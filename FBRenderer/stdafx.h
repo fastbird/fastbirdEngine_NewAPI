@@ -1,0 +1,1 @@
+#define _FBRendererDECL __declspec(dllexport)
