@@ -18,7 +18,7 @@ namespace fastbird{
 
 	void ReplaceCharacter(TCHAR* s, TCHAR target, TCHAR replace){
 		auto size = _tstrlen(s);
-		for (int i = 0; i < size; i++)
+		for (unsigned i = 0; i < size; i++)
 		{
 			if (s[i] == target)
 				s[i] = replace;
@@ -75,7 +75,7 @@ namespace fastbird{
 			return;
 
 		auto len = _tstrlen(*ppch);
-		for (int i = 0; i<len; i++)
+		for (unsigned i = 0; i<len; i++)
 		{
 			if (_tisdigit(**ppch))
 				return;
