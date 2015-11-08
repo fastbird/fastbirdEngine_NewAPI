@@ -35,7 +35,11 @@ typedef std::vector<std::wstring> WStringVector;
 	typedef const char* LPCTSTR;
 	typedef char TCHAR;
 	typedef std::vector<std::string> TStringVector;
+<<<<<<< Updated upstream
+	typedef std::string TString;
+=======
     typedef std::string TString;
+>>>>>>> Stashed changes
 	#define __T(x)      x
 	#define _tstrlen strlen	
 	#define _tisspace isspace

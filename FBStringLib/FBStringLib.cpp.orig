@@ -148,7 +148,7 @@ namespace fastbird{
 		va_list args;
 		
         va_start(args, str);
-#if defined(_PLATFORM_WINDOWS_)
+#if defined(_MSV_VER)
         _tvsprintf(buf, 2048, str, args);
 #else
         _tvsprintf(buf, str, args);
@@ -386,6 +386,7 @@ namespace fastbird{
 		static WCHAR wideBuffer[4096];
         
 		memset(wideBuffer, 0, 4096 * sizeof(WCHAR));
+<<<<<<< Updated upstream
 
 		bool err = false;
 #if defined(_PLATFORM_WINDOWS_)
@@ -403,6 +404,26 @@ namespace fastbird{
 #endif
 		if (err){
 			std::_tcerr << _T("AnsiToWide MultiByteToWideChar Failed!");
+=======
+        int ret = 0;
+#if defined(_PLATFORM_WINDOWS_)
+		ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, source, -1, wideBuffer, 2048);
+#elseif defined(_PLATFORM_MAC_)
+        size_t converted = mbstowcs(wideBuffer, source, 4096);
+        if (converted==0 || converted==-1){
+            ret = 0;
+        }
+        else{
+            ret = 1;
+        }
+#else
+        ret = 0;
+        assert(0 && "Not Implemented");
+#endif
+		if (ret == 0)
+		{
+			std::_tcerr << _T("(error)AnsiToWide Failed!");
+>>>>>>> Stashed changes
 		}
 		return wideBuffer;
 	}
@@ -413,11 +434,55 @@ namespace fastbird{
 	}
 	WCHAR AnsiToWide(const char source)
 	{
+<<<<<<< Updated upstream
 		char buf[] = { source, 0 };
 		auto wideBuffer = AnsiToWide(buf, 2);
 		return wideBuffer[0];
 	}
 
+=======
+		static WCHAR wideBuffer[4];
+		memset(wideBuffer, 0, 4 * sizeof(WCHAR));
+        int ret = 0;
+#if defined(_PLATFORM_WINDOWS_)
+		ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, &source, 1, wideBuffer, 2);
+#elseif defined(_PLATFORM_MAC_)
+        
+#else
+        
+#endif
+		return wideBuffer[0];
+	}
+
+	// return data is temporary data. save it to other memory if you need
+	WCHAR* UTF8ToWide(const unsigned char* source)
+	{
+		static WCHAR wideBuffer[4096];
+		memset(wideBuffer, 0, 4096 * sizeof(WCHAR));
+		int ret = 0;
+#if defined(_PLATFORM_WINDOWS_)
+        MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)source, -1, wideBuffer, 4096);
+#elseif defined(_PLATFORM_MAC_)
+        std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> ucs2conv;
+        try {
+            std::u16string ucs2 = ucs2conv.from_bytes(utf8);
+            wcscpy(wideBuffer, usc2.c_str());
+            ret = 1;
+        } catch(const std::range_error& e) {
+            std::u16string ucs2 = ucs2conv.from_bytes(utf8.substr(0, ucs2conv.converted()));
+            std::_tcerr << _T("(error)UCS2 failed after producing ") << std::dec << ucs2.size() << _T(" characters:\n");
+            wcscpy(wideBuffer, usc2.c_str());
+            ret = 0;
+        }
+#endif
+		if (ret == 0)
+		{
+			std::_tcerr << _T("UTF8ToWide Failed!");
+		}
+		return wideBuffer;
+	}
+
+>>>>>>> Stashed changes
 	const char* WideToAnsi(const WCHAR* source)
 	{
 		static char ansiBuffer[4096];

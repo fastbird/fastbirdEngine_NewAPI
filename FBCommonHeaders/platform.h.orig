@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 #if defined(_WIN32)
 	#define _PLATFORM_WINDOWS_
 #elif defined(__APPLE__)
@@ -13,4 +14,10 @@
 	#endif
 #else
 	#error "Platform is not supported"
+=======
+#if defined(_MSC_VER)
+    #define _PLATFORM_WINDOWS_
+#elseif defined(macintosh) || defined(__APPLE__)
+    #define _PLATFORM_MAC_
+>>>>>>> Stashed changes
 #endif
