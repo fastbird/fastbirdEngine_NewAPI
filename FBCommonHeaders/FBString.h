@@ -1,13 +1,9 @@
 #pragma once
+#include "platform.h"
 #include <vector>
 #include <string>
-#if !defined(_PLATFORM_MAC_)
-	typedef wchar_t WCHAR;    // wc,   16-bit UNICODE character
-#else
-	// some Macintosh compilers don't define wchar_t in a convenient location, or define it as a char
-	typedef unsigned short WCHAR;    // wc,   16-bit UNICODE character
-#endif
 
+typedef wchar_t WCHAR;    // wc,   16-bit UNICODE character
 typedef std::vector<std::string> StringVector;
 typedef std::vector<std::wstring> WStringVector;
 
@@ -51,6 +47,17 @@ typedef std::vector<std::wstring> WStringVector;
 	#define _tofstream ofstream
 	#define _tifstream ifstream
 	#define _tstreambuf streambuf
+#endif
+
+#if defined(_PLATFORM_MAC_)
+static inline int sprintf(TCHAR* str, size_t size, LPCTSTR format, ...){
+    int ret = -1;
+    va_list args;
+    va_start(args, format);
+    ret = _tvsprintf(str, format, args);
+    va_end(args);
+    return ret;    
+}
 #endif
 
 #define _T(x)       __T(x)

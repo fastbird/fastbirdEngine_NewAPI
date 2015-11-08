@@ -4,6 +4,10 @@
 #include <mutex>
 #include <map>
 #include <fstream>
+#if !defined(_PLATFORM_WINDOWS_)
+#include <stdlib.h>
+#endif
+
 namespace fastbird
 {
 	std::recursive_mutex gMutex;
@@ -50,9 +54,17 @@ namespace fastbird
 
 	void* AllocBytesAligned(size_t size, size_t align, LPCTSTR file, size_t line, LPCTSTR func)
 	{
+#if defined(_PLATFORM_WINDOWS_)
 		void* p = _aligned_malloc(size, align);
 		if (!p)
 			throw std::bad_alloc();
+#else
+        void* p;
+        auto err = posix_memalign(&p, align, size);
+        if(err){
+            throw std::bad_alloc();
+        }
+#endif
 
 		std::lock_guard<std::recursive_mutex> lock(gMutex);
 		++gNumMemoryAllocation;		
@@ -99,7 +111,11 @@ namespace fastbird
 			}*/
 			GetMemAllocLines().erase(it);
 			--gNumMemoryAllocation;
+#if defined(_PLATFORM_WINDOWS_)
 			_aligned_free(ptr);
+#else
+            free(ptr);
+#endif
 		}
 
 	}

@@ -17,4 +17,10 @@
    <FileRef
       location = "group:mac/FBDebugLib/FBDebugLib.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:mac/FBMemoryManager/FBMemoryManager.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:mac/FBFileSystem/FBFileSystem.xcodeproj">
+   </FileRef>
 </Workspace>

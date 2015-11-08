@@ -6,7 +6,7 @@ Provide a ceteralized method for memory allocation and deallocation
 Provide a ceteralized method for memory allocation and deallocation
 */
 #pragma once
-
+#include <cstddef>
 #ifdef NOT_USING_FB_MEMORY_MANAGER
 
 #define FB_NEW(T) new T
@@ -20,7 +20,7 @@ namespace fastbird
 {
 	/// \ingroup FBMemoryManager
 	void FBReportMemoryForModule();
-	void* AllocBytes(size_t size, const char* file, size_t line, const char* func);
+    void* AllocBytes(size_t size, const char* file, size_t line, const char* func);
 	void* AllocBytesAligned(size_t size, size_t align, const char* file, size_t line, const char* func);
 	void DeallocBytes(void* prt, const char* file, size_t line, const char* func);
 	void DeallocBytesAligned(void* ptr, const char* file, size_t line, const char* func);
@@ -28,7 +28,7 @@ namespace fastbird
 	template <typename T>
 	inline T* ConstructN(T* startp, size_t num)
 	{
-		for (size_t i = 0; i < num; ++i)
+        for (size_t i = 0; i < num; ++i)
 		{
 			new (startp + i) T();
 		}
@@ -38,8 +38,8 @@ namespace fastbird
 	template <typename T>
 	inline void DestructN(T* startp)
 	{
-		size_t num = _msize(startp) / sizeof(T);
-		for (size_t i = 0; i < num; ++i)
+        size_t num = _msize(startp) / sizeof(T);
+        for (size_t i = 0; i < num; ++i)
 		{
 			T* instance = (startp + i);
 			instance->~T();

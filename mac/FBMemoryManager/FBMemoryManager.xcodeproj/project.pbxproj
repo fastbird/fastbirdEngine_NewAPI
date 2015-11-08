@@ -7,17 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		989063D91BEF1FE90018262A /* FBDebug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 989063C41BEF1CCE0018262A /* FBDebug.cpp */; };
+		98B4E4201BEF77A800B829CE /* FBMemoryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 98B4E3FC1BEF73F800B829CE /* FBMemoryManager.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		989063C41BEF1CCE0018262A /* FBDebug.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FBDebug.cpp; path = ../../FBDebugLib/FBDebug.cpp; sourceTree = "<group>"; };
-		989063C51BEF1CCE0018262A /* FBDebug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FBDebug.h; path = ../../FBDebugLib/FBDebug.h; sourceTree = "<group>"; };
-		989063D81BEF1F300018262A /* libFBDebugLib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFBDebugLib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		98B4E3FC1BEF73F800B829CE /* FBMemoryManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FBMemoryManager.cpp; path = ../../FBMemoryManagerLib/FBMemoryManager.cpp; sourceTree = "<group>"; };
+		98B4E3FD1BEF73F800B829CE /* FBMemoryManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FBMemoryManager.h; path = ../../FBMemoryManagerLib/FBMemoryManager.h; sourceTree = "<group>"; };
+		98B4E41C1BEF777600B829CE /* libFBMemoryManager.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFBMemoryManager.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		989063D11BEF1E140018262A /* Frameworks */ = {
+		98B4E4191BEF777600B829CE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -27,19 +27,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		989063B51BEF1C460018262A = {
+		98B4E3F51BEF73C300B829CE = {
 			isa = PBXGroup;
 			children = (
-				989063C41BEF1CCE0018262A /* FBDebug.cpp */,
-				989063C51BEF1CCE0018262A /* FBDebug.h */,
-				989063E71BEF260F0018262A /* Products */,
+				98B4E3FC1BEF73F800B829CE /* FBMemoryManager.cpp */,
+				98B4E3FD1BEF73F800B829CE /* FBMemoryManager.h */,
+				98B4E4031BEF747300B829CE /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		989063E71BEF260F0018262A /* Products */ = {
+		98B4E4031BEF747300B829CE /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				989063D81BEF1F300018262A /* libFBDebugLib.a */,
+				98B4E41C1BEF777600B829CE /* libFBMemoryManager.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -47,7 +47,7 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		989063D21BEF1E140018262A /* Headers */ = {
+		98B4E41A1BEF777600B829CE /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -57,75 +57,81 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		989063D31BEF1E140018262A /* FBDebugLib */ = {
+		98B4E41B1BEF777600B829CE /* FBMemoryManager */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 989063D51BEF1E140018262A /* Build configuration list for PBXNativeTarget "FBDebugLib" */;
+			buildConfigurationList = 98B4E41D1BEF777600B829CE /* Build configuration list for PBXNativeTarget "FBMemoryManager" */;
 			buildPhases = (
-				989063D01BEF1E140018262A /* Sources */,
-				989063D11BEF1E140018262A /* Frameworks */,
-				989063D21BEF1E140018262A /* Headers */,
+				98B4E4181BEF777600B829CE /* Sources */,
+				98B4E4191BEF777600B829CE /* Frameworks */,
+				98B4E41A1BEF777600B829CE /* Headers */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = FBDebugLib;
-			productName = FBDebugLib;
-			productReference = 989063D81BEF1F300018262A /* libFBDebugLib.a */;
+			name = FBMemoryManager;
+			productName = FBMemoryManager;
+			productReference = 98B4E41C1BEF777600B829CE /* libFBMemoryManager.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		989063B61BEF1C460018262A /* Project object */ = {
+		98B4E3F61BEF73C300B829CE /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				KnownAssetTags = (
+					New,
+				);
 				LastUpgradeCheck = 0710;
+				TargetAttributes = {
+					98B4E41B1BEF777600B829CE = {
+						CreatedOnToolsVersion = 7.1;
+					};
+				};
 			};
-			buildConfigurationList = 989063B91BEF1C460018262A /* Build configuration list for PBXProject "FBDebugLib" */;
+			buildConfigurationList = 98B4E3F91BEF73C300B829CE /* Build configuration list for PBXProject "FBMemoryManager" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = 989063B51BEF1C460018262A;
-			productRefGroup = 989063B51BEF1C460018262A;
+			mainGroup = 98B4E3F51BEF73C300B829CE;
+			productRefGroup = 98B4E4031BEF747300B829CE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				989063D31BEF1E140018262A /* FBDebugLib */,
+				98B4E41B1BEF777600B829CE /* FBMemoryManager */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		989063D01BEF1E140018262A /* Sources */ = {
+		98B4E4181BEF777600B829CE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				989063D91BEF1FE90018262A /* FBDebug.cpp in Sources */,
+				98B4E4201BEF77A800B829CE /* FBMemoryManager.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		989063BA1BEF1C460018262A /* Debug */ = {
+		98B4E3FA1BEF73C300B829CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ENABLE_TESTABILITY = YES;
-				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
 		};
-		989063BB1BEF1C460018262A /* Release */ = {
+		98B4E3FB1BEF73C300B829CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 			};
 			name = Release;
 		};
-		989063D61BEF1E140018262A /* Debug */ = {
+		98B4E41E1BEF777600B829CE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -140,33 +146,37 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COMBINE_HIDPI_IMAGES = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
-		989063D71BEF1E140018262A /* Release */ = {
+		98B4E41F1BEF777600B829CE /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -181,21 +191,24 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COMBINE_HIDPI_IMAGES = YES;
-				COPY_PHASE_STRIP = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -204,25 +217,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		989063B91BEF1C460018262A /* Build configuration list for PBXProject "FBDebugLib" */ = {
+		98B4E3F91BEF73C300B829CE /* Build configuration list for PBXProject "FBMemoryManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				989063BA1BEF1C460018262A /* Debug */,
-				989063BB1BEF1C460018262A /* Release */,
+				98B4E3FA1BEF73C300B829CE /* Debug */,
+				98B4E3FB1BEF73C300B829CE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		989063D51BEF1E140018262A /* Build configuration list for PBXNativeTarget "FBDebugLib" */ = {
+		98B4E41D1BEF777600B829CE /* Build configuration list for PBXNativeTarget "FBMemoryManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				989063D61BEF1E140018262A /* Debug */,
-				989063D71BEF1E140018262A /* Release */,
+				98B4E41E1BEF777600B829CE /* Debug */,
+				98B4E41F1BEF777600B829CE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 989063B61BEF1C460018262A /* Project object */;
+	rootObject = 98B4E3F61BEF73C300B829CE /* Project object */;
 }
