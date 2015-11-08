@@ -62,3 +62,15 @@ LPCTSTR FileSystem::GetExtension(LPCTSTR path){
 	}
 	return _T("");
 }
+
+void FileSystem::BackupFile(LPCTSTR filepath, unsigned numKeeping) {
+	auto backupPath = FileSystem::ReplaceExtension(filepath, _T(""));
+	auto extension = FileSystem::GetExtension(filepath);
+	for (int i = (int)numKeeping - 1; i > 0; --i){
+		auto oldPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), i, extension);
+		auto newPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), i + 1, extension);
+		FileSystem::Rename(oldPath, newPath);
+	}
+	auto newPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), 1, extension);
+	FileSystem::Rename(filepath, newPath);
+}

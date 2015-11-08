@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{811467D3-734
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBStringLib", "FBStringLib\FBStringLib.vcxproj", "{97920097-3E86-410D-8D98-A2ECAD02A35F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBApp", "FBApp\FBApp.vcxproj", "{BD27B44E-6939-4E37-B6A4-88FAC74AC275}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -47,6 +49,10 @@ Global
 		{97920097-3E86-410D-8D98-A2ECAD02A35F}.Debug|Win32.Build.0 = Debug|Win32
 		{97920097-3E86-410D-8D98-A2ECAD02A35F}.Release|Win32.ActiveCfg = Release|Win32
 		{97920097-3E86-410D-8D98-A2ECAD02A35F}.Release|Win32.Build.0 = Release|Win32
+		{BD27B44E-6939-4E37-B6A4-88FAC74AC275}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BD27B44E-6939-4E37-B6A4-88FAC74AC275}.Debug|Win32.Build.0 = Debug|Win32
+		{BD27B44E-6939-4E37-B6A4-88FAC74AC275}.Release|Win32.ActiveCfg = Release|Win32
+		{BD27B44E-6939-4E37-B6A4-88FAC74AC275}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

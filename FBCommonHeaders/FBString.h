@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include <string>
-#include <tchar.h>
 #if !defined(_MAC)
 	typedef wchar_t WCHAR;    // wc,   16-bit UNICODE character
 #else
@@ -14,9 +13,10 @@ typedef std::vector<std::wstring> WStringVector;
 
 #if defined(UNICODE)
 	typedef wchar_t TCHAR;
-	typedef const WCHAR* LPCTSTR;
+	typedef const WCHAR* LPCTSTR;	
 	typedef std::vector<std::wstring> TStringVector;
 	typedef std::wstring TString;
+	#define __T(x)      L ## x
 	#define _tstrlen wcslen
 	#define _tisspace iswspace
 	#define _tisdigit iswdigit
@@ -26,11 +26,16 @@ typedef std::vector<std::wstring> WStringVector;
 	#define _tsprintf swprintf
 	#define _tofstream wofstream
 	#define _tgeneric_string generic_wstring
-	#define __T(x)      L ## x
+	#define _tcout wcout
+	#define _tcerr wcerr	
+	#define _tofstream wofstream
+	#define _tifstream wifstream
+	#define _tstreambuf wstreambuf
 #else
 	typedef const char* LPCTSTR;
 	typedef char TCHAR;
 	typedef std::vector<std::string> TStringVector;
+	#define __T(x)      x
 	#define _tstrlen strlen	
 	#define _tisspace isspace
 	#define _tisdigit isdigit
@@ -40,7 +45,11 @@ typedef std::vector<std::wstring> WStringVector;
 	#define _tsprintf sprintf
 	#define _tofstream ofstream
 	#define _tgeneric_string generic_string
-	#define __T(x)      x
+	#define _tcout cout
+	#define _tcerr cerr	
+	#define _tofstream ofstream
+	#define _tifstream ifstream
+	#define _tstreambuf streambuf
 #endif
 
 #define _T(x)       __T(x)

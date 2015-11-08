@@ -1,6 +1,5 @@
 #include "FBStringLib.h"
 #include "../FBCommonHeaders/platform.h"
-#include "../FBDebugLib/FBDebug.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -12,6 +11,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <iostream>
 
 namespace fastbird{
 
@@ -359,13 +359,13 @@ namespace fastbird{
 		int ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, source, -1, wideBuffer, 4096);
 		if (ret == 0)
 		{
-			Debug::Output(_T("AnsiToUTF8 MultiByteToWideChar Failed!"));
+			std::_tcerr << _T("(error) AnsiToUTF8 MultiByteToWideChar Failed!");			
 		}
 
 		ret = WideCharToMultiByte(CP_UTF8, 0, wideBuffer, -1, (LPSTR)utf8_buffer, 4096, 0, 0);
 		if (ret == 0)
 		{
-			Debug::Output(_T("AnsiToUTF8 WideCharToMultiByte Failed!"));
+			std::_tcerr << _T("(error) AnsiToUTF8 MultiByteToWideChar Failed!");			
 		}
 #else
 		assert(0 && "Not implemented function.");
@@ -383,7 +383,7 @@ namespace fastbird{
 		int ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, source, -1, wideBuffer, 2048);
 		if (ret == 0)
 		{
-			Debug::Output(_T("AnsiToWide MultiByteToWideChar Failed!"));
+			std::_tcerr << _T("AnsiToWide MultiByteToWideChar Failed!");
 		}
 		return wideBuffer;
 	}
@@ -408,7 +408,7 @@ namespace fastbird{
 		int ret = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)source, -1, wideBuffer, 4096);
 		if (ret == 0)
 		{
-			Debug::Output(_T("UTF8ToWide MultiByteToWideChar Failed!"));
+			std::_tcerr << _T("UTF8ToWide MultiByteToWideChar Failed!");
 		}
 		return wideBuffer;
 	}
@@ -421,7 +421,7 @@ namespace fastbird{
 			-1, ansiBuffer, 4096, NULL, NULL);
 		if (ret == 0)
 		{
-			Debug::Output(_T("WideToAnsi WideCharToMultiByte Failed!"));
+			std::_tcerr << _T("WideToAnsi WideCharToMultiByte Failed!");
 		}
 		return ansiBuffer;
 	}

@@ -1,9 +1,6 @@
 #include "FBDebug.h"
 #include "../FBCommonHeaders/platform.h"
-#define _FBFileSystemDECL
-#include "../FBFileSystem/FBFileSystem.h"
 #include "../FBStringLib/FBStringLib.h"
-
 #if defined(_PLATFORM_WINDOWS_)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -15,32 +12,24 @@
 using namespace fastbird;
 
 static int sInitialized = false;
-static std::ofstream sLogFile;
+static std::_tofstream sLogFile;
+static std::_tstreambuf* sOriginalErrorStream = 0;
 
-static void BackupFiles(LPCTSTR filepath, unsigned numKeeping){
-	auto backupPath = FileSystem::ReplaceExtension(filepath, _T(""));
-	auto extension = FileSystem::GetExtension(filepath);
-	for (int i = (int)numKeeping - 1; i > 0; -- i){		
-		auto oldPath = FormatString(_T("%s%d.%s_bak"), backupPath.c_str(), i, extension);
-		auto newPath = FormatString(_T("%s%d.%s_bak"), backupPath.c_str(), i+1, extension);		
-		FileSystem::Rename(oldPath, newPath);		
+void Debug::Init(LPCTSTR filepath){		
+	sLogFile.open(filepath);
+	auto errStream = std::_tcerr.rdbuf(sLogFile.rdbuf());
+	if (!sOriginalErrorStream){
+		sOriginalErrorStream = errStream;
 	}
-	auto newPath = FormatString(_T("%s%d.%s_bak"), backupPath.c_str(), 1, extension);
-	FileSystem::Rename(filepath, newPath);
-}
-
-void Debug::Init(LPCTSTR filepath, FileHandling handling, unsigned numKeeping){
-	if (FileSystem::Exists(filepath)){
-		if (handling == FileHandling::BackUp){
-			BackupFiles(filepath, numKeeping);
-		}		
-	}
-	sLogFile.open(filepath, std::ofstream::out);
 	sInitialized = true;
 }
 
 void Debug::Release(){
 	sInitialized = false;
+	if (sOriginalErrorStream){
+		std::_tcerr.rdbuf(sOriginalErrorStream);
+		sOriginalErrorStream = 0;
+	}
 	sLogFile.close();	
 }
 

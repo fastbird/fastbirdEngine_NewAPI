@@ -1,2 +1,2 @@
-#define _FBFileSystemDECL __declspec(dllexport)
+#define _FBFileSystemDLL __declspec(dllexport)
 #include <boost/filesystem.hpp>

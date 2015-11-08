@@ -1,14 +1,17 @@
 #include "stdafx.h"
+#include "FBFileSystem.h"
 #include "../FBDebugLib/FBDebug.h"
-
 using namespace fastbird;
+
 class DLLInit{
 public:
 	DLLInit(){
-		Debug::Init(_T("FileSystem.log"), Debug::BackUp, 5);
+		auto filepath = _T("FileSystem.log");
+		FileSystem::BackupFile(filepath, 5);
+		Debug::Init(filepath);
 	}
 	~DLLInit(){
-
+		Debug::Release();
 	}
 };
 

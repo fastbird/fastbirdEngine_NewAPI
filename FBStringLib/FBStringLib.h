@@ -1,8 +1,19 @@
+/**
+\file FBStringLib.h
+Provide string manipulators
+\author fastbird @ fastbird dev studio
+\defgroup FBStringLib
+Provide string manipulators
+*/
 #pragma once
 #include "../FBCommonHeaders/FBString.h"
 #include <vector>
 namespace fastbird{
-	void ReplaceCharacter(TCHAR* s, TCHAR target, TCHAR replace);
+	///@addtogroup FBStringLib
+	///@{
+
+	/// Replace all occurences of \a target in \a s to \a replace
+	void ReplaceCharacter(TCHAR* s, TCHAR target, TCHAR replace);	
 	TCHAR* StripRight(TCHAR* s);
 	TCHAR* StripLeft(TCHAR* s);
 	TString StripBoth(LPCTSTR s);	
@@ -59,4 +70,5 @@ namespace fastbird{
 	WCHAR* UTF8ToWide(const unsigned char* source);
 
 	const char* WideToAnsi(const WCHAR* source);
+	///@}
 }
