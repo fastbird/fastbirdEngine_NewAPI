@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <iostream>
+#include <clocale>
 
 namespace fastbird{
 
@@ -380,9 +381,22 @@ namespace fastbird{
 			size = strlen(source);
 		static WCHAR wideBuffer[4096];
 		memset(wideBuffer, 0, 4096 * sizeof(WCHAR));
+
+		bool err = false;
+#if defined(_PLATFORM_WINDOWS_)
 		int ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, source, -1, wideBuffer, 2048);
-		if (ret == 0)
-		{
+		err = ret == 0;		
+#else
+		std::string localeBackup = std::setlocale(LC_ALL, NULL);
+		std::setlocale(LC_ALL, "");
+
+		std::mbstate_t mbState = std::mbstate_t();
+		auto ret = std::mbsrtowcs(wideBuffer, &source, 4096, &mbState);
+		err = ret == -1;		
+
+		std::setlocale(LC_ALL, localeBackup.c_str());
+#endif
+		if (err){
 			std::_tcerr << _T("AnsiToWide MultiByteToWideChar Failed!");
 		}
 		return wideBuffer;
@@ -394,35 +408,33 @@ namespace fastbird{
 	}
 	WCHAR AnsiToWide(const char source)
 	{
-		static WCHAR wideBuffer[4];
-		memset(wideBuffer, 0, 4 * sizeof(WCHAR));
-		int ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, &source, 1, wideBuffer, 2);
+		char buf[] = { source, 0 };
+		auto wideBuffer = AnsiToWide(buf, 2);
 		return wideBuffer[0];
-	}
-
-	// return data is temporary data. save it to other memory if you need
-	WCHAR* UTF8ToWide(const unsigned char* source)
-	{
-		static WCHAR wideBuffer[4096];
-		memset(wideBuffer, 0, 4096 * sizeof(WCHAR));
-		int ret = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)source, -1, wideBuffer, 4096);
-		if (ret == 0)
-		{
-			std::_tcerr << _T("UTF8ToWide MultiByteToWideChar Failed!");
-		}
-		return wideBuffer;
 	}
 
 	const char* WideToAnsi(const WCHAR* source)
 	{
 		static char ansiBuffer[4096];
 		memset(ansiBuffer, 0, 4096);
+		bool err = false;
+#if defined(_PLATFORM_WINDOWS_)
 		int ret = WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)source,
 			-1, ansiBuffer, 4096, NULL, NULL);
-		if (ret == 0)
-		{
-			std::_tcerr << _T("WideToAnsi WideCharToMultiByte Failed!");
-		}
+		err = ret == 0;
+#else
+		std::string localeBackup = std::setlocale(LC_ALL, NULL);
+		std::setlocale(LC_ALL, "");
+
+		std::mbstate_t mbState = std::mbstate_t();		
+		auto ret = std::wcsrtombs(ansiBuffer, &source, 4096, &mbState);
+		err = ret == -1;
+
+		std::setlocale(LC_ALL, localeBackup.c_str());
+#endif
+		if (ret == 0)		
+			std::_tcerr << _T("WideToAnsi Failed!");
+
 		return ansiBuffer;
 	}
 }

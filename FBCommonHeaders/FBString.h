@@ -35,6 +35,7 @@ typedef std::vector<std::wstring> WStringVector;
 	typedef const char* LPCTSTR;
 	typedef char TCHAR;
 	typedef std::vector<std::string> TStringVector;
+	typedef std::string TString;
 	#define __T(x)      x
 	#define _tstrlen strlen	
 	#define _tisspace isspace
