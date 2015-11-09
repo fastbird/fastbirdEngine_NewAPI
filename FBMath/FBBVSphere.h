@@ -1,0 +1,45 @@
+#pragma once
+#include "FBBoundingVolume.h"
+#include "FBVec3.h"
+namespace fastbird
+{
+	class BVSphere : public BoundingVolume
+	{
+	public:
+		BVSphere();
+		BVSphere(const Vec3& center, Real radius);
+		virtual ~BVSphere(){}
+		//--------------------------------------------------------------------
+		// BoundingVolume Interfaces
+		//--------------------------------------------------------------------
+		virtual int GetBVType() const {return BV_SPHERE;}
+		virtual void SetCenter (const Vec3& center) { mCenter = center; }
+		virtual void SetRadius (Real fRadius) { mRadius = fRadius; }
+		virtual const Vec3& GetCenter () const { return mCenter;}
+		virtual Real GetRadius () const { return mRadius; }
+
+		virtual void ComputeFromData(const Vec3* pVertices, size_t numVertices);
+		virtual void StartComputeFromData();
+		virtual void AddComputeData(const Vec3* pVertices, size_t numVertices);
+		virtual void AddComputeData(const Vec3& vert);
+		virtual void EndComputeFromData();
+		virtual void TransformBy(const Transformation& transform,
+			BoundingVolume* result);
+		virtual int WhichSide(const Plane3& plane) const;
+		virtual bool TestIntersection(const Ray3& ray) const;
+		virtual bool TestIntersection(BoundingVolume* pBV) const;
+		virtual void Merge(const BoundingVolume* pBV);
+		virtual void Merge(const Vec3& pos);
+		virtual BoundingVolume& operator= (const BoundingVolume& other);
+		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal);
+		virtual void Invalidate();
+		virtual bool Contain(const Vec3& pos) const;
+		virtual Vec3 GetRandomPosInVolume(const Vec3* nearLocal=0) const;
+
+	private:
+		Vec3 mCenter;
+		Real mRadius;
+
+		std::vector<Vec3> mVertices;
+	};
+}

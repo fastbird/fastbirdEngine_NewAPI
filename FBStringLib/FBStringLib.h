@@ -1,12 +1,12 @@
 /**
 \file FBStringLib.h
 Provide string manipulators
-\author fastbird @ fastbird dev studio
+\author Jungwan Byun
 \defgroup FBStringLib
 Provide string manipulators
 */
 #pragma once
-#include "../FBCommonHeaders/FBString.h"
+#include "FBCommonHeaders/FBString.h"
 #include <vector>
 namespace fastbird{
 	///@addtogroup FBStringLib

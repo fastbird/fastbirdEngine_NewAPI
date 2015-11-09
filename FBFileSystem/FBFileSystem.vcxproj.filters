@@ -3,10 +3,12 @@
   <ItemGroup>
     <ClInclude Include="FBFileSystem.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="FBDirectoryIterator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FBFileSystem.cpp" />
     <ClCompile Include="FBFileSystemDLL.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="FBDirectoryIterator.cpp" />
   </ItemGroup>
 </Project>

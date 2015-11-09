@@ -1,6 +1,6 @@
 #include "FBMemoryManager.h"
-#include "../FBCommonHeaders/FBString.h"
-#include "../FBDebugLib/FBDebug.h"
+#include "FBCommonHeaders/FBString.h"
+#include "FBDebugLib/FBDebug.h"
 #include <mutex>
 #include <map>
 #include <fstream>

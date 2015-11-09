@@ -1,3 +1,7 @@
+/**
+\defgroup FBCommonHeaders
+A group containing header files only.
+*/
 #if defined(_WIN32)
 	#define _PLATFORM_WINDOWS_
 #elif defined(__APPLE__)

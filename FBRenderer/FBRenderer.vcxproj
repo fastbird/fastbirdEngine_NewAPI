@@ -11,7 +11,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="IRenderer.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="RendererEnums.h" />
+    <ClInclude Include="RendererStructs.h" />
     <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RendererEnums.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
+      <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBMath\FBMath.vcxproj">
+      <Project>{2df8e079-28e5-4e7d-9c6a-ff87c1329eb5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
+      <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FD658A50-2D36-4BB4-8EDA-635BF71B4CDB}</ProjectGuid>
@@ -47,6 +72,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -59,6 +86,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

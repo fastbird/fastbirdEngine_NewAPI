@@ -1,6 +1,6 @@
-#include "../FBCommonHeaders/platform.h"
+#include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
-    #define _FBFileSystemDLL __declspec(dllexport)
+    #define FBFileSystemDLL __declspec(dllexport)
 #else
     #include "PrefixHeader.pch"
 #endif

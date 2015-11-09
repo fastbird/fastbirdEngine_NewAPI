@@ -11,7 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FBFactory.h" />
+    <ClInclude Include="FBHelpers.h" />
     <ClInclude Include="FBString.h" />
+    <ClInclude Include="FBTypes.h" />
     <ClInclude Include="platform.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

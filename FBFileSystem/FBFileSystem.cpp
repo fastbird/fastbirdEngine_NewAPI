@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "FBFileSystem.h"
-#include "../FBDebugLib/FBDebug.h"
-#include "../FBStringLib/FBStringLib.h"
+#include "FBDirectoryIterator.h"
+#include "FBDebugLib/FBDebug.h"
+#include "FBStringLib/FBStringLib.h"
 using namespace fastbird;
 
 #if defined(UNICODE)
@@ -10,6 +11,22 @@ using namespace fastbird;
 #define OutputException(err) Debug::Output(err.what())
 #endif
 
+static bool gLogginStarted = false;
+void FileSystem::StartLoggingIfNot(LPCTSTR path){
+	if (gLogginStarted)
+		return;
+	auto filepath = _T("FileSystem.log");
+	FileSystem::BackupFile(filepath, 5);
+	Debug::Init(filepath);
+	gLogginStarted = true;
+}
+
+void FileSystem::StopLogging(){
+	if (!gLogginStarted)
+		return;
+
+	Debug::Release();
+}
 
 bool FileSystem::Exists(LPCTSTR path){
 	return boost::filesystem::exists(path);
@@ -73,4 +90,9 @@ void FileSystem::BackupFile(LPCTSTR filepath, unsigned numKeeping) {
 	}
 	auto newPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), 1, extension);
 	FileSystem::Rename(filepath, newPath);
+}
+
+DirectoryIteratorPtr FileSystem::GetDirectoryIterator(LPCTSTR filepath, bool recursive){
+	return DirectoryIteratorPtr(new DirectoryIterator(filepath, recursive),
+		[](DirectoryIterator* obj){delete obj; });
 }

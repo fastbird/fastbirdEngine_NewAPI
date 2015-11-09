@@ -1,1 +1,1 @@
-#define _FBAppDLL __declspec(dllexport)
+#define FBAppDLL __declspec(dllexport)

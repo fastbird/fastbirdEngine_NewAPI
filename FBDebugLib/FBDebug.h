@@ -1,12 +1,12 @@
 /**
 \file FBDebug.h
 Debug utility.
-\author fastbird @ fastbird dev studio
+\author Jungwan Byun
 \defgroup FBDebugLib
 A debug library
 */
 #pragma once
-#include "../FBCommonHeaders/FBString.h"
+#include "FBCommonHeaders/FBString.h"
 #include <fstream>
 #include <memory>
 namespace fastbird{

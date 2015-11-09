@@ -4,6 +4,8 @@
 # Doxygen
 doc/
 
+EngineEssentialData/
+
 # User-specific files
 *.suo
 *.user

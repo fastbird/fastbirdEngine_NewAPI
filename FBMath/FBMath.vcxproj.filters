@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="FBBoundingVolume.cpp" />
+    <ClCompile Include="FBBVaabb.cpp" />
+    <ClCompile Include="FBBVSphere.cpp" />
+    <ClCompile Include="FBMath.cpp" />
+    <ClCompile Include="FBGeomUtils.cpp" />
+    <ClCompile Include="FBMat33.cpp" />
+    <ClCompile Include="FBMat44.cpp" />
+    <ClCompile Include="FBQuat.cpp" />
+    <ClCompile Include="FBRay3.cpp" />
+    <ClCompile Include="FBTransformation.cpp" />
+    <ClCompile Include="FBVec2.cpp" />
+    <ClCompile Include="FBVec2I.cpp" />
+    <ClCompile Include="FBVec3.cpp" />
+    <ClCompile Include="FBVec3I.cpp" />
+    <ClCompile Include="FBVec4.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="FBPlane3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FBAABB.h" />
+    <ClInclude Include="FBBoundingVolume.h" />
+    <ClInclude Include="FBBVaabb.h" />
+    <ClInclude Include="FBBVSphere.h" />
+    <ClInclude Include="FBMath.h" />
+    <ClInclude Include="FBGeomUtils.h" />
+    <ClInclude Include="FBMat33.h" />
+    <ClInclude Include="FBMat44.h" />
+    <ClInclude Include="FBMathDefines.h" />
+    <ClInclude Include="FBOBB.h" />
+    <ClInclude Include="FBPlane3.h" />
+    <ClInclude Include="FBQuat.h" />
+    <ClInclude Include="FBRandom.h" />
+    <ClInclude Include="FBRay3.h" />
+    <ClInclude Include="FBTransformation.h" />
+    <ClInclude Include="FBVec2.h" />
+    <ClInclude Include="FBVec2I.h" />
+    <ClInclude Include="FBVec3.h" />
+    <ClInclude Include="FBVec3I.h" />
+    <ClInclude Include="FBVec4.h" />
+    <ClInclude Include="FBRect.h" />
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+</Project>

@@ -1,19 +1,30 @@
 /**
 \file FBFileSystem.h
 Handling file operations. Implemented on the top of boost::filesystem
-\author fastbird @ fastbird dev studio
+\author Jungwan Byun
 \defgroup FBFileSystem
 Handling file operations. Implemented on the top of boost::filesystem
 */
 #pragma once
-#include "../FBCommonHeaders/FBString.h"
+#include "FBCommonHeaders/FBString.h"
+#include <memory>
 namespace fastbird{
+	class DirectoryIterator;
+	typedef std::shared_ptr<DirectoryIterator> DirectoryIteratorPtr;
+	typedef std::weak_ptr<DirectoryIterator> DirectoryIteratorWeakPtr;
+
 	/** Collection of file manipulators.
 	\ingroup FBFileSystem
 	*/
-	class _FBFileSystemDLL FileSystem
+	class FBFileSystemDLL FileSystem
 	{
 	public:
+		/**Start logging.
+		You can call this functino several time but only the first call only takes the effect.
+		*/
+		static void StartLoggingIfNot(LPCTSTR path);
+		static void StopLogging();
+
 		static bool Exists(LPCTSTR path);
 
 		enum {
@@ -22,9 +33,9 @@ namespace fastbird{
 			RENAME_DEST_EXISTS = 2,
 		};
 		/** Rename a file.
-		@remark  If old_p and new_p resolve to the same existing file, no action is taken. 
-		Otherwise, if new_p resolves to an existing non-directory file, it is removed, 
-		while if new_p resolves to an existing directory, it is removed if empty on ISO/IEC 9945 
+		@remark  If \a path and \a newpath resolve to the same existing file, no action is taken. 
+		Otherwise, if \a newpath resolves to an existing non-directory file, it is removed, 
+		while if \a newpath resolves to an existing directory, it is removed if empty on ISO/IEC 9945 
 		but is an error on Windows. A symbolic link is itself renamed, rather than the file it 
 		resolves to being renamed.
 		*/
@@ -42,5 +53,7 @@ namespace fastbird{
 		need to be kept.\n
 		*/
 		static void BackupFile(LPCTSTR filepath, unsigned numKeeping);
+
+		static DirectoryIteratorPtr GetDirectoryIterator(LPCTSTR filepath, bool recursive);
 	};
 }

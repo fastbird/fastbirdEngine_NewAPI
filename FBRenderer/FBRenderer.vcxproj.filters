@@ -2,5 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Renderer.h" />
+    <ClInclude Include="IRenderer.h" />
+    <ClInclude Include="RendererEnums.h" />
+    <ClInclude Include="RendererStructs.h" />
+    <ClInclude Include="Color.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="RendererEnums.cpp" />
+    <ClCompile Include="Color.cpp" />
   </ItemGroup>
 </Project>

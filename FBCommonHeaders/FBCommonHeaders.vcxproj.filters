@@ -3,5 +3,8 @@
   <ItemGroup>
     <ClInclude Include="FBString.h" />
     <ClInclude Include="platform.h" />
+    <ClInclude Include="FBFactory.h" />
+    <ClInclude Include="FBHelpers.h" />
+    <ClInclude Include="FBTypes.h" />
   </ItemGroup>
 </Project>

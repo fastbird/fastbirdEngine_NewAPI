@@ -1,19 +1,17 @@
 /**
 \file FBMemoryManager.h
 Provide a ceteralized method for memory allocation and deallocation
-\author fastbird @ fastbird dev studio
+\author Jungwan Byun
 \defgroup FBMemoryManagerLib
 Provide a ceteralized method for memory allocation and deallocation
 */
 #pragma once
 #include <cstddef>
 #ifdef NOT_USING_FB_MEMORY_MANAGER
-
 #define FB_NEW(T) new T
-#define FB_ARRNEW(T, count) new T[count]
+#define FB_ARRARY_NEW(T, count) new T[count]
 #define FB_DELETE(ptr) delete ptr
-#define FB_ARRDELETE(ptr) delete[] ptr
-
+#define FB_ARRARY_DELETE(ptr) delete[] ptr
 #else
 
 namespace fastbird
@@ -76,12 +74,11 @@ namespace fastbird
 /// \addtogroup FBMemoryManagerLib
 /// @{
 #define FB_NEW(T) new (fastbird::AllocBytes(sizeof(T), __FILE__, __LINE__, __FUNCTION__)) T
-#define FB_ARRNEW(T, count) fastbird::ConstructN(static_cast<T*>(fastbird::AllocBytes(sizeof(T)*count, __FILE__, __LINE__, __FUNCTION__)), count)
+#define FB_ARRARY_NEW(T, count) fastbird::ConstructN(static_cast<T*>(fastbird::AllocBytes(sizeof(T)*count, __FILE__, __LINE__, __FUNCTION__)), count)
 #define FB_DELETE(ptr) fastbird::Delete( (ptr), __FILE__, __LINE__, __FUNCTION__)
-#define FB_ARRDELETE(ptr) fastbird::DeleteArr(ptr, __FILE__, __LINE__, __FUNCTION__)
-#define FB_SAFE_DEL(ptr) (ptr) ? FB_DELETE((ptr)) : 0; (ptr) = 0;
-#define FB_SAFE_ARRDEL(ptr) ptr ? FB_ARRDELETE(ptr) : 0; ptr = 0;
+#define FB_ARRARY_DELETE(ptr) fastbird::DeleteArr(ptr, __FILE__, __LINE__, __FUNCTION__)
+#define FB_SAFE_DELETE(ptr) (ptr) ? FB_DELETE((ptr)) : 0; (ptr) = 0;
 #define FB_NEW_ALIGNED(T, A) new (fastbird::AllocBytesAligned(sizeof(T), A, __FILE__, __LINE__, __FUNCTION__)) T
+#define FB_DELETE_ALIGNED(ptr) (ptr) ? fastbird::DeleteAligned( (ptr), __FILE__, __LINE__, __FUNCTION__) : 0;
 /// @}
-#define FB_DEL_ALIGNED(ptr) (ptr) ? fastbird::DeleteAligned( (ptr), __FILE__, __LINE__, __FUNCTION__) : 0;
 #endif

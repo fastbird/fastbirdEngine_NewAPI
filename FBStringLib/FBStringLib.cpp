@@ -1,5 +1,5 @@
 #include "FBStringLib.h"
-#include "../FBCommonHeaders/platform.h"
+#include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
