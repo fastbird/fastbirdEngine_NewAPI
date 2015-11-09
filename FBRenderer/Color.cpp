@@ -1,6 +1,9 @@
-#include <CommonLib/StdAfx.h>
-#include <CommonLib/Color.h>
-#include <CommonLib/StringUtils.h>
+#include "stdafx.h"
+#include "Color.h"
+#include "FBStringLib/StringLib.h"
+#include "FBStringMathLib/StringMathConverter.h"
+#include "FBStringLib/StringConverter.h"
+
 namespace fastbird
 {
 const Color Color::White(1, 1, 1);
@@ -26,24 +29,24 @@ unsigned Color::FixColorByteOrder(unsigned c)
 	return *(unsigned*)&color;
 }
 
-Color::Color(const char* str)
+Color::Color(LPCTSTR str)
 {
-	if (str[0] == '0' && str[1] == 'x')
+	if (str[0] == _T('0') && str[1] == _T('x'))
 	{	
-		if (strlen(str) == 8)
+		if (_tstrlen(str) == 8)
 		{
-			std::string strColor = str;
-			strColor += "ff";
-			*this = Color(Color::FixColorByteOrder(StringConverter::parseHexa(strColor.c_str())));
+			TString strColor = str;
+			strColor += _T("ff");
+			*this = Color(Color::FixColorByteOrder(StringConverter::ParseHexa(strColor.c_str())));
 		}
 		else
 		{
-			*this = Color(Color::FixColorByteOrder(StringConverter::parseHexa(str)));
+			*this = Color(Color::FixColorByteOrder(StringConverter::ParseHexa(str)));
 		}
 	}
 	else
 	{
-		mValue =  StringConverter::parseVec4(str);
+		mValue =  StringMathConverter::ParseVec4(str, Vec4::ZERO);
 	}
 }
 

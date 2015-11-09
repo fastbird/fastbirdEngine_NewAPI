@@ -66,10 +66,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="FBStringLib.h" />
+    <ClInclude Include="StringConverter.h" />
+    <ClInclude Include="StringLib.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FBStringLib.cpp" />
+    <ClCompile Include="StringConverter.cpp" />
+    <ClCompile Include="StringLib.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

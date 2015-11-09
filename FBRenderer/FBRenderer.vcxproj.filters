@@ -7,6 +7,14 @@
     <ClInclude Include="RendererEnums.h" />
     <ClInclude Include="RendererStructs.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="IInputLayout.h" />
+    <ClInclude Include="IRenderState.h" />
+    <ClInclude Include="IRenderTarget.h" />
+    <ClInclude Include="IRenderTargetListener.h" />
+    <ClInclude Include="IShader.h" />
+    <ClInclude Include="ITexture.h" />
+    <ClInclude Include="IVertexBuffer.h" />
+    <ClInclude Include="IIndexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />

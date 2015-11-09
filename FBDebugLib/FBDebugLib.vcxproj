@@ -11,10 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FBDebug.h" />
+    <ClInclude Include="Logger.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FBDebug.cpp" />
+    <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{7DA79D73-7E78-48A6-A052-177CDF5E3B3C}</ProjectGuid>

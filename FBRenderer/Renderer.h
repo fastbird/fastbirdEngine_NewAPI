@@ -4,10 +4,12 @@ namespace fastbird{
 	class Renderer;
 	typedef std::shared_ptr<Renderer> RendererPtr;
 	typedef std::weak_ptr<Renderer> RendererWeakPtr;
-	
-	/** Render vertices with a specified material
+	typedef unsigned HWND_ID;
+
+	/** Render vertices with a specified material	
 	Rednerer handles vertex/index data, materials, textures, shaders,
 	render states, lights and render targets.
+	\ingroup FBRenderer
 	*/
 	class FBRendererDLL Renderer{	
 		class RendererImpl;

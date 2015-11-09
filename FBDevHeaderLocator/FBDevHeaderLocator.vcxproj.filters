@@ -9,6 +9,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="FBDevHeaderLocator.cpp" />
+    <ClCompile Include="DevHeaderLocator.cpp" />
   </ItemGroup>
 </Project>

@@ -1,5 +1,5 @@
-#include <Engine/StdAfx.h>
-#include <Engine/RendererEnums.h>
+#include "stdafx.h"
+#include "RendererEnums.h"
 namespace fastbird
 {
 	BINDING_SHADER BindingShaderFromString(const char* szShader)
@@ -31,7 +31,7 @@ namespace fastbird
 			return BINDING_SHADER_CS;
 		}
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid BINDING_SHADER", szShader));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid BINDING_SHADER"), szShader));
 		return BINDING_SHADER_PS;
 	}
 
@@ -47,7 +47,7 @@ namespace fastbird
 		{
 			return FILL_MODE_SOLID;
 		}
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not vaild FILL_MODE", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not vaild FILL_MODE"), str));
 		return FILL_MODE_SOLID;
 	}
 
@@ -67,7 +67,7 @@ namespace fastbird
 		{
 			return CULL_MODE_BACK;
 		}
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not vaild CULL_MODE", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not vaild CULL_MODE"), str));
 		return CULL_MODE_BACK;
 	}
 
@@ -84,7 +84,7 @@ namespace fastbird
 		if (_stricmp(str, "DepthStencil") == 0)
 			return TEXTURE_TYPE_DEPTH_STENCIL;
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not vaild TEXTURE_TYPE", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not vaild TEXTURE_TYPE"), str));
 		return TEXTURE_TYPE_DEFAULT;
 	}
 
@@ -129,7 +129,7 @@ namespace fastbird
 		if (_stricmp(sz, "COMPARISON_ANISOTROPIC") == 0)
 			return TEXTURE_FILTER_COMPARISON_ANISOTROPIC;
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not vaild TEXTURE_FILTER", sz));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not vaild TEXTURE_FILTER"), sz));
 		return TEXTURE_FILTER_MIN_MAG_MIP_LINEAR;
 	}
 
@@ -148,7 +148,7 @@ namespace fastbird
 		if (_stricmp(sz, "Mirror_Once") == 0)
 			return TEXTURE_ADDRESS_MIRROR_ONCE;
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid TEXTURE_ADDRESS_MODE", sz));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid TEXTURE_ADDRESS_MODE"), sz));
 		return TEXTURE_ADDRESS_CLAMP;
 	}
 
@@ -163,7 +163,7 @@ namespace fastbird
 				return COMPARISON_FUNC(i);
 			}
 		}
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid COMPARISON_FUNC", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid COMPARISON_FUNC"), str));
 		return COMPARISON_LESS;
 	}
 
@@ -178,7 +178,7 @@ namespace fastbird
 				return BLEND(i);
 			}
 		}
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid Blend.", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid Blend."), str));
 		return BLEND_ONE;
 	}
 
@@ -193,7 +193,7 @@ namespace fastbird
 				return BLEND_OP(i);
 			}
 		}
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid BlendOp.", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid BlendOp."), str));
 		return BLEND_OP_ADD;
 	}
 
@@ -221,7 +221,7 @@ namespace fastbird
 		if (_stricmp(str, "0") == 0)
 			return COLOR_WRITE_MASK_NONE;
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid COLOR_WRITE_MASK", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid COLOR_WRITE_MASK"), str));
 		return COLOR_WRITE_MASK_ALL;
 	}
 
@@ -229,7 +229,7 @@ namespace fastbird
 	{
 		if (!sz)
 		{
-			Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid INPUT_ELEMENT_FORMAT", sz));
+			Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid INPUT_ELEMENT_FORMAT"), sz));
 			assert(0);			
 			return INPUT_ELEMET_FORMAT_NUM;
 		}
@@ -255,7 +255,7 @@ namespace fastbird
 			return INPUT_ELEMET_FORMAT_INT4;
 		}
 		
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid INPUT_ELEMENT_FORMAT", sz));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid INPUT_ELEMENT_FORMAT"), sz));
 		assert(0);
 		return INPUT_ELEMET_FORMAT_NUM;
 	}
@@ -269,7 +269,7 @@ namespace fastbird
 		if (_stricmp(sz, "INSTANCE") == 0)
 			return INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid INPUT_CLASSIFICATION", sz));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid INPUT_CLASSIFICATION"), sz));
 		return INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 	}
 
@@ -287,7 +287,7 @@ namespace fastbird
 			return DEPTH_WRITE_MASK_ALL;
 		}
 
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid DepthWriteMask", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid DepthWriteMask"), str));
 		return DEPTH_WRITE_MASK_ALL;
 	}
 
@@ -301,7 +301,7 @@ namespace fastbird
 			if (_stricmp(str, STR_STENCIL_OP[i - 1]) == 0)
 				return STENCIL_OP(i);
 		}
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid StencilOp", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid StencilOp"), str));
 		return STENCIL_OP_KEEP;
 	}
 
@@ -322,7 +322,7 @@ namespace fastbird
 		if (_stricmp(str, "SHADOW") == 0)
 			return PASS_SHADOW;
 		
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("%s is not valid RENDER_PASS", str));
+		Error(FB_DEFAULT_DEBUG_ARG, FormatString(_T("%s is not valid RENDER_PASS"), str));
 		return PASS_NORMAL;
 	}
 

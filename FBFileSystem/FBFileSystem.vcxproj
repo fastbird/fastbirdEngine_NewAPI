@@ -72,14 +72,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="FBDirectoryIterator.h" />
-    <ClInclude Include="FBFileSystem.h" />
+    <ClInclude Include="DirectoryIterator.h" />
+    <ClInclude Include="FileSystem.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FBDirectoryIterator.cpp" />
-    <ClCompile Include="FBFileSystem.cpp" />
-    <ClCompile Include="FBFileSystemDLL.cpp" />
+    <ClCompile Include="DirectoryIterator.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="FileSystemDLL.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

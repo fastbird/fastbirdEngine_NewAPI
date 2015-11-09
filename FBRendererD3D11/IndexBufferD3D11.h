@@ -2,16 +2,12 @@
 #ifndef _IndexBuffer_header_included_
 #define _IndexBuffer_header_included_
 
-#include <Engine/IIndexBuffer.h>
-#include <D3D11.h>
+#include "FBRenderer/IIndexBuffer.h"
 
 namespace fastbird
 {
 	class IndexBufferD3D11 : public IIndexBuffer
 	{
-	protected:
-		virtual void FinishSmartPtr();
-
 	public:
 		
 		virtual bool IsReady() const;

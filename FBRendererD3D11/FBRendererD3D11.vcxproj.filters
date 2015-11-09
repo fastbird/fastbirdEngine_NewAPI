@@ -10,6 +10,8 @@
     <ClCompile Include="InputLayoutD3D11.cpp" />
     <ClCompile Include="RenderStateD3D11.cpp" />
     <ClCompile Include="RenderTargetD3D11.cpp" />
+    <ClCompile Include="DLLMain.cpp" />
+    <ClCompile Include="ResourceBinder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RendererD3D11.h" />
@@ -23,5 +25,7 @@
     <ClInclude Include="IndexBufferD3D11.h" />
     <ClInclude Include="InputLayoutD3D11.h" />
     <ClInclude Include="RenderStateD3D11.h" />
+    <ClInclude Include="DLLMain.h" />
+    <ClInclude Include="ResourceBinder.h" />
   </ItemGroup>
 </Project>

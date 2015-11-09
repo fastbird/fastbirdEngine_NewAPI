@@ -1,7 +1,7 @@
 #pragma once
-#include <Engine/RendererStructs.h>
-#include <Engine/ConvertEnumD3D11.h>
-#include <d3d11.h>
+#include "FBRenderer/RendererStructs.h"
+#include "ConvertEnumD3D11.h"
+
 namespace fastbird
 {
 	void ConvertStructD3D11(D3D11_RASTERIZER_DESC& dest, const RASTERIZER_DESC& src)
@@ -102,7 +102,7 @@ namespace fastbird
 			destDesc.Format = DXGI_FORMAT_R32G32B32A32_SINT;
 			break;
 		default:
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Undefined input format found!");
+			Error(FB_DEFAULT_DEBUG_ARG, "Undefined input format found!");
 			assert(0);
 		}
 		destDesc.InputSlot = srcDesc.mInputSlot;
@@ -116,7 +116,7 @@ namespace fastbird
 			destDesc.InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
 			break;
 		default:
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Undefined input slot class found!");
+			Error(FB_DEFAULT_DEBUG_ARG, "Undefined input slot class found!");
 			assert(0);
 		}
 		destDesc.InstanceDataStepRate = srcDesc.mInstanceDataStepRate;

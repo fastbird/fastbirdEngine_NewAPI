@@ -1,41 +1,36 @@
-#include <Engine/StdAfx.h>
-#include <Engine/RendererD3D11.h>
-#include <Engine/UIObject.h>
-#include <Engine/Object.h>
-#include <Engine/IEngine.h>
-#include <Engine/GlobalEnv.h>
-#include <Engine/ICamera.h>
-#include <Engine/ILight.h>
-#include <Engine/DebugHud.h>
-#include <Engine/IRenderState.h>
-#include <Engine/VertexBufferD3D11.h>
-#include <Engine/IndexBufferD3D11.h>
-#include <Engine/ShaderD3D11.h>
-#include <Engine/TextureD3D11.h>
-#include <Engine/ConvertEnumD3D11.h>
-#include <Engine/ConvertStructD3D11.h>
-#include <Engine/InputLayoutD3D11.h>
-#include <Engine/RenderStateD3D11.h>
-#include <Engine/RenderTargetD3D11.h>
-#include <Engine/IRenderListener.h>
-#include <Engine/EngineCommand.h>
-#include <CommonLib/StringUtils.h>
-#include <CommonLib/Hammersley.h>
-#include <CommonLib/tinydir.h>
-#include <CommonLib/StackTracer.h>
-#include <../es/shaders/CommonDefines.h>
-#include <d3d11.h>
-#include <D3DX11.h>
+#include "stdafx.h"
+#include "RendererD3D11.h"
+#include "RenderTargetD3D11.h"
+#include "VertexBufferD3D11.h"
+#include "IndexBufferD3D11.h"
+#include "ShaderD3D11.h"
+#include "TextureD3D11.h"
+#include "RenderStateD3D11.h"
+
+
+#include "InputLayoutD3D11.h"
+
+#include "ConvertEnumD3D11.h"
+#include "ConvertStructD3D11.h"
+#include "EngineEssentialData/shaders/CommonDefines.h"
 #include <d3dcompiler.h>
 
 #define _RENDERER_FRAME_PROFILER_
 
 using namespace fastbird;
 
-//----------------------------------------------------------------------------
-IRenderer* IRenderer::CreateD3D11Instance()
-{
-	return FB_NEW(RendererD3D11);
+static RendererD3D11* sInstance = 0;
+IRendererPtr Create(){
+	return IRendererPtr(FB_NEW(RendererD3D11), [](IRenderer* obj){FB_DELETE(obj); });
+}
+
+RendererD3D11& RendererD3D11::GetInstance(){
+	if (!sInstance){
+		Error(_T("Renderer is not initialized or already deleted!"));
+		assert(0);
+		abort();
+	}
+	return *sInstance;
 }
 
 //----------------------------------------------------------------------------
@@ -43,6 +38,8 @@ RendererD3D11::RendererD3D11()
 : mCurrentDSView(0)
 , mStandBy(false)
 {
+	assert(sInstance == 0);
+	sInstance = this;
 	m_pDevice = 0;
 	m_pFactory = 0;
 	m_pImmediateContext = 0;
@@ -2373,16 +2370,8 @@ void RendererD3D11::SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt)
 void RendererD3D11::DrawIndexed(unsigned indexCount, 
 	unsigned startIndexLocation, unsigned startVertexLocation)
 {
-#ifdef _DEBUG
-	__try{
-		m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, startVertexLocation);
-	}
-	__except (StackTracer::Filter(GetExceptionCode(), GetExceptionInformation())) {
-		Log(StackTracer::GetExceptionMsg());
-	}
-#else
-	m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, startVertexLocation);
-#endif
+	m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, startVertexLocation);	
+
 
 #ifdef _RENDERER_FRAME_PROFILER_
 	mFrameProfiler.NumDrawIndexedCall++;

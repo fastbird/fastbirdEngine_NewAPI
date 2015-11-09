@@ -1,7 +1,5 @@
 #pragma once
-#include "FBTypes.h"
-#include "FBVec4.h"
-#include "FBVec3.h"
+#include "FBCommonHeaders/Types.h"
 
 namespace fastbird
 {
@@ -41,17 +39,17 @@ namespace fastbird
 			: mValue(color)
 		{
 		}
-		Color(float r, float g, float b, float a)
+		Color(Real r, Real g, Real b, Real a)
 			: mValue(r, g, b, a)
 		{
 		}
 
-		Color(float r, float g, float b)
+		Color(Real r, Real g, Real b)
 			: mValue(r, g, b, 1.f)
 		{
 		}
 
-		Color(const char* str);
+		Color(LPCTSTR str);
 
 		explicit Color(unsigned int c)
 		{
@@ -88,7 +86,7 @@ namespace fastbird
 
 		const Vec4& GetVec4() const { return mValue; }
 
-		inline Color operator* (float scalar) const
+		inline Color operator* (Real scalar) const
 		{
 			return Color(mValue*scalar);
 		}
@@ -98,7 +96,7 @@ namespace fastbird
 			return Color(mValue*other.mValue);
 		}
 
-		inline Color& operator*= (float scalar)
+		inline Color& operator*= (Real scalar)
 		{
 			mValue *= scalar;
 			return *this;
@@ -120,7 +118,7 @@ namespace fastbird
 			return mValue==other.mValue;
 		}
 
-		void SetColor(float r, float g, float b, float a=1.f)
+		void SetColor(Real r, Real g, Real b, Real a=1.f)
 		{
 			mValue.x = r;
 			mValue.y = g;
@@ -128,15 +126,15 @@ namespace fastbird
 			mValue.w = a;
 		}
 
-		float r() const {return mValue.x;}
-		float g() const {return mValue.y;}
-		float b() const {return mValue.z;}
-		float a() const {return mValue.w;}
+		Real r() const {return mValue.x;}
+		Real g() const {return mValue.y;}
+		Real b() const {return mValue.z;}
+		Real a() const {return mValue.w;}
 
-		float& r(){ return mValue.x; }
-		float& g(){ return mValue.y; }
-		float& b(){ return mValue.z; }
-		float& a(){ return mValue.w; }
+		Real& r(){ return mValue.x; }
+		Real& g(){ return mValue.y; }
+		Real& b(){ return mValue.z; }
+		Real& a(){ return mValue.w; }
 
 	private:
 		Vec4 mValue;
@@ -144,8 +142,7 @@ namespace fastbird
 
 	inline Color Random(const Color& min, const Color& max)
 	{
-		return Color(Random(min.r(), max.r()),
-			Random(min.g(), max.g()),
+		return Color(Random(min.r(), max.r()), Random(min.g(), max.g()),
 			Random(min.b(), max.b()));
 	}
 }

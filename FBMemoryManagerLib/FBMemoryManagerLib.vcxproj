@@ -66,10 +66,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="FBMemoryManager.h" />
+    <ClInclude Include="MemoryManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FBMemoryManager.cpp" />
+    <ClCompile Include="MemoryManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

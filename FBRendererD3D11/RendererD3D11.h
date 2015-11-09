@@ -2,22 +2,24 @@
 #ifndef __Rendererd3d11_header_included__
 #define __Rendererd3d11_header_included__
 
-#include "../FBRenderer/IRenderer.h"
-#include "../FBRenderer/RendererStructs.h"
-#include "../EngineEssentialData/shaders/Constants.h"
-#include "Engine/RenderStateD3D11.h"
-//#include <CommonLib/Color.h>
-
+#include "FBRenderer/IRenderer.h"
+#include "FBRenderer/RendererStructs.h"
+#include "EngineEssentialData/shaders/Constants.h"
+#include "RenderStateD3D11.h"
 
 namespace fastbird
 {
 	class IObject;
 	class ICamera;
 	class TextureD3D11;
-
-	class RendererD3D11 : public Renderer
+	class Color;
+	class RendererD3D11;
+	
+	class RendererD3D11 : public IRenderer
 	{
 	public:
+		static IRendererPtr Create();
+		static RendererD3D11& GetInstance();
 		RendererD3D11();
 		virtual ~RendererD3D11();
 		virtual bool Init(int threadPool);

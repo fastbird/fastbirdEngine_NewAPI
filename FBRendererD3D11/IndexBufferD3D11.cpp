@@ -1,15 +1,10 @@
-#include <Engine/StdAfx.h>
-#include <Engine/IndexBufferD3D11.h>
-#include <Engine/GlobalEnv.h>
-#include <Engine/IEngine.h>
-#include <Engine/IRenderer.h>
+#include "stdafx.h"
+#include "IndexBufferD3D11.h"
+#include "FBRenderer/RendererEnums.h"
+#include "ResourceBinder.h"
 
 namespace fastbird
 {
-	void IndexBufferD3D11::FinishSmartPtr(){
-		FB_DELETE(this);
-	}
-
 	IndexBufferD3D11* IndexBufferD3D11::CreateInstance(unsigned int numIndices, INDEXBUFFER_FORMAT format)
 	{
 		IndexBufferD3D11* pIndexBuffer = FB_NEW(IndexBufferD3D11)(numIndices, format);
@@ -51,8 +46,7 @@ namespace fastbird
 		if (!m_pIndexBuffer)
 			return;
 
-		gFBEnv->pEngine->GetRenderer()->SetIndexBuffer(this);
-
+		ResourceBinder::SetIndexBuffer(this);
 	}
 
 	ID3D11Buffer* IndexBufferD3D11::GetHardwareBuffer() const

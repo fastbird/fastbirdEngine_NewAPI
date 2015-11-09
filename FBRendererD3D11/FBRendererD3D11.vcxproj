@@ -16,17 +16,17 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -45,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\include;..</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -60,7 +60,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>$(DXSDK_DIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DXSDK_DIR)\include;..</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -70,11 +70,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DLLMain.cpp" />
     <ClCompile Include="IndexBufferD3D11.cpp" />
     <ClCompile Include="InputLayoutD3D11.cpp" />
     <ClCompile Include="RendererD3D11.cpp" />
     <ClCompile Include="RenderStateD3D11.cpp" />
     <ClCompile Include="RenderTargetD3D11.cpp" />
+    <ClCompile Include="ResourceBinder.cpp" />
     <ClCompile Include="ShaderD3D11.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -86,19 +88,27 @@
   <ItemGroup>
     <ClInclude Include="ConvertEnumD3D11.h" />
     <ClInclude Include="ConvertStructD3D11.h" />
+    <ClInclude Include="DLLMain.h" />
     <ClInclude Include="IndexBufferD3D11.h" />
     <ClInclude Include="InputLayoutD3D11.h" />
     <ClInclude Include="RendererD3D11.h" />
     <ClInclude Include="RenderStateD3D11.h" />
     <ClInclude Include="RenderTargetD3D11.h" />
+    <ClInclude Include="ResourceBinder.h" />
     <ClInclude Include="ShaderD3D11.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureD3D11.h" />
     <ClInclude Include="VertexBufferD3D11.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
+      <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\FBMath\FBMath.vcxproj">
       <Project>{2df8e079-28e5-4e7d-9c6a-ff87c1329eb5}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
+      <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

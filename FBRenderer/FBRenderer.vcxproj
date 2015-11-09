@@ -12,7 +12,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Color.h" />
+    <ClInclude Include="IIndexBuffer.h" />
+    <ClInclude Include="IInputLayout.h" />
     <ClInclude Include="IRenderer.h" />
+    <ClInclude Include="IRenderState.h" />
+    <ClInclude Include="IRenderTarget.h" />
+    <ClInclude Include="IRenderTargetListener.h" />
+    <ClInclude Include="IShader.h" />
+    <ClInclude Include="ITexture.h" />
+    <ClInclude Include="IVertexBuffer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererEnums.h" />
     <ClInclude Include="RendererStructs.h" />
@@ -36,6 +44,15 @@
     </ProjectReference>
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
       <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBStringLib\FBStringLib.vcxproj">
+      <Project>{97920097-3e86-410d-8d98-a2ecad02a35f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBStringMathLib\FBStringMathLib.vcxproj">
+      <Project>{58935f99-a95d-4da2-baa8-6e2f263c8e24}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBSystemLib\FBSystemLib.vcxproj">
+      <Project>{2e1e0f10-b5ea-4eec-aab9-c0dcbf67b306}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -73,7 +90,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -87,7 +104,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <AdditionalIncludeDirectories>../</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

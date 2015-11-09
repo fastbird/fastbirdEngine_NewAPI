@@ -1,6 +1,5 @@
 #pragma once
-#include <Engine/RendererEnums.h>
-#include <d3d11.h>
+#include "FBRenderer/RendererEnums.h"
 namespace fastbird
 {
 	//------------------------------------------------------------------------
@@ -143,7 +142,7 @@ namespace fastbird
 		case PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
 			return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 		default:
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Undefined primitive topology!");
+			Error(FB_DEFAULT_DEBUG_ARG, "Undefined primitive topology!");
 			assert(0);
 			return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
 		}
