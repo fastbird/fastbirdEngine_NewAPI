@@ -5,6 +5,9 @@
 doc/
 
 EngineEssentialData/
+*.gscache
+*.vscache
+*.pscache
 
 # User-specific files
 *.suo

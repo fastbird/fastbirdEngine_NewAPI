@@ -16,6 +16,7 @@
     <ClInclude Include="String.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="platform.h" />
+    <ClInclude Include="VectorMap.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{EB75B2FD-4CE2-496F-9F5E-52285B811EB9}</ProjectGuid>

@@ -2,34 +2,51 @@
 #include "ModuleHandler.h"
 #include "FBDebugLib/Logger.h"
 namespace fastbird{
-	ModuleHandle ModuleHandler::LoadModule(LPCTSTR path){
+	// intended redundancy
+	static const char* FormatString(const char* str, ...){
+		static char buf[2048];
+		va_list args;
+
+		va_start(args, str);
+		vsprintf_s(buf, str, args);
+		va_end(args);
+
+		return buf;
+	}
+
+	ModuleHandle ModuleHandler::LoadModule(const char* path){
 #if defined(_PLATFORM_WINDOWS_)
 		if (!path)
 			return 0;
 
-		auto dotPos = _tstrchr(path, _T('.'));
-		if (!dotPos)
-		{
-			Logger::Log(_T("LoadModule(%s) failed. Invalid param."), path);
+		auto dotPos = strchr(path, _T('.'));
+		char buf[MAX_PATH] = { 0 };
+		if (dotPos){
+			strncpy_s(buf, MAX_PATH, path, dotPos - path);
 		}
-
-		TCHAR buf[MAX_PATH] = { 0 };
-		_tstrncpy(buf, MAX_PATH, path, dotPos - path);
+		else{
+			strcpy_s(buf, MAX_PATH, path);
+		}
 
 #ifdef _DEBUG
-		_tstrcat(buf, MAX_PATH, _T("_Debug.dll"));
+		strcat_s(buf, MAX_PATH, "_Debug.dll");
 #else
-		_tstrcat(buf, MAX_PATH, _T("_Release.dll"));
+		strcat_s(buf, MAX_PATH, "_Release.dll");
 #endif
-
-		HMODULE module = LoadLibrary(buf);
-		if (!module)
-		{
-			module = LoadLibrary(path);
-		}
+		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf));
+		HMODULE module = LoadLibraryA(buf);
+		if (!module) {
+			Logger::Log(FB_DEFAULT_LOG_ARG, "Failed.\n");
+			strcat_s(buf, MAX_PATH, ".dll");
+			Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf));
+			module = LoadLibraryA(buf);
+		}		
 		
 		if (!module) {
-			Logger::Log(_T("LoadFBLibrary(%s) failed"), path);
+			Logger::Log(FB_DEFAULT_LOG_ARG, "Failed.\n");
+		}
+		else{
+			Logger::Log(FB_DEFAULT_LOG_ARG, "Succeeded.\n");
 		}
 		return (intptr_t)module;
 #else
@@ -48,7 +65,7 @@ namespace fastbird{
 
 	FunctionHandle ModuleHandler::GetFunction(ModuleHandle module, const char* functionName){
 		if (!module){
-			Logger::Log(_T("ModuleHandler::GetFunction : invalid param"));
+			Logger::Log(FB_DEFAULT_LOG_ARG, "ModuleHandler::GetFunction : invalid param");
 			return 0;
 		}
 #if defined(_PLATFORM_WINDOWS_)

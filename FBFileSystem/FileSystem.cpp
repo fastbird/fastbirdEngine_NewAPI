@@ -5,12 +5,6 @@
 #include "FBStringLib/StringLib.h"
 using namespace fastbird;
 
-#if defined(UNICODE)
-#define OutputException(err) Logger::Output(AnsiToWide(err.what()))
-#else
-#define OutputException(err) Logger::Output(err.what())
-#endif
-
 static bool gLogginStarted = false;
 void FileSystem::StartLoggingIfNot(LPCTSTR path){
 	if (gLogginStarted)
@@ -45,7 +39,7 @@ int FileSystem::Rename(LPCTSTR path, LPCTSTR newpath){
 		boost::filesystem::rename(path, newpath);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		OutputException(err);		
+		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()));
 	}
 	
 	return NO_ERROR;
@@ -57,7 +51,7 @@ bool FileSystem::Remove(LPCTSTR path){
 		ret = boost::filesystem::remove(path);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		OutputException(err);
+		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()));
 	}	
 	return ret;
 }

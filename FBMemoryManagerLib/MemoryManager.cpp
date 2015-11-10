@@ -128,10 +128,7 @@ namespace fastbird
 		auto itEnd = m.end();
 		for (; it != itEnd; ++it)
 		{
-			TCHAR buffer[500];
-			_tsprintf(buffer, 500, _T("%s(%d) : memory(%p) not released \n"), 
-				it->second.mFile.c_str(), it->second.mLine, it->first);
-			Logger::Output(buffer);
+			Logger::Output("%s(%d) : memory(%p) not released \n", it->second.mFile.c_str(), it->second.mLine, it->first);
 		}
 	}
 }

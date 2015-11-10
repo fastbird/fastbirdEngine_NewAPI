@@ -5,33 +5,296 @@
 #include "IndexBufferD3D11.h"
 #include "ShaderD3D11.h"
 #include "TextureD3D11.h"
-#include "RenderStateD3D11.h"
-
-
+#include "RenderStatesD3D11.h"
 #include "InputLayoutD3D11.h"
-
 #include "ConvertEnumD3D11.h"
 #include "ConvertStructD3D11.h"
-#include "EngineEssentialData/shaders/CommonDefines.h"
-#include <d3dcompiler.h>
+#include "EssentialEngineData/shaders/CommonDefines.h"
+#include "FBRenderer/RenderStates.h"
 
 #define _RENDERER_FRAME_PROFILER_
 
 using namespace fastbird;
 
+//----------------------------------------------------------------------------
 static RendererD3D11* sInstance = 0;
-IRendererPtr Create(){
-	return IRendererPtr(FB_NEW(RendererD3D11), [](IRenderer* obj){FB_DELETE(obj); });
+IRenderer* RendererD3D11::Create(){
+	if (sInstance){
+		Logger::Log(FB_ERROR_LOG_ARG, "RendererD3D11 is already created.");
+		return sInstance;
+	}
+	return FB_NEW(RendererD3D11);
 }
-
+void RendererD3D11::Delete(IRenderer* renderer){
+	if (sInstance != renderer){
+		Logger::Log(FB_ERROR_LOG_ARG, "RendererD3D11 is not vaild.");
+		return;
+	}
+	FB_DELETE(renderer);
+}
 RendererD3D11& RendererD3D11::GetInstance(){
 	if (!sInstance){
-		Error(_T("Renderer is not initialized or already deleted!"));
+		Error("FBRendererD3D11 is not initialized or already deleted!");
 		assert(0);
 		abort();
 	}
 	return *sInstance;
 }
+
+//----------------------------------------------------------------------------
+class RendererD3D11::RendererD3D11Impl{
+public:
+	ID3D11Device*			mDevice; // free-threaded
+	IDXGIFactory1*			mDXGIFactory;
+	VectorMap<HWND_ID, IDXGISwapChain*> mSwapChains;	
+	ID3D11DeviceContext*	mImmediateContext; //  not free-threaded
+	D3D_DRIVER_TYPE			mDriverType;
+	D3D_FEATURE_LEVEL		mFeatureLevel;	
+	ID3DX11ThreadPump*		mThreadPump;
+
+	// Current processing target.
+	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11Texture2D*		mDepthStencil;
+	ID3D11DepthStencilView* mDepthStencilView;
+	D3D11_VIEWPORT			mViewPort;
+	DXGI_SAMPLE_DESC		mMultiSampleDesc;
+	PIXEL_FORMAT			mDepthStencilFormat;
+
+	// constant buffers
+	ID3D11Buffer*			mFrameConstantsBuffer; // b0
+	ID3D11Buffer*			mObjectConstantsBuffer; // b1
+	ID3D11Buffer*			mMaterialConstantsBuffer; // b2
+	ID3D11Buffer*			mMaterialParametersBuffer; // b3
+	ID3D11Buffer*			mRareConstantsBuffer; // b4
+	ID3D11Buffer*			mBigBuffer; // b5
+	ID3D11Buffer*			mImmutableConstantsBuffer; // b6
+	ID3D11Buffer*			mPointLightConstantsBuffer; //b7
+	ID3D11Buffer*			mCameraConstantsBuffer; //b8
+	ID3D11Buffer*			mRenderTargetConstantsBuffer; //b9
+	ID3D11Buffer*			mSceneConstantsBuffer; // b10
+	FRAME_CONSTANTS			mFrameConstants;
+	CAMERA_CONSTANTS		mCameraConstants;
+	RENDERTARGET_CONSTANTS	mRenderTargetConstants;
+	SCENE_CONSTANTS			mSceneConstants;	
+
+	typedef std::map<RASTERIZER_DESC, IRasterizerStateWeakPtr > RASTERIZER_MAP;
+	RASTERIZER_MAP mRasterizerMap;
+	ID3D11RasterizerState*	mWireframeRasterizeState;
+	typedef std::map<BLEND_DESC, IBlendStateWeakPtr > BLEND_MAP;
+	BLEND_MAP mBlendMap;
+	typedef std::map<DEPTH_STENCIL_DESC, IDepthStencilStateWeakPtr> DEPTH_STENCIL_MAP;
+	DEPTH_STENCIL_MAP mDepthStencilMap;
+	typedef std::map<SAMPLER_DESC, ISamplerStateWeakPtr> SAMPLER_MAP;
+	SAMPLER_MAP mSamplerMap;
+	
+	std::vector<D3D11_VIEWPORT> mViewports;
+	std::vector<TextureD3D11*> mCheckTextures;
+
+	std::vector<ID3D11RenderTargetView*> mCurrentRTViews;
+	ID3D11DepthStencilView* mCurrentDSView;
+	std::vector<ITexture*> mCurrentRTTextures;
+	std::vector<size_t> mCurrentRTViewIdxes;
+	ITexture* mCurrentDSTexture;
+	size_t mCurrentDSViewIdx;
+
+	std::vector<DXGI_OUTPUT_DESC> mOutputInfos;
+	VectorMap<HMONITOR, std::vector<DXGI_MODE_DESC>> mDisplayModes;
+	bool mStandBy;
+
+	//-------------------------------------------------------------------
+	// Constant Buffers
+	//-------------------------------------------------------------------
+	void UpdateFrameConstantsBuffer();
+	void UpdateObjectConstantsBuffer(void* pData, bool record = false);
+	void UpdatePointLightConstantsBuffer(void* pData);
+	void UpdateCameraConstantsBuffer();
+	void UpdateRenderTargetConstantsBuffer();
+	void UpdateSceneConstantsBuffer();
+	void UpdateMaterialConstantsBuffer(void* pData);
+	void UpdateRareConstantsBuffer();
+	void UpdateRadConstantsBuffer(void* pData);
+	void* MapMaterialParameterBuffer();
+	void UnmapMaterialParameterBuffer();
+	void* MapBigBuffer();
+	void UnmapBigBuffer();
+
+
+
+	//-------------------------------------------------------------------
+	// Drawing
+	//-------------------------------------------------------------------
+	void Draw(unsigned int vertexCount, unsigned int startVertexLocation)
+	{
+		mImmediateContext->Draw(vertexCount, startVertexLocation);
+	}
+	
+	void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation)
+	{
+		mImmediateContext->DrawIndexed(indexCount, startIndexLocation, startVertexLocation);
+	}
+
+	void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs/*= true*/)
+	{
+
+		// vertex buffer
+		MapData mapped = mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Map(
+			MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+		DEFAULT_INPUTS::V_PC data[4] = {
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x, (float)pos.y, 0.f), color.Get4Byte()),
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x + size.x, (float)pos.y, 0.f), color.Get4Byte()),
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x, (float)pos.y + size.y, 0.f), color.Get4Byte()),
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x + size.x, (float)pos.y + size.y, 0.f), color.Get4Byte()),
+		};
+		if (mapped.pData)
+		{
+			memcpy(mapped.pData, data, sizeof(data));
+			mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Unmap();
+		}
+
+		if (updateRs){
+			UpdateObjectConstantsBuffer(&mObjConst);
+			// set primitive topology
+			SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+			// set material
+			mMaterials[DEFAULT_MATERIALS::QUAD]->Bind(true);
+		}
+
+
+		// set vertex buffer
+		mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Bind();
+		// draw
+		Draw(4, 0);
+	}
+
+	void DrawQuadLine(const Vec2I& pos, const Vec2I& size, const Color& color)
+	{
+		int left = pos.x - 1;
+		int top = pos.y - 1;
+		int right = pos.x + size.x + 1;
+		int bottom = pos.y + size.y + 1;
+		DrawLine(Vec2I(left, top), Vec2I(right, top), color, color);
+		DrawLine(Vec2I(left, top), Vec2I(left, bottom), color, color);
+		DrawLine(Vec2I(right, top), Vec2I(right, bottom), color, color);
+		DrawLine(Vec2I(left, bottom), Vec2I(right, bottom), color, color);
+
+	}
+
+	void DrawQuadWithTexture(const Vec2I& pos, const Vec2I& size, const Color& color, ITexture* texture, IMaterial* materialOverride)
+	{
+		DrawQuadWithTextureUV(pos, size, Vec2(0, 0), Vec2(1, 1), color, texture, materialOverride);
+	}
+
+	void DrawQuadWithTextureUV(const Vec2I& pos, const Vec2I& size, const Vec2& uvStart, const Vec2& uvEnd,
+		const Color& color, ITexture* texture, IMaterial* materialOverride)
+	{
+
+		// vertex buffer
+		MapData mapped = mDynVBs[DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD]->Map(
+			MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+		DEFAULT_INPUTS::V_PCT data[4] = {
+			DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x, (float)pos.y, 0.f), color.Get4Byte(), Vec2(uvStart.x, uvStart.y)),
+			DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x + size.x, (float)pos.y, 0.f), color.Get4Byte(), Vec2(uvEnd.x, uvStart.y)),
+			DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x, (float)pos.y + size.y, 0.f), color.Get4Byte(), Vec2(uvStart.x, uvEnd.y)),
+			DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x + size.x, (float)pos.y + size.y, 0.f), color.Get4Byte(), Vec2(uvEnd.x, uvEnd.y)),
+		};
+		if (mapped.pData)
+		{
+			memcpy(mapped.pData, data, sizeof(data));
+			mDynVBs[DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD]->Unmap();
+		}
+
+
+		if (mCurRenderTarget == GetMainRenderTarget()){
+			UpdateObjectConstantsBuffer(&mObjConst);
+		}
+		else{
+			const auto& rtSize = mCurRenderTarget->GetSize();
+			OBJECT_CONSTANTS constants =
+			{
+				Mat44(2.f / rtSize.x, 0, 0, -1.f,
+				0.f, -2.f / rtSize.y, 0, 1.f,
+				0, 0, 1.f, 0.f,
+				0, 0, 0, 1.f),
+				Mat44::IDENTITY,
+				Mat44::IDENTITY,
+			};
+			UpdateObjectConstantsBuffer(&constants);
+		}
+
+
+
+		// set primitive topology
+		SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		// set material
+		if (materialOverride)
+			materialOverride->Bind(true);
+		else
+			mMaterials[DEFAULT_MATERIALS::QUAD_TEXTURE]->Bind(true);
+		SetTexture(texture, BINDING_SHADER_PS, 0);
+		// set vertex buffer
+		mDynVBs[DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD]->Bind();
+		// draw
+		Draw(4, 0);
+	}
+
+	void DrawFullscreenQuad(IShader* pixelShader, bool farside)
+	{
+		// vertex buffer
+
+		if (farside)
+			mFullscreenQuadVSFar->BindVS();
+		else
+			mFullscreenQuadVSNear->BindVS();
+
+		if (pixelShader)
+			pixelShader->BindPS();
+
+		SetInputLayout(0);
+		SetGSShader(0);
+		// draw
+		// using full screen triangle : http://blog.naver.com/jungwan82/220108100698
+		SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		Draw(3, 0);
+	}
+
+	void DrawBillboardWorldQuad(const Vec3& pos, const Vec2& size, const Vec2& offset,
+		DWORD color, IMaterial* pMat)
+	{
+		IVertexBuffer* pVB = mDynVBs[DEFAULT_INPUTS::POSITION_VEC4_COLOR];
+		assert(pVB);
+		MapData mapped = pVB->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+		DEFAULT_INPUTS::POSITION_VEC4_COLOR_V* data = (DEFAULT_INPUTS::POSITION_VEC4_COLOR_V*)mapped.pData;
+		data->p = pos;
+		data->v4 = Vec4(size.x, size.y, offset.x, offset.y);
+		data->color = color;
+		pVB->Unmap();
+		pVB->Bind();
+		SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_POINTLIST);
+		pMat->Bind(true);
+		Draw(1, 0);
+
+		// vertexBuffer
+	}
+
+	void DrawTriangleNow(const Vec3& a, const Vec3& b, const Vec3& c, const Vec4& color, IMaterial* mat)
+	{
+		IVertexBuffer* pVB = mDynVBs[DEFAULT_INPUTS::POSITION];
+		assert(pVB);
+		MapData mapped = pVB->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+		DEFAULT_INPUTS::V_P* data = (DEFAULT_INPUTS::V_P*)mapped.pData;
+		data[0].p = a;
+		data[1].p = b;
+		data[2].p = c;
+		pVB->Unmap();
+		pVB->Bind();
+		SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		mat->SetMaterialParameters(0, color);
+		mat->Bind(true);
+		Draw(3, 0);
+	}
+
+
+};
 
 //----------------------------------------------------------------------------
 RendererD3D11::RendererD3D11()
@@ -42,24 +305,24 @@ RendererD3D11::RendererD3D11()
 	sInstance = this;
 	m_pDevice = 0;
 	m_pFactory = 0;
-	m_pImmediateContext = 0;
-	m_pRenderTargetView = 0;
-	m_pDepthStencil = 0;
-	m_pDepthStencilView = 0;
-	m_pFrameConstantsBuffer = 0;
-	m_pObjectConstantsBuffer = 0;
-	m_pPointLightConstantsBuffer = 0;
-	m_pCameraConstantsBuffer = 0;
-	m_pRenderTargetConstantsBuffer = 0;
-	m_pSceneConstantsBuffer = 0;
+	mImmediateContext = 0;
+	mRenderTargetView = 0;
+	mDepthStencil = 0;
+	mDepthStencilView = 0;
+	mFrameConstantsBuffer = 0;
+	mObjectConstantsBuffer = 0;
+	mPointLightConstantsBuffer = 0;
+	mCameraConstantsBuffer = 0;
+	mRenderTargetConstantsBuffer = 0;
+	mSceneConstantsBuffer = 0;
 
-	m_pMaterialConstantsBuffer = 0;
-	m_pMaterialParametersBuffer = 0;
-	m_pRareConstantsBuffer = 0;
-	m_pBigBuffer = 0;
-	m_pImmutableConstantsBuffer = 0;
-	m_pWireframeRasterizeState = 0;
-	m_pThreadPump = 0;
+	mMaterialConstantsBuffer = 0;
+	mMaterialParametersBuffer = 0;
+	mRareConstantsBuffer = 0;
+	mBigBuffer = 0;
+	mImmutableConstantsBuffer = 0;
+	mWireframeRasterizeState = 0;
+	mThreadPump = 0;
 	mMultiSampleDesc.Count = 1;
 	mMultiSampleDesc.Quality = 0;
 	
@@ -84,24 +347,25 @@ RendererD3D11::RendererD3D11()
 	mBindedInputLayout = 0;
 	mCurrentTopology = PRIMITIVE_TOPOLOGY_UNKNOWN;
 
-	mCurDSViewIdx = -1;
-	mCurDSTexture = 0;
+	mCurrentDSViewIdx = -1;
+	mCurrentDSTexture = 0;
 }
 
 //----------------------------------------------------------------------------
 RendererD3D11::~RendererD3D11()
 {
 	Deinit();	
-	gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "DirectX11 is destroyed.");
+	gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "DirectX11 is destroyed.");
+	sInstance = 0;
 }
 
 //----------------------------------------------------------------------------
 void RendererD3D11::Deinit()
 {
-	if (m_pThreadPump)
+	if (mThreadPump)
 	{
-		m_pThreadPump->WaitForAllItems();
-		SAFE_RELEASE(m_pThreadPump);
+		mThreadPump->WaitForAllItems();
+		SAFE_RELEASE(mThreadPump);
 	}
 	__super::Deinit();
 	mRasterizerMap.clear();
@@ -109,32 +373,32 @@ void RendererD3D11::Deinit()
 	mDepthStencilMap.clear();
 	mSamplerMap.clear();
 
-	m_pImmediateContext->ClearState();
-	SAFE_RELEASE(m_pWireframeRasterizeState);
-	SAFE_RELEASE(m_pMaterialParametersBuffer);
-	SAFE_RELEASE(m_pMaterialConstantsBuffer);
-	SAFE_RELEASE(m_pObjectConstantsBuffer);
-	SAFE_RELEASE(m_pPointLightConstantsBuffer);
-	SAFE_RELEASE(m_pCameraConstantsBuffer);
-	SAFE_RELEASE(m_pRenderTargetConstantsBuffer);
-	SAFE_RELEASE(m_pSceneConstantsBuffer);
-	SAFE_RELEASE(m_pFrameConstantsBuffer);
-	SAFE_RELEASE(m_pRareConstantsBuffer);
-	SAFE_RELEASE(m_pBigBuffer);
-	SAFE_RELEASE(m_pImmutableConstantsBuffer);
+	mImmediateContext->ClearState();
+	SAFE_RELEASE(mWireframeRasterizeState);
+	SAFE_RELEASE(mMaterialParametersBuffer);
+	SAFE_RELEASE(mMaterialConstantsBuffer);
+	SAFE_RELEASE(mObjectConstantsBuffer);
+	SAFE_RELEASE(mPointLightConstantsBuffer);
+	SAFE_RELEASE(mCameraConstantsBuffer);
+	SAFE_RELEASE(mRenderTargetConstantsBuffer);
+	SAFE_RELEASE(mSceneConstantsBuffer);
+	SAFE_RELEASE(mFrameConstantsBuffer);
+	SAFE_RELEASE(mRareConstantsBuffer);
+	SAFE_RELEASE(mBigBuffer);
+	SAFE_RELEASE(mImmutableConstantsBuffer);
 	
 	UIObject::ClearSharedRS();
 
-	SAFE_RELEASE(m_pDepthStencilView);
-	SAFE_RELEASE(m_pDepthStencil);
-	SAFE_RELEASE(m_pRenderTargetView);
+	SAFE_RELEASE(mDepthStencilView);
+	SAFE_RELEASE(mDepthStencil);
+	SAFE_RELEASE(mRenderTargetView);
 	// 0 is already released
 	for (auto it : mSwapChains)
 	{
 		SAFE_RELEASE(it.second);
 	}
 	mSwapChains.clear();	
-	SAFE_RELEASE(m_pImmediateContext);
+	SAFE_RELEASE(mImmediateContext);
 
 	if (gFBEnv->pConsole->GetEngineCommand()->r_ReportDeviceObjectLeak)
 	{
@@ -146,7 +410,7 @@ void RendererD3D11::Deinit()
 	
 	SAFE_RELEASE(m_pDevice);
 
-	gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "DirectX11 is deinitilized.");
+	gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "DirectX11 is deinitilized.");
 }
 
 //----------------------------------------------------------------------------
@@ -162,7 +426,7 @@ bool RendererD3D11::Init(int threadPool)
 	}
 	if (FAILED(hr))
 	{
-		Log(FB_DEFAULT_DEBUG_ARG, "CreateDXGIFactory1() failed!");
+		Log(FB_DEFAULT_LOG_ARG, "CreateDXGIFactory1() failed!");
 		return false;
 	}
 
@@ -209,14 +473,14 @@ bool RendererD3D11::Init(int threadPool)
 	{
 		mDriverType = driverTypes[driverTypeIndex];
 		hr = D3D11CreateDevice(vAdapters[0], mDriverType, NULL, createDeviceFlags, featureLevels, numFeatureLevels,
-			D3D11_SDK_VERSION, &m_pDevice, &mFeatureLevel, &m_pImmediateContext);
+			D3D11_SDK_VERSION, &m_pDevice, &mFeatureLevel, &mImmediateContext);
 		if (SUCCEEDED(hr))
 			break;
 	}
 
 	if (FAILED( hr ))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "D3D11CreateDevice() failed!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "D3D11CreateDevice() failed!");
 		return false;
 	}
 
@@ -270,117 +534,117 @@ bool RendererD3D11::Init(int threadPool)
 	Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	Desc.MiscFlags = 0;    
 	Desc.ByteWidth = sizeof( FRAME_CONSTANTS );
-	hr = m_pDevice->CreateBuffer( &Desc, NULL, &m_pFrameConstantsBuffer );
+	hr = m_pDevice->CreateBuffer( &Desc, NULL, &mFrameConstantsBuffer );
 	if (FAILED( hr ) )
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(FrameConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(FrameConstants)!");
 		assert(0);
 	}
 	
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	hr = m_pImmediateContext->Map(m_pFrameConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 
+	hr = mImmediateContext->Map(mFrameConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 
 		ConvertEnumD3D11(MAP_FLAG_NONE), &mappedResource);
 	if (FAILED(hr))
 		assert(0);
 	memcpy(mappedResource.pData, &mFrameConstants, sizeof(FRAME_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pFrameConstantsBuffer, 0);
+	mImmediateContext->Unmap(mFrameConstantsBuffer, 0);
 
 	//------------------------------------------------------------------------
 	// OBJECT CONSTANT
 	Desc.ByteWidth = sizeof( OBJECT_CONSTANTS );
-	hr = m_pDevice->CreateBuffer( &Desc, NULL, &m_pObjectConstantsBuffer );
+	hr = m_pDevice->CreateBuffer( &Desc, NULL, &mObjectConstantsBuffer );
 	if ( FAILED( hr ) )
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(ObjectConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(ObjectConstants)!");
 		assert(0);
 	}
 
 	//------------------------------------------------------------------------
 	// POINT_LIGHT CONSTANT
 	Desc.ByteWidth = sizeof(POINT_LIGHT_CONSTANTS);
-	hr = m_pDevice->CreateBuffer(&Desc, NULL, &m_pPointLightConstantsBuffer);
+	hr = m_pDevice->CreateBuffer(&Desc, NULL, &mPointLightConstantsBuffer);
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(PointLightConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(PointLightConstants)!");
 		assert(0);
 	}
 
 	//------------------------------------------------------------------------
 	// Camera CONSTANT
 	Desc.ByteWidth = sizeof(CAMERA_CONSTANTS);
-	hr = m_pDevice->CreateBuffer(&Desc, NULL, &m_pCameraConstantsBuffer);
+	hr = m_pDevice->CreateBuffer(&Desc, NULL, &mCameraConstantsBuffer);
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(CameraConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(CameraConstants)!");
 		assert(0);
 	}
 
 	//------------------------------------------------------------------------
 	// Render target CONSTANT
 	Desc.ByteWidth = sizeof(RENDERTARGET_CONSTANTS);
-	hr = m_pDevice->CreateBuffer(&Desc, NULL, &m_pRenderTargetConstantsBuffer);
+	hr = m_pDevice->CreateBuffer(&Desc, NULL, &mRenderTargetConstantsBuffer);
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(RenderTargetConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(RenderTargetConstants)!");
 		assert(0);
 	}
 
 	//------------------------------------------------------------------------
 	// Scene CONSTANT
 	Desc.ByteWidth = sizeof(SCENE_CONSTANTS);
-	hr = m_pDevice->CreateBuffer(&Desc, NULL, &m_pSceneConstantsBuffer);
+	hr = m_pDevice->CreateBuffer(&Desc, NULL, &mSceneConstantsBuffer);
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(SceneConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(SceneConstants)!");
 		assert(0);
 	}
 
 	//------------------------------------------------------------------------
 	// MATERIAL CONSTANT
 	Desc.ByteWidth = sizeof( MATERIAL_CONSTANTS );
-	hr = m_pDevice->CreateBuffer( &Desc, NULL, &m_pMaterialConstantsBuffer );
+	hr = m_pDevice->CreateBuffer( &Desc, NULL, &mMaterialConstantsBuffer );
 	if ( FAILED( hr ) )
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(MaterialConstants)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(MaterialConstants)!");
 		assert(0);
 	}
 
 	//------------------------------------------------------------------------
 	// MATERIAL PARAMETERS
 	Desc.ByteWidth = sizeof( MATERIAL_PARAMETERS );
-	hr = m_pDevice->CreateBuffer( &Desc, NULL, &m_pMaterialParametersBuffer );
+	hr = m_pDevice->CreateBuffer( &Desc, NULL, &mMaterialParametersBuffer );
 	if ( FAILED( hr ) )
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(MaterialParameters)!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(MaterialParameters)!");
 		assert(0);
 	}
 
 	Desc.ByteWidth = sizeof(RARE_CONSTANTS);
-	hr = m_pDevice->CreateBuffer( &Desc, NULL, &m_pRareConstantsBuffer );
+	hr = m_pDevice->CreateBuffer( &Desc, NULL, &mRareConstantsBuffer );
 	if ( FAILED( hr ) )
 	{
-		Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(Rare constants)!");
+		Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(Rare constants)!");
 		assert(0);
 	}
 
 	Desc.ByteWidth = sizeof(BIG_BUFFER);
-	hr = m_pDevice->CreateBuffer(&Desc, NULL, &m_pBigBuffer);
+	hr = m_pDevice->CreateBuffer(&Desc, NULL, &mBigBuffer);
 	if (FAILED(hr))
 	{
-		Log(FB_DEFAULT_DEBUG_ARG, "Failed to create big buffer!");
+		Log(FB_DEFAULT_LOG_ARG, "Failed to create big buffer!");
 		assert(0);
 	}
 
 	Desc.ByteWidth = sizeof(IMMUTABLE_CONSTANTS);
-	hr = m_pDevice->CreateBuffer( &Desc, NULL, &m_pImmutableConstantsBuffer );
+	hr = m_pDevice->CreateBuffer( &Desc, NULL, &mImmutableConstantsBuffer );
 	if ( FAILED( hr ) )
 	{
-		Log(FB_DEFAULT_DEBUG_ARG, "Failed to create constant buffer(Immutable constants)!");
+		Log(FB_DEFAULT_LOG_ARG, "Failed to create constant buffer(Immutable constants)!");
 		assert(0);
 	}
 	else
 	{
-		m_pImmediateContext->PSSetConstantBuffers(6, 1, &m_pImmutableConstantsBuffer);
+		mImmediateContext->PSSetConstantBuffers(6, 1, &mImmutableConstantsBuffer);
 	}
 
 	//------------------------------------------------------------------------
@@ -396,19 +660,19 @@ bool RendererD3D11::Init(int threadPool)
 	RasterizerDesc.ScissorEnable = FALSE;
 	RasterizerDesc.MultisampleEnable = FALSE;
 	RasterizerDesc.AntialiasedLineEnable = FALSE;
-	hr = m_pDevice->CreateRasterizerState( &RasterizerDesc, &m_pWireframeRasterizeState );
+	hr = m_pDevice->CreateRasterizerState( &RasterizerDesc, &mWireframeRasterizeState );
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create an wireframe rasterizer state!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create an wireframe rasterizer state!");
 		assert(0);
 	}
 
 	if (threadPool!=0)
 	{
-		hr = D3DX11CreateThreadPump(1, threadPool, &m_pThreadPump);
+		hr = D3DX11CreateThreadPump(1, threadPool, &mThreadPump);
 		if (FAILED(hr))
 		{
-			Log(FB_DEFAULT_DEBUG_ARG, "Failed to create thread pump");
+			Log(FB_DEFAULT_LOG_ARG, "Failed to create thread pump");
 		}
 	}
 
@@ -482,7 +746,7 @@ bool RendererD3D11::InitSwapChain(HWND_ID id, int width, int height)
 	HWND hwnd = gFBEnv->pEngine->GetWindowHandle(id);
 	if (!hwnd)
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, "Not vaild window.");
+		Logger::Log(FB_ERROR_LOG_ARG, "Not vaild window.");
 		return false;
 	}
 	DXGI_SWAP_CHAIN_DESC sd={};
@@ -544,7 +808,7 @@ bool RendererD3D11::InitSwapChain(HWND_ID id, int width, int height)
 	HRESULT hr = m_pFactory->CreateSwapChain(m_pDevice, &sd, &pSwapChain);
 	if (FAILED(hr))
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, "CreateSwapChain failed!");
+		Logger::Log(FB_ERROR_LOG_ARG, "CreateSwapChain failed!");
 		assert(0);
 		return false;
 	}
@@ -589,7 +853,7 @@ void RendererD3D11::ReleaseSwapChain(HWND_ID id)
 	auto it = mSwapChainRenderTargets.Find(id);
 	if (it == mSwapChainRenderTargets.end())
 	{
-		Log(FB_DEFAULT_DEBUG_ARG, FormatString("Cannot find the swap chain render target with the id %u", id));		
+		Log(FB_DEFAULT_LOG_ARG, FormatString("Cannot find the swap chain render target with the id %u", id));		
 	}
 	else{
 		Log(FormatString("Releasing swap chain %u.", id));
@@ -615,14 +879,14 @@ void RendererD3D11::ReleaseSwapChain(HWND_ID id)
 }
 
 bool RendererD3D11::ResizeSwapChain(HWND_ID hwndId, const Vec2I& resol){
-	m_pImmediateContext->OMSetRenderTargets(0, 0, 0);	
+	mImmediateContext->OMSetRenderTargets(0, 0, 0);	
 	mCurrentRTViews.clear();
 	mCurrentDSView = 0;
 	// release render target
 	auto it = mSwapChainRenderTargets.Find(hwndId);
 	if (it == mSwapChainRenderTargets.end())
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, FormatString("Cannot find the swap chain render target with id %u", hwndId));		
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Cannot find the swap chain render target with id %u", hwndId));		
 	}
 	else
 	{
@@ -670,7 +934,7 @@ RenderTarget* RendererD3D11::CreateRenderTargetFor(IDXGISwapChain* pSwapChain, c
 	auto hr = pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&pBackBuffer);
 	if (FAILED(hr))
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, "Failed to get backbuffer!");
+		Logger::Log(FB_ERROR_LOG_ARG, "Failed to get backbuffer!");
 		assert(0);
 		return 0;
 	}
@@ -678,7 +942,7 @@ RenderTarget* RendererD3D11::CreateRenderTargetFor(IDXGISwapChain* pSwapChain, c
 	hr = m_pDevice->CreateRenderTargetView(pBackBuffer, NULL, &pRenderTargetView);
 	if (FAILED(hr))
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, "Failed to create a render target view!");
+		Logger::Log(FB_ERROR_LOG_ARG, "Failed to create a render target view!");
 		assert(0);		
 		return 0;
 	}
@@ -774,10 +1038,10 @@ void RendererD3D11::Clear(float r, float g, float b, float a, float z, UINT8 ste
 	for (size_t i=0; i<mCurrentRTViews.size(); i++)
 	{
 		if (mCurrentRTViews[i])
-			m_pImmediateContext->ClearRenderTargetView( mCurrentRTViews[i], ClearColor );
+			mImmediateContext->ClearRenderTargetView( mCurrentRTViews[i], ClearColor );
 	}
 	if (mCurrentDSView)
-		m_pImmediateContext->ClearDepthStencilView( mCurrentDSView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, z, stencil );
+		mImmediateContext->ClearDepthStencilView( mCurrentDSView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, z, stencil );
 }
 
 //----------------------------------------------------------------------------
@@ -787,14 +1051,14 @@ void RendererD3D11::Clear(float r, float g, float b, float a)// only color
 	for (size_t i = 0; i<mCurrentRTViews.size(); i++)
 	{
 		if (mCurrentRTViews[i])
-			m_pImmediateContext->ClearRenderTargetView(mCurrentRTViews[i], ClearColor);
+			mImmediateContext->ClearRenderTargetView(mCurrentRTViews[i], ClearColor);
 	}
 }
 
 void RendererD3D11::ClearState()
 {
 	// do not use if possible.
-	m_pImmediateContext->ClearState();
+	mImmediateContext->ClearState();
 
 	for (int i = 0; i < SAMPLERS::NUM; ++i)
 	{
@@ -821,39 +1085,38 @@ void RendererD3D11::UpdateFrameConstantsBuffer()
 	mFrameConstants.gDeltaTime = gFBEnv->pTimer->GetDeltaTime();
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map( m_pFrameConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
+	mImmediateContext->Map( mFrameConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
 	memcpy(mappedResource.pData, &mFrameConstants, sizeof(FRAME_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pFrameConstantsBuffer, 0);
+	mImmediateContext->Unmap(mFrameConstantsBuffer, 0);
 	
-	m_pImmediateContext->VSSetConstantBuffers(0, 1, &m_pFrameConstantsBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(0, 1, &m_pFrameConstantsBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(0, 1, &m_pFrameConstantsBuffer);
+	mImmediateContext->VSSetConstantBuffers(0, 1, &mFrameConstantsBuffer);
+	mImmediateContext->GSSetConstantBuffers(0, 1, &mFrameConstantsBuffer);
+	mImmediateContext->PSSetConstantBuffers(0, 1, &mFrameConstantsBuffer);
 
-	if (m_pImmutableConstantsBuffer)
-		m_pImmediateContext->PSSetConstantBuffers(6, 1, &m_pImmutableConstantsBuffer);
+	if (mImmutableConstantsBuffer)
+		mImmediateContext->PSSetConstantBuffers(6, 1, &mImmutableConstantsBuffer);
 }
 //----------------------------------------------------------------------------
 void RendererD3D11::UpdateObjectConstantsBuffer(void* pData, bool record)
 {
 	if (gFBEnv->pConsole->GetEngineCommand()->r_noObjectConstants)
 		return;
-	if (record)
-		mFrameProfiler.NumUpdateObjectConst += 1;
+
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map( m_pObjectConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
+	mImmediateContext->Map( mObjectConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
 	memcpy(mappedResource.pData, pData, sizeof(OBJECT_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pObjectConstantsBuffer, 0);
-	m_pImmediateContext->VSSetConstantBuffers(1, 1, &m_pObjectConstantsBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(1, 1, &m_pObjectConstantsBuffer);
+	mImmediateContext->Unmap(mObjectConstantsBuffer, 0);
+	mImmediateContext->VSSetConstantBuffers(1, 1, &mObjectConstantsBuffer);
+	mImmediateContext->GSSetConstantBuffers(1, 1, &mObjectConstantsBuffer);
 }
 //----------------------------------------------------------------------------
 void RendererD3D11::UpdatePointLightConstantsBuffer(void* pData)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map(m_pPointLightConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	mImmediateContext->Map(mPointLightConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, pData, sizeof(POINT_LIGHT_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pPointLightConstantsBuffer, 0);
-	m_pImmediateContext->PSSetConstantBuffers(7, 1, &m_pPointLightConstantsBuffer);
+	mImmediateContext->Unmap(mPointLightConstantsBuffer, 0);
+	mImmediateContext->PSSetConstantBuffers(7, 1, &mPointLightConstantsBuffer);
 }
 //----------------------------------------------------------------------------
 void RendererD3D11::UpdateCameraConstantsBuffer()
@@ -869,12 +1132,12 @@ void RendererD3D11::UpdateCameraConstantsBuffer()
 	mCameraConstants.gTangentTheta = tan(mCamera->GetFOV() / 2.0f);	
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map(m_pCameraConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	mImmediateContext->Map(mCameraConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &mCameraConstants, sizeof(CAMERA_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pCameraConstantsBuffer, 0);
-	m_pImmediateContext->VSSetConstantBuffers(8, 1, &m_pCameraConstantsBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(8, 1, &m_pCameraConstantsBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(8, 1, &m_pCameraConstantsBuffer);
+	mImmediateContext->Unmap(mCameraConstantsBuffer, 0);
+	mImmediateContext->VSSetConstantBuffers(8, 1, &mCameraConstantsBuffer);
+	mImmediateContext->GSSetConstantBuffers(8, 1, &mCameraConstantsBuffer);
+	mImmediateContext->PSSetConstantBuffers(8, 1, &mCameraConstantsBuffer);
 }
 //----------------------------------------------------------------------------
 void RendererD3D11::UpdateRenderTargetConstantsBuffer()
@@ -884,12 +1147,12 @@ void RendererD3D11::UpdateRenderTargetConstantsBuffer()
 	mRenderTargetConstants.gScreenRatio = (float)mCurRTSize.x / (float)mCurRTSize.y;
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map(m_pRenderTargetConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	mImmediateContext->Map(mRenderTargetConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &mRenderTargetConstants, sizeof(RENDERTARGET_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pRenderTargetConstantsBuffer, 0);
-	m_pImmediateContext->VSSetConstantBuffers(9, 1, &m_pRenderTargetConstantsBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(9, 1, &m_pRenderTargetConstantsBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(9, 1, &m_pRenderTargetConstantsBuffer);
+	mImmediateContext->Unmap(mRenderTargetConstantsBuffer, 0);
+	mImmediateContext->VSSetConstantBuffers(9, 1, &mRenderTargetConstantsBuffer);
+	mImmediateContext->GSSetConstantBuffers(9, 1, &mRenderTargetConstantsBuffer);
+	mImmediateContext->PSSetConstantBuffers(9, 1, &mRenderTargetConstantsBuffer);
 }
 //----------------------------------------------------------------------------
 void RendererD3D11::UpdateSceneConstantsBuffer()
@@ -907,23 +1170,23 @@ void RendererD3D11::UpdateSceneConstantsBuffer()
 	mSceneConstants.gFogColor = mCurRenderTarget->GetScene()->GetFogColor().GetVec4();	
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map(m_pSceneConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	mImmediateContext->Map(mSceneConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	memcpy(mappedResource.pData, &mSceneConstants, sizeof(SCENE_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pSceneConstantsBuffer, 0);
-	m_pImmediateContext->VSSetConstantBuffers(10, 1, &m_pSceneConstantsBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(10, 1, &m_pSceneConstantsBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(10, 1, &m_pSceneConstantsBuffer);
+	mImmediateContext->Unmap(mSceneConstantsBuffer, 0);
+	mImmediateContext->VSSetConstantBuffers(10, 1, &mSceneConstantsBuffer);
+	mImmediateContext->GSSetConstantBuffers(10, 1, &mSceneConstantsBuffer);
+	mImmediateContext->PSSetConstantBuffers(10, 1, &mSceneConstantsBuffer);
 }
 //----------------------------------------------------------------------------
 void RendererD3D11::UpdateMaterialConstantsBuffer(void* pData)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr;
-	hr = m_pImmediateContext->Map( m_pMaterialConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
+	hr = mImmediateContext->Map( mMaterialConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
 	assert(hr == S_OK);
 	memcpy(mappedResource.pData, pData, sizeof(MATERIAL_CONSTANTS));
-	m_pImmediateContext->Unmap(m_pMaterialConstantsBuffer, 0);
-	m_pImmediateContext->PSSetConstantBuffers(2, 1, &m_pMaterialConstantsBuffer);
+	mImmediateContext->Unmap(mMaterialConstantsBuffer, 0);
+	mImmediateContext->PSSetConstantBuffers(2, 1, &mMaterialConstantsBuffer);
 }
 
 //----------------------------------------------------------------------------
@@ -931,18 +1194,18 @@ void RendererD3D11::UpdateRareConstantsBuffer()
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr;
-	hr = m_pImmediateContext->Map( m_pRareConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
+	hr = mImmediateContext->Map( mRareConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
 	assert(hr == S_OK);
 	RARE_CONSTANTS* pRareConstants = (RARE_CONSTANTS*)mappedResource.pData;	
 	pRareConstants->gMiddleGray = mMiddleGray;
 	pRareConstants->gStarPower = mStarPower;
 	pRareConstants->gBloomPower = mBloomPower;
 	pRareConstants->gRareDummy = 0.f;	
-	m_pImmediateContext->Unmap(m_pRareConstantsBuffer, 0);
+	mImmediateContext->Unmap(mRareConstantsBuffer, 0);
 
-	m_pImmediateContext->VSSetConstantBuffers(4, 1, &m_pRareConstantsBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(4, 1, &m_pRareConstantsBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(4, 1, &m_pRareConstantsBuffer);
+	mImmediateContext->VSSetConstantBuffers(4, 1, &mRareConstantsBuffer);
+	mImmediateContext->GSSetConstantBuffers(4, 1, &mRareConstantsBuffer);
+	mImmediateContext->PSSetConstantBuffers(4, 1, &mRareConstantsBuffer);
 }
 
 //----------------------------------------------------------------------------
@@ -950,15 +1213,15 @@ void RendererD3D11::UpdateRadConstantsBuffer(void* pData)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	HRESULT hr;
-	hr = m_pImmediateContext->Map(m_pImmutableConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	hr = mImmediateContext->Map(mImmutableConstantsBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	assert(hr == S_OK);
 	IMMUTABLE_CONSTANTS* pConstants = (IMMUTABLE_CONSTANTS*)mappedResource.pData;
 	memcpy(pConstants->gIrradConstsnts, pData, sizeof(Vec4)* 9);
 	std::vector<Vec2> hammersley;
 	GenerateHammersley(ENV_SAMPLES, hammersley);
 	memcpy(pConstants->gHammersley, &hammersley[0], sizeof(Vec2)* ENV_SAMPLES);
-	m_pImmediateContext->Unmap(m_pImmutableConstantsBuffer, 0);
-	m_pImmediateContext->PSSetConstantBuffers(6, 1, &m_pImmutableConstantsBuffer);
+	mImmediateContext->Unmap(mImmutableConstantsBuffer, 0);
+	mImmediateContext->PSSetConstantBuffers(6, 1, &mImmutableConstantsBuffer);
 }
 
 
@@ -966,32 +1229,32 @@ void RendererD3D11::UpdateRadConstantsBuffer(void* pData)
 void* RendererD3D11::MapMaterialParameterBuffer()
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map( m_pMaterialParametersBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
+	mImmediateContext->Map( mMaterialParametersBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource );
 	return mappedResource.pData;	
 }
 
 //----------------------------------------------------------------------------
 void RendererD3D11::UnmapMaterialParameterBuffer()
 {
-	m_pImmediateContext->Unmap(m_pMaterialParametersBuffer, 0);
-	m_pImmediateContext->VSSetConstantBuffers(3, 1, &m_pMaterialParametersBuffer);
-	m_pImmediateContext->GSSetConstantBuffers(3, 1, &m_pMaterialParametersBuffer);
-	m_pImmediateContext->PSSetConstantBuffers(3, 1, &m_pMaterialParametersBuffer);
+	mImmediateContext->Unmap(mMaterialParametersBuffer, 0);
+	mImmediateContext->VSSetConstantBuffers(3, 1, &mMaterialParametersBuffer);
+	mImmediateContext->GSSetConstantBuffers(3, 1, &mMaterialParametersBuffer);
+	mImmediateContext->PSSetConstantBuffers(3, 1, &mMaterialParametersBuffer);
 }
 
 //----------------------------------------------------------------------------
 void* RendererD3D11::MapBigBuffer()
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	m_pImmediateContext->Map(m_pBigBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	mImmediateContext->Map(mBigBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	return mappedResource.pData;
 }
 
 //----------------------------------------------------------------------------
 void RendererD3D11::UnmapBigBuffer()
 {
-	m_pImmediateContext->Unmap(m_pBigBuffer, 0);
-	m_pImmediateContext->PSSetConstantBuffers(5, 1, &m_pBigBuffer);
+	mImmediateContext->Unmap(mBigBuffer, 0);
+	mImmediateContext->PSSetConstantBuffers(5, 1, &mBigBuffer);
 }
 
 unsigned RendererD3D11::GetMultiSampleCount() const
@@ -1066,11 +1329,11 @@ void RendererD3D11::Present()
 		}
 	}
 	
-	if (m_pThreadPump)
+	if (mThreadPump)
 	{
 		//UINT io, process, device;
-		//m_pThreadPump->GetQueueStatus(&io, &process, &device);
-		m_pThreadPump->ProcessDeviceWorkItems(2);
+		//mThreadPump->GetQueueStatus(&io, &process, &device);
+		mThreadPump->ProcessDeviceWorkItems(2);
 
 		for (auto it = mCheckTextures.begin(); it!= mCheckTextures.end(); )
 		{
@@ -1108,7 +1371,7 @@ void RendererD3D11::SetVertexBuffer(unsigned int startSlot, unsigned int numBuff
 		ID3D11Buffer* pHardwareBuffers[1] = { 0 };
 		unsigned strides[1] = { 0 };
 		unsigned offsets[1] = { 0 };
-		m_pImmediateContext->IASetVertexBuffers(0, 1, pHardwareBuffers, strides, offsets);
+		mImmediateContext->IASetVertexBuffers(0, 1, pHardwareBuffers, strides, offsets);
 		return;
 	}
 	ID3D11Buffer* pHardwareBuffers[32]={0};
@@ -1120,7 +1383,7 @@ void RendererD3D11::SetVertexBuffer(unsigned int startSlot, unsigned int numBuff
 			pHardwareBuffers[i] = pBuffer;
 		}
 	}
-	m_pImmediateContext->IASetVertexBuffers(startSlot, numBuffers, pHardwareBuffers, strides, offsets);
+	mImmediateContext->IASetVertexBuffers(startSlot, numBuffers, pHardwareBuffers, strides, offsets);
 }
 
 //----------------------------------------------------------------------------
@@ -1128,7 +1391,7 @@ void RendererD3D11::SetIndexBuffer(IIndexBuffer* pIndexBuffer)
 {
 	IndexBufferD3D11* pIndexBufferD3D11 = static_cast<IndexBufferD3D11*>(pIndexBuffer);
 	ID3D11Buffer* pHardwareBuffer = pIndexBufferD3D11->GetHardwareBuffer();
-	m_pImmediateContext->IASetIndexBuffer(pHardwareBuffer, pIndexBufferD3D11->GetFormatD3D11(), pIndexBufferD3D11->GetOffset());
+	mImmediateContext->IASetIndexBuffer(pHardwareBuffer, pIndexBufferD3D11->GetFormatD3D11(), pIndexBufferD3D11->GetOffset());
 }
 
 //----------------------------------------------------------------------------
@@ -1142,13 +1405,13 @@ void RendererD3D11::SetTexture(ITexture* pTexture, BINDING_SHADER shaderType, un
 		switch (shaderType)
 		{
 		case BINDING_SHADER_VS:
-			m_pImmediateContext->VSSetShaderResources(slot, 1, &pSRV);
+			mImmediateContext->VSSetShaderResources(slot, 1, &pSRV);
 			break;
 		case BINDING_SHADER_GS:
-			m_pImmediateContext->GSSetShaderResources(slot, 1, &pSRV);
+			mImmediateContext->GSSetShaderResources(slot, 1, &pSRV);
 			break;
 		case BINDING_SHADER_PS:
-			m_pImmediateContext->PSSetShaderResources(slot, 1, &pSRV);
+			mImmediateContext->PSSetShaderResources(slot, 1, &pSRV);
 			break;
 		default:
 			assert(0);
@@ -1184,10 +1447,10 @@ void RendererD3D11::SetTextures(ITexture* pTextures[], int num, BINDING_SHADER s
 		switch (shaderType)
 		{
 		case BINDING_SHADER_VS:
-			m_pImmediateContext->VSSetShaderResources(startSlot, num, &rvs[0]);
+			mImmediateContext->VSSetShaderResources(startSlot, num, &rvs[0]);
 			break;
 		case BINDING_SHADER_PS:
-			m_pImmediateContext->PSSetShaderResources(startSlot, num, &rvs[0]);
+			mImmediateContext->PSSetShaderResources(startSlot, num, &rvs[0]);
 			break;
 		default:
 			assert(0);
@@ -1208,7 +1471,7 @@ void RendererD3D11::GenerateMips(ITexture* pTexture)
 	assert(pTextureD3D11);
 	ID3D11ShaderResourceView* pSRV = pTextureD3D11->GetHardwareResourceView();
 	assert(pSRV);
-	m_pImmediateContext->GenerateMips(pSRV);
+	mImmediateContext->GenerateMips(pSRV);
 }
 
 //----------------------------------------------------------------------------
@@ -1217,7 +1480,7 @@ IVertexBuffer* RendererD3D11::CreateVertexBuffer(void* data, unsigned stride,
 {
 	if (usage == BUFFER_USAGE_IMMUTABLE && data==0)
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create vertex buffer! "
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create vertex buffer! "
 			"Immutable needs data pointer.");
 		assert(0);
 		return 0;		
@@ -1243,7 +1506,7 @@ IVertexBuffer* RendererD3D11::CreateVertexBuffer(void* data, unsigned stride,
 
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create a vertex buffer!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create a vertex buffer!");
 	}
 	else
 	{
@@ -1287,7 +1550,7 @@ IIndexBuffer* RendererD3D11::CreateIndexBuffer(void* data, unsigned int numIndic
 	HRESULT hr = m_pDevice->CreateBuffer(&bufferDesc, &initData, &pHardwareBuffer);
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create a index buffer!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create a index buffer!");
 	}
 	
 	pIndexBufferD3D11->SetHardwareBuffer(pHardwareBuffer);
@@ -1513,7 +1776,7 @@ IShader* RendererD3D11::CreateShader(const char* path, int shaders,
 		{
 			if (pVSBlob)
 			{
-				gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, pVSBlob->GetBufferPointer());
+				gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, pVSBlob->GetBufferPointer());
 				SAFE_RELEASE(pVSBlob);
 			}
 			pShader->SetCompileFailed(true);
@@ -1585,7 +1848,7 @@ IShader* RendererD3D11::CreateShader(const char* path, int shaders,
 		{
 			if (pGSBlob)
 			{
-				gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, pGSBlob->GetBufferPointer());
+				gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, pGSBlob->GetBufferPointer());
 				SAFE_RELEASE(pGSBlob);
 			}
 			pShader->SetCompileFailed(true);
@@ -1642,7 +1905,7 @@ IShader* RendererD3D11::CreateShader(const char* path, int shaders,
 		{
 			if (pPSBlob)
 			{
-				gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, pPSBlob->GetBufferPointer());
+				gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, pPSBlob->GetBufferPointer());
 				SAFE_RELEASE(pPSBlob);
 			}
 			pShader->SetCompileFailed(true);
@@ -1717,11 +1980,11 @@ ITexture* RendererD3D11::CreateTexture(const char* file, ITexture* pReloadingTex
 	}
 
 	SAFE_RELEASE(pTexture->mSRView);
-	if (m_pThreadPump && async)
+	if (mThreadPump && async)
 	{
 		pTexture->mHr = S_FALSE;
 		hr = D3DX11CreateShaderResourceViewFromFile(m_pDevice, filepath.c_str(), 
-			&pTexture->mLoadInfo, m_pThreadPump, 
+			&pTexture->mLoadInfo, mThreadPump, 
 			&pTexture->mSRView, &pTexture->mHr);
 		mCheckTextures.push_back(pTexture);
 	}
@@ -1835,7 +2098,7 @@ ITexture* RendererD3D11::CreateTexture(void* data, int width, int height, PIXEL_
 {
 	if (width == 0 || height == 0)
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, "width and height cannot be 0.");
+		Logger::Log(FB_ERROR_LOG_ARG, "width and height cannot be 0.");
 		return 0;
 	}
 	bool engineUsingMS = mMultiSampleDesc.Count != 1;
@@ -1924,7 +2187,7 @@ ITexture* RendererD3D11::CreateTexture(void* data, int width, int height, PIXEL_
 	HRESULT hr;
 	if (FAILED(hr = m_pDevice->CreateTexture2D( &desc, data ? &sds[0]: 0, &pTextureD3D11 )))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to CreateTexture from memory!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to CreateTexture from memory!");
 		assert(0);
 		return 0;
 	}
@@ -2043,10 +2306,10 @@ ITexture* RendererD3D11::CreateTexture(void* data, int width, int height, PIXEL_
 //-----------------------------------------------------------------------------
 void RendererD3D11::SetRenderTarget(ITexture* pRenderTargets[], size_t rtViewIndex[], int num, ITexture* pDepthStencil, size_t dsViewIndex)
 {
-	if (num == mCurRTTextures.size() && mCurDSTexture == pDepthStencil && mCurDSViewIdx == dsViewIndex){
+	if (num == mCurrentRTTextures.size() && mCurrentDSTexture == pDepthStencil && mCurrentDSViewIdx == dsViewIndex){
 		bool same = false;
 		for (int i = 0; i < num && !same; ++i){
-			same = pRenderTargets[i] == mCurRTTextures[i] && rtViewIndex[i] == mCurRTViewIdxes[i];
+			same = pRenderTargets[i] == mCurrentRTTextures[i] && rtViewIndex[i] == mCurrentRTViewIdxes[i];
 		}
 		if (same)
 			return;
@@ -2054,8 +2317,8 @@ void RendererD3D11::SetRenderTarget(ITexture* pRenderTargets[], size_t rtViewInd
 	
 	__super::SetRenderTarget(pRenderTargets, rtViewIndex, num, pDepthStencil, dsViewIndex);
 
-	mCurRTTextures.clear();
-	mCurRTViewIdxes.clear();
+	mCurrentRTTextures.clear();
+	mCurrentRTViewIdxes.clear();
 	std::vector<ID3D11RenderTargetView*> rtviews;
 	if (pRenderTargets)
 	{
@@ -2064,8 +2327,8 @@ void RendererD3D11::SetRenderTarget(ITexture* pRenderTargets[], size_t rtViewInd
 			TextureD3D11* pTextureD3D11 = static_cast<TextureD3D11*>(pRenderTargets[i]);
 			rtviews.push_back(pTextureD3D11 ? pTextureD3D11->GetRenderTargetView(rtViewIndex[i]) : 0);
 			
-			mCurRTTextures.push_back(pRenderTargets[i]);
-			mCurRTViewIdxes.push_back(rtViewIndex[i]);			
+			mCurrentRTTextures.push_back(pRenderTargets[i]);
+			mCurrentRTViewIdxes.push_back(rtViewIndex[i]);			
 		}
 	}
 	else
@@ -2073,8 +2336,8 @@ void RendererD3D11::SetRenderTarget(ITexture* pRenderTargets[], size_t rtViewInd
 		rtviews.push_back(0);
 	}
 
-	mCurDSTexture = pDepthStencil;
-	mCurDSViewIdx = dsViewIndex;
+	mCurrentDSTexture = pDepthStencil;
+	mCurrentDSViewIdx = dsViewIndex;
 
 	ID3D11DepthStencilView* pDepthStencilView = 0;
 	if (pDepthStencil)
@@ -2086,11 +2349,11 @@ void RendererD3D11::SetRenderTarget(ITexture* pRenderTargets[], size_t rtViewInd
 
 	try
 	{
-		m_pImmediateContext->OMSetRenderTargets(rtviews.size(), &rtviews[0], pDepthStencilView);
+		mImmediateContext->OMSetRenderTargets(rtviews.size(), &rtviews[0], pDepthStencilView);
 	}
 	catch (...)
 	{
-		Error(FB_DEFAULT_DEBUG_ARG, "OMSetRenderTargets failed!");
+		Logger::Log(FB_ERROR_LOG_ARG, "OMSetRenderTargets failed!");
 	}
 	
 	mCurrentRTViews = rtviews;
@@ -2106,18 +2369,18 @@ void RendererD3D11::SetViewports(Viewport viewports[], int num)
 		d3d11_viewports.push_back(ConvertStructD3D11(viewports[i]));
 	}
 	if (!d3d11_viewports.empty())
-		m_pImmediateContext->RSSetViewports(d3d11_viewports.size(), &d3d11_viewports[0]);
+		mImmediateContext->RSSetViewports(d3d11_viewports.size(), &d3d11_viewports[0]);
 }
 
 void RendererD3D11::SetScissorRects(RECT rects[], int num)
 {
-	m_pImmediateContext->RSSetScissorRects(num, rects);
+	mImmediateContext->RSSetScissorRects(num, rects);
 }
 
 void RendererD3D11::RestoreScissorRects()
 {
 	RECT rect = {0, 0, 0, 0};
-	m_pImmediateContext->RSSetScissorRects(1, &rect);
+	mImmediateContext->RSSetScissorRects(1, &rect);
 }
 
 IInputLayout* RendererD3D11::GetInputLayout(const INPUT_ELEMENT_DESCS& descs,
@@ -2202,7 +2465,7 @@ IInputLayout* RendererD3D11::CreateInputLayout(const INPUT_ELEMENT_DESCS& descs,
 		byteCode, byteLength, &pHardwareInputLayout);
 	if (FAILED(hr))
 	{
-		gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create input layout!");
+		gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create input layout!");
 	}
 	else
 	{
@@ -2230,15 +2493,15 @@ void RendererD3D11::SetShaders(IShader* pShader)
 
 	ShaderD3D11* pShaderD3D11 = static_cast<ShaderD3D11*>(pShader);	
 	ID3D11VertexShader* pVS = pShaderD3D11->GetVertexShader();
-	m_pImmediateContext->VSSetShader(pVS, 0, 0);
+	mImmediateContext->VSSetShader(pVS, 0, 0);
 	ID3D11GeometryShader* pGS = pShaderD3D11->GetGeometryShader();
-	m_pImmediateContext->GSSetShader(pGS, 0, 0);
+	mImmediateContext->GSSetShader(pGS, 0, 0);
 	ID3D11HullShader* pHS = pShaderD3D11->GetHullShader();
-	m_pImmediateContext->HSSetShader(pHS, 0, 0);
+	mImmediateContext->HSSetShader(pHS, 0, 0);
 	ID3D11DomainShader* pDS = pShaderD3D11->GetDomainShader();
-	m_pImmediateContext->DSSetShader(pDS, 0, 0);
+	mImmediateContext->DSSetShader(pDS, 0, 0);
 	ID3D11PixelShader* pPS = pShaderD3D11->GetPixelShader();
-	m_pImmediateContext->PSSetShader(pPS, 0, 0);
+	mImmediateContext->PSSetShader(pPS, 0, 0);
 	mBindedShader = pShader;
 }
 
@@ -2246,7 +2509,7 @@ void RendererD3D11::SetVSShader(IShader* pShader)
 {
 	if (pShader == 0)
 	{
-		m_pImmediateContext->VSSetShader(0, 0, 0);
+		mImmediateContext->VSSetShader(0, 0, 0);
 		return;
 	}
 
@@ -2257,14 +2520,14 @@ void RendererD3D11::SetVSShader(IShader* pShader)
 
 	ShaderD3D11* pShaderD3D11 = static_cast<ShaderD3D11*>(pShader);
 	ID3D11VertexShader* pVS = pShaderD3D11->GetVertexShader();
-	m_pImmediateContext->VSSetShader(pVS, 0, 0);
+	mImmediateContext->VSSetShader(pVS, 0, 0);
 	mBindedShader = 0;
 }
 void RendererD3D11::SetPSShader(IShader* pShader)
 {
 	if (pShader == 0)
 	{
-		m_pImmediateContext->PSSetShader(0, 0, 0);
+		mImmediateContext->PSSetShader(0, 0, 0);
 		return;
 	}
 
@@ -2275,7 +2538,7 @@ void RendererD3D11::SetPSShader(IShader* pShader)
 
 	ShaderD3D11* pShaderD3D11 = static_cast<ShaderD3D11*>(pShader);
 	ID3D11PixelShader* pPS = pShaderD3D11->GetPixelShader();
-	m_pImmediateContext->PSSetShader(pPS, 0, 0);
+	mImmediateContext->PSSetShader(pPS, 0, 0);
 	mBindedShader = 0;
 }
 
@@ -2283,7 +2546,7 @@ void RendererD3D11::SetGSShader(IShader* pShader)
 {
 	if (pShader == 0)
 	{
-		m_pImmediateContext->GSSetShader(0, 0, 0);
+		mImmediateContext->GSSetShader(0, 0, 0);
 		return;
 	}
 
@@ -2294,7 +2557,7 @@ void RendererD3D11::SetGSShader(IShader* pShader)
 
 	ShaderD3D11* pShaderD3D11 = static_cast<ShaderD3D11*>(pShader);
 	ID3D11GeometryShader* pGS = pShaderD3D11->GetGeometryShader();
-	m_pImmediateContext->GSSetShader(pGS, 0, 0);
+	mImmediateContext->GSSetShader(pGS, 0, 0);
 	mBindedShader = 0;
 }
 
@@ -2302,7 +2565,7 @@ void RendererD3D11::SetHSShader(IShader* pShader)
 {
 	if (pShader == 0)
 	{
-		m_pImmediateContext->HSSetShader(0, 0, 0);
+		mImmediateContext->HSSetShader(0, 0, 0);
 		return;
 	}
 
@@ -2313,7 +2576,7 @@ void RendererD3D11::SetHSShader(IShader* pShader)
 
 	ShaderD3D11* pShaderD3D11 = static_cast<ShaderD3D11*>(pShader);
 	ID3D11HullShader* pHS = pShaderD3D11->GetHullShader();
-	m_pImmediateContext->HSSetShader(pHS, 0, 0);
+	mImmediateContext->HSSetShader(pHS, 0, 0);
 	mBindedShader = 0;
 }
 
@@ -2321,7 +2584,7 @@ void RendererD3D11::SetDSShader(IShader* pShader)
 {
 	if (pShader == 0)
 	{
-		m_pImmediateContext->DSSetShader(0, 0, 0);
+		mImmediateContext->DSSetShader(0, 0, 0);
 		return;
 	}
 
@@ -2332,7 +2595,7 @@ void RendererD3D11::SetDSShader(IShader* pShader)
 
 	ShaderD3D11* pShaderD3D11 = static_cast<ShaderD3D11*>(pShader);
 	ID3D11DomainShader* pDS = pShaderD3D11->GetDomainShader();
-	m_pImmediateContext->DSSetShader(pDS, 0, 0);
+	mImmediateContext->DSSetShader(pDS, 0, 0);
 	mBindedShader = 0;
 }
 
@@ -2343,7 +2606,7 @@ void RendererD3D11::SetInputLayout(IInputLayout* pInputLayout)
 		return;
 	if (!pInputLayout)
 	{
-		m_pImmediateContext->IASetInputLayout(0);
+		mImmediateContext->IASetInputLayout(0);
 		mBindedInputLayout = 0;
 		return;
 	}
@@ -2351,7 +2614,7 @@ void RendererD3D11::SetInputLayout(IInputLayout* pInputLayout)
 	InputLayoutD3D11* pInputLayoutD3D11 = static_cast<InputLayoutD3D11*>(pInputLayout);
 	ID3D11InputLayout* pLayout = pInputLayoutD3D11->GetHardwareInputLayout();
 	assert(pLayout);
-	m_pImmediateContext->IASetInputLayout(pLayout);
+	mImmediateContext->IASetInputLayout(pLayout);
 	mBindedInputLayout = pInputLayout;
 }
 
@@ -2362,58 +2625,70 @@ void RendererD3D11::SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt)
 		return;
 	D3D11_PRIMITIVE_TOPOLOGY d3d11PT = ConvertEnumD3D11(pt);
 
-	m_pImmediateContext->IASetPrimitiveTopology(d3d11PT);
+	mImmediateContext->IASetPrimitiveTopology(d3d11PT);
 	mCurrentTopology = pt;
 }
 
-//----------------------------------------------------------------------------
-void RendererD3D11::DrawIndexed(unsigned indexCount, 
-	unsigned startIndexLocation, unsigned startVertexLocation)
-{
-	m_pImmediateContext->DrawIndexed(indexCount, startIndexLocation, startVertexLocation);	
 
+//-------------------------------------------------------------------
+// Drawing
+//-------------------------------------------------------------------
+void RendererD3D11::Draw(unsigned int vertexCount, unsigned int startVertexLocation){
 
-#ifdef _RENDERER_FRAME_PROFILER_
-	mFrameProfiler.NumDrawIndexedCall++;
-	mFrameProfiler.NumIndexCount += indexCount;
-#endif
+}
+void RendererD3D11::DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation){
+}
+void RendererD3D11::DrawQuad(const DrawQuadParam& param){
+
+}
+void RendererD3D11::DrawQuadLine(const DrawQuadLineParam& param){
+}
+	 
+void RendererD3D11::DrawQuadWithTexture(const DrawQuadWithTextureParam& param){
+
+}
+void RendererD3D11::DrawQuadWithTextureUV(const DrawQuadWithTextureUVParam& param){
+
+}
+void RendererD3D11::DrawBillboardWorldQuad(const DrawBillboardWorldQuadParam& param){
+
+}
+void RendererD3D11::DrawFullscreenQuad(IShader* pixelShader, bool farside){
+
+}
+	 
+void RendererD3D11::DrawTriangle(const DrawTriangleParam& param){
+}
+	 
+void RendererD3D11::SetWireframe(bool enable){
+
+}
+	 
+void RendererD3D11::Clear(float r, float g, float b, float a, float z, unsigned char stencil){
+
+}
+void RendererD3D11::Clear(float r, float g, float b, float a){
+
+}
+void RendererD3D11::Present(){
 }
 
-//----------------------------------------------------------------------------
-void RendererD3D11::Draw(unsigned int vertexCount, unsigned int startVertexLocation)
-{
-#ifdef _DEBUG
-	__try{
-		m_pImmediateContext->Draw(vertexCount, startVertexLocation);
-	}
-	__except (StackTracer::Filter(GetExceptionCode(), GetExceptionInformation()))	{
-		auto msg = StackTracer::GetExceptionMsg();
-		Log(StackTracer::GetExceptionMsg());
-	}
-#else
-	m_pImmediateContext->Draw(vertexCount, startVertexLocation);
-#endif
 
-#ifdef _RENDERER_FRAME_PROFILER_
-	mFrameProfiler.NumDrawCall++;
-	mFrameProfiler.NumVertexCount += vertexCount;
-#endif
-}
 
 //----------------------------------------------------------------------------
 void RendererD3D11::SetWireframe(bool enable)
 {
-	assert(m_pWireframeRasterizeState);
+	assert(mWireframeRasterizeState);
 	if(mForcedWireframe != enable)
 	{
 		mForcedWireframe = enable;
 		if (mForcedWireframe)
 		{
-			m_pImmediateContext->RSSetState(m_pWireframeRasterizeState);
+			mImmediateContext->RSSetState(mWireframeRasterizeState);
 		}
 		else
 		{
-			m_pImmediateContext->RSSetState(0);
+			mImmediateContext->RSSetState(0);
 		}
 	}
 }
@@ -2425,7 +2700,7 @@ MapData RendererD3D11::MapBuffer(ID3D11Resource* pResource,
 	D3D11_MAPPED_SUBRESOURCE mappedSubresource;
 	D3D11_MAP maptype = ConvertEnumD3D11(type);
 	unsigned int flagd3d11 = ConvertEnumD3D11(flag);
-	HRESULT hr = m_pImmediateContext->Map(pResource, subResource, maptype,
+	HRESULT hr = mImmediateContext->Map(pResource, subResource, maptype,
 		flagd3d11, &mappedSubresource);
 	if (FAILED(hr))
 	{
@@ -2456,7 +2731,7 @@ void RendererD3D11::UnmapVertexBuffer(IVertexBuffer* pBuffer, unsigned int subRe
 {
 	VertexBufferD3D11* pBufferD3D11 = dynamic_cast<VertexBufferD3D11*>(pBuffer);
 	assert(pBufferD3D11);
-	m_pImmediateContext->Unmap(pBufferD3D11->GetHardwareBuffer(), subResource);
+	mImmediateContext->Unmap(pBufferD3D11->GetHardwareBuffer(), subResource);
 }
 
 //----------------------------------------------------------------------------
@@ -2471,7 +2746,7 @@ void RendererD3D11::UnmapTexture(ITexture* pTexture, UINT subResource)
 {
 	TextureD3D11* pTextureD3D11 = dynamic_cast<TextureD3D11*>(pTexture);
 	assert(pTextureD3D11);
-	m_pImmediateContext->Unmap(pTextureD3D11->GetHardwareTexture(), subResource);
+	mImmediateContext->Unmap(pTextureD3D11->GetHardwareTexture(), subResource);
 }
 
 void RendererD3D11::CopyToStaging(ITexture* dst, UINT dstSubresource, UINT dstx, UINT dsty, UINT dstz,
@@ -2480,7 +2755,7 @@ void RendererD3D11::CopyToStaging(ITexture* dst, UINT dstSubresource, UINT dstx,
 	assert(dst && src && dst!=src);
 	TextureD3D11* pDstD3D11 = static_cast<TextureD3D11*>(dst);
 	TextureD3D11* pSrcD3D11 = static_cast<TextureD3D11*>(src);
-	m_pImmediateContext->CopySubresourceRegion(pDstD3D11->mTexture, dstSubresource,
+	mImmediateContext->CopySubresourceRegion(pDstD3D11->mTexture, dstSubresource,
 		dstx, dsty, dstz, pSrcD3D11->GetHardwareTexture(), srcSubresource, (D3D11_BOX*)pBox);
 }
 
@@ -2521,7 +2796,7 @@ void RendererD3D11::SaveTextureToFile(ITexture* texture, const char* filename)
 			Error("Unsupported file format!");
 			return;
 		}
-		HRESULT hr = D3DX11SaveTextureToFile(m_pImmediateContext, pTextureD3D11->GetHardwareTexture(), format, filename);
+		HRESULT hr = D3DX11SaveTextureToFile(mImmediateContext, pTextureD3D11->GetHardwareTexture(), format, filename);
 		if (FAILED(hr))
 		{
 			Error("Save texture to file is failed.");
@@ -2545,7 +2820,7 @@ IRasterizerState* RendererD3D11::CreateRasterizerState(const RASTERIZER_DESC& de
 		HRESULT hr = m_pDevice->CreateRasterizerState( &d3d11desc, &pRasterizerState );
 		if (FAILED(hr))
 		{
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create an rasterizer state!");
+			gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create an rasterizer state!");
 			assert(0);
 			return 0;
 		}
@@ -2578,7 +2853,7 @@ IBlendState* RendererD3D11::CreateBlendState(const BLEND_DESC& desc)
 		HRESULT hr = m_pDevice->CreateBlendState( &d3d11desc, &pBlendState );
 		if (FAILED(hr))
 		{
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create a blend state!");
+			gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create a blend state!");
 			assert(0);
 			return 0;
 		}
@@ -2611,7 +2886,7 @@ IDepthStencilState* RendererD3D11::CreateDepthStencilState( const DEPTH_STENCIL_
 		HRESULT hr = m_pDevice->CreateDepthStencilState( &d3d11desc, &pHardwareState );
 		if (FAILED(hr))
 		{
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create a depth stencil state!");
+			gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create a depth stencil state!");
 			assert(0);
 			return 0;
 		}
@@ -2643,7 +2918,7 @@ ISamplerState* RendererD3D11::CreateSamplerState(const SAMPLER_DESC& desc)
 		HRESULT hr = m_pDevice->CreateSamplerState(&d3d11desc, &pSamplerState);
 		if (FAILED(hr))
 		{
-			gFBEnv->pEngine->Log(FB_DEFAULT_DEBUG_ARG, "Failed to create sampler state!");
+			gFBEnv->pEngine->Log(FB_DEFAULT_LOG_ARG, "Failed to create sampler state!");
 			assert(0);
 		}
 		pSSD3D11 = FB_NEW(SamplerStateD3D11);
@@ -2666,7 +2941,7 @@ void RendererD3D11::SetRasterizerState(IRasterizerState* pRasterizerState)
 	if (!mForcedWireframe)
 	{
 		RasterizerStateD3D11* pRasterizerStateD3D11 = (RasterizerStateD3D11*)pRasterizerState;
-		m_pImmediateContext->RSSetState(pRasterizerStateD3D11->GetHardwareRasterizerState());
+		mImmediateContext->RSSetState(pRasterizerStateD3D11->GetHardwareRasterizerState());
 	}
 }
 
@@ -2676,7 +2951,7 @@ void RendererD3D11::SetBlendState(IBlendState* pBlendState)
 	if (mLockBlendState)
 		return;
 	BlendStateD3D11* pBlendStateD3D11 = (BlendStateD3D11*)pBlendState;
-	m_pImmediateContext->OMSetBlendState(pBlendStateD3D11->GetHardwareBlendState(), 
+	mImmediateContext->OMSetBlendState(pBlendStateD3D11->GetHardwareBlendState(), 
 		pBlendStateD3D11->GetBlendFactor(), pBlendStateD3D11->GetBlendMask());
 }
 
@@ -2687,7 +2962,7 @@ void RendererD3D11::SetDepthStencilState(IDepthStencilState* pDepthStencilState,
 	if (mLockDepthStencil)
 		return;
 	DepthStencilStateD3D11* pDSSD11 = (DepthStencilStateD3D11*)pDepthStencilState;
-	m_pImmediateContext->OMSetDepthStencilState(pDSSD11->GetHardwareDSState(),
+	mImmediateContext->OMSetDepthStencilState(pDSSD11->GetHardwareDSState(),
 		stencilRef);
 }
 
@@ -2699,10 +2974,10 @@ void RendererD3D11::SetSamplerState(ISamplerState* pSamplerState, BINDING_SHADER
 	switch (shader)
 	{
 	case BINDING_SHADER_VS:
-		m_pImmediateContext->VSSetSamplers(slot, 1, &pSS);
+		mImmediateContext->VSSetSamplers(slot, 1, &pSS);
 		break;
 	case BINDING_SHADER_PS:
-		m_pImmediateContext->PSSetSamplers(slot, 1, &pSS);
+		mImmediateContext->PSSetSamplers(slot, 1, &pSS);
 		break;
 	default:
 		assert(0);
@@ -2710,165 +2985,7 @@ void RendererD3D11::SetSamplerState(ISamplerState* pSamplerState, BINDING_SHADER
 	
 }
 
-void RendererD3D11::DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs/*= true*/)
-{
 
-	// vertex buffer
-	MapData mapped = mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Map(
-		MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
-	DEFAULT_INPUTS::V_PC data[4] = {
-		DEFAULT_INPUTS::V_PC(Vec3((float)pos.x, (float)pos.y, 0.f), color.Get4Byte()),
-		DEFAULT_INPUTS::V_PC(Vec3((float)pos.x + size.x, (float)pos.y, 0.f), color.Get4Byte()),
-		DEFAULT_INPUTS::V_PC(Vec3((float)pos.x, (float)pos.y + size.y, 0.f), color.Get4Byte()),
-		DEFAULT_INPUTS::V_PC(Vec3((float)pos.x + size.x, (float)pos.y + size.y, 0.f), color.Get4Byte()),
-	};
-	if (mapped.pData)
-	{
-		memcpy(mapped.pData, data, sizeof(data));
-		mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Unmap();
-	}
-
-	if (updateRs){
-		UpdateObjectConstantsBuffer(&mObjConst);
-		// set primitive topology
-		SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-		// set material
-		mMaterials[DEFAULT_MATERIALS::QUAD]->Bind(true);
-	}
-
-	
-	// set vertex buffer
-	mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Bind();
-	// draw
-	Draw(4, 0);
-}
-
-void RendererD3D11::DrawQuadLine(const Vec2I& pos, const Vec2I& size, const Color& color)
-{
-	int left = pos.x - 1;
-	int top = pos.y - 1;
-	int right = pos.x + size.x + 1;
-	int bottom = pos.y + size.y + 1;
-	DrawLine(Vec2I(left, top), Vec2I(right, top), color, color);
-	DrawLine(Vec2I(left, top), Vec2I(left, bottom), color, color);
-	DrawLine(Vec2I(right, top), Vec2I(right, bottom), color, color);
-	DrawLine(Vec2I(left, bottom), Vec2I(right, bottom), color, color);
-
-}
-
-void RendererD3D11::DrawQuadWithTexture(const Vec2I& pos, const Vec2I& size, const Color& color, ITexture* texture, IMaterial* materialOverride)
-{
-	DrawQuadWithTextureUV(pos, size, Vec2(0, 0), Vec2(1, 1), color, texture, materialOverride);	
-}
-
-void RendererD3D11::DrawQuadWithTextureUV(const Vec2I& pos, const Vec2I& size, const Vec2& uvStart, const Vec2& uvEnd,
-	const Color& color, ITexture* texture, IMaterial* materialOverride)
-{
-
-	// vertex buffer
-	MapData mapped = mDynVBs[DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD]->Map(
-		MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
-	DEFAULT_INPUTS::V_PCT data[4] = {
-		DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x, (float)pos.y, 0.f), color.Get4Byte(), Vec2(uvStart.x, uvStart.y)),
-		DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x + size.x, (float)pos.y, 0.f), color.Get4Byte(), Vec2(uvEnd.x, uvStart.y)),
-		DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x, (float)pos.y + size.y, 0.f), color.Get4Byte(), Vec2(uvStart.x, uvEnd.y)),
-		DEFAULT_INPUTS::V_PCT(Vec3((float)pos.x + size.x, (float)pos.y + size.y, 0.f), color.Get4Byte(), Vec2(uvEnd.x, uvEnd.y)),
-	};
-	if (mapped.pData)
-	{
-		memcpy(mapped.pData, data, sizeof(data));
-		mDynVBs[DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD]->Unmap();
-	}
-
-	
-	if (mCurRenderTarget == GetMainRenderTarget()){
-		UpdateObjectConstantsBuffer(&mObjConst);
-	}
-	else{
-		const auto& rtSize = mCurRenderTarget->GetSize();
-		OBJECT_CONSTANTS constants =
-		{
-			Mat44(2.f / rtSize.x, 0, 0, -1.f,
-			0.f, -2.f / rtSize.y, 0, 1.f,
-			0, 0, 1.f, 0.f,
-			0, 0, 0, 1.f),
-			Mat44::IDENTITY,
-			Mat44::IDENTITY,
-		};
-		UpdateObjectConstantsBuffer(&constants);
-	}
-
-	
-
-	// set primitive topology
-	SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	// set material
-	if (materialOverride)
-		materialOverride->Bind(true);
-	else
-		mMaterials[DEFAULT_MATERIALS::QUAD_TEXTURE]->Bind(true);
-	SetTexture(texture, BINDING_SHADER_PS, 0);
-	// set vertex buffer
-	mDynVBs[DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD]->Bind();
-	// draw
-	Draw(4, 0);
-}
-
-void RendererD3D11::DrawFullscreenQuad(IShader* pixelShader, bool farside)
-{
-	// vertex buffer
-	
-	if (farside)
-		mFullscreenQuadVSFar->BindVS();
-	else
-		mFullscreenQuadVSNear->BindVS();
-	
-	if (pixelShader)
-		pixelShader->BindPS();
-
-	SetInputLayout(0);
-	SetGSShader(0);
-	// draw
-	// using full screen triangle : http://blog.naver.com/jungwan82/220108100698
-	SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	Draw(3, 0);
-}
-
-void RendererD3D11::DrawBillboardWorldQuad(const Vec3& pos, const Vec2& size, const Vec2& offset, 
-	DWORD color, IMaterial* pMat)
-{
-	IVertexBuffer* pVB = mDynVBs[DEFAULT_INPUTS::POSITION_VEC4_COLOR];
-	assert(pVB);
-	MapData mapped = pVB->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
-	DEFAULT_INPUTS::POSITION_VEC4_COLOR_V* data = (DEFAULT_INPUTS::POSITION_VEC4_COLOR_V*)mapped.pData;
-	data->p = pos;
-	data->v4 = Vec4(size.x, size.y, offset.x, offset.y);
-	data->color = color;
-	pVB->Unmap();
-	pVB->Bind();
-	SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_POINTLIST);
-	pMat->Bind(true);
-	Draw(1, 0);
-
-	// vertexBuffer
-}
-
-void RendererD3D11::DrawTriangleNow(const Vec3& a, const Vec3& b, const Vec3& c, const Vec4& color, IMaterial* mat)
-{
-	IVertexBuffer* pVB = mDynVBs[DEFAULT_INPUTS::POSITION];
-	assert(pVB);
-	MapData mapped = pVB->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
-	DEFAULT_INPUTS::V_P* data = (DEFAULT_INPUTS::V_P*)mapped.pData;
-	data[0].p = a;
-	data[1].p = b;
-	data[2].p = c;
-	pVB->Unmap();
-	pVB->Bind();
-	SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mat->SetMaterialParameters(0, color);
-	mat->Bind(true);
-	Draw(3, 0);
-}
 
 unsigned RendererD3D11::GetNumLoadingTexture() const
 {

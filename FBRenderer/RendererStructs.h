@@ -1,8 +1,8 @@
 #pragma once
 #ifndef _fastbird_RenderStructs_header_included_
 #define _fastbird_RenderStructs_header_included_
-#include <Engine/RendererEnums.h>
-#include <string>
+#include "RendererEnums.h"
+#include "Color.h"
 
 namespace fastbird
 {
@@ -268,6 +268,30 @@ namespace fastbird
 		float mHeight;
 		float mMinDepth;
 		float mMaxDepth;
+	};
+
+	struct RenderTargetParam
+	{
+		RenderTargetParam()
+			: mEveryFrame(false)
+			, mSize(200, 200)
+			, mPixelFormat(PIXEL_FORMAT_R8G8B8A8_UNORM)
+			, mShaderResourceView(false)
+			, mMipmap(false)
+			, mCubemap(false)
+			, mWillCreateDepth(false)
+			, mUsePool(false)
+		{
+
+		}
+		bool mEveryFrame;
+		Vec2I mSize;
+		PIXEL_FORMAT mPixelFormat;
+		bool mShaderResourceView;
+		bool mMipmap;
+		bool mCubemap;
+		bool mWillCreateDepth; // set true, and call IRenderTarget::SetDepthStencilDesc().
+		bool mUsePool;
 	};
 
 	struct Box3D

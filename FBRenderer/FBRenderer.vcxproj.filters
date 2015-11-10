@@ -8,18 +8,34 @@
     <ClInclude Include="RendererStructs.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="IInputLayout.h" />
-    <ClInclude Include="IRenderState.h" />
     <ClInclude Include="IRenderTarget.h" />
     <ClInclude Include="IRenderTargetListener.h" />
     <ClInclude Include="IShader.h" />
     <ClInclude Include="ITexture.h" />
     <ClInclude Include="IVertexBuffer.h" />
     <ClInclude Include="IIndexBuffer.h" />
+    <ClInclude Include="RenderStates.h" />
+    <ClInclude Include="IRenderStates.h" />
+    <ClInclude Include="IRendererStructs.h" />
+    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="RenderPipeline.h" />
+    <ClInclude Include="RenderSteps.h" />
+    <ClInclude Include="RenderResourceFactory.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureAtlas.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="IRenderable.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="RenderStates.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="RenderPipeline.cpp" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureAtlas.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
 </Project>

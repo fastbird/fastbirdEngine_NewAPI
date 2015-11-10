@@ -142,7 +142,7 @@ namespace fastbird
 		case PRIMITIVE_TOPOLOGY_TRIANGLESTRIP:
 			return D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 		default:
-			Error(FB_DEFAULT_DEBUG_ARG, "Undefined primitive topology!");
+			Logger::Log(FB_ERROR_LOG_ARG, "Undefined primitive topology!");
 			assert(0);
 			return D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
 		}

@@ -34,7 +34,8 @@ namespace fastbird{
 	void ToUpperCase(TString& str);
 	
 	bool IsNumeric(LPCTSTR str);
-	LPCTSTR FormatString(LPCTSTR str, ...);	
+	const WCHAR* FormatString(const WCHAR* str, ...);	
+	const char* FormatString(const char* str, ...);
 
 	//-----------------------------------------------------------------------
 	// UNICODE conversion
@@ -70,6 +71,6 @@ namespace fastbird{
 	// return data is temporary data. save it to other memory if you need
 	WCHAR* UTF8ToWide(const unsigned char* source);
 
-	const char* WideToAnsi(const WCHAR* source);
+	const char* WideToAnsi(const WCHAR* source);	
 	///@}
 }

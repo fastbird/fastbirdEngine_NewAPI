@@ -2,29 +2,23 @@
 #ifndef _VertexBuffer_header_included_
 #define _VertexBuffer_header_included_
 
-#include <Engine/VertexBuffer.h>
-#include <D3D11.h>
+#include "FBRenderer/IVertexBuffer.h"
 namespace fastbird
 {
-	class VertexBufferD3D11 : public VertexBuffer
+	class VertexBufferD3D11 : public IVertexBuffer
 	{
-	public:
-		static VertexBufferD3D11* CreateInstance(unsigned stride, unsigned numVertices);
-		virtual bool IsReady() const;
+		ID3D11Buffer* mVertexBuffer;		
 
-	protected:
-		VertexBufferD3D11(unsigned int stride, unsigned int num);
+	public:
+		VertexBufferD3D11(ID3D11Buffer* vertexBuffer);
 		virtual ~VertexBufferD3D11();
 
-		
-	private:
-		friend class RendererD3D11;
+		virtual void Bind();
+		virtual bool IsReady() const;
+		virtual MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag);
+		virtual void Unmap();
 		ID3D11Buffer* GetHardwareBuffer() const;
-		void SetHardwareBuffer(ID3D11Buffer* pVertexBuffer);
-
-	private:
-		ID3D11Buffer* m_pVertexBuffer;
-
+		
 	};
 }
 

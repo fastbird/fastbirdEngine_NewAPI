@@ -19,7 +19,7 @@ static inline int sprintf(TCHAR* str, size_t size, LPCTSTR format, ...){
 }
 #endif
 
-inline int FB_WCSNCPY(wchar_t* dest, unsigned bufSize, const wchar_t* src, unsigned maxCount){
+inline int FB_WCSNCPY(WCHAR* dest, unsigned bufSize, const wchar_t* src, unsigned maxCount){
 #if defined(_PLATFORM_WINDOWS_)
 	return wcsncpy_s(dest, bufSize, src, maxCount);
 #else
@@ -27,7 +27,7 @@ inline int FB_WCSNCPY(wchar_t* dest, unsigned bufSize, const wchar_t* src, unsig
 #endif
 }
 
-inline int FB_WCSCAT(wchar_t* dest, unsigned size, const wchar_t* src){
+inline int FB_WCSCAT(WCHAR* dest, unsigned size, const wchar_t* src){
 #if defined(_PLATFORM_WINDOWS_)
 	return wcscat_s(dest, size, src);
 #else
@@ -67,6 +67,7 @@ inline int FB_VSNPRINTF(char* dest, unsigned size, unsigned count, const char* f
 	#define _tstrlen wcslen
 	#define _tstrchr wcschr
 	#define _tstrncpy FB_WCSNCPY
+	#define _tstrcpy wcscpy
 	#define _tstrncat wcsncat
 	#define _tstrcat FB_WCSCAT
 	#define _tisspace iswspace
@@ -94,6 +95,7 @@ inline int FB_VSNPRINTF(char* dest, unsigned size, unsigned count, const char* f
 	#define _tstrlen strlen	
 	#define _tstrchr strchr
 	#define _tstrncpy strncpy
+	#define _tstrcpy strcpy
 	#define _tstrncat strncat
 	#define _tstrcat strcat
 	#define _tisspace isspace

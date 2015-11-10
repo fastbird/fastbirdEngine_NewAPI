@@ -19,6 +19,20 @@
   <defs
      id="defs5009">
     <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;"
+       inkscape:isstock="true">
+      <path
+         id="path4811"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+    <marker
        inkscape:stockid="Arrow1Lstart"
        orient="auto"
        refY="0.0"
@@ -100,16 +114,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.959798"
-     inkscape:cx="104.49761"
-     inkscape:cy="566.14376"
+     inkscape:zoom="2"
+     inkscape:cx="449.93871"
+     inkscape:cy="551.16816"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="2480"
-     inkscape:window-height="1400"
-     inkscape:window-x="1"
-     inkscape:window-y="1"
+     inkscape:window-width="2498"
+     inkscape:window-height="1418"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata5012">
@@ -124,6 +138,31 @@
     </rdf:RDF>
   </metadata>
   <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Layer 3">
+    <rect
+       transform="translate(0,-308.26772)"
+       style="display:inline;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect5200"
+       width="770"
+       height="80.5"
+       x="151.5"
+       y="322.36221" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="483.5"
+       y="28.094488"
+       id="text5204"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan5206"
+         x="483.5"
+         y="28.094488"
+         style="font-size:11.25px">Client Interface &amp; Cross platform common data</tspan></text>
+  </g>
+  <g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
@@ -131,7 +170,7 @@
      style="display:inline">
     <g
        id="g5599"
-       transform="matrix(0.36742865,0,0,0.39663215,165.03538,178.55086)">
+       transform="matrix(0.36742865,0,0,0.39663215,100.74967,174.97944)">
       <rect
          y="425.0683"
          x="257.74045"
@@ -153,7 +192,7 @@
     </g>
     <g
        id="g5599-1-6"
-       transform="matrix(0.3487929,0,0,0.37651522,-97.686323,374.65068)">
+       transform="matrix(0.3487929,0,0,0.37651522,-94.186323,333.65068)">
       <g
          id="g5628-0"
          transform="translate(205.07486,62.701264)">
@@ -178,7 +217,7 @@
       </g>
     </g>
     <g
-       transform="matrix(0.3487929,0,0,0.37651522,-216.95543,161.20598)"
+       transform="matrix(0.3487929,0,0,0.37651522,-125.45543,174.20598)"
        id="g4251">
       <text
          sodipodi:linespacing="125%"
@@ -200,7 +239,7 @@
          style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.92509413;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
     </g>
     <g
-       transform="matrix(0.31098419,0,0,0.33570145,66.308327,317.6584)"
+       transform="matrix(0.31098419,0,0,0.33570145,218.0939,282.6457)"
        id="g4283">
       <rect
          y="425.0683"
@@ -223,7 +262,7 @@
     </g>
     <g
        id="g4620"
-       transform="translate(57.066558,0.49295569)">
+       transform="translate(208.85213,-34.519748)">
       <rect
          y="459.84937"
          x="395.87436"
@@ -246,7 +285,7 @@
     </g>
     <g
        id="g4630"
-       transform="translate(-85.855059,0.0928092)">
+       transform="translate(65.930514,-34.919895)">
       <rect
          y="460.24951"
          x="462.17908"
@@ -269,7 +308,7 @@
     </g>
     <g
        id="g4283-8-5-1"
-       transform="matrix(0.31098419,0,0,0.33570145,157.21097,322.30126)">
+       transform="matrix(0.31098419,0,0,0.33570145,308.99654,287.28856)">
       <rect
          y="411.23798"
          x="211.80334"
@@ -291,7 +330,7 @@
     </g>
     <g
        id="g4717"
-       transform="translate(0,-2.2162536)">
+       transform="translate(152.80588,-75.301301)">
       <rect
          y="433.01559"
          x="144.9404"
@@ -314,7 +353,7 @@
     </g>
     <g
        id="g4615"
-       transform="translate(57.973723,0.07451792)">
+       transform="translate(210.7796,-73.010529)">
       <g
          id="g4712">
         <rect
@@ -340,7 +379,7 @@
     </g>
     <g
        id="g4625"
-       transform="translate(-85.689563,1.860254)">
+       transform="translate(67.116315,-71.224793)">
       <rect
          y="428.93909"
          x="461.26279"
@@ -374,7 +413,7 @@
          sodipodi:role="line" /></text>
     <g
        id="g4283-8-5-3-7"
-       transform="matrix(0.31098419,0,0,0.33570145,141.65312,288.11542)">
+       transform="matrix(0.31098419,0,0,0.33570145,294.459,215.03037)">
       <rect
          y="425.0683"
          x="257.74045"
@@ -396,7 +435,7 @@
     </g>
     <g
        id="g4283-8-5-3-7-4"
-       transform="matrix(0.31098419,0,0,0.33570145,218.53071,288.11542)">
+       transform="matrix(0.31098419,0,0,0.33570145,371.33659,215.03037)">
       <rect
          y="425.0683"
          x="257.74045"
@@ -418,7 +457,7 @@
     </g>
     <g
        id="g4283-8-5-3-7-4-9"
-       transform="matrix(0.31098419,0,0,0.33570145,219.54219,317.6584)">
+       transform="matrix(0.31098419,0,0,0.33570145,371.32776,282.6457)">
       <rect
          y="425.0683"
          x="257.74045"
@@ -440,7 +479,7 @@
     </g>
     <g
        id="g4620-5"
-       transform="translate(133.6835,0.49295569)">
+       transform="translate(285.46907,-34.519748)">
       <rect
          y="459.84937"
          x="395.87436"
@@ -463,7 +502,7 @@
     </g>
     <g
        id="g4615-6"
-       transform="translate(134.85135,0.07451792)">
+       transform="translate(287.65723,-73.010529)">
       <rect
          y="430.72482"
          x="394.47708"
@@ -486,7 +525,7 @@
     </g>
     <g
        id="g4620-5-0"
-       transform="translate(210.3004,0.49295569)">
+       transform="translate(362.08597,-34.519748)">
       <rect
          y="459.84937"
          x="395.87436"
@@ -509,7 +548,7 @@
     </g>
     <g
        id="g4615-6-6"
-       transform="translate(211.72897,0.07451792)">
+       transform="translate(364.53485,-73.010529)">
       <g
          id="g4707">
         <rect
@@ -535,7 +574,7 @@
     </g>
     <g
        id="g4620-5-0-7"
-       transform="translate(284.40754,-1.3479909)">
+       transform="translate(436.19311,-36.360695)">
       <rect
          y="459.84937"
          x="395.87436"
@@ -558,7 +597,7 @@
     </g>
     <g
        id="g4615-6-6-1"
-       transform="translate(285.83611,-1.7664309)">
+       transform="translate(438.64199,-74.851478)">
       <g
          id="g4707-4">
         <rect
@@ -583,7 +622,7 @@
       </g>
     </g>
     <g
-       transform="matrix(0.31098419,0,0,0.33570145,-77.355659,446.56955)"
+       transform="matrix(0.31098419,0,0,0.33570145,-16.85566,413.06955)"
        id="g4283-3">
       <g
          id="g4785"
@@ -608,14 +647,36 @@
              y="457.30664">IndexBufferD3D11</tspan></text>
       </g>
     </g>
+    <g
+       id="g5143">
+      <rect
+         y="237.3622"
+         x="177.14285"
+         height="23.571428"
+         width="98.571426"
+         id="rect5137"
+         style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text5139"
+         y="253.34195"
+         x="209.95731"
+         style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-size:11.25px"
+           y="253.34195"
+           x="209.95731"
+           id="tspan5141"
+           sodipodi:role="line">Client</tspan></text>
+    </g>
     <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker6092)"
-       d="M 266.96965,367.54484 66.373793,443.27247"
-       id="path5088"
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-end:url(#Arrow1Lend)"
+       d="m 226.79713,260.93363 2.58441,82.64156"
+       id="path5148"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
-       inkscape:connection-start="#g5599"
-       inkscape:connection-end="#g5599-1" />
+       inkscape:connection-start="#g5143"
+       inkscape:connection-end="#g5599" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -624,28 +685,32 @@
      style="display:inline">
     <g
        id="g5599-1"
-       transform="matrix(0.31098419,0,0,0.33570145,-106.54262,-37.37252)">
+       transform="matrix(0.31098419,0,0,0.33570145,21.24168,-45.958818)">
       <g
          id="g5628"
          transform="translate(205.07486,62.701264)">
-        <rect
-           style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.92509413;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-           id="rect3487-1-4"
-           width="186.42857"
-           height="51.42857"
-           x="257.74045"
-           y="425.0683" />
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="308.13858"
-           y="457.21115"
-           id="text3489-0-5"
-           sodipodi:linespacing="125%"><tspan
-             sodipodi:role="line"
-             id="tspan3491-4-1"
+        <g
+           id="g5126"
+           transform="translate(22.737709,-15.045401)">
+          <rect
+             y="425.0683"
+             x="257.74045"
+             height="51.42857"
+             width="186.42857"
+             id="rect3487-1-4"
+             style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.92509413;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+          <text
+             sodipodi:linespacing="125%"
+             id="text3489-0-5"
+             y="457.21115"
              x="308.13858"
-             y="457.21115">IRenderer</tspan></text>
+             style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             xml:space="preserve"><tspan
+               y="457.21115"
+               x="308.13858"
+               id="tspan3491-4-1"
+               sodipodi:role="line">IRenderer</tspan></text>
+        </g>
       </g>
     </g>
   </g>

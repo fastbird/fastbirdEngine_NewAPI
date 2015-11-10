@@ -4,7 +4,7 @@ Direct3D 11 renderer
 
 Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 */
-#pragma once
+#define FBRendererD3D11DLL __declspec(dllexport)
 
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -18,15 +18,11 @@ Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 #include <memory>
 #include <iostream>
 #include <D3DX11.h>
+#include <map>
 
-#include "FBMath/Math.h"
+#include "FBCommonHeaders/VectorMap.h"
+#include "FBMathLib/Math.h"
 #include "FBMemoryManagerLib/MemoryManager.h"
 #include "FBDebugLib/Logger.h"
-
-// convenient functions
-namespace fastbird{
-	void Error(LPCTSTR format, ...);
-	void Log(LPCTSTR format, ...);
-}
 
 #define SAFE_RELEASE(x) (x) ? (x)->Release() : 0; (x)=0

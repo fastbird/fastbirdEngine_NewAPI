@@ -7,6 +7,10 @@ Required modules: \b FBColladaImporter, \b FBRenderableFactory
 Optional modules: \b FBRendererD3D11
 */
 
+// Happens when a interface can have not exposed symbols.
+// But they are all privates so it is fine.
+#pragma warning (disable : 4251)
+
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define FBRendererDLL __declspec(dllexport)
@@ -23,13 +27,7 @@ Optional modules: \b FBRendererD3D11
 #include <cstdarg>
 
 #include "FBMemoryManagerLib/MemoryManager.h"
-#include "FBMath/Math.h"
+#include "FBMathLib/Math.h"
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/String.h"
-
-// convenient functions
-namespace fastbird{
-	void Error(LPCTSTR format, ...);
-	void Log(LPCTSTR format, ...);
-}

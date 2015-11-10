@@ -201,12 +201,23 @@ namespace fastbird{
 		return true;
 	}
 
-	LPCTSTR FormatString(LPCTSTR str, ...){
-		static TCHAR buf[2048];
+	const WCHAR* FormatString(const WCHAR* str, ...){
+		static WCHAR buf[2048];
 		va_list args;
 		
         va_start(args, str);
-        _tvsnprintf(buf, 2048, str, args);
+		vswprintf(buf, 2048, str, args);
+		va_end(args);
+
+		return buf;
+	}
+
+	const char* FormatString(const char* str, ...){
+		static char buf[2048];
+		va_list args;
+
+		va_start(args, str);
+		vsprintf_s(buf, str, args);
 		va_end(args);
 
 		return buf;
@@ -418,13 +429,13 @@ namespace fastbird{
 		int ret = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, source, -1, wideBuffer, 4096);
 		if (ret == 0)
 		{
-			std::_tcerr << _T("(error) AnsiToUTF8 MultiByteToWideChar Failed!");			
+			std::cerr << "(error) AnsiToUTF8 MultiByteToWideChar Failed!";
 		}
 
 		ret = WideCharToMultiByte(CP_UTF8, 0, wideBuffer, -1, (LPSTR)utf8_buffer, 4096, 0, 0);
 		if (ret == 0)
 		{
-			std::_tcerr << _T("(error) AnsiToUTF8 MultiByteToWideChar Failed!");			
+			std::cerr << "(error) AnsiToUTF8 MultiByteToWideChar Failed!";
 		}
 #else
 		assert(0 && "Not implemented function.");
@@ -456,7 +467,7 @@ namespace fastbird{
 		std::setlocale(LC_ALL, localeBackup.c_str());
 #endif
 		if (err){
-			std::_tcerr << _T("AnsiToWide MultiByteToWideChar Failed!");
+			std::cerr << "AnsiToWide MultiByteToWideChar Failed!";
 		}
 		return wideBuffer;
 	}
@@ -492,7 +503,7 @@ namespace fastbird{
 		std::setlocale(LC_ALL, localeBackup.c_str());
 #endif
 		if (ret == 0)		
-			std::_tcerr << _T("WideToAnsi Failed!");
+			std::cerr << "WideToAnsi Failed!";
 
 		return ansiBuffer;
 	}

@@ -46,7 +46,7 @@ namespace fastbird
 		if (!m_pIndexBuffer)
 			return;
 
-		ResourceBinder::SetIndexBuffer(this);
+		ResourceBinder::Bind(this);
 	}
 
 	ID3D11Buffer* IndexBufferD3D11::GetHardwareBuffer() const

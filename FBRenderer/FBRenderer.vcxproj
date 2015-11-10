@@ -11,11 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="IIndexBuffer.h" />
     <ClInclude Include="IInputLayout.h" />
+    <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IRenderer.h" />
-    <ClInclude Include="IRenderState.h" />
+    <ClInclude Include="IRendererStructs.h" />
+    <ClInclude Include="IRenderStates.h" />
     <ClInclude Include="IRenderTarget.h" />
     <ClInclude Include="IRenderTargetListener.h" />
     <ClInclude Include="IShader.h" />
@@ -24,22 +27,35 @@
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererEnums.h" />
     <ClInclude Include="RendererStructs.h" />
+    <ClInclude Include="RenderPipeline.h" />
+    <ClInclude Include="RenderResourceFactory.h" />
+    <ClInclude Include="RenderStates.h" />
+    <ClInclude Include="RenderSteps.h" />
+    <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureAtlas.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
+    <ClCompile Include="RenderPipeline.cpp" />
+    <ClCompile Include="RenderStates.cpp" />
+    <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureAtlas.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
       <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\FBMath\FBMath.vcxproj">
+    <ProjectReference Include="..\FBMathLib\FBMathLib.vcxproj">
       <Project>{2df8e079-28e5-4e7d-9c6a-ff87c1329eb5}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
@@ -54,6 +70,9 @@
     <ProjectReference Include="..\FBSystemLib\FBSystemLib.vcxproj">
       <Project>{2e1e0f10-b5ea-4eec-aab9-c0dcbf67b306}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\TinyXmlLib\TinyXmlLib.vcxproj">
+      <Project>{23117a44-391e-4542-968f-c99c1bac52c0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{FD658A50-2D36-4BB4-8EDA-635BF71B4CDB}</ProjectGuid>
@@ -64,14 +83,14 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">

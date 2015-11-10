@@ -20,7 +20,8 @@ namespace fastbird{
 		the debug output widow rather than recorded into the log file.
 		@param filepath The new log file path. ex)error.log		
 		*/		
-		static void Init(LPCTSTR filepath);
+		static void Init(const char* filepath);
+		static void Init(const WCHAR* filepath);
 
 		/** Close the log file
 		Logs received after Debug is released, will be sent to the debug output.
@@ -28,18 +29,15 @@ namespace fastbird{
 		static void Release();
 
 		/** Output to the log file created by \b CreateLogFile(). */		
-		static void Log(LPCTSTR str, ...);
+		static void Log(const char* str, ...);		
 
 		/** Output to the log file specified as a parameter. */
-		static void Log(std::ofstream& file, LPCTSTR str);
+		static void Log(std::ofstream& file, const char* str);
 
 		/** Output to the debug window.	*/
-		static void Output(LPCTSTR str, ...);
+		static void Output(const char* str, ...);
 	};
 }
 
-#if defined(UNICODE)
-#define FB_DEFAULT_DEBUG_ARG L"%s(%d): %s() - %s", __TFILE__, __LINE__, __TFUNCTION__
-#else
-#define FB_DEFAULT_DEBUG_ARG "%s(%d): %s() - %s", __TFILE__, __LINE__, __TFUNCTION__
-#endif
+#define FB_DEFAULT_LOG_ARG "%s: %s", __FUNCTION__
+#define FB_ERROR_LOG_ARG "%s: (error)%s", __FUNCTION__

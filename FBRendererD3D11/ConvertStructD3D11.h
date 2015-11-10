@@ -102,7 +102,7 @@ namespace fastbird
 			destDesc.Format = DXGI_FORMAT_R32G32B32A32_SINT;
 			break;
 		default:
-			Error(FB_DEFAULT_DEBUG_ARG, "Undefined input format found!");
+			Logger::Log(FB_ERROR_LOG_ARG, "Undefined input format found!");
 			assert(0);
 		}
 		destDesc.InputSlot = srcDesc.mInputSlot;
@@ -116,7 +116,7 @@ namespace fastbird
 			destDesc.InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
 			break;
 		default:
-			Error(FB_DEFAULT_DEBUG_ARG, "Undefined input slot class found!");
+			Logger::Log(FB_ERROR_LOG_ARG, "Undefined input slot class found!");
 			assert(0);
 		}
 		destDesc.InstanceDataStepRate = srcDesc.mInstanceDataStepRate;

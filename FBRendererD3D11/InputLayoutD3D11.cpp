@@ -1,8 +1,6 @@
-#include <Engine/StdAfx.h>
-#include <Engine/InputLayoutD3D11.h>
-#include <Engine/IEngine.h>
-#include <Engine/GlobalEnv.h>
-#include <Engine/IRenderer.h>
+#include "stdafx.h"
+#include "InputLayoutD3D11.h"
+#include "ResourceBinder.h"
 
 using namespace fastbird;
 
@@ -34,7 +32,7 @@ void InputLayoutD3D11::SetHardwareInputLayout(ID3D11InputLayout* pLayout)
 //----------------------------------------------------------------------------
 void InputLayoutD3D11::Bind()
 {
-	gFBEnv->pEngine->GetRenderer()->SetInputLayout(this);
+	ResourceBinder::SetInputLayout(this);	
 }
 
 void InputLayoutD3D11::SetDebugName(const char* name)

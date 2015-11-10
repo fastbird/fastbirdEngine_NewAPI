@@ -7,7 +7,7 @@ namespace fastbird{
 	typedef intptr_t FunctionHandle;
 	class ModuleHandler{
 	public:		
-		static ModuleHandle LoadModule(LPCTSTR path);
+		static ModuleHandle LoadModule(const char* path);		
 		static void UnloadModule(ModuleHandle handle);
 
 		static FunctionHandle GetFunction(ModuleHandle module, const char* functionName);
