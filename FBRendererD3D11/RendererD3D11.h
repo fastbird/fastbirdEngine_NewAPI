@@ -32,12 +32,12 @@ namespace fastbird
 	private:
 		void GetOutputInformationFor(IDXGIAdapter1* adapter);
 	public:
-		virtual bool InitSwapChain(HWND_ID id, int width, int height);
-		virtual void ReleaseSwapChain(HWND_ID id);
+		virtual bool InitSwapChain(HWindowId id, int width, int height);
+		virtual void ReleaseSwapChain(HWindowId id);
 		// For full screen.
 		// See Renderer::ChangeWindowSize for windowed.
-		virtual void ChangeResolution(HWND_ID id, const Vec2I& resol);
-		virtual void OnSizeChanged(HWND_ID id, const Vec2I& resol);
+		virtual void ChangeResolution(HWindowId id, const Vec2I& resol);
+		virtual void OnSizeChanged(HWindowId id, const Vec2I& resol);
 		virtual void Deinit();				
 		virtual unsigned GetMultiSampleCount() const;		
 
@@ -144,7 +144,7 @@ namespace fastbird
 		// Accessing Information -- probably should remove. Handle in FBRenderer
 		//-------------------------------------------------------------------
 		virtual unsigned GetNumLoadingTexture() const;
-		virtual Vec2I FindClosestSize(HWND_ID id, const Vec2I& input);
+		virtual Vec2I FindClosestSize(HWindowId id, const Vec2I& input);
 		virtual void ChangeFullscreenMode(int mode);
 		virtual bool GetResolutionList(unsigned& outNum, Vec2I* list);
 
@@ -154,7 +154,7 @@ namespace fastbird
 	private:
 		
 		MapData MapBuffer(ID3D11Resource* pResource, UINT subResource, MAP_TYPE type, MAP_FLAG flag);
-		bool ResizeSwapChain(HWND_ID hwndId, const Vec2I& resol);
+		bool ResizeSwapChain(HWindowId hwndId, const Vec2I& resol);
 		RenderTarget* CreateRenderTargetFor(IDXGISwapChain* swapChain, const Vec2I& size);
 		bool FindClosestMatchingMode(const DXGI_MODE_DESC* finding, DXGI_MODE_DESC* best, HMONITOR monitor);
 

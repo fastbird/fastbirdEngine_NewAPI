@@ -35,6 +35,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBMathLib", "FBMathLib\FBMa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyXmlLib", "TinyXmlLib\TinyXmlLib.vcxproj", "{23117A44-391E-4542-968F-C99C1BAC52C0}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBInputManager", "FBInputManager\FBInputManager.vcxproj", "{C8797AA0-B737-4F09-A6A4-131350B54BC9}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBSceneManager", "FBSceneManager\FBSceneManager.vcxproj", "{E1F08226-828D-4354-8128-2AE1B91FBD4F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -97,6 +101,14 @@ Global
 		{23117A44-391E-4542-968F-C99C1BAC52C0}.Debug|Win32.Build.0 = Debug|Win32
 		{23117A44-391E-4542-968F-C99C1BAC52C0}.Release|Win32.ActiveCfg = Release|Win32
 		{23117A44-391E-4542-968F-C99C1BAC52C0}.Release|Win32.Build.0 = Release|Win32
+		{C8797AA0-B737-4F09-A6A4-131350B54BC9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C8797AA0-B737-4F09-A6A4-131350B54BC9}.Debug|Win32.Build.0 = Debug|Win32
+		{C8797AA0-B737-4F09-A6A4-131350B54BC9}.Release|Win32.ActiveCfg = Release|Win32
+		{C8797AA0-B737-4F09-A6A4-131350B54BC9}.Release|Win32.Build.0 = Release|Win32
+		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Debug|Win32.Build.0 = Debug|Win32
+		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Release|Win32.ActiveCfg = Release|Win32
+		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

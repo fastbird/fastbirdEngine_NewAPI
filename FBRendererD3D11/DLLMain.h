@@ -1,8 +1,11 @@
 #pragma once
+#if !defined(FBPlugin)
+#define FBPlugin __declspec(dllimport)
+#endif
 namespace fastbird {
 	class IRenderer;
 }
 extern "C"{
-	FBRendererD3D11DLL fastbird::IRenderer* CreateRenderEngine();
-	FBRendererD3D11DLL void DeleteRenderEngine(fastbird::IRenderer* renderer);
+	FBPlugin fastbird::IRenderer* CreateRenderEngine();
+	FBPlugin void DeleteRenderEngine(fastbird::IRenderer* renderer);
 }

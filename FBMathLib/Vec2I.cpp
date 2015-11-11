@@ -21,6 +21,12 @@ namespace fastbird
 		y = Round(v.y);
 	}	
 
+	Vec2I::Vec2I(const std::pair<int, int>& coordinates)
+		: x(coordinates.first), y(coordinates.second)
+	{
+
+	}
+
 	//-------------------------------------------------------------------
 	Vec2I Vec2I::operator+ (int s) const
 	{

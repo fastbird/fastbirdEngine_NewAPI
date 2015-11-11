@@ -2,6 +2,8 @@
 #include "RendererEnums.h"
 #include "RendererStructs.h"
 #include "Color.h"
+#include "FBCommonHeaders/Observable.h"
+#include "IRenderTargetObserver.h"
 namespace fastbird
 {
 	struct GaussianDist;
@@ -16,7 +18,7 @@ namespace fastbird
 	DECLARE_SMART_PTR(Keyboard);
 	DECLARE_SMART_PTR(Renderer);
 	DECLARE_SMART_PTR(RenderTarget);
-	class FBRendererDLL RenderTarget
+	class FB_DLL_PUBLIC RenderTarget : public Observable<IRenderTargetObserver>
 	{
 		static RenderTargetId NextRenderTargetId;
 		static const int FB_NUM_BLOOM_TEXTURES = 3;
@@ -29,6 +31,13 @@ namespace fastbird
 	public:
 		~RenderTarget();
 
+		//-------------------------------------------------------------------
+		// Observable<IRenderTargetObserver>
+		//-------------------------------------------------------------------
+		virtual void OnObserverAdded(IRenderTargetObserver* observer);
+		virtual void OnObserverRemoved(IRenderTargetObserver* observer);
+
+		//-------------------------------------------------------------------
 		bool CheckOptions(const RenderTargetParam& param);
 		RenderPipeline& GetRenderPipeline() const;		
 

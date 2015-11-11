@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Renderer.h"
 #include "IRenderer.h"
+#include "RendererEnums.h"
+#include "RendererStructs.h"
 #include "Texture.h"
 #include "RenderResourceFactory.h"
 
@@ -179,4 +181,8 @@ void Renderer::ReloadTexture(const char* texturePath){
 //-------------------------------------------------------------------
 void Renderer::SetCurrentRenderTarget(RenderTarget* renderTarget){
 	mImpl->mCurrentRenderTarget = renderTarget;
+}
+
+HWindow Renderer::GetWindowHandle(RenderTargetId rtId){
+
 }

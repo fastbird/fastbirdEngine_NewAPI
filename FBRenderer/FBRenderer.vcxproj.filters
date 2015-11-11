@@ -25,6 +25,14 @@
     <ClInclude Include="TextureAtlas.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="IRenderable.h" />
+    <ClInclude Include="ICameraObserver.h" />
+    <ClInclude Include="IRenderTargetObserver.h" />
+    <ClInclude Include="IRendererObserver.h" />
+    <ClInclude Include="Spatial.h" />
+    <ClInclude Include="Renderable.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="Material.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -37,5 +45,10 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureAtlas.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Spatial.cpp" />
+    <ClCompile Include="Renderable.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="Material.cpp" />
   </ItemGroup>
 </Project>

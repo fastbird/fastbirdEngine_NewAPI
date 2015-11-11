@@ -1,10 +1,16 @@
 #pragma once
 #ifndef _Camera_Header_included_
 #define _Camera_Header_included_
+#include "FBCommonHeaders/Observable.h"
+#include "FBInputManager/InputConsumer.h"
+#include "ICameraObserver.h"
 
 namespace fastbird
 {
-	class FBRendererDLL Camera
+	DECLARE_SMART_PTR(IMouse);
+	DECLARE_SMART_PTR(IKeyboard);
+	DECLARE_SMART_PTR(IRenderable);
+	class FB_DLL_PUBLIC Camera : public Observable<ICameraObserver>, public InputConsumer
 	{
 		DECLARE_PIMPL(Camera);
 
@@ -19,65 +25,70 @@ namespace fastbird
 			FRUSTUM_PLANE_BOTTOM = 5
 		};
 
+		enum ObserverEvents{
+			TransformChanged,
+		};
+
 		Camera();
 		~Camera();
 
 		//-------------------------------------------------------------------------
-		// IObject
-		//-------------------------------------------------------------------------
-		virtual void PreRender();
-		virtual void Render();		
-		virtual void PostRender();
-
-		//-------------------------------------------------------------------------
-		virtual void SetOrthogonal(bool ortho);
-		virtual void SetPos(const Vec3& pos);
-		virtual const Vec3& GetPos() const;
-		virtual void SetDir(const Vec3& dir);
-		virtual void SetDirAndRight(const Vec3& dir, const Vec3& right);
-		virtual void SetRot(const Quat& rot);
-		virtual const Quat& GetRot() const { return mTransformation.GetRotation(); }
-		virtual void SetCamTransform(const Vec3& pos, const Quat& rot);
-		virtual void SetTransform(const Transformation& t);
-		virtual const Vec3 GetDir() const;
-		virtual const Mat44& GetViewMat();
-		virtual const Mat44& GetInvViewMat();
-		virtual const Mat44& GetInvViewProjMat();
-		virtual const Mat44& GetProjMat();
-		virtual const Mat44& GetInvProjMat();
-		virtual const Mat44& GetViewProjMat();
+		void SetOrthogonal(bool ortho);
+		void SetPosition(const Vec3& pos);
+		const Vec3& GetPosition() const;
+		void SetDirection(const Vec3& dir);
+		void SetDirrectionAndRight(const Vec3& dir, const Vec3& right);
+		void SetRotation(const Quat& rot);
+		const Quat& GetRotation() const;
+		void SetTransform(const Vec3& pos, const Quat& rot);
+		void SetTransform(const Transformation& t);
+		const Vec3 GetDirection() const;
+		enum MatrixType {
+			View,
+			InverseView,
+			InverseViewProj,
+			Proj, // Projection
+			InverseProj,
+			ViewProj,
+			NumMatrices,
+		};
+		const Mat44& GetMatrix(MatrixType type);
+		
 		// field of view in the y direction, in radians.
-		virtual void SetFOV(float fov);
-		virtual float GetFOV() const { return mFov; }
-		virtual float GetTanHalfFOV() const { return mTanHalfFOV; }
+		void SetFOV(Real fov);
+		Real GetFOV() const;
+		Real GetTanHalfFOV() const;
 		// width / height
-		virtual void SetAspectRatio(float ar) { mAspectRatio = ar; mProjPropertyChanged = true;}
-		virtual float GetAspectRatio() const { return mAspectRatio; }
+		void SetAspectRatio(Real ar);
+		Real GetAspectRatio() const;
 		// near/far view-plane
-		virtual void SetNearFar(float nearPlane, float farPlane);
-		virtual void GetNearFar(float& nearPlane, float& farPlane) const;
+		void SetNearFar(Real nearPlane, Real farPlane);
+		void GetNearFar(Real& nearPlane, Real& farPlane) const;
 		// width and height of the view volume at the near view-plane
-		virtual void SetWidth(float width) { mWidth = width; mProjPropertyChanged = true;}
-		virtual void SetHeight(float height) { mHeight = height; mProjPropertyChanged = true;}
-		virtual float GetWidth() const { return mWidth; }
-		virtual float GetHeight() const { return mHeight; }
-		virtual void SetName(const char* name) { mName = name; }
-		virtual const char* GetName() const { return mName.c_str(); }
-		virtual void Update();
-		virtual bool IsCulled(BoundingVolume* pBV) const;
-		virtual Ray3 ScreenPosToRay(long x, long y);
-		virtual Vec2I WorldToScreen(const Vec3& worldPos) const;
-		virtual void SetYZSwap(bool enable){mYZSwap = enable; mProjPropertyChanged = true; }
-		virtual void SetTarget(SpatialObject* pObj);
-		virtual void SetDistanceFromTarget(float dist);
-		virtual SpatialObject* GetTarget() const { return mTarget; }
-		virtual void SetCurrent(bool cur) { mCurrentCamera = cur; }
-		virtual void OnInputFromEngine(fastbird::IMouse* pMouse, fastbird::IKeyboard* pKeyboard);
-		virtual void SetCameraIndex(size_t idx) {mCamIndex = idx;}
-		virtual void SetEnalbeInput(bool enable);
-		virtual void SetInitialDistToTarget(float dist);
-		virtual void RegisterCamListener(ICameraListener* p);
-		virtual void UnregisterCamListener(ICameraListener* p);
+		void SetWidth(Real width);
+		void SetHeight(Real height);
+		Real GetWidth() const;
+		Real GetHeight() const;
+		void SetName(const char* name);
+		const char* GetName() const;
+		void Update();
+		bool IsCulled(BoundingVolume* pBV) const;
+		Ray3 ScreenPosToRay(long x, long y);
+		Vec2I WorldToScreen(const Vec3& worldPos) const;
+		void SetYZSwap(bool enable);
+		void SetTarget(IRenderablePtr pObj);
+		void SetDistanceFromTarget(Real dist);
+		IRenderablePtr GetTarget() const;
+		void SetCurrent(bool cur);
+		void OnInput(IMousePtr mouse, IKeyboardPtr keyboard);
+		void SetCameraIndex(size_t idx);
+		void SetEnalbeInput(bool enable);
+		void SetInitialDistToTarget(Real dist);
+
+		//-------------------------------------------------------------------
+		// InputConsumer
+		//-------------------------------------------------------------------
+		virtual void ConsumeInput(InputManager* inputManager);
 
 	protected:
 		void UpdateFrustum();

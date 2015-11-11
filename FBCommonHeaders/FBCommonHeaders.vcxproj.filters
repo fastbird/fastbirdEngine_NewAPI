@@ -7,5 +7,6 @@
     <ClInclude Include="String.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="VectorMap.h" />
+    <ClInclude Include="Observable.h" />
   </ItemGroup>
 </Project>

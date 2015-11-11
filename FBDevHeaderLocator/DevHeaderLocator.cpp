@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#define FBFileSystemDLL __declspec(dllimport)
+#define FB_DLL_PUBLIC __declspec(dllimport)
 #include "FBFileSystem/FileSystem.h"
 #include "FBFileSystem/DirectoryIterator.h"
 #include <iostream>

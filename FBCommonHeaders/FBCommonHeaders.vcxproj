@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="Observable.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="platform.h" />

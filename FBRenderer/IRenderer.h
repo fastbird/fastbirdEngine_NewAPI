@@ -1,16 +1,15 @@
 #pragma once
-#define IRenderer_Version "2015-11-10, 0"
+#define IRenderer_Version "1"
 #include "IRendererStructs.h"
+#include <memory>
 
 namespace fastbird{
 	class IShader;
-	typedef intptr_t HWND_ID;
-	DECLARE_SMART_PTR(IRenderer);
-	/** Interface for specific renderers like D3D11, OpenGL.
-	This is an internal interface and not intended to used as an API
-	by clients. However they can crea	Except when day want to implement their own renderer.
-	Clients should use \see Renderer instead of this one.
-	\ internal
+	typedef intptr_t HWindowId;
+	class IRenderer;
+	typedef std::shared_ptr<IRenderer> IRendererPtr;
+	typedef std::weak_ptr<IRenderer> IRendererWeakPtr;
+	/** Plug-in interface for render engine like D3D11, OpenGL.	
 	*/
 	class IRenderer{
 	public:
@@ -47,6 +46,5 @@ namespace fastbird{
 		virtual void Clear(float r, float g, float b, float a, float z, unsigned char stencil) = 0;
 		virtual void Clear(float r, float g, float b, float a) = 0;
 		virtual void Present() = 0;
-
 	};
 }

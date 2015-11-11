@@ -1,12 +1,18 @@
 #pragma once
-typedef unsigned char BYTE;
-typedef unsigned char UINT8;
-typedef unsigned int UINT;
-typedef unsigned long DWORD;
-typedef unsigned __int64 UINT64;
-typedef __int64 INT64;
+#include <utility>
 namespace fastbird{
 	typedef double Real;
+	typedef unsigned char BYTE;
+	typedef unsigned char UINT8;
+	typedef unsigned int UINT;
+	typedef unsigned long DWORD;
+	typedef unsigned __int64 UINT64;
+	typedef __int64 INT64;
+	typedef __int64 HWindowId;
+	typedef __int64 HWindow;
+
+	typedef std::pair<int, int> CoordinatesI;
+	typedef std::pair<Real, Real> CoordinatesR;
 }
 
 #define DECLARE_NON_COPYABLE(className) \

@@ -15,6 +15,7 @@ namespace fastbird
 		Vec2I();
 		Vec2I(int _x, int _y);
 		Vec2I(const Vec2& v);
+		Vec2I(const std::pair<int, int>& coordinates);
 
 		//-------------------------------------------------------------------
 		Vec2I operator+ (int s) const;

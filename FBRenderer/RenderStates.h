@@ -5,7 +5,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(RenderStates);
 	//------------------------------------------------------------------------
-	class FBRendererDLL RenderStates
+	class FB_DLL_PUBLIC RenderStates
 	{
 		DECLARE_PIMPL(RenderStates);
 

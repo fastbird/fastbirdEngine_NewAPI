@@ -1,10 +1,8 @@
 #pragma once
-#include "RendererEnums.h"
-#include "RendererStructs.h"
-
+#include "FBCommonHeaders/Observable.h"
+#include "IRendererObserver.h"
 namespace fastbird{	
-
-	typedef intptr_t HWND_ID;
+	typedef unsigned RenderTargetId;
 	DECLARE_SMART_PTR(Texture);
 	DECLARE_SMART_PTR(RenderTarget);
 	DECLARE_SMART_PTR(Renderer);
@@ -13,7 +11,7 @@ namespace fastbird{
 	render states, lights and render targets.
 	\ingroup FBRenderer
 	*/
-	class FBRendererDLL Renderer{	
+	class FB_DLL_PUBLIC Renderer : public Observable<IRendererObserver>{
 		RendererWeakPtr mMe;
 
 		DECLARE_PIMPL(Renderer);
@@ -59,9 +57,19 @@ namespace fastbird{
 		/** Reload texture in the \a textuerPath
 		*/
 		void ReloadTexture(const char* texturePath);
+
+		//-------------------------------------------------------------------
+		// Manipulation
+		//-------------------------------------------------------------------
+		void SetRenderTarget(TexturePtr pRenderTargets[], size_t rtViewIndex[], int num,
+			TexturePtr pDepthStencil, size_t dsViewIndex);
+		void SetViewports(Viewport viewports[], int num);
+		void Clear(float r, float g, float b, float a, float z, UINT8 stencil);
+		void Clear(float r, float g, float b, float a)
 		
 		//-------------------------------------------------------------------
 		void SetCurrentRenderTarget(RenderTarget* renderTarget);
+		HWindow GetWindowHandle(RenderTargetId rtId);
 	};
 
 }

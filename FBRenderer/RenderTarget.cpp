@@ -3,46 +3,13 @@
 #include "Renderer.h"
 #include "Camera.h"
 #include "RenderPipeline.h"
+#include "Texture.h"
 
 namespace fastbird
 {
 RenderTargetId RenderTarget::NextRenderTargetId = 1;
 class RenderTarget::RenderTargetImpl{
 public:
-	RenderTargetImpl()
-		: mCamera(FB_NEW(Camera), [](Camera* obj){ FB_DELETE(obj); })
-		, mRenderPipeline(FB_NEW(RenderPipeline), [](RenderPipeline* obj){ FB_DELETE(obj); })
-		, mClearColor(0, 0, 0, 1)
-		, mDepthClear(1.f)
-		, mStencilClear(0)
-		, mEnabled(true)
-		, mSize(0, 0), mSizeCropped(0, 0)
-		, mFormat(PIXEL_FORMAT_R8G8B8A8_UNORM)
-		, mSRV(false)
-		, mMiplevel(false)
-		, mCubeMap(false)
-		, mWillCreateDepth(false), mUsePool(true), mGlowSet(false)
-		, mFrameLuminanceCalced(0)
-		, mGaussianDistBlendGlow(0)
-		, mGaussianDistBloom(0), mDrawOnEvent(false), mDrawEventTriggered(false)
-		, mLuminance(0.5f), mFace(0)
-		, mId(NextRenderTargetId++)
-		
-		
-	{
-	}
-	~RenderTargetImpl(){
-		if (mGaussianDistBlendGlow)
-		{
-			FB_DELETE(mGaussianDistBlendGlow);
-			mGaussianDistBlendGlow = 0;
-		}
-		if (mGaussianDistBloom)
-		{
-			FB_DELETE(mGaussianDistBloom);
-			mGaussianDistBloom = 0;
-		}
-	}
 	RendererWeakPtr mRenderer;
 	RenderTargetId mId;
 	Vec2I mSize;
@@ -55,7 +22,7 @@ public:
 	bool mWillCreateDepth;
 	TexturePtr mRenderTargetTexture;
 	TexturePtr mDepthStencilTexture;
-	ScenePtr mScene;
+	SceneWeakPtr mScene;
 	CameraPtr mCamera;
 
 	Color mClearColor;
@@ -108,6 +75,57 @@ public:
 	bool mDrawOnEvent;
 	bool mDrawEventTriggered;
 
+	RenderTargetImpl()
+		: mCamera(FB_NEW(Camera), [](Camera* obj){ FB_DELETE(obj); })
+		, mRenderPipeline(FB_NEW(RenderPipeline), [](RenderPipeline* obj){ FB_DELETE(obj); })
+		, mClearColor(0, 0, 0, 1)
+		, mDepthClear(1.f)
+		, mStencilClear(0)
+		, mEnabled(true)
+		, mSize(0, 0), mSizeCropped(0, 0)
+		, mFormat(PIXEL_FORMAT_R8G8B8A8_UNORM)
+		, mSRV(false)
+		, mMiplevel(false)
+		, mCubeMap(false)
+		, mWillCreateDepth(false), mUsePool(true), mGlowSet(false)
+		, mFrameLuminanceCalced(0)
+		, mGaussianDistBlendGlow(0)
+		, mGaussianDistBloom(0), mDrawOnEvent(false), mDrawEventTriggered(false)
+		, mLuminance(0.5f), mFace(0)
+		, mId(NextRenderTargetId++)
+		
+		
+	{
+	}
+	~RenderTargetImpl(){
+		if (mGaussianDistBlendGlow)
+		{
+			FB_DELETE(mGaussianDistBlendGlow);
+			mGaussianDistBlendGlow = 0;
+		}
+		if (mGaussianDistBloom)
+		{
+			FB_DELETE(mGaussianDistBloom);
+			mGaussianDistBloom = 0;
+		}
+	}	
+
+	//-------------------------------------------------------------------
+	// Observable<IRenderTargetObserver>
+	//-------------------------------------------------------------------
+	void OnObserverAdded(IRenderTargetObserver* observer){
+		auto renderer = Renderer::GetRenderer();
+		if (renderer){
+			HWindow hwnd = renderer->GetWindowHandle(mId);
+			if (hwnd){
+				observer->OnRenderTargetSizeChanged(mSize.x, mSize.y, hwnd);
+			}
+		}
+	}
+	void OnObserverRemoved(IRenderTargetObserver* observer){
+	}
+
+	//-------------------------------------------------------------------
 	bool CheckOptions(const RenderTargetParam& param)
 	{
 		return param.mSize == mSize && param.mPixelFormat == mFormat &&
@@ -119,7 +137,7 @@ public:
 	{
 		auto prevScene = mScene;
 		mScene = scene;
-		return prevScene;
+		return prevScene.lock();
 	}
 
 	CameraPtr ReplaceCamera(CameraPtr cam){
@@ -128,7 +146,7 @@ public:
 		return prev;		
 	}
 
-	void Bind(RenderTarget* rt, size_t face)
+	void Bind(RenderTarget* owner, size_t face)
 	{
 		if (!mEnabled)
 			return;
@@ -136,11 +154,11 @@ public:
 		if (!renderer)
 			return;		
 		
-		renderer->SetCurrentRenderTarget(rt);		
+		renderer->SetCurrentRenderTarget(owner);
 
 		if (mRenderTargetTexture)
 			mRenderTargetTexture->Unbind();
-		ITexture* rt[] = { mRenderTargetTexture };
+		TexturePtr rt[] = { mRenderTargetTexture };
 		size_t rtViewIndex[] = { face };
 		// will update RenderTargetConstants
 		renderer->SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, face);
@@ -149,9 +167,13 @@ public:
 		renderer->Clear(mClearColor.r(), mClearColor.g(), mClearColor.b(), mClearColor.a(),
 			mDepthClear, mStencilClear);
 
-		auto scene = GetSceneInternal();
-		assert(scene);
-		scene->SetLightToRenderer();
+		auto scene = mScene.lock();
+		if (scene){
+			auto light = scene->GetLight(0);
+			renderer->SetDirectionalLight(light, 0);
+			light = scene->GetLight(1);
+			renderer->SetDirectionalLight(light, 1);			
+		}
 
 		auto cam = GetCamera();
 		renderer->SetCamera(cam);
@@ -184,6 +206,17 @@ RenderTarget::~RenderTarget()
 	delete mImpl;
 }
 
+//-------------------------------------------------------------------
+// Observable<IRenderTargetObserver>
+//-------------------------------------------------------------------
+void RenderTarget::OnObserverAdded(IRenderTargetObserver* observer){
+	mImpl->OnObserverAdded(observer);
+}
+void RenderTarget::OnObserverRemoved(IRenderTargetObserver* observer){
+	mImpl->OnObserverRemoved(observer);
+}
+
+//-------------------------------------------------------------------
 bool RenderTarget::CheckOptions(const RenderTargetParam& param)
 {
 	return mImpl->CheckOptions(param);

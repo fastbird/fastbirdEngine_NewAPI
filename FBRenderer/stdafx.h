@@ -10,10 +10,9 @@ Optional modules: \b FBRendererD3D11
 // Happens when a interface can have not exposed symbols.
 // But they are all privates so it is fine.
 #pragma warning (disable : 4251)
-
+#define FBDLLProject
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
-#define FBRendererDLL __declspec(dllexport)
 #else
 #include "PrefixHeader.pch"
 #endif
@@ -25,6 +24,7 @@ Optional modules: \b FBRendererD3D11
 #include <assert.h>
 #include <iostream>
 #include <cstdarg>
+#include <mutex>
 
 #include "FBMemoryManagerLib/MemoryManager.h"
 #include "FBMathLib/Math.h"

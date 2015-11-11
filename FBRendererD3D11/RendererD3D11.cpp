@@ -46,7 +46,7 @@ class RendererD3D11::RendererD3D11Impl{
 public:
 	ID3D11Device*			mDevice; // free-threaded
 	IDXGIFactory1*			mDXGIFactory;
-	VectorMap<HWND_ID, IDXGISwapChain*> mSwapChains;	
+	VectorMap<HWindowId, IDXGISwapChain*> mSwapChains;	
 	ID3D11DeviceContext*	mImmediateContext; //  not free-threaded
 	D3D_DRIVER_TYPE			mDriverType;
 	D3D_FEATURE_LEVEL		mFeatureLevel;	
@@ -731,7 +731,7 @@ bool RendererD3D11::FindClosestMatchingMode(const DXGI_MODE_DESC* finding, DXGI_
 }
 
 //----------------------------------------------------------------------------
-bool RendererD3D11::InitSwapChain(HWND_ID id, int width, int height)
+bool RendererD3D11::InitSwapChain(HWindowId id, int width, int height)
 {
 	if (width == 0 || height == 0){
 		// check the config
@@ -743,7 +743,7 @@ bool RendererD3D11::InitSwapChain(HWND_ID id, int width, int height)
 		gFBEnv->pConsole->GetEngineCommand()->r_resolution = Vec2I(width, height);
 	}
 
-	HWND hwnd = gFBEnv->pEngine->GetWindowHandle(id);
+	HWindow hwnd = gFBEnv->pEngine->GetWindowHandle(id);
 	if (!hwnd)
 	{
 		Logger::Log(FB_ERROR_LOG_ARG, "Not vaild window.");
@@ -848,7 +848,7 @@ bool RendererD3D11::InitSwapChain(HWND_ID id, int width, int height)
 }
 
 //----------------------------------------------------------------------------
-void RendererD3D11::ReleaseSwapChain(HWND_ID id)
+void RendererD3D11::ReleaseSwapChain(HWindowId id)
 {	
 	auto it = mSwapChainRenderTargets.Find(id);
 	if (it == mSwapChainRenderTargets.end())
@@ -878,7 +878,7 @@ void RendererD3D11::ReleaseSwapChain(HWND_ID id)
 	}
 }
 
-bool RendererD3D11::ResizeSwapChain(HWND_ID hwndId, const Vec2I& resol){
+bool RendererD3D11::ResizeSwapChain(HWindowId hwndId, const Vec2I& resol){
 	mImmediateContext->OMSetRenderTargets(0, 0, 0);	
 	mCurrentRTViews.clear();
 	mCurrentDSView = 0;
@@ -959,12 +959,12 @@ RenderTarget* RendererD3D11::CreateRenderTargetFor(IDXGISwapChain* pSwapChain, c
 }
 
 // for full-screen
-void RendererD3D11::ChangeResolution(HWND_ID id, const Vec2I& resol){
+void RendererD3D11::ChangeResolution(HWindowId id, const Vec2I& resol){
 	gFBEnv->pEngine->ChangeSize(id, resol);	
 	OnSizeChanged(id, resol);
 }
 
-void RendererD3D11::OnSizeChanged(HWND_ID id, const Vec2I& newResol){
+void RendererD3D11::OnSizeChanged(HWindowId id, const Vec2I& newResol){
 	auto swIt = mSwapChains.Find(id);
 	if (swIt == mSwapChains.end())
 		return;
@@ -2992,7 +2992,7 @@ unsigned RendererD3D11::GetNumLoadingTexture() const
 	return mCheckTextures.size();
 }
 
-Vec2I RendererD3D11::FindClosestSize(HWND_ID id, const Vec2I& input){
+Vec2I RendererD3D11::FindClosestSize(HWindowId id, const Vec2I& input){
 	Vec2I closest = input;
 	auto it = mSwapChains.Find(id);
 	if (it == mSwapChains.end()){

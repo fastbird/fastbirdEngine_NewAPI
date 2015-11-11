@@ -23,6 +23,12 @@ namespace fastbird
 	{
 	}
 
+	Vec2::Vec2(const std::pair<Real, Real>& coordinates)
+		: x(coordinates.first), y(coordinates.second)
+	{
+
+	}
+
 	//-------------------------------------------------------------------
 	Vec2 Vec2::operator+ (Real s) const
 	{
