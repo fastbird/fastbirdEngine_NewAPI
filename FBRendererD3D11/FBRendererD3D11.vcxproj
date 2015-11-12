@@ -46,7 +46,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(DXSDK_DIR)\include;..;../EssentialEngineData</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FB_PLUGIN_DLL_PROJECT;CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -62,7 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(DXSDK_DIR)\include;..;../EssentialEngineData</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FB_PLUGIN_DLL_PROJECT;CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -77,7 +77,6 @@
     <ClCompile Include="InputLayoutD3D11.cpp" />
     <ClCompile Include="RendererD3D11.cpp" />
     <ClCompile Include="RenderStatesD3D11.cpp" />
-    <ClCompile Include="RenderTargetD3D11.cpp" />
     <ClCompile Include="ResourceBinder.cpp" />
     <ClCompile Include="ResourceMapper.cpp" />
     <ClCompile Include="ShaderD3D11.cpp" />
@@ -96,7 +95,6 @@
     <ClInclude Include="InputLayoutD3D11.h" />
     <ClInclude Include="RendererD3D11.h" />
     <ClInclude Include="RenderStatesD3D11.h" />
-    <ClInclude Include="RenderTargetD3D11.h" />
     <ClInclude Include="ResourceBinder.h" />
     <ClInclude Include="ResourceMapper.h" />
     <ClInclude Include="ShaderD3D11.h" />

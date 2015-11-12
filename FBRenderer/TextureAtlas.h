@@ -1,8 +1,10 @@
 #pragma once
 #include "FBCommonHeaders/VectorMap.h"
 namespace fastbird{
-	struct TextureAtlasRegion
+	DECLARE_SMART_PTR(TextureAtlasRegion);
+	class TextureAtlasRegion
 	{
+	public:
 		DWORD mID;
 		std::string mName;
 		Vec2 mUVStart;
@@ -23,7 +25,7 @@ namespace fastbird{
 	{
 		std::string mPath;
 		TexturePtr mTexture;
-		typedef VectorMap<std::string, TextureAtlasRegion*> REGION_MAP;
+		typedef VectorMap<std::string, TextureAtlasRegionPtr> REGION_MAP;
 		REGION_MAP mRegions;
 		
 		TextureAtlas();
@@ -32,15 +34,10 @@ namespace fastbird{
 		static TextureAtlasPtr CreateTextureAtlas();
 		~TextureAtlas()
 		{
-			for (auto& c : mRegions)
-			{
-				FB_SAFE_DELETE(c.second);
-			}
-			mRegions.clear();
 		}
 
-		TextureAtlasRegion* AddRegion(const char* name);
-		TextureAtlasRegion* GetRegion(const char* name);
+		TextureAtlasRegionPtr AddRegion(const char* name);
+		TextureAtlasRegionPtr GetRegion(const char* name);
 		bool ReloadTextureAtlas();
 	};
 }

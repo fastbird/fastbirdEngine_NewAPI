@@ -2,7 +2,7 @@
 #include "Camera.h"
 #include "IRenderable.h"
 #include "FBMathLib/BoundingVolume.h"
-#include "FBInputManager/InputManager.h"
+#include "FBInputManager/IInputInjector.h"
 #include "FBInputManager/KeyCodes.h"
 
 using namespace fastbird;
@@ -384,23 +384,23 @@ public:
 	}
 
 	//---------------------------------------------------------------------------
-	void ConsumeInput(InputManager* inputMan)
+	void ConsumeInput(IInputInjectorPtr injector)
 	{
 		if (!mCurrentCamera)
 			return;
 		auto target = mTarget.lock();
 		if (!mProcessInput || !target)
 			return;
-		if (inputMan->IsValid(InputManager::DeviceMouse) && !inputMan->IsKeyDown(VK_CONTROL)){
+		if (injector->IsValid(FBInputDevice::DeviceMouse) && !injector->IsKeyDown(VK_CONTROL)){
 			const Vec3 camPos = GetPosition();
 			Vec3 toCam = camPos - target->GetPos();
 			const Real distToTarget = toCam.Normalize();
 			long dx, dy;
-			inputMan->GetHDDeltaXY(dx, dy);
+			injector->GetHDDeltaXY(dx, dy);
 
-			if (inputMan->IsLButtonDown())
+			if (injector->IsLButtonDown())
 			{
-				Real mouseSens = inputMan->GetSensitivity();
+				Real mouseSens = injector->GetSensitivity();
 				if (dx != 0)
 				{
 					mUserParams.dYaw = dx * mouseSens;
@@ -411,26 +411,26 @@ public:
 					mUserParams.dPitch = -dy * mouseSens;
 				}
 
-				inputMan->LockMousePos(true, this);
-				inputMan->Invalidate(InputManager::DeviceMouse);
+				injector->LockMousePos(true, this);
+				injector->Invalidate(FBInputDevice::DeviceMouse);
 			}
 			else
 			{
 				//pMouse->LockMousePos(false, this);
 			}
 
-			long wheel = inputMan->GetWheel();
+			long wheel = injector->GetWheel();
 			if (wheel)
 			{
-				inputMan->PopWheel();
+				injector->PopWheel();
 				Real shift = 1.0f;
-				if (inputMan->IsKeyDown(VK_SHIFT))
+				if (injector->IsKeyDown(VK_SHIFT))
 					shift = 0.1f;
-				Real wheelSens = inputMan->GetWheelSensitivity();
-				Real numLinesSens = wheelSens * (Real)inputMan->GetNumLinesWheelScroll();
+				Real wheelSens = injector->GetWheelSensitivity();
+				Real numLinesSens = wheelSens * (Real)injector->GetNumLinesWheelScroll();
 				numLinesSens *= std::max(1.0, mInternalParams.dist * 0.05);				
 				mUserParams.dDist += -wheel * numLinesSens * shift;
-				inputMan->Invalidate(InputManager::DeviceMouse);
+				injector->Invalidate(FBInputDevice::DeviceMouse);
 			}
 		}
 	}
@@ -637,6 +637,6 @@ void Camera::SetCameraIndex(size_t idx) {
 	mImpl->mCamIndex = idx; 
 }
 
-void Camera::ConsumeInput(InputManager* inputManager){
-	mImpl->ConsumeInput(inputManager);
+void Camera::ConsumeInput(IInputInjectorPtr injector){
+	mImpl->ConsumeInput(injector);
 }

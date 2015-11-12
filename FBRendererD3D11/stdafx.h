@@ -4,7 +4,6 @@ Direct3D 11 renderer
 
 Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 */
-#define FBPlugin __declspec(dllexport)
 
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxgi.lib")

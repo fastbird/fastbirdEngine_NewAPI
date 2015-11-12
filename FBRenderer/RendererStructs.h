@@ -31,8 +31,8 @@ namespace fastbird
 		FILL_MODE		FillMode;
 		CULL_MODE		CullMode;		
 		int             DepthBias;
-		float           DepthBiasClamp;
-		float           SlopeScaledDepthBias;
+		Real           DepthBiasClamp;
+		Real           SlopeScaledDepthBias;
 		bool            FrontCounterClockwise;
 		bool            DepthClipEnable;
 		bool            ScissorEnable;
@@ -67,12 +67,12 @@ namespace fastbird
 		TEXTURE_ADDRESS_MODE AddressU;
 		TEXTURE_ADDRESS_MODE AddressV;
 		TEXTURE_ADDRESS_MODE AddressW;
-		float                MipLODBias;
+		Real                MipLODBias;
 		unsigned int         MaxAnisotropy;
 		COMPARISON_FUNC      ComparisonFunc;
-		float                BorderColor[4];
-		float                MinLOD;
-		float                MaxLOD;
+		Real                BorderColor[4];
+		Real                MinLOD;
+		Real                MaxLOD;
 	};
 
 	struct RENDER_TARGET_BLEND_DESC
@@ -187,10 +187,10 @@ namespace fastbird
 			NumUpdateObjectConst = 0;
 		}
 
-		void UpdateFrameRate(float dt)
+		void UpdateFrameRate(Real dt)
 		{
 			FrameRateDisplayUpdateTime += dt;
-			dt = std::max(0.0000001f, dt);
+			dt = std::max(0.0000001, dt);
 			FrameRate = (FrameRate + 1.0f/dt)/2.0f;
 			if (FrameRateDisplayUpdateTime>0.5f)
 			{
@@ -206,51 +206,12 @@ namespace fastbird
 		unsigned int NumDrawIndexedCall;
 		unsigned int NumIndexCount;
 
-		float FrameRate;
-		float FrameRateDisplay;
-		float FrameRateDisplayUpdateTime;
+		Real FrameRate;
+		Real FrameRateDisplay;
+		Real FrameRateDisplayUpdateTime;
 
 		unsigned int NumUpdateObjectConst;
 	};
-
-	struct INPUT_ELEMENT_DESC
-	{
-		INPUT_ELEMENT_DESC(const char* semantic, unsigned index,
-			INPUT_ELEMENT_FORMAT format, unsigned inputSlot,
-			unsigned alignedByteOffset, INPUT_CLASSIFICATION slotClass,
-			unsigned instanceDataStepRate)
-			: mSemanticIndex(index)
-			, mFormat(format), mInputSlot(inputSlot)
-			, mAlignedByteOffset(alignedByteOffset), mInputSlotClass(slotClass)
-			, mInstanceDataStepRate(instanceDataStepRate)
-		{
-			memset(mSemanticName, 0, 256);
-			strcpy_s(mSemanticName, semantic);
-		}
-		INPUT_ELEMENT_DESC()
-		{
-			memset(this, 0, sizeof(INPUT_ELEMENT_DESC));
-		}
-		bool operator==(const INPUT_ELEMENT_DESC& other) const
-		{
-			return memcmp(this, &other, sizeof(INPUT_ELEMENT_DESC)) == 0;
-		}
-
-		bool operator< (const INPUT_ELEMENT_DESC& other) const
-		{
-			return memcmp(this, &other, sizeof(INPUT_ELEMENT_DESC)) < 0;
-		}
-
-		char mSemanticName[256];
-		unsigned mSemanticIndex;
-		INPUT_ELEMENT_FORMAT mFormat;
-		unsigned mInputSlot;
-		unsigned mAlignedByteOffset;
-		INPUT_CLASSIFICATION mInputSlotClass;
-		unsigned mInstanceDataStepRate;
-	};
-
-	typedef std::vector<INPUT_ELEMENT_DESC> INPUT_ELEMENT_DESCS;
 
 	struct MapData
 	{
@@ -262,36 +223,12 @@ namespace fastbird
 
 	struct Viewport
 	{
-		float mTopLeftX;
-		float mTopLeftY;
-		float mWidth;
-		float mHeight;
-		float mMinDepth;
-		float mMaxDepth;
-	};
-
-	struct RenderTargetParam
-	{
-		RenderTargetParam()
-			: mEveryFrame(false)
-			, mSize(200, 200)
-			, mPixelFormat(PIXEL_FORMAT_R8G8B8A8_UNORM)
-			, mShaderResourceView(false)
-			, mMipmap(false)
-			, mCubemap(false)
-			, mWillCreateDepth(false)
-			, mUsePool(false)
-		{
-
-		}
-		bool mEveryFrame;
-		Vec2I mSize;
-		PIXEL_FORMAT mPixelFormat;
-		bool mShaderResourceView;
-		bool mMipmap;
-		bool mCubemap;
-		bool mWillCreateDepth; // set true, and call IRenderTarget::SetDepthStencilDesc().
-		bool mUsePool;
+		Real mTopLeftX;
+		Real mTopLeftY;
+		Real mWidth;
+		Real mHeight;
+		Real mMinDepth;
+		Real mMaxDepth;
 	};
 
 	struct Box3D

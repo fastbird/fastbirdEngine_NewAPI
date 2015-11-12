@@ -27,6 +27,7 @@ public:
 		memset(mKeyPressed, 0, sizeof(mKeyPressed));
 		memset(mKeyUp, 0, sizeof(mKeyUp));
 	}
+
 	void EndFrame(Timer::TIME_PRECISION gameTimeInSecond){
 		mValid = true;
 		memset(mKeyPressed, 0, sizeof(mKeyPressed));
@@ -38,12 +39,15 @@ public:
 			}
 		}
 	}
+
 	bool IsValid() const { 
 		return mValid && !mInvalidatedTemporary; 
 	}
+
 	void Invalidate(bool buttonClicked = false){
 		mValid = false;
 	}
+
 	void InvalidTemporary(bool invalidate){
 		mInvalidatedTemporary = invalidate;
 	}
@@ -85,6 +89,7 @@ public:
 			}
 		}
 	}
+
 	void PushChar(HWindow hWnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec){
 		mCurrentChar.push(keycode);
 		while (mCurrentChar.size() > 10)
@@ -93,24 +98,28 @@ public:
 		}
 		mLastPushKeyTime = gameTimeInSec;
 	}
+
 	unsigned GetChar(){
 		if (mCurrentChar.empty())
 			return 0;
 		unsigned ret = mCurrentChar.front();
 		return ret;
 	}
+
 	void PopChar(){
 		if (!mCurrentChar.empty()){
 			mCurrentChar.pop();
 			Invalidate();
 		}
 	}
+
+	void ClearBuffer(){
+		ClearWithSwap(mCurrentChar);
+	}
+
 	void OnKillFocus(){
 		memset(mKeyDown, 0, sizeof(mKeyDown));
 		memset(mKeyPressed, 0, sizeof(mKeyPressed));
-	}
-	void ClearBuffer(){
-		ClearWithSwap(mCurrentChar);
 	}
 
 	bool IsPairedKey(unsigned short keycode) const
@@ -221,14 +230,13 @@ public:
 		mImpl->PopChar();
 	}
 
-	//--------------------------------------------------------------------------
-	void Keyboard::OnKillFocus()
-	{
-		mImpl->PopChar();
-	}
-
 	void Keyboard::ClearBuffer()
 	{
 		mImpl->ClearBuffer();
+	}
+
+	void Keyboard::OnKillFocus()
+	{
+		mImpl->PopChar();
 	}
 }

@@ -1,7 +1,10 @@
 #pragma once
-#include "FBCommonHeaders/Types.h"
-namespace fastbird{
-	
+#define FB_RENDERABLE_VERSION 1
+
+#include "FBCommonHeaders/platform.h"
+#include "FBMathLib/Vec3.h"
+namespace fastbird{	
+	class BoundingVolume;
 	DECLARE_SMART_PTR(Animation);
 	DECLARE_SMART_PTR(InputLayout);
 	DECLARE_SMART_PTR(IndexBuffer);
@@ -9,16 +12,27 @@ namespace fastbird{
 	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(Scene);
 	DECLARE_SMART_PTR(IRenderable);
-	class IRenderable
+	class FB_DLL_PUBLIC IRenderable
 	{
 	public:
-		virtual ~IRenderable() {}
-		
-		virtual IRenderable* Clone() const{ return 0; }
-
+		enum RenderableType{
+			RenderableUnknown,
+			RenderableMesh,			
+			RenderableParticle,
+			RenderableTerrain,
+			RenderableCloudVolumes,
+			RenderableSky,			
+			RenderableTrail,
+			RenderableUI,
+			Renderable3DUI,
+			RenderableHUD,
+			RenderableLast = RenderableHUD, /// You can define your own renderable type from RenderableLast+1
+		};
+		virtual ~IRenderable() {}		
+		virtual IRenderablePtr Clone() const{ return 0; }
 		virtual void SetName(const char* name) {}
 		virtual const char* GetName() const { return ""; }
-		
+		virtual int GetRenderableType() const = 0;
 		virtual void OnAttachedToScene(ScenePtr pScene) = 0;
 		virtual void OnDetachedFromScene(ScenePtr pScene) = 0;
 		virtual bool IsAttached(ScenePtr pScene) const = 0;
@@ -27,12 +41,14 @@ namespace fastbird{
 		virtual void SetMaterial(const char* name, int pass) = 0;
 		virtual void SetMaterial(MaterialPtr pMat, int pass) = 0;
 		virtual MaterialPtr GetMaterial(int pass = 0) const = 0;
-
 		virtual void SetVertexBuffer(VertexBufferPtr pVertexBuffer) = 0;
 		virtual void SetIndexBuffer(IndexBufferPtr pIndexBuffer) = 0;
 		// override the input layout defined in material
 		virtual void SetInputLayout(InputLayoutPtr i) = 0;
-		
+
+		//-------------------------------------------------------------------
+		// RenderableFlags
+		//-------------------------------------------------------------------		
 		enum RenderableFlag
 		{
 			OF_HIDE = 0x1,
@@ -62,6 +78,7 @@ namespace fastbird{
 		virtual Real GetDistToCam() const { return -1; }
 		virtual const Vec3& GetPos() const { return Vec3::ZERO; }
 		virtual void SetPos(const Vec3& pos) {}
+		virtual BoundingVolume* GetBoundingVolume(){ return 0; }
 
 		//-------------------------------------------------------------------
 		// Rendering
@@ -73,6 +90,9 @@ namespace fastbird{
 		virtual void SetEnableHighlight(bool highlight) {}
 		const AnimationPtr GetAnimation() const { return 0; }
 
+		//-------------------------------------------------------------------
+		// Debugging features
+		//-------------------------------------------------------------------
 		virtual void SetGameType(int type) = 0;
 		virtual int GetGameType() const = 0;
 		virtual void SetGameId(unsigned id) = 0;

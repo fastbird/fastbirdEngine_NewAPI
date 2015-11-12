@@ -1,11 +1,9 @@
 #pragma once
-#if !defined(FBPlugin)
-#define FBPlugin __declspec(dllimport)
-#endif
+#include "FBCommonHeaders/platform.h"
 namespace fastbird {
 	class IRenderer;
 }
 extern "C"{
-	FBPlugin fastbird::IRenderer* CreateRenderEngine();
-	FBPlugin void DeleteRenderEngine(fastbird::IRenderer* renderer);
+	FB_PLUGIN_DLL_PUBLIC fastbird::IRenderer* CreateRenderEngine();
+	FB_PLUGIN_DLL_PUBLIC void DeleteRenderEngine(fastbird::IRenderer* renderer);
 }

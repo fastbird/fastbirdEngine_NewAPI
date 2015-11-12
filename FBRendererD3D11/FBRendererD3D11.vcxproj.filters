@@ -8,7 +8,6 @@
     <ClCompile Include="VertexBufferD3D11.cpp" />
     <ClCompile Include="IndexBufferD3D11.cpp" />
     <ClCompile Include="InputLayoutD3D11.cpp" />
-    <ClCompile Include="RenderTargetD3D11.cpp" />
     <ClCompile Include="DLLMain.cpp" />
     <ClCompile Include="ResourceBinder.cpp" />
     <ClCompile Include="RenderStatesD3D11.cpp" />
@@ -17,7 +16,6 @@
   <ItemGroup>
     <ClInclude Include="RendererD3D11.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="RenderTargetD3D11.h" />
     <ClInclude Include="ShaderD3D11.h" />
     <ClInclude Include="TextureD3D11.h" />
     <ClInclude Include="VertexBufferD3D11.h" />

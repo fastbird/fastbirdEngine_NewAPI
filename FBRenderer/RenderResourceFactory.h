@@ -4,7 +4,7 @@ namespace fastbird{
 		friend class Renderer;
 	private:
 		template <typename T>
-		static std::shared_ptr<T> CreateResource(RendererPtr renderer){
+		static std::shared_ptr<T> CreateResource(){
 			return std::shared_ptr<T>(FB_NEW(T), [](T* obj){ FB_DELETE(obj); });
 		}
 	};

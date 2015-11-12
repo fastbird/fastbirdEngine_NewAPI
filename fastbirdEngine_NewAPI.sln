@@ -39,6 +39,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBInputManager", "FBInputMa
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBSceneManager", "FBSceneManager\FBSceneManager.vcxproj", "{E1F08226-828D-4354-8128-2AE1B91FBD4F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBRenderableFactory", "FBRenderableFactory\FBRenderableFactory.vcxproj", "{5F32EA1B-6CA3-41B6-B918-FA4F1470C360}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -109,6 +111,10 @@ Global
 		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Debug|Win32.Build.0 = Debug|Win32
 		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Release|Win32.ActiveCfg = Release|Win32
 		{E1F08226-828D-4354-8128-2AE1B91FBD4F}.Release|Win32.Build.0 = Release|Win32
+		{5F32EA1B-6CA3-41B6-B918-FA4F1470C360}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5F32EA1B-6CA3-41B6-B918-FA4F1470C360}.Debug|Win32.Build.0 = Debug|Win32
+		{5F32EA1B-6CA3-41B6-B918-FA4F1470C360}.Release|Win32.ActiveCfg = Release|Win32
+		{5F32EA1B-6CA3-41B6-B918-FA4F1470C360}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

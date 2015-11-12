@@ -32,14 +32,34 @@ namespace fastbird
 		// IMouse
 		//-------------------------------------------------------------------
 		virtual void PushEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION);
+		
+		// Positions
 		virtual void GetHDDeltaXY(long &x, long &y) const;
 		virtual void GetDeltaXY(long &x, long &y) const;
 		virtual CoordinatesI GetDeltaXY() const;
 		virtual void GetPos(long &x, long &y) const;
 		virtual CoordinatesI GetPos() const;
 		virtual void GetPrevPos(long &x, long &y) const;
+		// normalized pos(0.0~1.0)
 		virtual void GetNPos(Real &x, Real &y) const;
-		virtual CoordinatesR GetNPos() const;		
+		virtual CoordinatesR GetNPos() const;
+		virtual bool IsMoved() const;
+		virtual void LockMousePos(bool lock, void* key);
+		virtual bool IsIn(int left, int top, int right, int bottom);
+		virtual Real GetSensitivity() const;
+
+		// Dragging
+		virtual void GetDragStart(long &x, long &y) const;
+		virtual CoordinatesI GetDragStartedPos() const;
+		virtual bool IsDragStartIn(int left, int top, int right, int bottom) const;
+		virtual bool IsDragStarted(int& outX, int& outY) const;
+		virtual bool IsDragEnded() const;
+		virtual void PopDragEvent();
+		virtual bool IsRDragStarted(int& outX, int& outY) const;
+		virtual bool IsRDragEnded(int& outX, int& outY) const;
+		virtual void PopRDragEvent();
+
+		// Buttons
 		virtual bool IsLButtonDownPrev() const;
 		virtual bool IsLButtonDown(Real* time = 0) const;
 		virtual bool IsLButtonClicked() const;
@@ -50,37 +70,23 @@ namespace fastbird
 		virtual bool IsRButtonClicked() const;
 		virtual bool IsRButtonPressed() const;
 		virtual bool IsMButtonDown() const;
-		virtual bool IsMoved() const;
+		virtual void ClearButton();
+		virtual void NoClickOnce();
+		virtual void ClearRightDown();
+		virtual Real GetLButtonDownTime() const;
 
-		virtual void GetDragStart(long &x, long &y) const;
-		virtual CoordinatesI GetDragStartedPos() const;
-		virtual bool IsDragStartIn(int left, int top, int right, int bottom) const;
-		virtual bool IsDragStarted(int& outX, int& outY) const;
-		virtual bool IsDragEnded() const;
-		virtual void PopDragEvent();
-		virtual bool IsRDragStarted(int& outX, int& outY) const;
-		virtual bool IsRDragEnded(int& outX, int& outY) const;
-		virtual void PopRDragEvent();
-		
+		// Wheel
 		virtual long GetWheel() const;
 		virtual void PopWheel();
 		virtual void ClearWheel();
-		virtual void ClearButton();
 		virtual unsigned long GetNumLinesWheelScroll() const;
 
-		virtual void LockMousePos(bool lock, void* key);
-		virtual void NoClickOnce();
+
 		virtual void OnKillFocus();
 		virtual void OnSetFocus(HWindow hWnd);
-		virtual bool IsIn(int left, int top, int right, int bottom);
-		
 		virtual void CursorToCenter();
 		virtual void SetCursorPosition(int x, int y);
-
-		virtual void ClearRightDown();
-		virtual Real GetLButtonDownTime() const;
 		virtual void AddHwndInterested(HWindow wnd);
-		virtual Real GetSensitivity() const;
 		virtual void SetSensitivity(Real sens);
 		virtual Real GetWheelSensitivity() const;
 		virtual void SetWheelSensitivity(Real sens);

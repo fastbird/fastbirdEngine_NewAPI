@@ -31,8 +31,10 @@ namespace fastbird
 		virtual bool IsKeyUp(unsigned short keycode) const;
 		virtual unsigned GetChar();
 		virtual void PopChar();
-		virtual void OnKillFocus();
 		virtual void ClearBuffer();
+
+		virtual void OnKillFocus();
+		
 	};
 }
 

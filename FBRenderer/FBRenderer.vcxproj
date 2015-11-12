@@ -13,32 +13,41 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="GaussianDistribution.h" />
     <ClInclude Include="ICameraObserver.h" />
     <ClInclude Include="IIndexBuffer.h" />
     <ClInclude Include="IInputLayout.h" />
     <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="InputElementDesc.h" />
     <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IRenderer.h" />
     <ClInclude Include="IRendererObserver.h" />
     <ClInclude Include="IRendererStructs.h" />
     <ClInclude Include="IRenderStates.h" />
-    <ClInclude Include="IRenderTarget.h" />
+    <ClInclude Include="IRenderStrategy.h" />
     <ClInclude Include="IRenderTargetListener.h" />
     <ClInclude Include="IRenderTargetObserver.h" />
     <ClInclude Include="IShader.h" />
     <ClInclude Include="ITexture.h" />
     <ClInclude Include="IVertexBuffer.h" />
+    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererEnums.h" />
     <ClInclude Include="RendererStructs.h" />
-    <ClInclude Include="RenderPipeline.h" />
+    <ClInclude Include="RenderEventMarker.h" />
+    <ClInclude Include="RenderOptions.h" />
+    <ClInclude Include="RenderParam.h" />
     <ClInclude Include="RenderResourceFactory.h" />
     <ClInclude Include="RenderStates.h" />
     <ClInclude Include="RenderSteps.h" />
+    <ClInclude Include="RenderStrategyDefault.h" />
     <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="RenderTargetParam.h" />
+    <ClInclude Include="ShaderDefines.h" />
     <ClInclude Include="Spatial.h" />
+    <ClInclude Include="StarDef.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureAtlas.h" />
@@ -48,14 +57,19 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
+    <ClCompile Include="InputElementDesc.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
-    <ClCompile Include="RenderPipeline.cpp" />
+    <ClCompile Include="RenderEventMarker.cpp" />
     <ClCompile Include="RenderStates.cpp" />
+    <ClCompile Include="RenderStrategyDefault.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="ShaderDefines.cpp" />
     <ClCompile Include="Spatial.cpp" />
+    <ClCompile Include="StarDef.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -67,6 +81,9 @@
   <ItemGroup>
     <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
       <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBFileSystem\FBFileSystem.vcxproj">
+      <Project>{970770a8-f3c4-43ad-b4a0-c076ec6fe610}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBInputManager\FBInputManager.vcxproj">
       <Project>{c8797aa0-b737-4f09-a6a4-131350b54bc9}</Project>
@@ -126,6 +143,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>..</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FB_DLL_PROJECT;CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -140,6 +158,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>..</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>FB_DLL_PROJECT;CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

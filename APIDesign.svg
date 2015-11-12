@@ -19,6 +19,34 @@
   <defs
      id="defs4">
     <marker
+       inkscape:isstock="true"
+       style="overflow:visible"
+       id="marker4859"
+       refX="0.0"
+       refY="0.0"
+       orient="auto"
+       inkscape:stockid="Arrow1Lstart">
+      <path
+         transform="scale(0.8) translate(12.5,0)"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         id="path4861" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="marker4684"
+       style="overflow:visible"
+       inkscape:isstock="true">
+      <path
+         id="path4428"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <marker
        inkscape:stockid="Arrow1Lstart"
        orient="auto"
        refY="0.0"
@@ -306,21 +334,6 @@
          d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
          style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
          transform="scale(0.8) translate(12.5,0)" />
-    </marker>
-    <marker
-       inkscape:isstock="true"
-       style="overflow:visible"
-       id="marker6685"
-       refX="0.0"
-       refY="0.0"
-       orient="auto"
-       inkscape:stockid="Arrow1Lstart"
-       inkscape:collect="always">
-      <path
-         transform="scale(0.8) translate(12.5,0)"
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt;stroke-opacity:1;fill:#000000;fill-opacity:1"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         id="path6687" />
     </marker>
     <marker
        inkscape:isstock="true"
@@ -658,10 +671,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4142136"
-     inkscape:cx="146.71618"
-     inkscape:cy="625.78113"
+     inkscape:cx="278.57066"
+     inkscape:cy="601.40273"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="g6152-7"
      showgrid="false"
      inkscape:window-width="2498"
      inkscape:window-height="1418"
@@ -801,30 +814,31 @@
     </g>
     <g
        id="g3514"
-       transform="matrix(0.99993223,0,0,1.0794076,-40.587434,-324.69433)"
+       transform="matrix(0.99993223,0,0,1.0794076,-42.587434,-329.94433)"
        inkscape:connector-avoid="true">
       <rect
-         y="425.78259"
-         x="53.097584"
-         height="51.42857"
-         width="186.42857"
+         y="439.50357"
+         x="82.44191"
+         height="25.144672"
+         width="128.73999"
          id="rect3487"
-         style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.92509413;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.11859596;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
          id="text3489"
-         y="457.92545"
-         x="88.097588"
+         y="455.39523"
+         x="106.63332"
          style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          xml:space="preserve"><tspan
-           y="457.92545"
-           x="88.097588"
+           y="455.39523"
+           x="106.63332"
            id="tspan3491"
-           sodipodi:role="line">FBFileSystem</tspan></text>
+           sodipodi:role="line"
+           style="font-size:12.03183842px">FBFileSystem</tspan></text>
     </g>
     <g
        id="g3519"
-       transform="matrix(0.99993223,0,0,1.0794076,-24.126127,79.213799)"
+       transform="matrix(0.99993223,0,0,1.0794076,-30.490088,34.666073)"
        inkscape:connector-avoid="true">
       <g
          id="g4716"
@@ -839,14 +853,15 @@
         <text
            xml:space="preserve"
            style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           x="297.02615"
-           y="457.21115"
+           x="301.80093"
+           y="456.49274"
            id="text3489-0"
            sodipodi:linespacing="125%"><tspan
              sodipodi:role="line"
              id="tspan3491-4"
-             x="297.02615"
-             y="457.21115">FBRenderer</tspan></text>
+             x="301.80093"
+             y="456.49274"
+             style="font-size:14.43820667px">FBRenderer</tspan></text>
       </g>
     </g>
     <path
@@ -859,7 +874,7 @@
        inkscape:connection-end="#g3344-7" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#Arrow1Lstart)"
-       d="M 378.57673,104.68663 198.92249,142.85327"
+       d="m 374.06985,104.68663 -205.4897,40.61984"
        id="path3563"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -867,7 +882,7 @@
        inkscape:connection-end="#g3514" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker4935)"
-       d="M 192.88424,95.201821 141.58393,134.89864"
+       d="M 191.61775,95.201821 123.09337,144.45916"
        id="path4927"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -906,7 +921,7 @@
       </g>
       <path
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#marker4811)"
-         d="m 398.32634,284.30849 -51.25772,-7.24361"
+         d="m 425.66868,285.02 -76.84479,-9.35452"
          id="path5026"
          inkscape:connector-type="polyline"
          inkscape:connector-curvature="0"
@@ -963,26 +978,27 @@
       </g>
     </g>
     <g
-       transform="matrix(0.99993223,0,0,1.0794076,278.74813,276.17008)"
+       transform="matrix(0.99993223,0,0,1.0794076,281.74813,271.17008)"
        id="g5008">
       <rect
-         y="425.0683"
-         x="257.74045"
-         height="51.42857"
-         width="186.42857"
+         y="438.22952"
+         x="269.46838"
+         height="31.591181"
+         width="157.97237"
          id="rect3487-1-0"
-         style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.92509413;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+         style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.38888729;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
          id="text3489-0-8"
-         y="457.88907"
-         x="318.24808"
+         y="457.78622"
+         x="324.93256"
          style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          xml:space="preserve"><tspan
-           y="457.88907"
-           x="318.24808"
+           y="457.78622"
+           x="324.93256"
            id="tspan3491-4-5"
-           sodipodi:role="line">FBApp</tspan></text>
+           sodipodi:role="line"
+           style="font-size:14.43820667px">FBApp</tspan></text>
     </g>
     <path
        inkscape:connection-end="#g5008"
@@ -990,7 +1006,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="path5377"
-       d="m 378.58917,570.09987 54.47656,45.99432 159.4017,118.89784"
+       d="m 352.46232,525.55214 29.69173,109.63393 214.4797,109.01229"
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker5385)" />
     <path
        inkscape:connection-end="#g4643"
@@ -998,7 +1014,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="path5553"
-       d="M 600.8606,790.50442 408.19362,971.34204"
+       d="M 612.14329,778.29812 407.93658,971.34204"
        style="fill:none;fill-rule:evenodd;stroke:#00b700;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker5561)" />
     <path
        inkscape:connection-end="#g4643"
@@ -1006,7 +1022,7 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="path5729"
-       d="m 353.8743,570.09987 16.81482,401.24217"
+       d="m 347.7044,525.55214 22.68087,445.7899"
        style="fill:none;fill-rule:evenodd;stroke:#0000ff;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker5737)" />
     <text
        sodipodi:linespacing="125%"
@@ -1029,11 +1045,12 @@
        inkscape:connector-curvature="0"
        inkscape:connector-type="polyline"
        id="path5911"
-       d="m 674.0641,108.74724 -71.06022,155.80294 -1.436,2.55645 -89.21478,96.11203 -143.01129,166.21807"
+       d="m 674.0641,108.74724 -71.06022,155.80294 -1.436,2.55645 L 367.09354,484.889"
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker5919)" />
     <g
        id="g4930"
-       transform="translate(-79.75736,137.53553)">
+       transform="translate(370.66964,283.19952)"
+       inkscape:connector-avoid="true">
       <rect
          style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
          id="rect6253"
@@ -1044,15 +1061,15 @@
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="175.61794"
-         y="267.20367"
+         x="181.53"
+         y="265.16409"
          id="text6255"
          sodipodi:linespacing="125%"><tspan
-           style="font-size:15px"
+           style="font-size:12.5px"
            sodipodi:role="line"
            id="tspan6257"
-           x="175.61794"
-           y="267.20367">FBColladaImporter</tspan></text>
+           x="181.53"
+           y="265.16409">FBColladaImporter</tspan></text>
     </g>
     <g
        id="g4935"
@@ -1116,7 +1133,7 @@
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker6639)"
-       d="m 439.36007,104.68663 4.58549,124.39171 0,20.7271 -85.18059,279.63129"
+       d="m 439.36007,104.68663 4.58549,124.39171 0,20.7271 -0.88284,2.46051 -89.16431,232.62305"
        id="path6631"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1201,7 +1218,7 @@
          id="tspan4398">Loop-free layered architecture.</tspan></text>
     <g
        id="g4406"
-       transform="translate(268.3245,192.64362)"
+       transform="translate(217.41282,211.7355)"
        inkscape:connector-avoid="true">
       <g
          id="g4868"
@@ -1229,7 +1246,7 @@
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker4589)"
-       d="M 517.2393,613.09419 384.64432,971.34204"
+       d="M 468.3382,632.18607 380.84585,971.34204"
        id="path4581"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1283,7 +1300,7 @@
     </g>
     <path
        style="fill:#800080;fill-rule:evenodd;stroke:#969696;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:8, 1;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 436.06573,598.40246 -40.977525,615.98245"
+       d="m 385.15405,615.36425 -426.131575,5.36654"
        id="path4784"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1402,7 +1419,7 @@
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:8, 8;stroke-dashoffset:0;stroke-opacity:1"
-       d="m 417.89367,540.61484 377.34107,-45.6405"
+       d="M 411.52971,501.55194 795.23474,487.55639"
        id="path6273"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1444,20 +1461,12 @@
        inkscape:connection-end="#rect6467" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker6519)"
-       d="m 112.1557,190.41103 44.98341,193.84166"
+       d="m 114.80196,171.60051 77.03582,98.74229 396.30974,259.57388"
        id="path6503"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#g3514"
        inkscape:connection-end="#g4930" />
-    <path
-       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker6685)"
-       d="M 179.95346,414.24957 328.43569,529.43673"
-       id="path6505"
-       inkscape:connector-type="polyline"
-       inkscape:connector-curvature="0"
-       inkscape:connection-end="#g3519"
-       inkscape:connection-start="#g4930" />
     <g
        id="g6981-4"
        transform="translate(1240.4493,204.57495)">
@@ -1485,7 +1494,7 @@
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker6895)"
-       d="m 1056.1676,446.16768 -91.84503,20.25824"
+       d="m 1056.1676,446.16768 -91.84504,20.25824"
        id="path6887"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1575,7 +1584,7 @@
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker8924)" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker10223)"
-       d="M 370.18717,252.35868 182.01756,384.25269"
+       d="m 398.02063,252.35868 202.1049,277.558"
        id="path9787"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1583,7 +1592,7 @@
        inkscape:connection-end="#g4930" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker10009)"
-       d="m 393.52665,252.35868 123.5313,324.88019"
+       d="m 391.52198,252.35868 77.40664,343.97207"
        id="path9789"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1591,7 +1600,7 @@
        inkscape:connection-end="#g4406" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker9801)"
-       d="M 387.12521,252.35868 355.16308,529.43673"
+       d="M 386.56343,252.35868 349.62682,484.889"
        id="path9791"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1607,7 +1616,7 @@
        inkscape:connection-end="#g4406-9" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker10969)"
-       d="M 255.33201,269.32342 346.3113,529.43673"
+       d="M 255.66982,269.32342 339.227,484.889"
        id="path10961"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1615,7 +1624,7 @@
        inkscape:connection-end="#g3519" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker11215)"
-       d="m 417.89367,566.20821 40.36975,11.03066"
+       d="m 371.37677,525.55214 81.05552,70.77861"
        id="path11831"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1667,7 +1676,7 @@
        inkscape:connection-end="#g3344-0" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker5132)"
-       d="m 518.72945,184.9864 -33.61908,56.85059 -1.43599,2.55645 -122.52608,285.04329"
+       d="M 514.60866,184.9864 443.06272,252.26595 353.89841,484.889"
        id="path5124"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1675,7 +1684,7 @@
        inkscape:connection-end="#g3519" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1"
-       d="M 453.38752,104.68663 862.75558,466.42592"
+       d="M 463.59324,104.68663 582.83605,166.52838 866.1098,466.42592"
        id="path5400"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1683,7 +1692,7 @@
        inkscape:connection-end="#g4406-9" />
     <g
        id="g4406-2"
-       transform="translate(-70.288228,313.25648)"
+       transform="translate(-130.90702,83.746814)"
        inkscape:connector-avoid="true">
       <g
          id="g4868-78">
@@ -1703,22 +1712,22 @@
             <text
                xml:space="preserve"
                style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-               x="197.14711"
-               y="404.44733"
+               x="196.76683"
+               y="402.95435"
                id="text4402-0"
                sodipodi:linespacing="125%"><tspan
                  style="font-size:17.5px"
                  sodipodi:role="line"
                  id="tspan4404-2"
-                 x="197.14711"
-                 y="404.44733">FBSceneManager</tspan></text>
+                 x="196.76683"
+                 y="402.95435">FBSceneManager</tspan></text>
           </g>
         </g>
       </g>
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:1, 2;stroke-dashoffset:0;stroke-opacity:1;marker-start:url(#marker6165)"
-       d="M 227.66995,704.71566 355.8285,971.34204"
+       d="M 164.75221,475.206 358.85755,971.34204"
        id="path6157"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1744,21 +1753,29 @@
           <text
              sodipodi:linespacing="125%"
              id="text4402-0-1"
-             y="393.84073"
-             x="205.63239"
+             y="393.75833"
+             x="208.39117"
              style="font-style:normal;font-weight:normal;font-size:17.5px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
              xml:space="preserve"><tspan
-               y="393.84073"
-               x="205.63239"
+               y="393.75833"
+               x="208.39117"
                id="tspan4404-2-2"
                sodipodi:role="line"
                style="font-size:12.5px">FBInputManager</tspan></text>
+          <path
+             style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             d="M -228.93769,177.95629 -9.3947296,491.24478"
+             id="path5519"
+             inkscape:connector-type="polyline"
+             inkscape:connector-curvature="0"
+             inkscape:connection-start="#g3514"
+             inkscape:connection-end="#g3519" />
         </g>
       </g>
     </g>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker4692)"
-       d="m 604.41771,402.07398 23.31735,332.91805"
+       d="m 615.0506,402.07398 82.78805,124.8427 0,35.99688 -61.8432,181.2848"
        id="path4430"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1766,7 +1783,7 @@
        inkscape:connection-end="#g5008" />
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker4697)"
-       d="M 575.86559,402.07398 381.94432,529.43673"
+       d="M 564.76059,402.07398 387.36886,484.889"
        id="path4695"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
@@ -1790,14 +1807,30 @@
          sodipodi:role="line"
          id="tspan4709"
          x="173.94826"
-         y="520.61792"></tspan></text>
+         y="520.61792" /></text>
     <path
        style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker4723)"
-       d="m 428.92994,104.68663 -94.76223,121.9312 -0.88284,2.46051 L 222.054,653.304"
+       d="m 418.92693,104.68663 -227.08915,145.76764 -1.39267,2.28994 -31.07924,171.05013"
        id="path4721"
        inkscape:connector-type="polyline"
        inkscape:connector-curvature="0"
        inkscape:connection-start="#g3344"
        inkscape:connection-end="#g4406-2" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker4684)"
+       d="m 581.18022,559.91356 -72.51774,36.41719"
+       id="path4422"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#g4930"
+       inkscape:connection-end="#g4406" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;marker-start:url(#marker4859)"
+       d="m 245.34527,475.206 36.33704,10.30417"
+       id="path4851"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="0"
+       inkscape:connection-start="#g4406-2"
+       inkscape:connection-end="#g3519" />
   </g>
 </svg>

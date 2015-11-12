@@ -1,4 +1,5 @@
 #pragma once
+#include "FBCommonHeaders/platform.h"
 #include "RendererEnums.h"
 #include "RendererStructs.h"
 #include "Color.h"
@@ -6,10 +7,12 @@
 #include "IRenderTargetObserver.h"
 namespace fastbird
 {
-	struct GaussianDist;
+	struct RenderTargetParam;
 	class Scene;
 	class IRenderTargetListener;
 	typedef unsigned RenderTargetId;
+	DECLARE_SMART_PTR(IInputInjector);
+	DECLARE_SMART_PTR(GaussianDist);
 	DECLARE_SMART_PTR(RenderPipeline);	
 	DECLARE_SMART_PTR(Texture);
 	DECLARE_SMART_PTR(Scene);
@@ -24,11 +27,11 @@ namespace fastbird
 		static const int FB_NUM_BLOOM_TEXTURES = 3;
 		static const int FB_NUM_STAR_TEXTURES = 12;
 
-		DECLARE_PIMPL(RenderTarget);
 		friend class RenderResourceFactory;
 		RenderTarget();
 
 	public:
+		DECLARE_PIMPL(RenderTarget);
 		~RenderTarget();
 
 		//-------------------------------------------------------------------
@@ -38,8 +41,13 @@ namespace fastbird
 		virtual void OnObserverRemoved(IRenderTargetObserver* observer);
 
 		//-------------------------------------------------------------------
+		// InputConsumer From Renderer
+		//-------------------------------------------------------------------
+		void ConsumeInput(IInputInjectorPtr injector);
+
+		//-------------------------------------------------------------------
+		RenderTargetId GetId() const;
 		bool CheckOptions(const RenderTargetParam& param);
-		RenderPipeline& GetRenderPipeline() const;		
 
 		ScenePtr RegisterScene(ScenePtr scene);
 		ScenePtr GetScene() const;
@@ -50,9 +58,12 @@ namespace fastbird
 		TexturePtr GetDepthStencilTexture() const;
 		const Vec2I& GetSize() const;
 		void DeleteBuffers();
-		void SetClearValues(const Color& color, float z, UINT8 stencil);
+
+		void SetColorTextureDesc(int width, int height, PIXEL_FORMAT format, bool srv, bool miplevel, bool cubeMap);
+		void SetDepthStencilDesc(int width, int height, PIXEL_FORMAT format, bool srv, bool cubeMap);
+		void SetClearValues(const Color& color, Real z, UINT8 stencil);
 		void SetClearColor(const Color& color);
-		void SetClearDepthStencil(float z, UINT8 stencil);
+		void SetClearDepthStencil(Real z, UINT8 stencil);
 
 		void Bind(size_t face = 0);
 		void BindTargetOnly(bool hdr);
@@ -64,65 +75,18 @@ namespace fastbird
 		void SetEnvTexture(TexturePtr texture);
 		void SetUsePool(bool usePool);
 		bool GetUsePool() const;
-
-		void OnInputFromHandler(MousePtr pMouse, KeyboardPtr pKeyboard);
-
 		void AddListener(IRenderTargetListener* listener);
 		void RemoveListener(IRenderTargetListener* listener);
 
 		void SetColorTexture(TexturePtr pTexture);
+		void SetDepthTexture(TexturePtr pTexture);
 		CameraPtr GetLightCamera() const;
+		const Viewport& GetViewport() const;
 
-		//-------------------------------------------------------------------
-		// Post processors
-		//-------------------------------------------------------------------
-		void SetDepthRenderTarget(bool clear);
-		void UnsetDepthRenderTarget();
-		void BindDepthTexture(bool set);
-
-		void SetGlowRenderTarget();
-		void UnSetGlowRenderTarget();
-
-		void PrepareShadowMapRendering();
-		void EndShadowMapRendering();
-		void BindShadowMap(bool bind);
-
-		void SetCloudVolumeTarget();
-		void SetCloudVolumeTexture(bool set);
-
-		void SetGodRayRenderTarget();
-		void GodRay();
-		
-		void SetHDRTarget();
-		void DrawSilouette();
-		
-		void SetSmallSilouetteBuffer();
-		void SetBigSilouetteBuffer();
-
-		void CalcLuminance();
-
-		void BlendGlow();
-		void BlendGodRay();
-		void MeasureLuminanceOfHDRTargetNew();
-		void BrightPass();
-		void BrightPassToStarSource();
-		void StarSourceToBloomSource();
-		void Bloom();
-		void RenderStarGlare();
-		void ToneMapping();
-
-		// internal access only
-		TexturePtr GetShadowMap() const;
-		void DeleteShadowMap();
-
-		void SetLightCamWidth(float width);
-		void SetLightCamHeight(float height);
-		void SetLightCamNear(float n);
-		void SetLightCamFar(float f);
-		void UpdateLightCamera();
-
-		static void ReleaseStarDef();
-
+		void SetLightCamWidth(Real width);
+		void SetLightCamHeight(Real height);
+		void SetLightCamNear(Real n);
+		void SetLightCamFar(Real f);
 		void DrawOnEvent(bool set);
 		void TriggerDrawEvent();
 

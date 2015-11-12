@@ -22,10 +22,10 @@ namespace fastbird{
 		/**Start logging.
 		You can call this functino several time but only the first call only takes the effect.
 		*/
-		static void StartLoggingIfNot(LPCTSTR path);
+		static void StartLoggingIfNot(const char* path);
 		static void StopLogging();
 
-		static bool Exists(LPCTSTR path);
+		static bool Exists(const char* path);
 
 		enum {
 			NO_ERROR = 0,
@@ -39,21 +39,21 @@ namespace fastbird{
 		but is an error on Windows. A symbolic link is itself renamed, rather than the file it 
 		resolves to being renamed.
 		*/
-		static int Rename(LPCTSTR path, LPCTSTR newpath);
+		static int Rename(const char* path, const char* newpath);
 		/** Remove a file.
 		@return 'false' if \b path did not exist in the first place, otherwise true.
 		*/
-		static bool Remove(LPCTSTR path);
+		static bool Remove(const char* path);
 		/** If ext doesn't have \a dot(.), it will be added. */
-		static TString ReplaceExtension(LPCTSTR path, LPCTSTR ext);
+		static TString ReplaceExtension(const char* path, const char* ext);
 		/** If \a dot(.) is not in the \a path, empty string will be returned. */
-		static LPCTSTR GetExtension(LPCTSTR path);
+		static const char* GetExtension(const char* path);
 
 		/** If filepath exists, rename it to preserve. \a numKeeping decides how many backup files
 		need to be kept.\n
 		*/
-		static void BackupFile(LPCTSTR filepath, unsigned numKeeping);
+		static void BackupFile(const char* filepath, unsigned numKeeping);
 
-		static DirectoryIteratorPtr GetDirectoryIterator(LPCTSTR filepath, bool recursive);
+		static DirectoryIteratorPtr GetDirectoryIterator(const char* filepath, bool recursive);
 	};
 }

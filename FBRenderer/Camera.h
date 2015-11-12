@@ -2,15 +2,16 @@
 #ifndef _Camera_Header_included_
 #define _Camera_Header_included_
 #include "FBCommonHeaders/Observable.h"
-#include "FBInputManager/InputConsumer.h"
 #include "ICameraObserver.h"
 
 namespace fastbird
 {
+	DECLARE_SMART_PTR(IInputInjector);
 	DECLARE_SMART_PTR(IMouse);
 	DECLARE_SMART_PTR(IKeyboard);
 	DECLARE_SMART_PTR(IRenderable);
-	class FB_DLL_PUBLIC Camera : public Observable<ICameraObserver>, public InputConsumer
+	DECLARE_SMART_PTR(Camera);
+	class FB_DLL_PUBLIC Camera : public Observable<ICameraObserver>
 	{
 		DECLARE_PIMPL(Camera);
 
@@ -84,15 +85,16 @@ namespace fastbird
 		void SetCameraIndex(size_t idx);
 		void SetEnalbeInput(bool enable);
 		void SetInitialDistToTarget(Real dist);
+		void ProcessInputData();
 
 		//-------------------------------------------------------------------
-		// InputConsumer
+		// InputConsumer From Renderer
 		//-------------------------------------------------------------------
-		virtual void ConsumeInput(InputManager* inputManager);
-
+		void ConsumeInput(IInputInjectorPtr injector);
+		
 	protected:
 		void UpdateFrustum();
-		void ProcessInputData();
+		
 	};
 }
 

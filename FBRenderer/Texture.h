@@ -24,6 +24,7 @@ namespace fastbird{
 		TEXTURE_TYPE GetType() const;
 		unsigned GetWidth() const;
 		unsigned GetHeight() const;
+		PIXEL_FORMAT GetFormat() const;
 		Vec2I GetSize();
 		void SetSlot(int slot);
 		int GetSlot() const;
@@ -42,6 +43,7 @@ namespace fastbird{
 			UINT srcSubresource, Box3D* srcBox);
 		void SaveToFile(const char* filename);
 		void GenerateMips();
+		void SetPlatformTexture(ITexturePtr platformTexture);
 		ITexturePtr GetPlatformTexture() const;
 	};
 }

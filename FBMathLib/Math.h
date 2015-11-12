@@ -144,4 +144,5 @@ namespace fastbird
 	void StepToDigit_(TCHAR** ppch);
 
 	void GenerateHammersley(int numSamples, std::vector<Vec2>& outResult);
+	int CropSize8(int size);
 }

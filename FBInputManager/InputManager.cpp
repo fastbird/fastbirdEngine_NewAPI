@@ -2,7 +2,8 @@
 #include "InputManager.h"
 #include "Mouse.h"
 #include "Keyboard.h"
-#include "InputConsumer.h"
+#include "IInputConsumer.h"
+#include "IInputInjector.h"
 #include "FBCommonHeaders/Helpers.h"
 
 using namespace fastbird;
@@ -26,53 +27,53 @@ class InputManager::InputManagerImpl{
 public:
 	IKeyboardPtr mKeyboard;
 	IMousePtr mMouse;
-	std::map<int, std::vector<InputConsumer*>> mConsumers;
+	IInputInjectorPtr mInjector;
+	std::map<int, std::vector<IInputConsumer*>> mConsumers;
 	int mValid;
 
 	InputManagerImpl()
 		:mValid(0){
 
-		for (int i = 0; i < DeviceNum; ++i){
+		for (int i = 0; i < FBInputDevice::DeviceNum; ++i){
 			mValid += 1 << i;
 		}
 	}
 
-	void RegisterInputConsumer(int priority, InputConsumer* consumer){
+	void RegisterInputConsumer(IInputConsumer* consumer, int priority){
 		auto& consumers = mConsumers[priority];
 		if (!ValueExistsInVector(consumers, consumer)){
-			consumers.push_back(consumer);
-			consumer->OnInputConsumerRegistered(sInputManager, (InputConsumer::Priority)priority);
+			consumers.push_back(consumer);			
 		}
 	}
-	void UnregisterInputConsumer(int priority, InputConsumer* consumer){
+	void UnregisterInputConsumer(IInputConsumer* consumer, int priority){
 		auto& consumers = mConsumers[priority];
 		DeleteValuesInVector(consumers, consumer);
 	}
 
 	void Update(InputManager* inputManager){
 		mValid = 0;
-		for (int i = 0; i < DeviceNum; ++i){
+		for (int i = 0; i < FBInputDevice::DeviceNum; ++i){
 			mValid += 1 << i;
 		}
 		for (const auto& it : mConsumers){
 			for (const auto& consumer : it.second){
-				consumer->ConsumeInput(inputManager);
-				if (!(mValid & AllMask))
+				consumer->ConsumeInput(mInjector);
+				if (!(mValid & FBInputDevice::AllMask))
 					return;
 			}
 		}
 	}
 
-	void Invalidate(Device type, bool includeButtonClicks){
+	void Invalidate(FBInputDevice::Enum type, bool includeButtonClicks){
 		if (mValid & type)
 			mValid -= type;
 		switch (type){
-		case DeviceKeyboard:
+		case FBInputDevice::DeviceKeyboard:
 			if (mKeyboard){
 				mKeyboard->Invalidate(includeButtonClicks);
 			}
 			break;
-		case DeviceMouse:
+		case FBInputDevice::DeviceMouse:
 			if (mMouse){
 				mMouse->Invalidate(includeButtonClicks);
 			}
@@ -82,14 +83,14 @@ public:
 		}
 	}
 
-	void InvalidTemporary(Device type, bool invalidate){
+	void InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
 		switch (type){
-		case DeviceKeyboard:
+		case FBInputDevice::DeviceKeyboard:
 			if (mKeyboard){
 				mKeyboard->InvalidTemporary(invalidate);
 			}
 			break;
-		case DeviceMouse:
+		case FBInputDevice::DeviceMouse:
 			if (mMouse){
 				mMouse->InvalidTemporary(invalidate);
 			}
@@ -99,14 +100,14 @@ public:
 		}
 	}
 
-	bool IsValid(Device type) const{
+	bool IsValid(FBInputDevice::Enum type) const{
 		switch (type){
-		case DeviceKeyboard:
+		case FBInputDevice::DeviceKeyboard:
 			if (mKeyboard){
 				return mKeyboard->IsValid();
 			}
 			break;
-		case DeviceMouse:
+		case FBInputDevice::DeviceMouse:
 			if (mMouse){
 				return mMouse->IsValid();
 			}
@@ -124,6 +125,12 @@ public:
 		if (mMouse){
 			mMouse->EndFrame(gameTimeInSecond);
 		}
+	}
+
+	void SetInputInjector(IInputInjectorPtr injector){
+		mInjector = injector;
+		mInjector->SetKeyboard(mKeyboard);
+		mInjector->SetMouse(mMouse);
 	}
 };
 
@@ -155,27 +162,27 @@ void InputManager::SetMouse(IMousePtr mouse){
 	mImpl->mMouse = mouse;
 }
 
-void InputManager::RegisterInputConsumer(int priority, InputConsumer* consumer){
-	mImpl->RegisterInputConsumer(priority, consumer);
+void InputManager::RegisterInputConsumer(IInputConsumer* consumer, int priority){
+	mImpl->RegisterInputConsumer(consumer, priority);
 }
 
-void InputManager::UnregisterInputConsumer(int priority, InputConsumer* consumer){
-	mImpl->UnregisterInputConsumer(priority, consumer);
+void InputManager::UnregisterInputConsumer(IInputConsumer* consumer, int priority){
+	mImpl->UnregisterInputConsumer(consumer, priority);
 }
 
 void InputManager::Update(){
 	mImpl->Update(this);
 }
 
-void InputManager::Invalidate(Device type, bool includeButtonClicks){
+void InputManager::Invalidate(FBInputDevice::Enum type, bool includeButtonClicks){
 	mImpl->Invalidate(type, includeButtonClicks);
 }
 
-void InputManager::InvalidTemporary(Device type, bool invalidate){
+void InputManager::InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
 	mImpl->InvalidTemporary(type, invalidate);
 }
 
-bool InputManager::IsValid(Device type) const{
+bool InputManager::IsValid(FBInputDevice::Enum type) const{
 	return mImpl->IsValid(type);
 }
 
@@ -207,6 +214,10 @@ void InputManager::AddHwndInterested(HWindow wnd){
 	}
 }
 
+void InputManager::SetInputInjector(IInputInjectorPtr injector){
+	mImpl->SetInputInjector(injector);
+}
+
 //-------------------------------------------------------------------
 // Keyboard
 //-------------------------------------------------------------------
@@ -222,46 +233,6 @@ void InputManager::PushChar(HWindow hwnd, unsigned keycode, Timer::TIME_PRECISIO
 	}
 }
 
-bool InputManager::IsKeyDown(unsigned short keycode) const{
-	if (mImpl->mKeyboard){
-		return mImpl->mKeyboard->IsKeyDown(keycode);
-	}
-	return false;
-}
-
-bool InputManager::IsKeyPressed(unsigned short keycode) const{
-	if (mImpl->mKeyboard){
-		return mImpl->mKeyboard->IsKeyPressed(keycode);
-	}
-	return false;
-}
-
-bool InputManager::IsKeyUp(unsigned short keycode) const{
-	if (mImpl->mKeyboard){
-		return mImpl->mKeyboard->IsKeyUp(keycode);
-	}
-	return false;
-}
-
-unsigned InputManager::GetChar(){
-	if (mImpl->mKeyboard){
-		return mImpl->mKeyboard->GetChar();
-	}
-	return 0;
-}
-
-void InputManager::PopChar(){
-	if (mImpl->mKeyboard){
-		mImpl->mKeyboard->PopChar();
-	}
-}
-
-void InputManager::ClearBuffer(){
-	if (mImpl->mKeyboard){
-		mImpl->mKeyboard->ClearBuffer();
-	}
-}
-
 //-------------------------------------------------------------------
 // Mouse
 //-------------------------------------------------------------------
@@ -269,246 +240,6 @@ void InputManager::PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, 
 	if (mImpl->mMouse){
 		mImpl->mMouse->PushEvent(handle, mouseEvent, timeInSec);
 	}
-}
-
-void InputManager::GetHDDeltaXY(long &x, long &y) const{
-	if (mImpl->mMouse){
-		mImpl->mMouse->GetHDDeltaXY(x, y);
-	}
-}
-
-void InputManager::GetDeltaXY(long &x, long &y) const{
-	if (mImpl->mMouse){
-		mImpl->mMouse->GetDeltaXY(x, y);
-	}
-}
-
-CoordinatesI InputManager::GetDeltaXY() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetDeltaXY();
-	}	
-	return{ 0, 0 };
-}
-
-void InputManager::GetMousePos(long &x, long &y) const{
-	if (mImpl->mMouse){
-		mImpl->mMouse->GetPos(x, y);
-	}
-}
-
-CoordinatesI InputManager::GetMousePos() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetPos();
-	}
-	return{ 0, 0 };
-}
-
-void InputManager::GetMousePrevPos(long &x, long &y) const{
-	if (mImpl->mMouse){
-		mImpl->mMouse->GetPrevPos(x, y);
-	}
-}
-
-// normalized pos(0.0~1.0)
-void InputManager::GetMouseNPos(Real &x, Real &y) const{
-	if (mImpl->mMouse){
-		mImpl->mMouse->GetNPos(x, y);
-	}
-}
-
-CoordinatesR InputManager::GetMouseNPos() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetNPos();
-	}
-	return{ 0., 0. };
-}
-
-bool InputManager::IsLButtonDownPrev() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsLButtonDownPrev();
-	}
-	return false;
-}
-
-bool InputManager::IsLButtonDown(Real* time) const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsLButtonDown(time);
-	}
-	return false;
-}
-
-bool InputManager::IsLButtonClicked() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsLButtonClicked();
-	}
-	return false;
-}
-
-bool InputManager::IsLButtonDoubleClicked() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsLButtonDoubleClicked();
-	}
-	return false;
-}
-
-bool InputManager::IsLButtonPressed() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsLButtonPressed();
-	}
-	return false;
-}
-
-bool InputManager::IsRButtonDown(Real* time) const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsRButtonDown(time);
-	}
-	return false;
-}
-
-bool InputManager::IsRButtonDownPrev() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsRButtonDownPrev();
-	}
-	return false;
-}
-
-bool InputManager::IsRButtonClicked() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsRButtonClicked();
-	}
-	return false;
-}
-
-bool InputManager::IsRButtonPressed() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsRButtonPressed();
-	}
-	return false;
-}
-
-bool InputManager::IsMButtonDown() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsMButtonDown();
-	}
-	return false;
-}
-
-bool InputManager::IsMouseMoved() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsMoved();
-	}
-	return false;
-}
-
-void InputManager::GetDragStart(long &x, long &y) const{
-	if (mImpl->mMouse){
-		mImpl->mMouse->GetDragStart(x, y);
-	}
-}
-
-CoordinatesI InputManager::GetDragStartedPos() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetDragStartedPos();
-	}
-	return{ 0, 0 };
-}
-
-bool InputManager::IsDragStartIn(int left, int top, int right, int bottom) const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsDragStartIn(left, top, right, bottom);
-	}
-	return false;
-}
-
-bool InputManager::IsDragStarted(int& outX, int& outY) const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsDragStarted(outX, outY);
-	}
-	return false;
-}
-
-bool InputManager::IsDragEnded() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsDragEnded();
-	}
-	return false;
-}
-
-void InputManager::PopDragEvent(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->PopDragEvent();
-	}	
-}
-
-bool InputManager::IsRDragStarted(int& outX, int& outY) const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsRDragStarted(outX, outY);
-	}
-	return false;
-}
-
-bool InputManager::IsRDragEnded(int& outX, int& outY) const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsRDragEnded(outX, outY);
-	}
-	return false;
-}
-
-void InputManager::PopRDragEvent(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->PopRDragEvent();
-	}
-}
-
-long InputManager::GetWheel() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetWheel();
-	}
-	return 0;
-}
-
-void InputManager::PopWheel(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->PopWheel();
-	}
-}
-
-void InputManager::ClearWheel(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->ClearWheel();
-	}
-}
-
-void InputManager::ClearButton(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->ClearButton();
-	}
-}
-
-unsigned long InputManager::GetNumLinesWheelScroll() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetNumLinesWheelScroll();
-	}
-	return 0;
-}
-
-void InputManager::LockMousePos(bool lock, void* key){
-	if (mImpl->mMouse){
-		mImpl->mMouse->LockMousePos(lock, key);
-	}
-}
-
-void InputManager::NoClickOnce(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->NoClickOnce();
-	}
-}
-
-bool InputManager::IsMouseIn(int left, int top, int right, int bottom){
-	if (mImpl->mMouse){
-		return mImpl->mMouse->IsIn(left, top, right, bottom);
-	}
-	return false;
 }
 
 void InputManager::MouseToCenter(){
@@ -521,19 +252,6 @@ void InputManager::SetMousePosition(int x, int y){
 	if (mImpl->mMouse){
 		mImpl->mMouse->SetCursorPosition(x, y);
 	}
-}
-
-void InputManager::ClearRightDown(){
-	if (mImpl->mMouse){
-		mImpl->mMouse->ClearRightDown();
-	}
-}
-
-Real InputManager::GetLButtonDownTime() const{
-	if (mImpl->mMouse){
-		return mImpl->mMouse->GetLButtonDownTime();
-	}
-	return 0.;
 }
 
 Real InputManager::GetSensitivity() const{

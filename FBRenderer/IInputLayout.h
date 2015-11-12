@@ -1,11 +1,8 @@
 #pragma once
-#include <CommonLib/SmartPtr.h>
-#include <Engine/RendererEnums.h>
-#include <Engine/RendererStructs.h>
-
+#include "InputElementDesc.h"
 namespace fastbird
 {
-	class IInputLayout : public ReferenceCounter
+	class IInputLayout
 	{
 	public:
 		virtual ~IInputLayout(){}

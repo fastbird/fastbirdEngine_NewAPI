@@ -1,14 +1,10 @@
 #pragma once
 namespace fastbird
 {
-	enum VERTEX_COMPONENT
+	enum INDEXBUFFER_FORMAT
 	{
-		VC_POSITION = 0x1,
-		VC_NORMAL = 0x2,
-		VC_COLOR =0x4,
-		VC_TEXCOORD = 0x8,
-		VC_TANGENT = 0x10,
-		VC_BLENDINDICES = 0x20,
+		INDEXBUFFER_FORMAT_16BIT,
+		INDEXBUFFER_FORMAT_32BIT,
 	};
 
 	enum BUFFER_USAGE
@@ -355,42 +351,6 @@ namespace fastbird
 		PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
 	};
 
-	enum INPUT_ELEMENT_FORMAT
-	{
-		INPUT_ELEMENT_FORMAT_FLOAT4,
-		INPUT_ELEMENT_FORMAT_FLOAT3,
-		INPUT_ELEMENT_FORMAT_UBYTE4,
-		INPUT_ELEMENT_FORMAT_FLOAT2,
-		INPUT_ELEMET_FORMAT_INT4,
-
-		INPUT_ELEMET_FORMAT_NUM
-	};
-
-	static const char* STR_INPUT_ELEMENT_FORMAT[] =
-	{
-		"FLOAT4",
-		"FLOAT3",
-		"UBYTE4",
-		"FLOAT2",
-		"INT4"
-	};
-
-	INPUT_ELEMENT_FORMAT InputElementFromString(const char* sz);
-
-	enum INPUT_CLASSIFICATION
-	{
-		INPUT_CLASSIFICATION_PER_VERTEX_DATA,
-		INPUT_CLASSIFICATION_PER_INSTANCE_DATA,
-
-		INPUT_CLASSIFICATION_NUM
-	};
-	static const char* STR_INPUT_CLASSIFICATION[] = 
-	{
-		"VERTEX",
-		"INSTANCE",
-	};
-	INPUT_CLASSIFICATION InputClassificationFromString(const char* sz);
-
 	enum DEPTH_WRITE_MASK
 	{
 		DEPTH_WRITE_MASK_ZERO 	=0,
@@ -431,6 +391,7 @@ namespace fastbird
 		PASS_DEPTH_ONLY, // write depth only to the depth buffer.
 		PASS_SHADOW,
 		PASS_SILOUETTE,
+		PASS_LAST = PASS_SILOUETTE /// You can define your own from PASS_LAST+1
 	};
 
 	RENDER_PASS RenderPassFromString(const char* str);

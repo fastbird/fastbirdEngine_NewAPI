@@ -789,4 +789,9 @@ namespace fastbird
 			outResult.push_back(Vec2(phi, t));
 		}
 	}
+
+	int CropSize8(int size)
+	{
+		return size - size % 8;
+	}
 }

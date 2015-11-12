@@ -11,13 +11,16 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="KeyboardEvent.h" />
     <ClInclude Include="MouseEvent.h" />
-    <ClInclude Include="InputConsumer.h" />
+    <ClInclude Include="IInputInjector.h" />
+    <ClInclude Include="InputInjector.h" />
+    <ClInclude Include="FBInputDevice.h" />
+    <ClInclude Include="IInputConsumer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="InputConsumer.cpp" />
+    <ClCompile Include="InputInjector.cpp" />
   </ItemGroup>
 </Project>

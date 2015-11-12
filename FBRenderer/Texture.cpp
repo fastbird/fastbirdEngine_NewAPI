@@ -31,6 +31,10 @@ public:
 		return mPlatformTexture->GetHeight();
 	}
 
+	PIXEL_FORMAT GetFormat() const{
+		return mPlatformTexture->GetFormat();
+	}
+
 	void SetSlot(int slot){
 		mPlatformTexture->SetSlot(slot);
 	}
@@ -132,6 +136,10 @@ unsigned Texture::GetHeight() const{
 	return mImpl->GetHeight();
 }
 
+PIXEL_FORMAT Texture::GetFormat() const{
+	return mImpl->GetFormat();
+}
+
 Vec2I Texture::GetSize(){
 	return mImpl->GetSize();
 }
@@ -196,6 +204,10 @@ void Texture::SaveToFile(const char* filename){
 
 void Texture::GenerateMips(){
 	mImpl->GenerateMips();
+}
+
+void Texture::SetPlatformTexture(ITexturePtr platformTexture){
+	mImpl->mPlatformTexture = platformTexture;
 }
 
 ITexturePtr Texture::GetPlatformTexture() const{

@@ -6,7 +6,7 @@
 #include "KeyboardEvent.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IKeyboard);	
+	DECLARE_SMART_PTR(IKeyboard);
 	class IKeyboard : public IInputDevice
 	{
 	public:
@@ -25,8 +25,9 @@ namespace fastbird
 		virtual bool IsKeyUp(unsigned short keycode) const = 0;
 		virtual unsigned GetChar() = 0;
 		virtual void PopChar() = 0;
-		virtual void OnKillFocus() = 0;
 		virtual void ClearBuffer() = 0;
+
+		virtual void OnKillFocus() = 0;		
 	};
 }
 

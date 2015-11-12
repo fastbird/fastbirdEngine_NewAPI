@@ -25,7 +25,7 @@ namespace fastbird{
 	}
 
 	//-----------------------------------------------------------------------
-	TextureAtlasRegion* TextureAtlas::AddRegion(const char* name)
+	TextureAtlasRegionPtr TextureAtlas::AddRegion(const char* name)
 	{
 		if (!name || strlen(name) == 0){
 			Logger::Log(FB_DEFAULT_LOG_ARG, "invalid arg");
@@ -37,12 +37,12 @@ namespace fastbird{
 			return it->second;
 		}
 
-		TextureAtlasRegion* region = FB_NEW(TextureAtlasRegion);
+		TextureAtlasRegionPtr region(FB_NEW(TextureAtlasRegion), [](TextureAtlasRegion* obj){ FB_DELETE(obj); });
 		region->mName = name;
 		mRegions.Insert(std::make_pair(region->mName, region));
 	}
 
-	TextureAtlasRegion* TextureAtlas::GetRegion(const char* name)
+	TextureAtlasRegionPtr TextureAtlas::GetRegion(const char* name)
 	{
 		if (!name || strlen(name) == 0){
 			Logger::Log(FB_DEFAULT_LOG_ARG, "invalid arg");
@@ -63,7 +63,7 @@ namespace fastbird{
 
 	bool TextureAtlas::ReloadTextureAtlas()
 	{
-		auto renderer = Renderer::GetRenderer();
+		auto renderer = Renderer::GetInstance();
 		if (!renderer){
 			Logger::Log(FB_DEFAULT_LOG_ARG, "no renderer.");
 		}
@@ -107,7 +107,7 @@ namespace fastbird{
 					Logger::Log(FB_ERROR_LOG_ARG, "No name for texture atlas region");
 					continue;
 				}
-				TextureAtlasRegion* region = AddRegion(szBuffer);
+				TextureAtlasRegionPtr region = AddRegion(szBuffer);
 				if (!region)
 				{
 					continue;					

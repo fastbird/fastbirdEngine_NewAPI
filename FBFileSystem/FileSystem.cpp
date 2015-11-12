@@ -6,10 +6,10 @@
 using namespace fastbird;
 
 static bool gLogginStarted = false;
-void FileSystem::StartLoggingIfNot(LPCTSTR path){
+void FileSystem::StartLoggingIfNot(const char* path){
 	if (gLogginStarted)
 		return;
-	auto filepath = _T("FileSystem.log");
+	auto filepath = "FileSystem.log";
 	FileSystem::BackupFile(filepath, 5);
 	Logger::Init(filepath);
 	gLogginStarted = true;
@@ -22,11 +22,11 @@ void FileSystem::StopLogging(){
 	Logger::Release();
 }
 
-bool FileSystem::Exists(LPCTSTR path){
+bool FileSystem::Exists(const char* path){
 	return boost::filesystem::exists(path);
 }
 
-int FileSystem::Rename(LPCTSTR path, LPCTSTR newpath){
+int FileSystem::Rename(const char* path, const char* newpath){
 	if (!Exists(path)){
 		return RENAME_NO_SOURCE;
 	}
@@ -45,7 +45,7 @@ int FileSystem::Rename(LPCTSTR path, LPCTSTR newpath){
 	return NO_ERROR;
 }
 
-bool FileSystem::Remove(LPCTSTR path){	
+bool FileSystem::Remove(const char* path){	
 	bool ret = true;
 	try{
 		ret = boost::filesystem::remove(path);
@@ -56,37 +56,37 @@ bool FileSystem::Remove(LPCTSTR path){
 	return ret;
 }
 
-TString FileSystem::ReplaceExtension(LPCTSTR path, LPCTSTR ext){
+TString FileSystem::ReplaceExtension(const char* path, const char* ext){
 	boost::filesystem::path boostPath(path);
 	boostPath.replace_extension(ext);
-	return boostPath._tgeneric_string();
+	return boostPath.generic_string();
 }
 
-LPCTSTR FileSystem::GetExtension(LPCTSTR path){
-	size_t len = _tstrlen(path);
+const char* FileSystem::GetExtension(const char* path){
+	size_t len = strlen(path);
 	while (--len)
 	{
-		if (path[len] == _T('.'))
+		if (path[len] == '.')
 		{
 			return &path[len];
 		}
 	}
-	return _T("");
+	return "";
 }
 
-void FileSystem::BackupFile(LPCTSTR filepath, unsigned numKeeping) {
-	auto backupPath = FileSystem::ReplaceExtension(filepath, _T(""));
+void FileSystem::BackupFile(const char* filepath, unsigned numKeeping) {
+	auto backupPath = FileSystem::ReplaceExtension(filepath, "");
 	auto extension = FileSystem::GetExtension(filepath);
 	for (int i = (int)numKeeping - 1; i > 0; --i){
-		auto oldPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), i, extension);
-		auto newPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), i + 1, extension);
+		auto oldPath = FormatString("%s_bak%d.%s", backupPath.c_str(), i, extension);
+		auto newPath = FormatString("%s_bak%d.%s", backupPath.c_str(), i + 1, extension);
 		FileSystem::Rename(oldPath, newPath);
 	}
-	auto newPath = FormatString(_T("%s_bak%d.%s"), backupPath.c_str(), 1, extension);
+	auto newPath = FormatString("%s_bak%d.%s", backupPath.c_str(), 1, extension);
 	FileSystem::Rename(filepath, newPath);
 }
 
-DirectoryIteratorPtr FileSystem::GetDirectoryIterator(LPCTSTR filepath, bool recursive){
+DirectoryIteratorPtr FileSystem::GetDirectoryIterator(const char* filepath, bool recursive){
 	return DirectoryIteratorPtr(new DirectoryIterator(filepath, recursive),
 		[](DirectoryIterator* obj){delete obj; });
 }

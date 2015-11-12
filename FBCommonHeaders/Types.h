@@ -1,5 +1,13 @@
+// Should not define data in this file.
+// Only typedefs or defines are allowed.
 #pragma once
+#define FBCommonHeaders_Types_h
 #include <utility>
+#include <memory>
+
+#define FB_DECLARE_HANDLE(name) struct name##__; typedef struct name##__ *name
+
+
 namespace fastbird{
 	typedef double Real;
 	typedef unsigned char BYTE;
@@ -9,7 +17,7 @@ namespace fastbird{
 	typedef unsigned __int64 UINT64;
 	typedef __int64 INT64;
 	typedef __int64 HWindowId;
-	typedef __int64 HWindow;
+	FB_DECLARE_HANDLE(HWindow);
 
 	typedef std::pair<int, int> CoordinatesI;
 	typedef std::pair<Real, Real> CoordinatesR;

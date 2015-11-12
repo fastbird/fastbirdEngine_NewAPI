@@ -1,12 +1,13 @@
 #pragma once
-#define IRenderer_Version "1"
+#define FB_RENDERER_VERSION "1"
 #include "IRendererStructs.h"
+#include "FBCommonHeaders/Types.h"
 #include <memory>
 
 namespace fastbird{
-	class IShader;
-	typedef intptr_t HWindowId;
-	class IRenderer;
+	class IShader;	
+	DECLARE_SMART_PTR(ITexture);		
+	DECLARE_SMART_PTR(IRenderer);
 	typedef std::shared_ptr<IRenderer> IRendererPtr;
 	typedef std::weak_ptr<IRenderer> IRendererWeakPtr;
 	/** Plug-in interface for render engine like D3D11, OpenGL.	
@@ -15,6 +16,8 @@ namespace fastbird{
 	public:
 		virtual ~IRenderer();
 
+		virtual bool InitCanvas(HWindowId id, HWindow window, int width, int height,
+			ITexturePtr& outColorTexture, ITexturePtr& outDepthTexture) = 0;
 		//-------------------------------------------------------------------
 		// Data
 		//-------------------------------------------------------------------
