@@ -39,7 +39,7 @@ int FileSystem::Rename(const char* path, const char* newpath){
 		boost::filesystem::rename(path, newpath);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()));
+		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()).c_str());
 	}
 	
 	return NO_ERROR;
@@ -51,12 +51,12 @@ bool FileSystem::Remove(const char* path){
 		ret = boost::filesystem::remove(path);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()));
+		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()).c_str());
 	}	
 	return ret;
 }
 
-TString FileSystem::ReplaceExtension(const char* path, const char* ext){
+std::string FileSystem::ReplaceExtension(const char* path, const char* ext){
 	boost::filesystem::path boostPath(path);
 	boostPath.replace_extension(ext);
 	return boostPath.generic_string();
@@ -74,19 +74,55 @@ const char* FileSystem::GetExtension(const char* path){
 	return "";
 }
 
+std::string FileSystem::ConcatPath(const char* path1, const char* path2){
+	return boost::filesystem::path(path1).concat(path2).generic_string();
+}
+
 void FileSystem::BackupFile(const char* filepath, unsigned numKeeping) {
 	auto backupPath = FileSystem::ReplaceExtension(filepath, "");
 	auto extension = FileSystem::GetExtension(filepath);
 	for (int i = (int)numKeeping - 1; i > 0; --i){
 		auto oldPath = FormatString("%s_bak%d.%s", backupPath.c_str(), i, extension);
 		auto newPath = FormatString("%s_bak%d.%s", backupPath.c_str(), i + 1, extension);
-		FileSystem::Rename(oldPath, newPath);
+		FileSystem::Rename(oldPath.c_str(), newPath.c_str());
 	}
 	auto newPath = FormatString("%s_bak%d.%s", backupPath.c_str(), 1, extension);
-	FileSystem::Rename(filepath, newPath);
+	FileSystem::Rename(filepath, newPath.c_str());
 }
 
+//---------------------------------------------------------------------------
+// Directory Operataions
+//---------------------------------------------------------------------------
 DirectoryIteratorPtr FileSystem::GetDirectoryIterator(const char* filepath, bool recursive){
 	return DirectoryIteratorPtr(new DirectoryIterator(filepath, recursive),
 		[](DirectoryIterator* obj){delete obj; });
+}
+
+bool FileSystem::CreateDirectory(const char* filepath){
+	bool ret = true;
+	try{
+		ret = boost::filesystem::create_directories(filepath);
+	}
+	catch (boost::filesystem::filesystem_error& err){
+		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()).c_str());
+	}
+	return ret;
+}
+
+
+//---------------------------------------------------------------------------
+// System Folders
+//---------------------------------------------------------------------------
+std::string FileSystem::GetAppDataFolder(){
+#if defined(_PLATFORM_WINDOWS_)
+	PWSTR* path=0;
+	if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, 0, path))){
+		auto ret = std::string(WideToAnsi(*path));
+		CoTaskMemFree(path);
+		return ret;
+	}	
+#else
+	assert(0 && "Not implemented");
+#endif
+	return std::string("./temp/");
 }

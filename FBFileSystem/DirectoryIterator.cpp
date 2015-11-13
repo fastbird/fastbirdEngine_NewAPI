@@ -2,44 +2,52 @@
 #include "DirectoryIterator.h"
 
 namespace fastbird{
-	class DirectoryIterator::DirectoryIteratorImpl{
+	class DirectoryIterator::Impl{
 	public:
-		TString mLastFile;
+		std::string mLastFile;
 		bool mRecursive;
 		boost::filesystem::recursive_directory_iterator mRecursiveIterator;
 		boost::filesystem::directory_iterator mIterator;
 
-		DirectoryIteratorImpl() :mRecursive(false){
+		Impl() :mRecursive(false){
 		}
 
-		LPCTSTR GetNext(bool& isDirectory){
+		bool HasNext(){
+			if (mRecursive)
+				return mRecursiveIterator != boost::filesystem::recursive_directory_iterator();
+			return mIterator != boost::filesystem::directory_iterator();
+		}
+
+		const char* GetNext(bool* isDirectory){
+			if (!HasNext())
+				return "";
+
 			boost::filesystem::path path;
 			if (mRecursive){
-				if (mRecursiveIterator != boost::filesystem::recursive_directory_iterator()){
 					auto entity = *mRecursiveIterator;
 					mRecursiveIterator++;
-					path = entity.path();					
-				}
+					path = entity.path();
 			}
 			else{
-				if (mIterator != boost::filesystem::directory_iterator()){
 					auto entity = *mIterator;
 					mIterator++;
-					path = entity.path();										
-				}
+					path = entity.path();
 			}
+
 			if (path.empty())
-				return _T("");
+				return "";
 
 			mLastFile = path._tgeneric_string();
-			isDirectory = boost::filesystem::is_directory(path);
+			if (isDirectory)
+				*isDirectory = boost::filesystem::is_directory(path);
 			return mLastFile.c_str();			
 		}
 		
 	};
 
-	DirectoryIterator::DirectoryIterator(LPCTSTR directoryPath, bool recursive)
-		:mImpl(new DirectoryIteratorImpl)
+	//---------------------------------------------------------------------------
+	DirectoryIterator::DirectoryIterator(const char* directoryPath, bool recursive)
+		:mImpl(new Impl)
 	{
 		if (directoryPath && _tstrlen(directoryPath) != 0){			
 			mImpl->mRecursive = recursive;
@@ -53,10 +61,17 @@ namespace fastbird{
 	}
 
 	DirectoryIterator::~DirectoryIterator(){
-		delete mImpl;
+
 	}
 
-	LPCTSTR DirectoryIterator::GetNextFileName(bool& isDirectory){
+	bool DirectoryIterator::HasNext() const{
+		return mImpl->HasNext();
+	}
+	const char* DirectoryIterator::GetNextFileName(bool* isDirectory){
 		return mImpl->GetNext(isDirectory);
+	}
+
+	const char* DirectoryIterator::GetNextFileName(){
+		return GetNextFileName(0);
 	}
 }

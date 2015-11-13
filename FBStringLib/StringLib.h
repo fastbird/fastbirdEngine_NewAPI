@@ -19,7 +19,7 @@ namespace fastbird{
 	TString StripBoth(LPCTSTR s);	
 	LPCTSTR FindLastOf(LPCTSTR s, TCHAR ch);
 	void StepToDigit(TCHAR** ppch);
-	TStringVector Split(const TString& str, const TString& delims = _T("\t\n, "),
+	TStringVector Split(const TString& str, const TString& delims = "\t\n, ",
 		unsigned int maxSplits = 0, bool preserveDelims = false);
 	/** Compare two strings. This function ignores the case.
 	@return 0 if two strings are same. 1 if \b lhs > \b rhs. -1 if \nlhs < \b rhs
@@ -34,8 +34,8 @@ namespace fastbird{
 	void ToUpperCase(TString& str);
 	
 	bool IsNumeric(LPCTSTR str);
-	const WCHAR* FormatString(const WCHAR* str, ...);	
-	const char* FormatString(const char* str, ...);
+	std::wstring FormatString(const WCHAR* str, ...);	
+	std::string FormatString(const char* str, ...);
 
 	//-----------------------------------------------------------------------
 	// UNICODE conversion

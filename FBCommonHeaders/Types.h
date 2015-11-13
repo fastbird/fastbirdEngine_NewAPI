@@ -25,14 +25,27 @@ namespace fastbird{
 
 #define DECLARE_NON_COPYABLE(className) \
 	className(const className&) = delete;\
-	className& className::operator= (const className&) = delete;
+	className& className::operator= (const className&) = delete
 
 #define DECLARE_PIMPL(className) \
-	class className##Impl; \
-	className##Impl* mImpl; \
+	class Impl; \
+	std::shared_ptr<Impl> mImpl
+
+#define DECLARE_PIMPL_NON_COPYABLE(className) \
+	DECLARE_PIMPL(className); \
 	DECLARE_NON_COPYABLE(className)
 
 #define DECLARE_SMART_PTR(className) \
 	class className;\
 	typedef std::shared_ptr<className> className##Ptr;\
 	typedef std::weak_ptr<className> className##WeakPtr
+
+#define DECLARE_SMART_PTR_STRUCT(className) \
+	struct className;\
+	typedef std::shared_ptr<className> className##Ptr;\
+	typedef std::weak_ptr<className> className##WeakPtr
+
+#define IMPLEMENT_STATIC_CREATE(className)\
+	className##Ptr className##::Create(){\
+		return className##Ptr(new className, [](className* obj){delete obj;});\
+	}

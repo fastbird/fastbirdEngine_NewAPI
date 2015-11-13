@@ -40,6 +40,7 @@ namespace fastbird{
 		TextureAtlasRegionPtr region(FB_NEW(TextureAtlasRegion), [](TextureAtlasRegion* obj){ FB_DELETE(obj); });
 		region->mName = name;
 		mRegions.Insert(std::make_pair(region->mName, region));
+		return region;
 	}
 
 	TextureAtlasRegionPtr TextureAtlas::GetRegion(const char* name)
@@ -72,7 +73,7 @@ namespace fastbird{
 		if (doc.Error()) {
 			const char* errMsg = doc.GetErrorStr1();
 			if (errMsg)
-				Logger::Log(FB_ERROR_LOG_ARG, FormatString("texture atlas error : \t%s", errMsg));
+				Logger::Log(FB_ERROR_LOG_ARG, FormatString("texture atlas error : \t%s", errMsg).c_str());
 			else
 				Logger::Log(FB_ERROR_LOG_ARG, "ReloadTextureAtlas Failed");
 			return false;
@@ -89,7 +90,7 @@ namespace fastbird{
 			mTexture = renderer->CreateTexture(szBuffer, true);
 			if (!mTexture)
 			{
-				Logger::Log(FB_ERROR_LOG_ARG, FormatString("Texture %s not found.", szBuffer));
+				Logger::Log(FB_ERROR_LOG_ARG, FormatString("Texture %s not found.", szBuffer).c_str());
 			}
 		}
 		else {

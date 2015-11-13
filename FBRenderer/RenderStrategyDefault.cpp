@@ -23,11 +23,15 @@ static const int starGlareSamples = 8;
 static const Real starGlareChromaticAberration = 0.5f;
 static const Real starGlareInclination = HALF_PI;
 static StarDef* starGlareDef = 0;
-class RenderStrategyDefault::RenderStrategyDefaultImpl{
+
+//IRenderStrategyPtr RenderStrategyDefault::Create(){
+//	return IRenderStrategyPtr(FB_NEW(RenderStrategyDefault), [](RenderStrategyDefault* obj){FB_DELETE(obj); });
+//}
+IMPLEMENT_STATIC_CREATE(RenderStrategyDefault);
+
+class RenderStrategyDefault::Impl{
 public:
-	
-	
-	RenderStrategyDefaultImpl()
+	Impl()
 		:mGlowSet(false), mFrameLuminanceCalced(0), mLuminance(0.5f)
 		, mRenderingFace(0)
 	{
@@ -99,8 +103,7 @@ public:
 
 		GlowTarget(true);
 		renderer->Clear(0., 0., 0., 1.);
-		GlowTarget(false);
-		renderer->RegisterGlowTarget(mGlowTarget);
+		GlowTarget(false);		
 		{
 			RenderEventMarker marker("Shadow Pass");
 			memset(&renderParam, 0, sizeof(RenderParam));
@@ -325,19 +328,16 @@ public:
 
 				*/				
 				mGlowTarget = renderer->CreateTexture(0, mSize.x, mSize.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
-					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
-				const char* szStr = FormatString("rt%u_%u_%u_GlowTarget", rt->GetId(), mSize.x, mSize.y);
-				mGlowTarget->SetDebugName(szStr);
+					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);				
+				mGlowTarget->SetDebugName(FormatString("rt%u_%u_%u_GlowTarget", rt->GetId(), mSize.x, mSize.y).c_str());
 
 				mGlowTexture[0] = renderer->CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
-				szStr = FormatString("rt%u_%u_%u_GlowTexture0", rt->GetId(), mSize.x, mSize.y);
-				mGlowTexture[0]->SetDebugName(szStr);
+				mGlowTexture[0]->SetDebugName(FormatString("rt%u_%u_%u_GlowTexture0", rt->GetId(), mSize.x, mSize.y).c_str());
 
 				mGlowTexture[1] = renderer->CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
-				szStr = FormatString("rt%u_%u_%u_GlowTexture1", rt->GetId(), mSize.x, mSize.y);
-				mGlowTexture[1]->SetDebugName(szStr);
+				mGlowTexture[1]->SetDebugName(FormatString("rt%u_%u_%u_GlowTexture1", rt->GetId(), mSize.x, mSize.y).c_str());
 			}
 
 			TexturePtr rts[] = { rt->GetRenderTargetTexture(), mGlowTarget };
@@ -370,7 +370,7 @@ public:
 		auto cam = renderer->GetCamera();
 		if (!mLightCamera)
 		{
-			mLightCamera = CameraPtr(FB_NEW(Camera), [](Camera* cam){ FB_DELETE(cam); });
+			mLightCamera = Camera::Create();				
 			mLightCamera->SetOrthogonal(true);
 			auto cmd = renderer->GetOptions();
 			float width = std::min(cmd->r_ShadowCamWidth, mSize.x * (cmd->r_ShadowCamWidth / 1600.f));
@@ -437,9 +437,8 @@ public:
 					width, height,
 					PIXEL_FORMAT_D32_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_DEPTH_STENCIL_SRV);
-				assert(mShadowMap);
-				const char* szStr = FormatString("rt%u_%u_%u_ShadowMap", rt->GetId(), width, height);
-				mShadowMap->SetDebugName(szStr);
+				assert(mShadowMap);				
+				mShadowMap->SetDebugName(FormatString("rt%u_%u_%u_ShadowMap", rt->GetId(), width, height).c_str());
 			}
 
 			TexturePtr rts[] = { 0 };
@@ -592,9 +591,8 @@ public:
 			{
 				Logger::Log(FB_ERROR_LOG_ARG, "Cannot create HDR RenderTarget.");
 				return;
-			}
-			const char* szStr = FormatString("rt%u_%u_%u_HDRTargetTexture", mId, size.x, size.y);
-			mHDRTarget->SetDebugName(szStr);
+			}			
+			mHDRTarget->SetDebugName(FormatString("rt%u_%u_%u_HDRTargetTexture", mId, size.x, size.y).c_str());
 		}
 
 		TexturePtr rts[] = { mHDRTarget };
@@ -788,9 +786,8 @@ public:
 				CropSize8((int)(size.y * 0.25f))
 				);
 			mBrightPassTexture = renderer->CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
-				BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
-			const char* szStr = FormatString("rt%u_%u_%u_BrightPass", rt->GetId(), size.x, size.y);
-			mBrightPassTexture->SetDebugName(szStr);
+				BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);			
+			mBrightPassTexture->SetDebugName(FormatString("rt%u_%u_%u_BrightPass", rt->GetId(), size.x, size.y).c_str());
 		}
 
 		const Vec2I& resol = mBrightPassTexture->GetSize();
@@ -1236,11 +1233,10 @@ public:
 
 //---------------------------------------------------------------------------
 RenderStrategyDefault::RenderStrategyDefault()
-: mImpl(new RenderStrategyDefaultImpl){
+: mImpl(new Impl){
 
 }
 RenderStrategyDefault::~RenderStrategyDefault(){
-	delete mImpl;
 }
 
 void RenderStrategyDefault::Render(size_t face){
@@ -1251,7 +1247,7 @@ bool RenderStrategyDefault::IsHDR() const{
 	return true;
 }
 bool RenderStrategyDefault::SetHDRTarget(){
-	HDRTarget(true);
+	mImpl->HDRTarget(true);
 	return true;
 }
 
@@ -1268,3 +1264,6 @@ bool RenderStrategyDefault::SetBigSilouetteBuffer(){
 	return mImpl->SetBigSilouetteBuffer();
 }
 
+void RenderStrategyDefault::SetGlowRenderTarget(){
+	return mImpl->GlowTarget(true);
+}

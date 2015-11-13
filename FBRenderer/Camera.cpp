@@ -7,7 +7,7 @@
 
 using namespace fastbird;
 
-class Camera::CameraImpl{
+class Camera::Impl{
 public:
 	struct UserParameters
 	{
@@ -69,7 +69,7 @@ public:
 	typedef std::lock_guard<std::mutex> MUTEX_LOCK;
 	std::mutex mMutex;
 
-	CameraImpl() :mViewPropertyChanged(true)
+	Impl() :mViewPropertyChanged(true)
 		, mProjPropertyChanged(true)
 		, mOrthogonal(false)
 		, mYZSwap(true)
@@ -82,7 +82,7 @@ public:
 		mNear = 0.5f;
 		mFar = 1500.0f;
 	}
-	~CameraImpl(){		
+	~Impl(){		
 	}
 
 	//----------------------------------------------------------------------------
@@ -464,15 +464,19 @@ public:
 		mHeight = height; mProjPropertyChanged = true;
 	}
 };
+
 //----------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(Camera);
+//CameraPtr Camera::Create(){
+//	return CameraPtr(FB_NEW(Camera), )
+//}
+
 Camera::Camera()
-	: mImpl(new CameraImpl){
+	: mImpl(new Impl){
 	
 }
 
-Camera::~Camera(){
-	delete mImpl;
-	
+Camera::~Camera(){	
 }
 
 //----------------------------------------------------------------------------

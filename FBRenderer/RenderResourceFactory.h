@@ -5,7 +5,10 @@ namespace fastbird{
 	private:
 		template <typename T>
 		static std::shared_ptr<T> CreateResource(){
-			return std::shared_ptr<T>(FB_NEW(T), [](T* obj){ FB_DELETE(obj); });
+			return T::Create();
 		}
 	};
 }
+
+
+

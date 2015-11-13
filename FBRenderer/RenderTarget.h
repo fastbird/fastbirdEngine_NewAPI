@@ -26,12 +26,12 @@ namespace fastbird
 		static RenderTargetId NextRenderTargetId;
 		static const int FB_NUM_BLOOM_TEXTURES = 3;
 		static const int FB_NUM_STAR_TEXTURES = 12;
-
-		friend class RenderResourceFactory;
+		
+		DECLARE_PIMPL_NON_COPYABLE(RenderTarget);		
 		RenderTarget();
 
 	public:
-		DECLARE_PIMPL(RenderTarget);
+		static RenderTargetPtr Create();
 		~RenderTarget();
 
 		//-------------------------------------------------------------------
@@ -64,31 +64,28 @@ namespace fastbird
 		void SetClearValues(const Color& color, Real z, UINT8 stencil);
 		void SetClearColor(const Color& color);
 		void SetClearDepthStencil(Real z, UINT8 stencil);
+		void SetColorTexture(TexturePtr pTexture);
+		void SetDepthTexture(TexturePtr pTexture);
+		void SetEnvTexture(TexturePtr texture);
+		void SetEnable(bool enable);
+		bool GetEnable() const;
+		bool GetUsePool() const;
+		void SetUsePool(bool usePool);
+		const Viewport& GetViewport() const;
 
 		void Bind(size_t face = 0);
 		void BindTargetOnly(bool hdr);
 		bool Render(size_t face=0);
 		void Unbind();
+		void SetGlowRenderTarget();
 
-		void SetEnable(bool enable);
-		bool GetEnable() const;
-		void SetEnvTexture(TexturePtr texture);
-		void SetUsePool(bool usePool);
-		bool GetUsePool() const;
-		void AddListener(IRenderTargetListener* listener);
-		void RemoveListener(IRenderTargetListener* listener);
-
-		void SetColorTexture(TexturePtr pTexture);
-		void SetDepthTexture(TexturePtr pTexture);
-		CameraPtr GetLightCamera() const;
-		const Viewport& GetViewport() const;
-
+		CameraPtr GetLightCamera() const;		
 		void SetLightCamWidth(Real width);
 		void SetLightCamHeight(Real height);
 		void SetLightCamNear(Real n);
 		void SetLightCamFar(Real f);
+
 		void DrawOnEvent(bool set);
 		void TriggerDrawEvent();
-
 	};
 }

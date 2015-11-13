@@ -6,7 +6,7 @@ namespace fastbird
 	//------------------------------------------------------------------------
 	class FB_DLL_PUBLIC DirectionalLight
 	{
-		DECLARE_PIMPL(DirectionalLight);
+		DECLARE_PIMPL_NON_COPYABLE(DirectionalLight);
 
 	public:
 		DirectionalLight();

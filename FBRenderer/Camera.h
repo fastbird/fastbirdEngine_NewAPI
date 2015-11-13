@@ -13,7 +13,8 @@ namespace fastbird
 	DECLARE_SMART_PTR(Camera);
 	class FB_DLL_PUBLIC Camera : public Observable<ICameraObserver>
 	{
-		DECLARE_PIMPL(Camera);
+		DECLARE_PIMPL_NON_COPYABLE(Camera);
+		Camera();
 
 	public:
 		enum FRUSTUM_PLANE
@@ -30,7 +31,7 @@ namespace fastbird
 			TransformChanged,
 		};
 
-		Camera();
+		static CameraPtr Create();
 		~Camera();
 
 		//-------------------------------------------------------------------------

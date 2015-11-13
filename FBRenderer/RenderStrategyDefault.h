@@ -4,14 +4,14 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(RenderTarget);
 	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(RenderStrategyDefault);
 	class RenderStrategyDefault : public IRenderStrategy{
-		DECLARE_PIMPL(RenderStrategyDefault);		
-
-	public:
+		DECLARE_PIMPL_NON_COPYABLE(RenderStrategyDefault);
 		RenderStrategyDefault();
-		~RenderStrategyDefault();
 
-	private:
+	public:	
+		static RenderStrategyDefaultPtr Create();
+		~RenderStrategyDefault();
 
 		//-------------------------------------------------------------------
 		// IRenderStrategy
@@ -24,44 +24,6 @@ namespace fastbird{
 		CameraPtr GetLightCamera() const;
 		bool SetSmallSilouetteBuffer();
 		bool SetBigSilouetteBuffer();
-
-		//-------------------------------------------------------------------
-		// Own - Intentionally not located in the RenderStrategyDefaultImpl class.
-		//-------------------------------------------------------------------
-		void ClearSilouetteBuffer();
-		void RenderTargetColor(bool bind);
-		void RenderTargetDepth(bool bind);
-
-		void UpdateLightCamera();
-		void ShadowTarget(bool bind);
-		void ShadowMap(bool bind);
-
-		void DepthTarget(bool bind, bool clear);
-		void DepthTexture(bool bind);
-
-		void CloudVolumeTarget(bool bind);
-		void CloudVolumeTexture(bool bind);
-
-		void GodRayTarget(bool bind);
-		void GodRay();
-
-		void HDRTarget(bool bind);
-		void Silouette();
-
-		void GlowTarget(bool bind);
-		void GlowTexture(bool bind);
-		void BlendGlow();
-		void BlendGodRay();
-
-		void MeasureLuminanceOfHDRTarget();
-		void BrightPass();
-		void BrightPassToStarSource();
-		void StarSourceToBloomSource();
-		void Bloom();
-		void RenderStarGlare();
-		void ToneMapping();
-
-		void ScenePreRender();
-		void SceneRender();
+		void SetGlowRenderTarget();
 	};
 }

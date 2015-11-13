@@ -16,7 +16,7 @@ namespace fastbird{
 	\ingroup FBInputManager
 	*/
 	class FB_DLL_PUBLIC InputManager{
-		DECLARE_PIMPL(InputManager);
+		DECLARE_PIMPL_NON_COPYABLE(InputManager);
 		InputManager();
 		~InputManager();
 		static InputManager* sInputManager;

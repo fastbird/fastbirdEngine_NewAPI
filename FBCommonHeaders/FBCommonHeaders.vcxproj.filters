@@ -8,5 +8,6 @@
     <ClInclude Include="Types.h" />
     <ClInclude Include="VectorMap.h" />
     <ClInclude Include="Observable.h" />
+    <ClInclude Include="CowPtr.h" />
   </ItemGroup>
 </Project>

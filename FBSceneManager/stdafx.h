@@ -4,7 +4,7 @@ Scene manage the objects visible on the render target.
 
 Required libraries: 
 Required modules: 
-Optional modules: 
+Plugin: 
 */
 
 // Happens when a interface can have not exposed symbols.

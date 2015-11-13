@@ -1,6 +1,6 @@
 #pragma once
 namespace fastbird{
-	class ITexture;
+	class IPlatformTexture;
 
 	struct DrawQuadParam{
 		int x, y; 
@@ -21,7 +21,7 @@ namespace fastbird{
 		int x, y; 
 		int width, height;
 		float r, g, b, a;
-		ITexture* texture; 
+		IPlatformTexture* texture; 
 		//IMaterial* materialOverride = 0 -- should bind in Renderer layer.
 	};
 
@@ -30,7 +30,7 @@ namespace fastbird{
 		int width, height; 
 		float uStart, vStart, uEnd, vEnd;		
 		float r, g, b, a;
-		ITexture* texture;
+		IPlatformTexture* texture;
 		//IMaterial* materialOverride = 0 -- should bind in Renderer layer.
 	};
 

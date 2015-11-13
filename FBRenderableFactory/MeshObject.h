@@ -3,7 +3,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(MeshObject);
 	class FB_DLL_PUBLIC MeshObject{
-		DECLARE_PIMPL(MeshObject);
+		DECLARE_PIMPL_NON_COPYABLE(MeshObject);
 		MeshObject();
 
 	public:

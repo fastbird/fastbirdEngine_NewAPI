@@ -1,10 +1,9 @@
 #pragma once
 #include "FBCommonHeaders/VectorMap.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(TextureAtlasRegion);
-	class TextureAtlasRegion
+	DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
+	struct TextureAtlasRegion
 	{
-	public:
 		DWORD mID;
 		std::string mName;
 		Vec2 mUVStart;

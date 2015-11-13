@@ -32,3 +32,5 @@ Convenent macros for manipulating stl containers.
 				}\
 		}\
 	unsigned arr ## SizeAfter = arr.size();
+
+#define ValidCString(szStr) szStr && strlen((szStr))

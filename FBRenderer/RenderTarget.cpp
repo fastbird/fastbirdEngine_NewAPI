@@ -14,8 +14,9 @@ namespace fastbird
 {
 RenderTargetId NextRenderTargetId = 1;
 
-class RenderTarget::RenderTargetImpl{
+class RenderTarget::Impl{
 public:
+	RenderTargetWeakPtr mSelf;
 	CameraPtr mCamera;
 	IRenderStrategyPtr mStrategy;
 	RendererWeakPtr mRenderer;
@@ -43,10 +44,8 @@ public:
 	bool mDrawOnEvent;
 	bool mDrawEventTriggered;
 
-	RenderTargetImpl()
-		: mCamera(FB_NEW(Camera), [](Camera* obj){ FB_DELETE(obj); })
-		, mStrategy(FB_NEW(RenderStrategyDefault), [](IRenderStrategy* obj){ FB_DELETE(obj); })
-		, mClearColor(0, 0, 0, 1)
+	Impl()
+		: mClearColor(0, 0, 0, 1)
 		, mDepthClear(1.f)
 		, mStencilClear(0)
 		, mEnabled(true)
@@ -60,8 +59,8 @@ public:
 		, mFace(0)
 		, mId(NextRenderTargetId++)		
 	{
-	}
-	~RenderTargetImpl(){		
+		mCamera = Camera::Create();
+		mStrategy = RenderStrategyDefault::Create();
 	}	
 
 	//-------------------------------------------------------------------
@@ -140,7 +139,7 @@ public:
 		mWillCreateDepth = true;
 	}
 
-	void Bind(RenderTarget* owner, size_t face)
+	void Bind(size_t face)
 	{
 		if (!mEnabled)
 			return;
@@ -148,7 +147,7 @@ public:
 		if (!renderer)
 			return;		
 		
-		renderer->SetCurrentRenderTarget(owner);
+		renderer->SetCurrentRenderTarget(mSelf.lock());
 
 		if (mRenderTargetTexture)
 			mRenderTargetTexture->Unbind();
@@ -175,10 +174,10 @@ public:
 		renderer->RestoreRenderStates();
 	}
 
-	void BindTargetOnly(RenderTarget* owner, bool hdr)
+	void BindTargetOnly(bool hdr)
 	{
 		auto const renderer = Renderer::GetInstance();
-		renderer->SetCurrentRenderTarget(owner);
+		renderer->SetCurrentRenderTarget(mSelf.lock());
 		if (hdr &&  mStrategy->IsHDR() && renderer->GetOptions()->r_HDR){
 			mStrategy->SetHDRTarget();			
 		}
@@ -194,7 +193,7 @@ public:
 		}
 	}
 
-	bool Render(RenderTarget* owner, size_t face)
+	bool Render(size_t face)
 	{
 		if (!mEnabled || !mScene.lock())
 			return false;
@@ -272,6 +271,10 @@ public:
 		}
 	}
 
+	void SetGlowRenderTarget(){
+		mStrategy->SetGlowRenderTarget();
+	}
+
 	void ConsumeInput(IInputInjectorPtr injector)
 	{
 		if (!injector->IsValid(FBInputDevice::DeviceMouse))
@@ -309,14 +312,19 @@ public:
 };
 
 //-------------------------------------------------------------------
+RenderTargetPtr RenderTarget::Create(){
+	auto p = RenderTargetPtr(FB_NEW(RenderTarget), [](RenderTarget* obj){ FB_DELETE(obj); });
+	p->mImpl->mSelf = p;
+	return p;
+}
+
 RenderTarget::RenderTarget()
-	:mImpl(new RenderTargetImpl)
+	:mImpl(new Impl)
 {
 }
 
 RenderTarget::~RenderTarget()
 {
-	delete mImpl;
 }
 
 //-------------------------------------------------------------------
@@ -403,22 +411,26 @@ void RenderTarget::SetClearDepthStencil(Real z, UINT8 stencil)
 
 void RenderTarget::Bind(size_t face)
 {
-	mImpl->Bind(this, face);	
+	mImpl->Bind(face);	
 }
 
 void RenderTarget::BindTargetOnly(bool hdr)
 {	
-	mImpl->BindTargetOnly(this, hdr);
+	mImpl->BindTargetOnly(hdr);
 }
 
 bool RenderTarget::Render(size_t face)
 {
-	return mImpl->Render(this, face);
+	return mImpl->Render(face);
 }
 
 void RenderTarget::Unbind()
 {
 	mImpl->Unbind();
+}
+
+void RenderTarget::SetGlowRenderTarget(){
+	mImpl->SetGlowRenderTarget();
 }
 
 void RenderTarget::SetEnable(bool enable) {
@@ -450,6 +462,10 @@ bool RenderTarget::GetUsePool() const{
 void RenderTarget::SetColorTexture(TexturePtr pTexture)
 {
 	mImpl->SetColorTexture(pTexture);
+}
+
+void RenderTarget::SetDepthTexture(TexturePtr pTexture){
+	mImpl->SetDepthTexture(pTexture);
 }
 
 CameraPtr RenderTarget::GetLightCamera() const {

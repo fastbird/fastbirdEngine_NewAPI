@@ -1,26 +1,39 @@
 #pragma once
 
-#include <Engine/Texture.h>
-#include <CommonLib/Math/Vec2I.h>
-#include <D3D11.h>
-#include <D3DX11tex.h>
-
+#include "FBRenderer/ITexture.h"
 namespace fastbird
 {
-	class TextureD3D11 : public Texture
+	DECLARE_SMART_PTR(TextureD3D11);
+	class TextureD3D11 : public ITexture
 	{
-	public:
-		//--------------------------------------------------------------------
-		static TextureD3D11* CreateInstance();
-		// for game. in the engine use smartptr instead of this.
-		virtual void Delete();
-		//--------------------------------------------------------------------
+		DECLARE_PIMPL(TextureD3D11);
 		TextureD3D11();
-		virtual ~TextureD3D11();
+
+	public:
+		static TextureD3D11Ptr Create();
+		~TextureD3D11();
 
 		//--------------------------------------------------------------------
 		// ITexture
 		//--------------------------------------------------------------------
+		virtual bool LoadFile(const char* filepath, bool async) = 0;
+		virtual const char* GetName() const = 0;
+		virtual void SetSlot(int slot) = 0;
+		virtual int GetSlot() const = 0;
+		virtual void SetShaderStage(BINDING_SHADER shader) = 0;
+		virtual BINDING_SHADER GetShaderStage() const = 0;
+		virtual bool IsReady() const = 0;
+		virtual void Bind() const = 0;
+		virtual void Unbind() const = 0;
+		virtual MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const = 0;
+		virtual void Unmap(UINT subResource) const = 0;
+		virtual void CopyToStaging(ITexture* dst, UINT dstSubresource,
+			UINT dstX, UINT dstY, UINT dstZ, UINT srcSubresource, Box3D* srcBox) const = 0;
+		virtual void SaveToFile(const char* filename) const = 0;
+		virtual void GenerateMips() = 0;
+		virtual void SetDebugName(const char*) = 0;
+
+
 		virtual bool IsReady() const;
 		virtual Vec2I GetSize() const;
 		virtual unsigned GetWidth() const;

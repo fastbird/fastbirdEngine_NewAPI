@@ -2,7 +2,7 @@
 #include "DirectionalLight.h"
 using namespace fastbird;
 
-class DirectionalLight::DirectionalLightImpl{
+class DirectionalLight::Impl{
 public:
 	Vec3 mDirection;
 	Vec3 mDiffuse;
@@ -20,7 +20,7 @@ public:
 	bool mInterpolating;
 
 	//----------------------------------------------------------------------------
-	DirectionalLightImpl()
+	Impl()
 		: mTheta(0)
 		, mPhi(0)
 		, mInterpolating(false)
@@ -171,14 +171,13 @@ public:
 
 //----------------------------------------------------------------------------
 DirectionalLight::DirectionalLight()
-	:mImpl(new DirectionalLightImpl)
+	:mImpl(new Impl)
 {
 }
 
 //----------------------------------------------------------------------------
 DirectionalLight::~DirectionalLight()
 {
-	delete mImpl;
 }
 
 const Vec3& DirectionalLight::GetPosition(){

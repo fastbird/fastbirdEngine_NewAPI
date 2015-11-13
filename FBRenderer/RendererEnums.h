@@ -1,12 +1,6 @@
 #pragma once
 namespace fastbird
 {
-	enum INDEXBUFFER_FORMAT
-	{
-		INDEXBUFFER_FORMAT_16BIT,
-		INDEXBUFFER_FORMAT_32BIT,
-	};
-
 	enum BUFFER_USAGE
 	{
 		BUFFER_USAGE_DEFAULT,

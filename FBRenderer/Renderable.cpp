@@ -4,7 +4,7 @@
 #include "IndexBuffer.h"
 using namespace fastbird;
 
-class Renderable::RenderableImpl{
+class Renderable::Impl{
 public:
 	
 };

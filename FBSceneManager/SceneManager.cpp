@@ -20,7 +20,7 @@ void SceneManager::DeleteSceneManager(){
 }
 
 //---------------------------------------------------------------------------
-class SceneManager::SceneManagerImpl{
+class SceneManager::Impl{
 public:
 	std::map<std::string, SceneWeakPtr> mScenes;
 };
@@ -37,7 +37,7 @@ ScenePtr SceneManager::CreateScene(const char* name){
 		if (scene)
 			return scene;
 	}
-	auto scene = ScenePtr(new Scene, [](Scene* obj){ delete obj; });
+	auto scene = Scene::Create(name);
 	mImpl->mScenes[name] = scene;
 	return scene;
 }

@@ -3,7 +3,7 @@
 #include "FBDebugLib/Logger.h"
 namespace fastbird{
 	// intended redundancy
-	static const char* FormatString(const char* str, ...){
+	static std::string FormatString(const char* str, ...){
 		static char buf[2048];
 		va_list args;
 
@@ -33,12 +33,12 @@ namespace fastbird{
 #else
 		strcat_s(buf, MAX_PATH, "_Release.dll");
 #endif
-		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf));
+		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf).c_str());
 		HMODULE module = LoadLibraryA(buf);
 		if (!module) {
 			Logger::Log(FB_DEFAULT_LOG_ARG, "Failed.\n");
 			strcat_s(buf, MAX_PATH, ".dll");
-			Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf));
+			Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf).c_str());
 			module = LoadLibraryA(buf);
 		}		
 		

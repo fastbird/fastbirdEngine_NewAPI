@@ -3,15 +3,8 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Renderer.h" />
-    <ClInclude Include="IRenderer.h" />
-    <ClInclude Include="IInputLayout.h" />
     <ClInclude Include="IRenderTargetListener.h" />
-    <ClInclude Include="IShader.h" />
-    <ClInclude Include="ITexture.h" />
-    <ClInclude Include="IVertexBuffer.h" />
-    <ClInclude Include="IIndexBuffer.h" />
     <ClInclude Include="RenderStates.h" />
-    <ClInclude Include="IRenderStates.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderResourceFactory.h" />
     <ClInclude Include="Texture.h" />
@@ -37,9 +30,6 @@
     <ClInclude Include="InputElementDesc.h">
       <Filter>Enum&amp;Structures</Filter>
     </ClInclude>
-    <ClInclude Include="IRendererStructs.h">
-      <Filter>Enum&amp;Structures</Filter>
-    </ClInclude>
     <ClInclude Include="RendererEnums.h">
       <Filter>Enum&amp;Structures</Filter>
     </ClInclude>
@@ -62,6 +52,20 @@
     <ClInclude Include="StarDef.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="RenderTargetParam.h" />
+    <ClInclude Include="Font.h" />
+    <ClInclude Include="TextTags.h" />
+    <ClInclude Include="ColorRamp.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="IPlatformRenderer.h" />
+    <ClInclude Include="IPlatformRendererStructs.h">
+      <Filter>Enum&amp;Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="IPlatformTexture.h" />
+    <ClInclude Include="IPlatformVertexBuffer.h" />
+    <ClInclude Include="IPlatformShader.h" />
+    <ClInclude Include="IPlatformInputLayout.h" />
+    <ClInclude Include="IPlatformIndexBuffer.h" />
+    <ClInclude Include="IPlatformRenderStates.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -94,6 +98,9 @@
     <ClCompile Include="InputElementDesc.cpp">
       <Filter>Enum&amp;Structures</Filter>
     </ClCompile>
+    <ClCompile Include="Font.cpp" />
+    <ClCompile Include="ColorRamp.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

@@ -3,8 +3,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(Renderable);	
 	class FB_DLL_PUBLIC Renderable{
-		DECLARE_PIMPL(Renderable);
-
+		DECLARE_PIMPL_NON_COPYABLE(Renderable);
 
 
 	};

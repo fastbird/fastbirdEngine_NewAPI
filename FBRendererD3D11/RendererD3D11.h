@@ -2,7 +2,7 @@
 #ifndef __Rendererd3d11_header_included__
 #define __Rendererd3d11_header_included__
 
-#include "FBRenderer/IRenderer.h"
+#include "FBRenderer/IPlatformRenderer.h"
 #include "FBRenderer/RendererStructs.h"
 #include "EssentialEngineData/shaders/Constants.h"
 #include "RenderStatesD3D11.h"
@@ -17,15 +17,15 @@ namespace fastbird
 	class RendererD3D11;
 	class IRenderTarget;
 	
-	class RendererD3D11 : public IRenderer
+	class RendererD3D11 : public IPlatformRenderer
 	{	
-		DECLARE_PIMPL(RendererD3D11);				
+		DECLARE_PIMPL_NON_COPYABLE(RendererD3D11);
 		RendererD3D11();
 		virtual ~RendererD3D11();
 
 	public:
-		static IRenderer* Create();
-		static void Delete(IRenderer* renderer);
+		static IPlatformRenderer* Create();
+		static void Delete(IPlatformRenderer* renderer);
 		static RendererD3D11& GetInstance();	
 		
 		virtual bool Init(int threadPool);

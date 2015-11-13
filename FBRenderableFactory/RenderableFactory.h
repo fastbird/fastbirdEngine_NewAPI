@@ -4,7 +4,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(MeshObject);
 	class FB_DLL_PUBLIC RenderableFactory{
-		DECLARE_PIMPL(RenderableFactory)
+		DECLARE_PIMPL_NON_COPYABLE(RenderableFactory);
 		RenderableFactory();
 		
 	public:

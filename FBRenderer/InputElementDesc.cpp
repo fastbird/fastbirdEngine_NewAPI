@@ -6,7 +6,7 @@ INPUT_ELEMENT_FORMAT InputElementFromString(const char* sz)
 {
 	if (!sz)
 	{
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid INPUT_ELEMENT_FORMAT"), sz));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString(("%s is not valid INPUT_ELEMENT_FORMAT", sz).c_str());
 		assert(0);
 		return INPUT_ELEMET_FORMAT_NUM;
 	}
@@ -32,7 +32,7 @@ INPUT_ELEMENT_FORMAT InputElementFromString(const char* sz)
 		return INPUT_ELEMET_FORMAT_INT4;
 	}
 
-	Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid INPUT_ELEMENT_FORMAT"), sz));
+	Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid INPUT_ELEMENT_FORMAT", sz).c_str());
 	assert(0);
 	return INPUT_ELEMET_FORMAT_NUM;
 }
@@ -46,6 +46,6 @@ INPUT_CLASSIFICATION InputClassificationFromString(const char* sz)
 	if (_stricmp(sz, "INSTANCE") == 0)
 		return INPUT_CLASSIFICATION_PER_INSTANCE_DATA;
 
-	Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid INPUT_CLASSIFICATION"), sz));
+	Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid INPUT_CLASSIFICATION", sz).c_str());
 	return INPUT_CLASSIFICATION_PER_VERTEX_DATA;
 }

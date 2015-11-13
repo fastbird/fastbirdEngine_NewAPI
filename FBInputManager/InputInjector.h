@@ -4,7 +4,7 @@
 
 namespace fastbird{
 	class FB_DLL_HIDDEN InputInjector{
-		DECLARE_PIMPL(InputInjector);
+		DECLARE_PIMPL_NON_COPYABLE(InputInjector);
 
 	public:
 		InputInjector();

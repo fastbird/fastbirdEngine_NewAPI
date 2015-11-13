@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include <Engine/StdAfx.h>
 #include <Engine/TextureD3D11.h>
 #include <Engine/RendererD3D11.h>

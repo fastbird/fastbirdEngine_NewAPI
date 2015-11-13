@@ -18,14 +18,14 @@ using namespace fastbird;
 
 //----------------------------------------------------------------------------
 static RendererD3D11* sInstance = 0;
-IRenderer* RendererD3D11::Create(){
+IPlatformRenderer* RendererD3D11::Create(){
 	if (sInstance){
 		Logger::Log(FB_ERROR_LOG_ARG, "RendererD3D11 is already created.");
 		return sInstance;
 	}
 	return FB_NEW(RendererD3D11);
 }
-void RendererD3D11::Delete(IRenderer* renderer){
+void RendererD3D11::Delete(IPlatformRenderer* renderer){
 	if (sInstance != renderer){
 		Logger::Log(FB_ERROR_LOG_ARG, "RendererD3D11 is not vaild.");
 		return;
@@ -853,10 +853,10 @@ void RendererD3D11::ReleaseSwapChain(HWindowId id)
 	auto it = mSwapChainRenderTargets.Find(id);
 	if (it == mSwapChainRenderTargets.end())
 	{
-		Log(FB_DEFAULT_LOG_ARG, FormatString("Cannot find the swap chain render target with the id %u", id));		
+		Log(FB_DEFAULT_LOG_ARG, FormatString("Cannot find the swap chain render target with the id %u", id).c_str());
 	}
 	else{
-		Log(FormatString("Releasing swap chain %u.", id));
+		Log(FormatString("Releasing swap chain %u.", id).c_str());
 		mSwapChainRenderTargets.erase(it);
 	}
 

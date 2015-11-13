@@ -13,23 +13,25 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="ColorRamp.h" />
+    <ClInclude Include="Font.h" />
     <ClInclude Include="GaussianDistribution.h" />
     <ClInclude Include="ICameraObserver.h" />
-    <ClInclude Include="IIndexBuffer.h" />
-    <ClInclude Include="IInputLayout.h" />
+    <ClInclude Include="IPlatformIndexBuffer.h" />
+    <ClInclude Include="IPlatformInputLayout.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputElementDesc.h" />
+    <ClInclude Include="IPlatformRenderStates.h" />
     <ClInclude Include="IRenderable.h" />
-    <ClInclude Include="IRenderer.h" />
+    <ClInclude Include="IPlatformRenderer.h" />
     <ClInclude Include="IRendererObserver.h" />
-    <ClInclude Include="IRendererStructs.h" />
-    <ClInclude Include="IRenderStates.h" />
+    <ClInclude Include="IPlatformRendererStructs.h" />
     <ClInclude Include="IRenderStrategy.h" />
     <ClInclude Include="IRenderTargetListener.h" />
     <ClInclude Include="IRenderTargetObserver.h" />
-    <ClInclude Include="IShader.h" />
-    <ClInclude Include="ITexture.h" />
-    <ClInclude Include="IVertexBuffer.h" />
+    <ClInclude Include="IPlatformShader.h" />
+    <ClInclude Include="IPlatformTexture.h" />
+    <ClInclude Include="IPlatformVertexBuffer.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Renderable.h" />
@@ -45,10 +47,12 @@
     <ClInclude Include="RenderStrategyDefault.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderTargetParam.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderDefines.h" />
     <ClInclude Include="Spatial.h" />
     <ClInclude Include="StarDef.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TextTags.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureAtlas.h" />
     <ClInclude Include="VertexBuffer.h" />
@@ -56,6 +60,8 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
+    <ClCompile Include="ColorRamp.cpp" />
+    <ClCompile Include="Font.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="InputElementDesc.cpp" />
@@ -67,6 +73,7 @@
     <ClCompile Include="RenderStates.cpp" />
     <ClCompile Include="RenderStrategyDefault.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderDefines.cpp" />
     <ClCompile Include="Spatial.cpp" />
     <ClCompile Include="StarDef.cpp" />

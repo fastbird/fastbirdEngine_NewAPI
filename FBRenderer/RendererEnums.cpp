@@ -31,7 +31,7 @@ namespace fastbird
 			return BINDING_SHADER_CS;
 		}
 
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid BINDING_SHADER", szShader));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid BINDING_SHADER", szShader).c_str());
 		return BINDING_SHADER_PS;
 	}
 
@@ -47,7 +47,7 @@ namespace fastbird
 		{
 			return FILL_MODE_SOLID;
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not vaild FILL_MODE"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not vaild FILL_MODE", str).c_str());
 		return FILL_MODE_SOLID;
 	}
 
@@ -67,7 +67,7 @@ namespace fastbird
 		{
 			return CULL_MODE_BACK;
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not vaild CULL_MODE"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not vaild CULL_MODE", str).c_str());
 		return CULL_MODE_BACK;
 	}
 
@@ -84,7 +84,7 @@ namespace fastbird
 		if (_stricmp(str, "DepthStencil") == 0)
 			return TEXTURE_TYPE_DEPTH_STENCIL;
 
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not vaild TEXTURE_TYPE"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not vaild TEXTURE_TYPE", str).c_str());
 		return TEXTURE_TYPE_DEFAULT;
 	}
 
@@ -129,7 +129,7 @@ namespace fastbird
 		if (_stricmp(sz, "COMPARISON_ANISOTROPIC") == 0)
 			return TEXTURE_FILTER_COMPARISON_ANISOTROPIC;
 
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not vaild TEXTURE_FILTER"), sz));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not vaild TEXTURE_FILTER", sz).c_str());
 		return TEXTURE_FILTER_MIN_MAG_MIP_LINEAR;
 	}
 
@@ -148,7 +148,7 @@ namespace fastbird
 		if (_stricmp(sz, "Mirror_Once") == 0)
 			return TEXTURE_ADDRESS_MIRROR_ONCE;
 
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid TEXTURE_ADDRESS_MODE"), sz));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid TEXTURE_ADDRESS_MODE", sz).c_str());
 		return TEXTURE_ADDRESS_CLAMP;
 	}
 
@@ -163,7 +163,7 @@ namespace fastbird
 				return COMPARISON_FUNC(i);
 			}
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid COMPARISON_FUNC"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid COMPARISON_FUNC", str).c_str());
 		return COMPARISON_LESS;
 	}
 
@@ -178,7 +178,7 @@ namespace fastbird
 				return BLEND(i);
 			}
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid Blend."), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid Blend.", str).c_str());
 		return BLEND_ONE;
 	}
 
@@ -193,7 +193,7 @@ namespace fastbird
 				return BLEND_OP(i);
 			}
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid BlendOp."), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid BlendOp.", str).c_str());
 		return BLEND_OP_ADD;
 	}
 
@@ -221,7 +221,7 @@ namespace fastbird
 		if (_stricmp(str, "0") == 0)
 			return COLOR_WRITE_MASK_NONE;
 
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid COLOR_WRITE_MASK"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid COLOR_WRITE_MASK", str).c_str());
 		return COLOR_WRITE_MASK_ALL;
 	}
 
@@ -239,7 +239,7 @@ namespace fastbird
 			return DEPTH_WRITE_MASK_ALL;
 		}
 
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid DepthWriteMask"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid DepthWriteMask", str).c_str());
 		return DEPTH_WRITE_MASK_ALL;
 	}
 
@@ -253,7 +253,7 @@ namespace fastbird
 			if (_stricmp(str, STR_STENCIL_OP[i - 1]) == 0)
 				return STENCIL_OP(i);
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid StencilOp"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid StencilOp", str).c_str());
 		return STENCIL_OP_KEEP;
 	}
 
@@ -274,7 +274,7 @@ namespace fastbird
 		if (_stricmp(str, "SHADOW") == 0)
 			return PASS_SHADOW;
 		
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString(_T("%s is not valid RENDER_PASS"), str));
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s is not valid RENDER_PASS", str).c_str());
 		return PASS_NORMAL;
 	}
 

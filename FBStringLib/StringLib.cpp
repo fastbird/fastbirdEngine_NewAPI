@@ -28,7 +28,7 @@ namespace fastbird{
 	TCHAR* StripRight(TCHAR* s){
 		TCHAR* p = s + _tstrlen(s);
 		while (p > s && _tisspace((*--p)))
-			*p = _T('\0');
+			*p = '\0';
 		return s;
 	}
 
@@ -201,7 +201,7 @@ namespace fastbird{
 		return true;
 	}
 
-	const WCHAR* FormatString(const WCHAR* str, ...){
+	std::wstring FormatString(const WCHAR* str, ...){
 		static WCHAR buf[2048];
 		va_list args;
 		
@@ -212,15 +212,15 @@ namespace fastbird{
 		return buf;
 	}
 
-	const char* FormatString(const char* str, ...){
-		static char buf[2048];
+	std::string FormatString(const char* str, ...){
+		char buf[2048];
 		va_list args;
 
 		va_start(args, str);
 		vsprintf_s(buf, str, args);
 		va_end(args);
 
-		return buf;
+		return std::string(buf);
 	}
 
 	//-----------------------------------------------------------------------

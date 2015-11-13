@@ -1,21 +1,16 @@
 #pragma once
 #include <memory>
+#include "FBCommonHeaders/Types.h"
 namespace fastbird{
-	class Camera;
-	typedef std::shared_ptr<Camera> CameraPtr;
-	class Scene;
-	typedef std::shared_ptr<Scene> ScenePtr;
-	class RenderTarget;
-	typedef std::shared_ptr<RenderTarget> RenderTargetPtr;
-	class IRenderStrategy;
-	typedef std::shared_ptr<IRenderStrategy> IRenderStrategyPtr;
-	typedef std::weak_ptr<IRenderStrategy> IRenderStrategyWeakPtr;
+	DECLARE_SMART_PTR(Camera);
+	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(RenderTarget);	
+	DECLARE_SMART_PTR(IRenderStrategy);
 	class IRenderStrategy{
-	public:
+	protected:
 		virtual ~IRenderStrategy(){}
 
-	private:
-		friend class RenderTarget::RenderTargetImpl;
+	public:
 		virtual void SetScene(ScenePtr scene) = 0;
 		virtual void SetRenderTarget(RenderTargetPtr renderTarget) = 0;
 		virtual void Render(size_t face) = 0;
@@ -23,6 +18,7 @@ namespace fastbird{
 		virtual bool SetHDRTarget() = 0;
 		virtual CameraPtr GetLightCamera() const = 0;
 		virtual bool SetSmallSilouetteBuffer() = 0;
-		virtual bool SetBigSilouetteBuffer() = 0;
+		virtual bool SetBigSilouetteBuffer() = 0;	
+		virtual void SetGlowRenderTarget() = 0;
 	};
 }

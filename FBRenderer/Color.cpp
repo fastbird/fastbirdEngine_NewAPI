@@ -49,7 +49,7 @@ Color::Color(const char* str)
 		if (strlen(str) == 8)
 		{
 			TString strColor = str;
-			strColor += _T("ff");
+			strColor += "ff";
 			*this = Color(Color::FixColorByteOrder(StringConverter::ParseHexa(strColor.c_str())));
 		}
 		else

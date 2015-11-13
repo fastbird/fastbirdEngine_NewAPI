@@ -3,7 +3,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(Scene);
 	class FB_DLL_PUBLIC SceneManager{
-		DECLARE_PIMPL(SceneManager);
+		DECLARE_PIMPL_NON_COPYABLE(SceneManager);
 		SceneManager();
 		~SceneManager();
 		static SceneManager* sSceneManager;

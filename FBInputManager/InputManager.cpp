@@ -23,7 +23,7 @@ void InputManager::DeleteInputManager(){
 	sInputManager = 0;
 }
 
-class InputManager::InputManagerImpl{
+class InputManager::Impl{
 public:
 	IKeyboardPtr mKeyboard;
 	IMousePtr mMouse;
@@ -31,7 +31,7 @@ public:
 	std::map<int, std::vector<IInputConsumer*>> mConsumers;
 	int mValid;
 
-	InputManagerImpl()
+	Impl()
 		:mValid(0){
 
 		for (int i = 0; i < FBInputDevice::DeviceNum; ++i){
@@ -135,13 +135,12 @@ public:
 };
 
 InputManager::InputManager()
-: mImpl(new InputManagerImpl)
+: mImpl(new Impl)
 {
 	
 }
 
-InputManager::~InputManager(){
-	delete mImpl;
+InputManager::~InputManager(){	
 }
 //-------------------------------------------------------------------
 // Manager

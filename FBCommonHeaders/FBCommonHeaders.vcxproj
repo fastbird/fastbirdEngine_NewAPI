@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CowPtr.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Observable.h" />

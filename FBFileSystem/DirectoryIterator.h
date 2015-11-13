@@ -13,17 +13,19 @@ namespace fastbird{
 	all file names. This function is not thread safe.
 	*/
 	class FB_DLL_PUBLIC DirectoryIterator{
-		DECLARE_PIMPL(DirectoryIterator);		
+		DECLARE_PIMPL_NON_COPYABLE(DirectoryIterator);
 
 	public:
-		DirectoryIterator(LPCTSTR directoryPath, bool recursive);
+		DirectoryIterator(const char* directoryPath, bool recursive);
 		~DirectoryIterator();
 
+		bool HasNext() const;
 		/** Get next file name
 		Order is undefined.
 		\return A file name or the empty string _T("") when every file names
 		returned.
 		*/
-		LPCTSTR GetNextFileName(bool& isDirectory);
+		const char* GetNextFileName(bool* outIsDirectory);
+		const char* GetNextFileName();
 	};
 }

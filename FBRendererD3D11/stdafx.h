@@ -4,7 +4,7 @@ Direct3D 11 renderer
 
 Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 */
-
+#pragma warning (disable : 4251)
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d11.lib")

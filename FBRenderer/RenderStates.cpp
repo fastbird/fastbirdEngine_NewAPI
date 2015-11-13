@@ -1,14 +1,16 @@
 #include "stdafx.h"
 #include "RenderStates.h"
+#include "Renderer.h"
 
 namespace fastbird{
 
-class RenderStates::RenderStatesImpl{
+class RenderStates::Impl{
 public:
-	IRasterizerStatePtr mRasterizerState;
-	IBlendStatePtr mBlendState;
-	IDepthStencilStatePtr mDepthStencilState;
+	IPlatformRasterizerStatePtr mRasterizerState;
+	IPlatformBlendStatePtr mBlendState;
+	IPlatformDepthStencilStatePtr mDepthStencilState;
 
+	// todo: Good to be CowPtrs.
 	RASTERIZER_DESC mRDesc;
 	BLEND_DESC mBDesc;
 	DEPTH_STENCIL_DESC mDDesc;
@@ -37,20 +39,20 @@ public:
 
 	void CreateRasterizerState(const RASTERIZER_DESC& desc){
 		mRDesc = desc;
-		/*if (gFBEnv && gFBEnv->pRenderer)
-			mRasterizerState = gFBEnv->pRenderer->CreateRasterizerState(desc);*/
+		auto renderer = Renderer::GetInstance();
+		mRasterizerState = renderer->CreateRasterizerState(desc);
 	}
 
 	void CreateBlendState(const BLEND_DESC& desc){
 		mBDesc = desc;
-		/*if (gFBEnv && gFBEnv->pRenderer)
-			mBlendState = gFBEnv->pRenderer->CreateBlendState(desc);*/
+		auto renderer = Renderer::GetInstance();
+		mBlendState = renderer->CreateBlendState(desc);
 	}
 
 	void CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc){
 		mDDesc = desc;
-		/*if (gFBEnv && gFBEnv->pRenderer)
-			mDepthStencilState = gFBEnv->pRenderer->CreateDepthStencilState(desc);*/
+		auto renderer = Renderer::GetInstance();
+		mDepthStencilState = renderer->CreateDepthStencilState(desc);
 	}
 
 	void Bind(unsigned stencilRef){
@@ -60,7 +62,7 @@ public:
 	}
 
 	RenderStatesPtr Clone() const{
-		RenderStatesPtr newObj(FB_NEW(RenderStates), [](RenderStates* obj){ delete obj; });
+		RenderStatesPtr newObj = RenderStates::Create();		
 		newObj->CreateBlendState(mBDesc);
 		newObj->CreateDepthStencilState(mDDesc);
 		newObj->CreateRasterizerState(mRDesc);
@@ -69,14 +71,13 @@ public:
 };
 
 //---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(RenderStates);
 RenderStates::RenderStates()
-	: mImpl(new RenderStatesImpl)
+	: mImpl(new Impl)
 {
-
 }
 
 RenderStates::~RenderStates(){
-	delete mImpl;
 }
 
 void RenderStates::Reset(){

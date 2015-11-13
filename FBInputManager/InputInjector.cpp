@@ -5,19 +5,18 @@
 #include "InputManager.h"
 using namespace fastbird;
 
-class InputInjector::InputInjectorImpl{
+class InputInjector::Impl{
 public:
 	IKeyboardPtr mKeyboard;
 	IMousePtr mMouse;
 };
 
 InputInjector::InputInjector()
-	:mImpl(new InputInjectorImpl){
+	:mImpl(new Impl){
 
 }
 
 InputInjector::~InputInjector(){
-	delete mImpl;
 }
 
 //---------------------------------------------------------------------------
