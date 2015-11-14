@@ -26,7 +26,4 @@ Plugin: \b FBRendererD3D11
 #include <regex>
 
 #include "FBMemoryManagerLib/MemoryManager.h"
-#include "FBMathLib/Math.h"
 #include "FBDebugLib/Logger.h"
-#include "FBStringLib/StringLib.h"
-#include "FBCommonHeaders/String.h"

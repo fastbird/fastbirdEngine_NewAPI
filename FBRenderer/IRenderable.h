@@ -1,12 +1,11 @@
 #pragma once
 #define FB_RENDERABLE_VERSION 1
-
+#include "InputLayout.h"
 #include "FBCommonHeaders/platform.h"
 #include "FBMathLib/Vec3.h"
 namespace fastbird{	
 	class BoundingVolume;
-	DECLARE_SMART_PTR(Animation);
-	DECLARE_SMART_PTR(InputLayout);
+	DECLARE_SMART_PTR(Animation);	
 	DECLARE_SMART_PTR(IndexBuffer);
 	DECLARE_SMART_PTR(VertexBuffer);
 	DECLARE_SMART_PTR(Material);

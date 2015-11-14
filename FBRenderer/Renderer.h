@@ -6,22 +6,26 @@
 #include "ShaderDefines.h"
 #include "InputElementDesc.h"
 #include "RenderTargetParam.h"
+#include "InputLayout.h"
 #include "IPlatformIndexBuffer.h"
 #include "RenderStates.h"
+#include "TextureBinding.h"
+#include "SystemTextures.h"
+#include "FBMathLib/Math.h"
+#include "FBTimerLib/Timer.h"
 #include "../EssentialEngineData/shaders/Constants.h"
 namespace fastbird{	
 	class RenderOptions;
 	typedef unsigned RenderTargetId;
 	DECLARE_SMART_PTR(Camera);
 	DECLARE_SMART_PTR(VideoPlayer);
-	DECLARE_SMART_PTR(PointLightMan);
+	DECLARE_SMART_PTR(PointLightManager);
 	DECLARE_SMART_PTR(Font);
 	DECLARE_SMART_PTR(DirectionalLight);
 	DECLARE_SMART_PTR(PointLight);
 	DECLARE_SMART_PTR(Scene);	
 	DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
 	DECLARE_SMART_PTR(TextureAtlas);	
-	DECLARE_SMART_PTR(InputLayout);
 	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(Shader);
 	DECLARE_SMART_PTR(IndexBuffer);
@@ -71,10 +75,12 @@ namespace fastbird{
 		void PrepareRenderEngine(const char* rendererPlugInName);
 
 		//-------------------------------------------------------------------
-		// Canvas 
+		// Canvas & System
 		//-------------------------------------------------------------------
 		bool InitCanvas(HWindowId id, HWindow window, int width, int height);
 		void ReleaseCanvas(HWindowId id);
+		void SetTimer(TimerPtr timer);
+		TimerPtr GetTimer() const;
 
 		//-------------------------------------------------------------------
 		// Resource Creation
@@ -97,6 +103,7 @@ namespace fastbird{
 		MaterialPtr CreateMaterial(const char* file);
 		MaterialPtr GetMissingMaterial();
 		// use this if you are sure there is instance of the descs.
+		InputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& descs, ShaderPtr shader);
 		InputLayoutPtr GetInputLayout(const INPUT_ELEMENT_DESCS& descs);
 		// use these if you are not sure.
 		InputLayoutPtr GetInputLayout(const INPUT_ELEMENT_DESCS& descs,
@@ -130,9 +137,8 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		void SetRenderTarget(TexturePtr pRenderTargets[], size_t rtViewIndex[], int num,
 			TexturePtr pDepthStencil, size_t dsViewIndex);		
-		void SetViewports(const Viewport* viewports, int num);
+		void SetViewports(const Viewport viewports[], int num);
 		void SetScissorRects(Rect rects[], int num);
-		void RestoreScissorRects();
 		void SetVertexBuffer(unsigned int startSlot, unsigned int numBuffers,
 			VertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]);
 		void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt);
@@ -145,7 +151,11 @@ namespace fastbird{
 		void SetDSShader(ShaderPtr pShader);
 		void SetHSShader(ShaderPtr pShader);		
 		void SetTexture(TexturePtr pTexture, BINDING_SHADER shaderType, unsigned int slot);
+		/** Bind serveral texture at once.
+		The texture order apears in the shader(BINDING_SHADER) should be sequential.
+		*/
 		void SetTextures(TexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot);
+		void SetSystemTexture(SystemTextures::Enum type, TexturePtr texture);
 		// pre defined
 		void BindDepthTexture(bool set);		
 		void SetDepthWriteShader();
@@ -153,6 +163,9 @@ namespace fastbird{
 		void SetOccPreShader();
 		void SetOccPreGSShader();
 		void SetPositionInputLayout();
+
+		void SetSystemTextureBindings(SystemTextures::Enum type, const TextureBindings& bindings);
+		const TextureBindings& GetSystemTextureBindings(SystemTextures::Enum type) const;
 
 		ShaderPtr GetGodRayPS();
 		ShaderPtr GetGlowShader();
@@ -224,8 +237,15 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// GPU constants
 		//-------------------------------------------------------------------
-		void UpdateObjectConstantsBuffer(void* pData, bool record = false);
-		void UpdatePointLightConstantsBuffer(void* pData);
+		void UpdateObjectConstantsBuffer(const void* pData, bool record = false);
+		void UpdatePointLightConstantsBuffer(const void* pData);
+		void UpdateFrameConstantsBuffer();
+		void UpdateMaterialConstantsBuffer(const void* pData);
+		void UpdateCameraConstantsBuffer();
+		void UpdateRenderTargetConstantsBuffer();
+		void UpdateSceneConstantsBuffer();
+		void UpdateRareConstantsBuffer();
+		void UpdateRadConstantsBuffer(const void* pData);
 		void* MapMaterialParameterBuffer();
 		void UnmapMaterialParameterBuffer();
 		void* MapBigBuffer();

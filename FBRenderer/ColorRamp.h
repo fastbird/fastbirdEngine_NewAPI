@@ -5,13 +5,10 @@ namespace fastbird{
 	DECLARE_SMART_PTR(ColorRamp);
 	class ColorRamp
 	{
-		DECLARE_PIMPL(ColorRamp);
-		ColorRamp();
-		static void* operator new (size_t);
-		static void* operator new[](size_t);
+		DECLARE_PIMPL(ColorRamp);		
 
 	public:
-		ColorRampPtr Create();
+		ColorRamp();
 		bool operator==(const ColorRamp& other) const;
 		const Color& operator[] (int idx) const;
 

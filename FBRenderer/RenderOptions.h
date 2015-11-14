@@ -1,6 +1,8 @@
 #pragma once
 #include "FBMathLib/Vec2I.h"
+#include "FBCommonHeaders/Types.h"
 namespace fastbird{
+	DECLARE_SMART_PTR(RenderOptions);
 	class RenderOptions{
 	public:
 		int r_UI;

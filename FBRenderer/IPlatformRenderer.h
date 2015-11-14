@@ -6,15 +6,15 @@
 
 namespace fastbird{
 	class IPlatformShader;	
-	DECLARE_SMART_PTR(ISamplerState);
-	DECLARE_SMART_PTR(IRasterizerState);
-	DECLARE_SMART_PTR(IDepthStencilState);
-	DECLARE_SMART_PTR(IBlendState);
+	DECLARE_SMART_PTR(IPlatformSamplerState);
+	DECLARE_SMART_PTR(IPlatformRasterizerState);
+	DECLARE_SMART_PTR(IPlatformDepthStencilState);
+	DECLARE_SMART_PTR(IPlatformBlendState);
 	DECLARE_SMART_PTR(IPlatformTexture);
 	DECLARE_SMART_PTR(IPlatformShader);	
-	DECLARE_SMART_PTR(IInputLayout);
-	DECLARE_SMART_PTR(IIndexBuffer);
-	DECLARE_SMART_PTR(IVertexBuffer);		
+	DECLARE_SMART_PTR(IPlatformInputLayout);
+	DECLARE_SMART_PTR(IPlatformIndexBuffer);
+	DECLARE_SMART_PTR(IPlatformVertexBuffer);		
 	DECLARE_SMART_PTR(IPlatformRenderer);
 	
 	/** Plug-in interface for render engine like D3D11, OpenGL.	
@@ -31,18 +31,34 @@ namespace fastbird{
 		virtual IPlatformTexturePtr CreateTexture(void* data, int width, int height,
 			PIXEL_FORMAT format, BUFFER_USAGE usage, int  buffer_cpu_access,
 			int texture_type) = 0;		
-		virtual IVertexBufferPtr CreateVertexBuffer(void* data, unsigned stride,
+		virtual IPlatformVertexBuffer CreateVertexBuffer(void* data, unsigned stride,
 			unsigned numVertices, BUFFER_USAGE usage, BUFFER_CPU_ACCESS_FLAG accessFlag) = 0;
-		virtual IIndexBufferPtr CreateIndexBuffer(void* data, unsigned int numIndices,
+		virtual IPlatformIndexBufferPtr CreateIndexBuffer(void* data, unsigned int numIndices,
 			INDEXBUFFER_FORMAT format) = 0;
 		virtual IPlatformShaderPtr CreateShader(const char* path, int shaders,
 			const SHADER_DEFINES& defines);
-		virtual IInputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& desc,
+		virtual IPlatformInputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& desc,
 			void* shaderByteCode, unsigned size) = 0;
-		virtual IBlendStatePtr CreateBlendState(const BLEND_DESC& desc) = 0;
-		virtual IDepthStencilStatePtr CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc) = 0;
-		virtual IRasterizerStatePtr CreateRasterizerState(const RASTERIZER_DESC& desc) = 0;
-		virtual ISamplerStatePtr CreateSamplerState(const SAMPLER_DESC& desc) = 0;
+		virtual IPlatformBlendStatePtr CreateBlendState(const BLEND_DESC& desc) = 0;
+		virtual IPlatformDepthStencilStatePtr CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc) = 0;
+		virtual IPlatformRasterizerStatePtr CreateRasterizerState(const RASTERIZER_DESC& desc) = 0;
+		virtual IPlatformSamplerStatePtr CreateSamplerState(const SAMPLER_DESC& desc) = 0;
+
+		//-------------------------------------------------------------------
+		// Resource Bindings
+		//-------------------------------------------------------------------
+		virtual void SetRenderTarget(IPlatformTexturePtr pRenderTargets[], size_t rtViewIndex[], int num,
+			IPlatformTexturePtr pDepthStencil, size_t dsViewIndex) = 0;
+		virtual void SetViewports(const Viewport viewports[], int num) = 0;
+		virtual void SetScissorRects(const Rect rects[], int num) = 0;
+		virtual void SetVertexBuffer(unsigned int startSlot, unsigned int numBuffers,
+			IPlatformVertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]) = 0;
+		virtual void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt) = 0;
+		virtual void SetInputLayout(IPlatformInputLayoutPtr pInputLayout) = 0;
+		virtual void SetIndexBuffer(IPlatformIndexBufferPtr pIndexBuffer) = 0;
+		virtual void SetShaders(IPlatformShaderPtr pShader) = 0;		
+		virtual void SetTexture(IPlatformTexturePtr pTexture, BINDING_SHADER shaderType, unsigned int slot) = 0;
+		virtual void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot) = 0;
 
 		//-------------------------------------------------------------------
 		// Data
@@ -75,7 +91,7 @@ namespace fastbird{
 		virtual bool GetWireframe() const = 0;
 		virtual void Clear(Real r, Real g, Real b, Real a, Real z, unsigned char stencil) = 0;
 		virtual void Clear(Real r, Real g, Real b, Real a) = 0;
-		virtual void ClearState() = 0;
+		virtual void ClearState() = 0;		
 		virtual void Present() = 0;
 
 		//-------------------------------------------------------------------

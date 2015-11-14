@@ -115,7 +115,6 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(ColorRamp);
 ColorRamp::ColorRamp()
 : mImpl(new Impl)
 {

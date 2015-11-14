@@ -15,7 +15,7 @@ namespace fastbird
 		static const Vec4 ZERO;
 
 		//-------------------------------------------------------------------------
-		Vec4();
+		Vec4();		
 		Vec4(Real _x, Real _y, Real _z, Real _w);
 		Vec4(const Vec3& xyz, Real _w);
 		explicit Vec4(const Vec3& xyz);

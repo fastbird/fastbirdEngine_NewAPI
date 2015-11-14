@@ -72,12 +72,15 @@ namespace fastbird
 		bool GetUsePool() const;
 		void SetUsePool(bool usePool);
 		const Viewport& GetViewport() const;
+		/// true, if underyling render strategy support glow rendering
+		bool IsGlowSupported() const;
 
 		void Bind(size_t face = 0);
 		void BindTargetOnly(bool hdr);
+		void BindDepthTexture(bool bind);
 		bool Render(size_t face=0);
 		void Unbind();
-		void SetGlowRenderTarget();
+		void GlowRenderTarget(bool bind);
 
 		CameraPtr GetLightCamera() const;		
 		void SetLightCamWidth(Real width);

@@ -1,12 +1,17 @@
 #include "stdafx.h"
 #include "Font.h"
-#include "FBTimerLib/Profiler.h"
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "Texture.h"
 #include "ShaderDefines.h"
 #include "InputLayout.h"
 #include "Material.h"
+#include "TextureAtlas.h"
+#include "RenderOptions.h"
+#include "Shader.h"
+#include "FBTimerLib/Profiler.h"
+#include "FBStringLib/StringLib.h"
+#include "FBStringLib/StringConverter.h"
 namespace fastbird{
 struct SCharDescr
 {
@@ -84,6 +89,7 @@ const unsigned int Font::MAX_BATCH = 4 * 2000;
 
 class Font::Impl{
 public:
+	bool mInitialized;
 	FontWeakPtr mSelf;
 	short mFontHeight; // total height of the font
 	short mScaledFontSize;
@@ -92,26 +98,20 @@ public:
 	short mScaleH;
 	SCharDescr mDefChar;
 	bool mHasOutline;
-
-	float mScale;
+	Real mScale;
 	EFontTextEncoding mEncoding;
-
 	unsigned int mColor;
 	std::stack<unsigned int> mColorBackup;
-
 	std::map<int, SCharDescr*> mChars;
 	std::vector<TexturePtr> mPages;
-
 	VertexBufferPtr mVertexBuffer;
 	unsigned int mVertexLocation;
 	ShaderPtr mShader;
 	InputLayoutPtr mInputLayout;
 	MaterialPtr mTextureMaterial;
-
-	bool mInitialized;
-
 	OBJECT_CONSTANTS mObjectConstants;
 	Vec2I mRenderTargetSize;
+	TextureAtlasPtr mTextureAtlas;
 
 	//---------------------------------------------------------------------------
 	Impl()
@@ -184,7 +184,7 @@ public:
 
 		mInitialized = r == 0;
 
-		mTextureMaterial = renderer->GetMaterial(DEFAULT_MATERIALS::QUAD_TEXTURE)->Clone();
+		mTextureMaterial = renderer->GetMaterial(DEFAULT_MATERIALS::QUAD_TEXTURE);
 
 		BLEND_DESC desc;
 		desc.RenderTarget[0].BlendEnable = true;
@@ -193,13 +193,11 @@ public:
 		desc.RenderTarget[0].DestBlend = BLEND_INV_SRC_ALPHA;
 		desc.RenderTarget[0].RenderTargetWriteMask = COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE;
 		mTextureMaterial->SetBlendState(desc);
-		mTextureMaterial->CloneRenderStates();
-
-
-		mRenderTargetSize = gFBEnv->_pInternalRenderer->GetMainRTSize();
+		
+		mRenderTargetSize = renderer->GetMainRTSize();
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-			(float)mRenderTargetSize.x,
-			(float)mRenderTargetSize.y,
+			(Real)mRenderTargetSize.x,
+			(Real)mRenderTargetSize.y,
 			0.f, 1.0f);
 		mObjectConstants.gWorld.MakeIdentity();
 
@@ -215,7 +213,7 @@ public:
 
 	bool ApplyTag(const char* text, int start, int end, int& x, int& y)
 	{
-		static TextureAtlas* textureAtlas = gFBEnv->pRenderer->GetTextureAtlas("data/textures/gameui.xml");
+		auto renderer = Renderer::GetInstance();
 
 		assert(end - start > 8);
 		char buf[256];
@@ -224,21 +222,21 @@ public:
 		{
 		case TextTags::Img:
 		{
-			if (textureAtlas)
+			if (mTextureAtlas)
 			{
-				auto region = textureAtlas->GetRegion(buf);
+				auto region = mTextureAtlas->GetRegion(buf);
 				if (region)
 				{
 					auto& regionSize = region->GetSize();
-					float ratio = regionSize.x / (float)regionSize.y;
+					Real ratio = regionSize.x / (Real)regionSize.y;
 					Vec2I imgSize = regionSize;
 					int yoffset = 0;
 					if (imgSize.y < mScaledFontSize){
 						yoffset = Round((mScaledFontSize - imgSize.y) * .5f);
 					}
 					mTextureMaterial->SetDiffuseColor(Vec4(1, 1, 1, ((mColor & 0xff000000) >> 24) / 255.f));
-					gFBEnv->pRenderer->DrawQuadWithTextureUV(Vec2I(x, y + yoffset), imgSize, region->mUVStart, region->mUVEnd,
-						Color::White, textureAtlas->mTexture, mTextureMaterial);
+					renderer->DrawQuadWithTextureUV(Vec2I(x, y + yoffset), imgSize, region->mUVStart, region->mUVEnd,
+						Color::White, mTextureAtlas->GetTexture(), mTextureMaterial);
 
 					x += imgSize.x;
 					return true;
@@ -248,7 +246,7 @@ public:
 		}
 		case TextTags::ColorStart:
 		{
-			unsigned color = StringConverter::parseHexa(buf);
+			unsigned color = StringConverter::ParseHexa(buf);
 
 			int prevAlpha = mColor & 0xff000000;
 			mColorBackup.push(mColor);
@@ -269,9 +267,8 @@ public:
 		return false;
 	}
 
-	int SkipTags(const char* text, TextTags::Enum* tag, int* imgLen)
+	int SkipTags(const char* text, TextTags::Enum* tag = 0, int* imgLen = 0)
 	{
-		static TextureAtlas* textureAtlas = gFBEnv->pRenderer->GetTextureAtlas("data/textures/gameui.xml");
 		if (tag)
 		{
 			*tag = TextTags::Num;
@@ -298,8 +295,8 @@ public:
 					{
 						*tag = tagType;
 					}
-					if (imgLen && tagType == TextTags::Img && textureAtlas){
-						auto region = textureAtlas->GetRegion(buf);
+					if (imgLen && tagType == TextTags::Img && mTextureAtlas){
+						auto region = mTextureAtlas->GetRegion(buf);
 						if (region)
 						{
 							auto& regionSize = region->GetSize();
@@ -355,7 +352,7 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void InternalWrite(int x, int y, float z, const char *text, int count, int spacing)
+	void InternalWrite(int x, int y, Real z, const char *text, int count, int spacing=0)
 	{
 		static FontVertex vertices[MAX_BATCH];
 
@@ -384,8 +381,9 @@ public:
 			{
 				PrepareRenderResources();
 				if (page != -1)
-					mPages[page]->Bind();
-				gFBEnv->pRenderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+					mPages[page]->Bind(BINDING_SHADER_PS, 0);
+				auto renderer = Renderer::GetInstance();
+				renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
 			}
 
 			int charId = GetTextChar(text, n, &n);
@@ -408,16 +406,16 @@ public:
 			if (ch == 0)
 				ch = &mDefChar;
 
-			float u = (float(ch->srcX)) / (float)mScaleW;
-			float v = (float(ch->srcY)) / (float)mScaleH;
-			float u2 = u + float(ch->srcW) / (float)mScaleW;
-			float v2 = v + float(ch->srcH) / (float)mScaleH;
+			Real u = (Real(ch->srcX)) / (Real)mScaleW;
+			Real v = (Real(ch->srcY)) / (Real)mScaleH;
+			Real u2 = u + Real(ch->srcW) / (Real)mScaleW;
+			Real v2 = v + Real(ch->srcH) / (Real)mScaleH;
 
-			int a = Round(mScale * float(ch->xAdv));
-			int w = Round(mScale * float(ch->srcW));
-			int h = Round(mScale * float(ch->srcH));
-			int ox = Round(mScale * float(ch->xOff));
-			int oy = Round(mScale * float(ch->yOff));
+			int a = Round(mScale * Real(ch->xAdv));
+			int w = Round(mScale * Real(ch->srcW));
+			int h = Round(mScale * Real(ch->srcH));
+			int ox = Round(mScale * Real(ch->xOff));
+			int oy = Round(mScale * Real(ch->yOff));
 
 			if (ch->page != page)
 			{
@@ -427,7 +425,7 @@ public:
 				mVertexLocation += batchingVertices;
 				batchingVertices = 0;
 				page = ch->page;
-				mPages[page]->Bind();
+				mPages[page]->Bind(BINDING_SHADER_PS, 0);
 			}
 
 			if (mVertexLocation + batchingVertices + 4 >= MAX_BATCH)
@@ -456,18 +454,18 @@ public:
 			//	Vec3(pos.x, pos.y, pos.z), mColor, Vec2(u2, v2), ch->chnl);
 
 			vertices[mVertexLocation + batchingVertices++] = FontVertex(
-				Vec3((float)left, (float)top, z), mColor, Vec2(u, v), ch->chnl);
+				Vec3((Real)left, (Real)top, z), mColor, Vec2(u, v), ch->chnl);
 			vertices[mVertexLocation + batchingVertices++] = FontVertex(
-				Vec3((float)right, (float)top, z), mColor, Vec2(u2, v), ch->chnl);
+				Vec3((Real)right, (Real)top, z), mColor, Vec2(u2, v), ch->chnl);
 			vertices[mVertexLocation + batchingVertices++] = FontVertex(
-				Vec3((float)left, (float)bottom, z), mColor, Vec2(u, v2), ch->chnl);
+				Vec3((Real)left, (Real)bottom, z), mColor, Vec2(u, v2), ch->chnl);
 
 			vertices[mVertexLocation + batchingVertices++] = FontVertex(
-				Vec3((float)right, (float)top, z), mColor, Vec2(u2, v), ch->chnl);
+				Vec3((Real)right, (Real)top, z), mColor, Vec2(u2, v), ch->chnl);
 			vertices[mVertexLocation + batchingVertices++] = FontVertex(
-				Vec3((float)right, (float)bottom, z), mColor, Vec2(u2, v2), ch->chnl);
+				Vec3((Real)right, (Real)bottom, z), mColor, Vec2(u2, v2), ch->chnl);
 			vertices[mVertexLocation + batchingVertices++] = FontVertex(
-				Vec3((float)left, (float)bottom, z), mColor, Vec2(u, v2), ch->chnl);
+				Vec3((Real)left, (Real)bottom, z), mColor, Vec2(u, v2), ch->chnl);
 
 
 
@@ -488,27 +486,28 @@ public:
 		if (page == -1 || vertexCount == 0)
 			return;
 
-		IPlatformRenderer* pRenderer = gFBEnv->pEngine->GetRenderer();
+		auto renderer = Renderer::GetInstance();
 
-		MapData data = pRenderer->MapVertexBuffer(mVertexBuffer, 0,
+		MapData data = renderer->MapVertexBuffer(mVertexBuffer, 0,
 			MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 		FontVertex* pDest = (FontVertex*)data.pData;
 		memcpy(pDest + mVertexLocation, pVertices + mVertexLocation,
 			vertexCount * sizeof(FontVertex));
 
-		pRenderer->UnmapVertexBuffer(mVertexBuffer, 0);
+		renderer->UnmapVertexBuffer(mVertexBuffer, 0);
 		mVertexBuffer->Bind();
-		pRenderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		pRenderer->Draw(vertexCount, mVertexLocation);
+		renderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		renderer->Draw(vertexCount, mVertexLocation);
 	}
 
 	//----------------------------------------------------------------------------
-	void Write(float x, float y, float z, unsigned int color,
+	void Write(Real x, Real y, Real z, unsigned int color,
 		const char *text, int count, FONT_ALIGN mode)
 	{
 		if (!mInitialized)
 			return;
-		if (gFBEnv->pConsole->GetEngineCommand()->r_noText)
+		auto renderer = Renderer::GetInstance();
+		if (renderer->GetOptions()->r_noText)
 			return;
 
 		//
@@ -517,26 +516,26 @@ public:
 
 		if (mode == FONT_ALIGN_CENTER)
 		{
-			float w = GetTextWidth(text, count);
+			Real w = GetTextWidth(text, count);
 			x -= w / 2;
 		}
 		else if (mode == FONT_ALIGN_RIGHT)
 		{
-			float w = GetTextWidth(text, count);
+			Real w = GetTextWidth(text, count);
 			x -= w;
 		}
 
 		mColor = color;
 
-		gFBEnv->pRenderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+		renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
 
 		InternalWrite(Round(x), Round(y), z, text, count);
 	}
 
 	//----------------------------------------------------------------------------
-	void SetHeight(float h)
+	void SetHeight(Real h)
 	{
-		mScale = (h) / float(mFontHeight);
+		mScale = (h) / Real(mFontHeight);
 		mScaledFontSize = short(Round(h));
 	}
 
@@ -547,28 +546,28 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	float GetHeight() const
+	Real GetHeight() const
 	{
 		return mScale * mFontHeight;
 	}
 
-	float GetBaseHeight() const
+	Real GetBaseHeight() const
 	{
 		return mScale * mBase;
 	}
 
-	std::wstring InsertLineFeed(const char *text, int count, unsigned wrapAt, float* outWidth, unsigned* outLines)
+	std::wstring InsertLineFeed(const char *text, int count, unsigned wrapAt, Real* outWidth, unsigned* outLines)
 	{
 		if (count < 0)
 			count = GetTextLength(text);
 
 		unsigned lines = 1;
-		std::vector<float> maxes;
-		float dummyMax = 0;
-		float curX = 0;
+		std::vector<Real> maxes;
+		Real dummyMax = 0;
+		Real curX = 0;
 		std::wstring multilineString;
 		unsigned inputBeforeSpace = 0;
-		float lengthAfterSpace = 0;
+		Real lengthAfterSpace = 0;
 		for (int n = 0; n < count;)
 		{
 			TextTags::Enum tag = TextTags::Num;
@@ -609,7 +608,7 @@ public:
 			{
 				SCharDescr *ch = GetChar(charId);
 				if (ch == 0) ch = &mDefChar;
-				float length = (mScale * (ch->xAdv));
+				Real length = (mScale * (ch->xAdv));
 				if (n < count)
 					length += AdjustForKerningPairs(charId, GetTextChar(text, n));
 				curX += length;
@@ -649,7 +648,7 @@ public:
 				*outWidth = dummyMax;
 			else
 			{
-				float biggest = 0;
+				Real biggest = 0;
 				for (auto val : maxes)
 				{
 					biggest = std::max(biggest, val);
@@ -664,14 +663,14 @@ public:
 		return multilineString;
 	}
 	//----------------------------------------------------------------------------
-	float GetTextWidth(const char *text, int count, float *outMinY/* = 0*/, float *outMaxY/* = 0*/)
+	Real GetTextWidth(const char *text, int count = -1, Real *outMinY = 0, Real *outMaxY = 0)
 	{
 		if (count < 0)
 			count = GetTextLength(text);
 
-		float x = 0;
-		float minY = 10000;
-		float maxY = -10000;
+		Real x = 0;
+		Real minY = 10000;
+		Real maxY = -10000;
 
 		for (int n = 0; n < count;)
 		{
@@ -703,8 +702,8 @@ public:
 			if (ch == 0) ch = &mDefChar;
 
 			x += mScale * (ch->xAdv);
-			float h = mScale * float(ch->srcH);
-			float y = mScale * (float(mBase) - float(ch->yOff));
+			Real h = mScale * Real(ch->srcH);
+			Real y = mScale * (Real(mBase) - Real(ch->yOff));
 			if (minY > y - h)
 				minY = y - h;
 			if (maxY < y)
@@ -725,7 +724,8 @@ public:
 	{
 		if (!mInitialized)
 			return;
-		gFBEnv->pRenderer->SetAlphaBlendState();
+		auto renderer = Renderer::GetInstance();
+		renderer->SetAlphaBlendState();
 		mShader->Bind();
 		mInputLayout->Bind();
 	}
@@ -790,12 +790,12 @@ public:
 	//----------------------------------------------------------------------------
 	// Own
 	//----------------------------------------------------------------------------
-	float GetBottomOffset()
+	Real GetBottomOffset()
 	{
 		return mScale * (mBase - mFontHeight);
 	}
 
-	float GetTopOffset()
+	Real GetTopOffset()
 	{
 		return mScale * (mBase - 0);
 	}
@@ -824,7 +824,7 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	int GetTextChar(const char *text, int pos, int *nextPos)
+	int GetTextChar(const char *text, int pos, int *nextPos=0)
 	{
 		int ch;
 		unsigned int len;
@@ -852,19 +852,20 @@ public:
 	{
 		mRenderTargetSize = rtSize;
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-			(float)mRenderTargetSize.x,
-			(float)mRenderTargetSize.y,
+			(Real)mRenderTargetSize.x,
+			(Real)mRenderTargetSize.y,
 			0.f, 1.0f);
 		mObjectConstants.gWorld.MakeIdentity();
 	}
 
 	void RestoreRenderTargetSize()
 	{
-		const auto& rtSize = gFBEnv->_pInternalRenderer->GetMainRTSize();
+		auto renderer = Renderer::GetInstance();
+		const auto& rtSize = renderer->GetMainRTSize();
 		mRenderTargetSize = rtSize;
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-			(float)mRenderTargetSize.x,
-			(float)mRenderTargetSize.y,
+			(Real)mRenderTargetSize.x,
+			(Real)mRenderTargetSize.y,
 			0.f, 1.0f);
 		mObjectConstants.gWorld.MakeIdentity();
 	}
@@ -901,771 +902,110 @@ public:
 //----------------------------------------------------------------------------
 IMPLEMENT_STATIC_CREATE(Font);
 Font::Font()
-	: mImpl(new Font)
+	: mImpl(new Impl)
 {
 }
 
-int Font::Init(const char *fontFile)
-{
+int Font::Init(const char *fontFile) {
+	return mImpl->Init(fontFile);
+}
 
-	if (mInitialized)
-		return 0;
-	Profiler profiler("'Font Init'");
-	// Load the font
-	FILE *f = 0;
-#if _MSC_VER >= 1400 // MSVC 8.0 / 2005
-	fopen_s(&f, fontFile, "rb");
-#else
-	f = fopen(fontFile, "rb");
-#endif
-	if (f == 0)
-	{
-		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to open a font file(%s).", fontFile).c_str());		
-		return -1;
-	}
+void Font::SetTextEncoding(EFontTextEncoding encoding) {
+	mImpl->SetTextEncoding(encoding);
+}
 
-	// Determine format by reading the first bytes of the file
-	char str[4] = { 0 };
-	fread(str, 3, 1, f);
-	fseek(f, 0, SEEK_SET);
-	int r = 0;
-	{
-		Profiler profiler("'Font loding'");
-		FontLoader *loader = 0;
-		if (strcmp(str, "BMF") == 0)
-			loader = FB_NEW(FontLoaderBinaryFormat)(f, this, fontFile);
-		else
-			loader = FB_NEW(FontLoaderTextFormat)(f, this, fontFile);
+bool Font::ApplyTag(const char* text, int start, int end, int& x, int& y) {
+	return mImpl->ApplyTag(text, start, end, x, y);
+}
 
-		r = loader->Load();
-		FB_SAFE_DELETE(loader);
-	}
-	auto renderer = Renderer::GetInstance();
-	mVertexBuffer = renderer->CreateVertexBuffer(0, sizeof(FontVertex), MAX_BATCH,
-		BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE)
-	assert(mVertexBuffer);
+int Font::SkipTags(const char* text, TextTags::Enum* tag, int* imgLen){
+	return mImpl->SkipTags(text, tag, imgLen);
+}
 
-	// init shader
-	mShader = gFBEnv->pEngine->GetRenderer()->CreateShader(
-		"es/shaders/font.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS,
-		IMaterial::SHADER_DEFINES());
-	mInputLayout = gFBEnv->pEngine->GetRenderer()->GetInputLayout(
-		DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD_BLENDINDICES, mShader);
-	FB_SET_DEVICE_DEBUG_NAME(mInputLayout, "font input layout");
+TextTags::Enum Font::GetTagType(const char* tagStart, int length, char* buf) const {
+	return mImpl->GetTagType(tagStart, length, buf);
+}
 
-	mInitialized = r == 0;
+void Font::InternalWrite(int x, int y, Real z, const char *text, int count, int spacing){
+	return mImpl->InternalWrite(x, y, z, text, count, spacing);
+}
 
-	mTextureMaterial = gFBEnv->pRenderer->GetMaterial(DEFAULT_MATERIALS::QUAD_TEXTURE)->Clone();
+void Font::Flush(int page, const FontVertex* pVertices, unsigned int vertexCount){
+	return mImpl->Flush(page, pVertices, vertexCount);
+}
 
-	BLEND_DESC desc;
-	desc.RenderTarget[0].BlendEnable = true;
-	desc.RenderTarget[0].BlendOp = BLEND_OP_ADD;
-	desc.RenderTarget[0].SrcBlend = BLEND_SRC_ALPHA;
-	desc.RenderTarget[0].DestBlend = BLEND_INV_SRC_ALPHA;
-	desc.RenderTarget[0].RenderTargetWriteMask = COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE;
-	mTextureMaterial->SetBlendState(desc);
-	mTextureMaterial->CloneRenderStates();
+void Font::Write(Real x, Real y, Real z, unsigned int color,
+	const char *text, int count, FONT_ALIGN mode){
+	return mImpl->Write(x, y, z, color, text, count, mode);
+}
 
+void Font::SetHeight(Real h){
+	return mImpl->SetHeight(h);
+}
 
-	mRenderTargetSize = gFBEnv->_pInternalRenderer->GetMainRTSize();
-	mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-		(float)mRenderTargetSize.x,
-		(float)mRenderTargetSize.y,
-		0.f, 1.0f);
-	mObjectConstants.gWorld.MakeIdentity();
+void Font::SetBackToOrigHeight(){
+	mImpl->SetBackToOrigHeight();
+}
 
-	SetBackToOrigHeight();
-	return r;
+Real Font::GetHeight() const{
+	return mImpl->GetHeight();
+}
+
+Real Font::GetBaseHeight() const{
+	return mImpl->GetBaseHeight();
+}
+
+std::wstring Font::InsertLineFeed(const char *text, int count, unsigned wrapAt, Real* outWidth, unsigned* outLines){
+	return mImpl->InsertLineFeed(text, count, wrapAt, outWidth, outLines);
+}
+
+Real Font::GetTextWidth(const char *text, int count, Real *outMinY/* = 0*/, Real *outMaxY/* = 0*/){
+	return mImpl->GetTextWidth(text, count, outMinY, outMaxY);
+}
+
+void Font::PrepareRenderResources(){
+	mImpl->PrepareRenderResources();
+}
+
+void Font::SetRenderStates(bool depthEnable, bool scissorEnable){
+	mImpl->SetRenderStates(depthEnable, scissorEnable);
 }
 
 //----------------------------------------------------------------------------
-void Font::SetTextEncoding(EFontTextEncoding encoding)
-{
-	mEncoding = encoding;
+int Font::GetTextLength(const char *text) {
+	return mImpl->GetTextLength(text);
 }
 
-bool Font::ApplyTag(const char* text, int start, int end, int& x, int& y)
-{
-	static TextureAtlas* textureAtlas = gFBEnv->pRenderer->GetTextureAtlas("data/textures/gameui.xml");
-
-	assert(end - start > 8);
-	char buf[256];
-	TextTags::Enum tagType = GetTagType(&text[start], end - start, buf);
-	switch (tagType)
-	{
-	case TextTags::Img:
-	{
-		if (textureAtlas)
-		{
-			auto region = textureAtlas->GetRegion(buf);
-			if (region)
-			{
-				auto& regionSize = region->GetSize();
-				float ratio = regionSize.x / (float)regionSize.y;
-				Vec2I imgSize = regionSize;
-				int yoffset = 0;
-				if (imgSize.y < mScaledFontSize){
-					yoffset = Round((mScaledFontSize - imgSize.y) * .5f);
-				}
-				mTextureMaterial->SetDiffuseColor(Vec4(1, 1, 1, ((mColor & 0xff000000) >> 24) / 255.f));
-				gFBEnv->pRenderer->DrawQuadWithTextureUV(Vec2I(x, y + yoffset), imgSize, region->mUVStart, region->mUVEnd,
-					Color::White, textureAtlas->mTexture, mTextureMaterial);
-
-				x += imgSize.x;
-				return true;
-			}
-		}
-		break;
-	}
-	case TextTags::ColorStart:
-	{
-		unsigned color = StringConverter::parseHexa(buf);
-
-		int prevAlpha = mColor & 0xff000000;
-		mColorBackup.push(mColor);
-		mColor = Color::FixColorByteOrder(color);
-		mColor = mColor & 0x00ffffff + prevAlpha;
-		break;
-	}
-	case TextTags::ColorEnd:
-	{
-		if (!mColorBackup.empty()){
-			mColor = mColorBackup.top();
-			mColorBackup.pop();
-		}
-		break;
-	}
-	}
-
-	return false;
+Real Font::GetBottomOffset() {
+	return mImpl->GetBottomOffset();
 }
 
-int Font::SkipTags(const char* text, TextTags::Enum* tag, int* imgLen)
-{
-	static TextureAtlas* textureAtlas = gFBEnv->pRenderer->GetTextureAtlas("data/textures/gameui.xml");
-	if (tag)
-	{
-		*tag = TextTags::Num;
-	}
-
-	if (text[0] == 0)
-	{
-		return 0;
-	}
-
-	if (text[0] == '[' && text[2] == '$')
-	{
-		// found end
-		int pos = 4;
-		for (; text[pos] != 0; pos += 2)
-		{
-			if (text[pos] == '$' && text[pos + 2] == ']')
-			{
-				int endLen = pos + 4;
-				char buf[256];
-				TextTags::Enum tagType = GetTagType(text, endLen, buf);
-
-				if (tag)
-				{
-					*tag = tagType;
-				}
-				if (imgLen && tagType == TextTags::Img && textureAtlas){
-					auto region = textureAtlas->GetRegion(buf);
-					if (region)
-					{
-						auto& regionSize = region->GetSize();
-						*imgLen = regionSize.x;
-					}
-
-				}
-				return endLen;
-			}
-		}
-	}
-	return 0;
+Real Font::GetTopOffset() {
+	return mImpl->GetTopOffset();
 }
 
-TextTags::Enum Font::GetTagType(const char* tagStart, int length, char* buf) const
-{
-	if (length < 8)
-		return TextTags::Num;
-
-	if (tagStart[0] != '[' || tagStart[length - 2] != ']')
-		return TextTags::Num;
-
-	if (tagStart[4] == 'i' && tagStart[6] == 'm' && tagStart[8] == 'g')
-	{
-		if (buf)
-		{
-			int oneI = 0;
-			for (int i = 10; tagStart[i] != '$'; i += 2)
-			{
-				buf[oneI++] = tagStart[i];
-			}
-			buf[oneI] = 0;
-		}
-
-		return TextTags::Img;
-	}
-
-	if (tagStart[4] == 'c' && tagStart[6] == 'r')
-	{
-		if (buf)
-		{
-			int oneI = 0;
-			for (int i = 8; tagStart[i] != '$'; i += 2)
-			{
-				buf[oneI++] = tagStart[i];
-			}
-			buf[oneI] = 0;
-		}
-		return tagStart[8] == '$' ? TextTags::ColorEnd : TextTags::ColorStart;
-	}
-
-	return TextTags::Num;
+int Font::AdjustForKerningPairs(int first, int second) {
+	return mImpl->AdjustForKerningPairs(first, second);	
 }
 
-//----------------------------------------------------------------------------
-void Font::InternalWrite(int x, int y, float z, const char *text, int count, int spacing)
-{
-	static FontVertex vertices[MAX_BATCH];
-
-	const int initialX = x;
-	int page = -1;
-	y -= mScaledFontSize;
-	unsigned int batchingVertices = 0;
-	for (int n = 0; n < count;)
-	{
-		bool reapplyRender = false;
-		int skiplen = SkipTags(&text[n]);
-		if (skiplen>0)
-		{
-			do
-			{
-				reapplyRender = ApplyTag(text, n, n + skiplen, x, y) || reapplyRender;
-				n += skiplen;
-				skiplen = SkipTags(&text[n]);
-			} while (skiplen > 0);
-		}
-
-		if (n >= count)
-			break;
-
-		if (reapplyRender)
-		{
-			PrepareRenderResources();
-			if (page != -1)
-				mPages[page]->Bind();
-			gFBEnv->pRenderer->UpdateObjectConstantsBuffer(&mObjectConstants);
-		}
-
-		int charId = GetTextChar(text, n, &n);
-
-		if (charId == L'\n')
-		{
-			y += mScaledFontSize;
-			x = initialX;
-			if (batchingVertices > 0)
-			{
-				Flush(page, vertices, batchingVertices);
-				batchingVertices = 0;
-				mVertexLocation += batchingVertices;
-			}
-
-			continue;
-		}
-
-		SCharDescr *ch = GetChar(charId);
-		if (ch == 0)
-			ch = &mDefChar;
-
-		float u = (float(ch->srcX)) / (float)mScaleW;
-		float v = (float(ch->srcY)) / (float)mScaleH;
-		float u2 = u + float(ch->srcW) / (float)mScaleW;
-		float v2 = v + float(ch->srcH) / (float)mScaleH;
-
-		int a = Round(mScale * float(ch->xAdv));
-		int w = Round(mScale * float(ch->srcW));
-		int h = Round(mScale * float(ch->srcH));
-		int ox = Round(mScale * float(ch->xOff));
-		int oy = Round(mScale * float(ch->yOff));
-
-		if (ch->page != page)
-		{
-			if (batchingVertices)
-				Flush(page, vertices, batchingVertices);
-
-			mVertexLocation += batchingVertices;
-			batchingVertices = 0;
-			page = ch->page;
-			mPages[page]->Bind();
-		}
-
-		if (mVertexLocation + batchingVertices + 4 >= MAX_BATCH)
-		{
-			Flush(page, vertices, batchingVertices);
-			batchingVertices = 0;
-			mVertexLocation = 0;
-		}
-
-		int left = x + ox;
-		int top = y + oy;
-		int right = left + w;
-		int bottom = top + h;
-
-		//Vec4 pos = mOrthogonalMat * Vec4(left, top, z, 1.0f);
-		//vertices[mVertexLocation + batchingVertices++] = FontVertex(
-		//	Vec3(pos.x, pos.y, pos.z), mColor, Vec2(u, v), ch->chnl);
-		//pos = mOrthogonalMat * Vec4(right, top, z, 1.0f);
-		//vertices[mVertexLocation + batchingVertices++] = FontVertex(
-		//	Vec3(pos.x, pos.y, pos.z), mColor, Vec2(u2, v), ch->chnl);
-		//pos = mOrthogonalMat * Vec4(left, bottom, z, 1.0f);
-		//vertices[mVertexLocation + batchingVertices++] = FontVertex(
-		//	Vec3(pos.x, pos.y, pos.z), mColor, Vec2(u, v2), ch->chnl);
-		//pos = mOrthogonalMat * Vec4(right, bottom, z, 1.0f);
-		//vertices[mVertexLocation + batchingVertices++] = FontVertex(
-		//	Vec3(pos.x, pos.y, pos.z), mColor, Vec2(u2, v2), ch->chnl);
-
-		vertices[mVertexLocation + batchingVertices++] = FontVertex(
-			Vec3((float)left, (float)top, z), mColor, Vec2(u, v), ch->chnl);
-		vertices[mVertexLocation + batchingVertices++] = FontVertex(
-			Vec3((float)right, (float)top, z), mColor, Vec2(u2, v), ch->chnl);
-		vertices[mVertexLocation + batchingVertices++] = FontVertex(
-			Vec3((float)left, (float)bottom, z), mColor, Vec2(u, v2), ch->chnl);
-
-		vertices[mVertexLocation + batchingVertices++] = FontVertex(
-			Vec3((float)right, (float)top, z), mColor, Vec2(u2, v), ch->chnl);
-		vertices[mVertexLocation + batchingVertices++] = FontVertex(
-			Vec3((float)right, (float)bottom, z), mColor, Vec2(u2, v2), ch->chnl);
-		vertices[mVertexLocation + batchingVertices++] = FontVertex(
-			Vec3((float)left, (float)bottom, z), mColor, Vec2(u, v2), ch->chnl);
-
-
-
-		x += a;
-		if (charId == L' ')
-			x += spacing;
-
-		if (n < count)
-			x += AdjustForKerningPairs(charId, GetTextChar(text, n));
-	}
-	Flush(page, vertices, batchingVertices);
-	mVertexLocation += batchingVertices;
+SCharDescr *Font::GetChar(int id){
+	return mImpl->GetChar(id);
 }
 
-//----------------------------------------------------------------------------
-void Font::Flush(int page, const FontVertex* pVertices, unsigned int vertexCount)
-{
-	if (page == -1 || vertexCount == 0)
-		return;
-
-	IPlatformRenderer* pRenderer = gFBEnv->pEngine->GetRenderer();
-
-	MapData data = pRenderer->MapVertexBuffer(mVertexBuffer, 0,
-		MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
-	FontVertex* pDest = (FontVertex*)data.pData;
-	memcpy(pDest + mVertexLocation, pVertices + mVertexLocation,
-		vertexCount * sizeof(FontVertex));
-
-	pRenderer->UnmapVertexBuffer(mVertexBuffer, 0);
-	mVertexBuffer->Bind();
-	pRenderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	pRenderer->Draw(vertexCount, mVertexLocation);
+int Font::GetTextChar(const char *text, int pos, int *nextPos){
+	return mImpl->GetTextChar(text, pos, nextPos);
 }
 
-//----------------------------------------------------------------------------
-void Font::Write(float x, float y, float z, unsigned int color,
-	const char *text, int count, FONT_ALIGN mode)
-{
-	if (!mInitialized)
-		return;
-	if (gFBEnv->pConsole->GetEngineCommand()->r_noText)
-		return;
-
-	//
-	if (count < 0)
-		count = GetTextLength(text);
-
-	if (mode == FONT_ALIGN_CENTER)
-	{
-		float w = GetTextWidth(text, count);
-		x -= w / 2;
-	}
-	else if (mode == FONT_ALIGN_RIGHT)
-	{
-		float w = GetTextWidth(text, count);
-		x -= w;
-	}
-
-	mColor = color;
-
-	gFBEnv->pRenderer->UpdateObjectConstantsBuffer(&mObjectConstants);
-
-	InternalWrite(Round(x), Round(y), z, text, count);
+void Font::SetRenderTargetSize(const Vec2I& rtSize) {
+	return mImpl->SetRenderTargetSize(rtSize);
 }
 
-//----------------------------------------------------------------------------
-void Font::SetHeight(float h)
-{
-	mScale = (h) / float(mFontHeight);
-	mScaledFontSize = short(Round(h));
+void Font::RestoreRenderTargetSize(){
+	return mImpl->RestoreRenderTargetSize();
 }
 
-void Font::SetBackToOrigHeight()
-{
-	SetHeight(mFontHeight);
-	//mScale = 1.f;
-}
-
-//----------------------------------------------------------------------------
-float Font::GetHeight() const
-{
-	return mScale * mFontHeight;
-}
-
-float Font::GetBaseHeight() const
-{
-	return mScale * mBase;
-}
-
-std::wstring Font::InsertLineFeed(const char *text, int count, unsigned wrapAt, float* outWidth, unsigned* outLines)
-{
-	if (count < 0)
-		count = GetTextLength(text);
-
-	unsigned lines = 1;
-	std::vector<float> maxes;
-	float dummyMax = 0;
-	float curX = 0;
-	std::wstring multilineString;
-	unsigned inputBeforeSpace = 0;
-	float lengthAfterSpace = 0;
-	for (int n = 0; n < count;)
-	{
-		TextTags::Enum tag = TextTags::Num;
-		int imgLen = 0;
-		int numSkip = SkipTags(&text[n], &tag, &imgLen);
-		if (numSkip)
-		{
-			do
-			{
-				if (tag == TextTags::Img)
-				{
-					curX += imgLen;
-					lengthAfterSpace += imgLen;
-				}
-				int startN = n;
-				for (; n < startN + numSkip;)
-				{
-					int charId = GetTextChar(text, n, &n);
-					++inputBeforeSpace;
-					multilineString.push_back(charId);
-				}
-				numSkip = SkipTags(&text[n], &tag, &imgLen);
-
-			} while (numSkip);
-			if (n >= count)
-				break;
-		}
-
-		int charId = GetTextChar(text, n, &n);
-		if (charId == L'\n')
-		{
-			maxes.push_back(curX);
-			curX = 0;
-			lengthAfterSpace = 0;
-			++lines;
-		}
-		else
-		{
-			SCharDescr *ch = GetChar(charId);
-			if (ch == 0) ch = &mDefChar;
-			float length = (mScale * (ch->xAdv));
-			if (n < count)
-				length += AdjustForKerningPairs(charId, GetTextChar(text, n));
-			curX += length;
-			lengthAfterSpace += length;
-		}
-
-		if (curX > wrapAt)
-		{
-			multilineString.insert(multilineString.end() - inputBeforeSpace, L'\n');
-			maxes.push_back(curX - lengthAfterSpace);
-			curX = lengthAfterSpace;
-			multilineString.push_back(charId);
-			++lines;
-			inputBeforeSpace = 0;
-			lengthAfterSpace = 0;
-		}
-		else
-		{
-			if (iswspace(charId))
-			{
-				inputBeforeSpace = 0;
-				lengthAfterSpace = 0;
-			}
-			else
-			{
-				++inputBeforeSpace;
-			}
-			multilineString.push_back(charId);
-		}
-		dummyMax = std::max(dummyMax, curX);
-	}
-	maxes.push_back(curX);
-
-	if (outWidth)
-	{
-		if (maxes.empty())
-			*outWidth = dummyMax;
-		else
-		{
-			float biggest = 0;
-			for (auto val : maxes)
-			{
-				biggest = std::max(biggest, val);
-				*outWidth = biggest;
-			}
-		}
-	}
-
-	if (outLines)
-		*outLines = lines;
-
-	return multilineString;
-}
-//----------------------------------------------------------------------------
-float Font::GetTextWidth(const char *text, int count, float *outMinY/* = 0*/, float *outMaxY/* = 0*/)
-{
-	if (count < 0)
-		count = GetTextLength(text);
-
-	float x = 0;
-	float minY = 10000;
-	float maxY = -10000;
-
-	for (int n = 0; n < count;)
-	{
-		TextTags::Enum tag;
-		int imgLen;
-		int skiplen = SkipTags(&text[n], &tag, &imgLen);
-		if (skiplen>0)
-		{
-			if (tag == TextTags::Img)
-			{
-				x += imgLen;
-			}
-			do
-			{
-				n += skiplen;
-				skiplen = SkipTags(&text[n], &tag, &imgLen);
-				if (tag == TextTags::Img)
-				{
-					x += imgLen;
-				}
-			} while (skiplen > 0);
-		}
-		if (n >= count)
-			break;
-
-		int charId = GetTextChar(text, n, &n);
-
-		SCharDescr *ch = GetChar(charId);
-		if (ch == 0) ch = &mDefChar;
-
-		x += mScale * (ch->xAdv);
-		float h = mScale * float(ch->srcH);
-		float y = mScale * (float(mBase) - float(ch->yOff));
-		if (minY > y - h)
-			minY = y - h;
-		if (maxY < y)
-			maxY = y;
-
-		if (n < count)
-			x += AdjustForKerningPairs(charId, GetTextChar(text, n));
-	}
-
-	if (outMinY) *outMinY = minY;
-	if (outMaxY) *outMaxY = maxY;
-
-	return x;
-}
-
-//----------------------------------------------------------------------------
-void Font::PrepareRenderResources()
-{
-	if (!mInitialized)
-		return;
-	gFBEnv->pRenderer->SetAlphaBlendState();
-	mShader->Bind();
-	mInputLayout->Bind();
-}
-
-void Font::SetRenderStates(bool depthEnable, bool scissorEnable)
-{
-	if (!mInitialized)
-		return;
-
-	if (scissorEnable)
-	{
-		RASTERIZER_DESC rd;
-		rd.ScissorEnable = true;
-		mTextureMaterial->SetRasterizerState(rd);
-	}
-	else
-	{
-		RASTERIZER_DESC rd;
-		rd.ScissorEnable = false;
-		mTextureMaterial->SetRasterizerState(rd);
-	}
-	if (depthEnable)
-	{
-		mTextureMaterial->SetDepthStencilState(DEPTH_STENCIL_DESC());
-
-	}
-	else
-	{
-		DEPTH_STENCIL_DESC desc;
-		desc.DepthEnable = false;
-		mTextureMaterial->SetDepthStencilState(desc);
-	}
-}
-
-//----------------------------------------------------------------------------
-int Font::GetTextLength(const char *text)
-{
-	if (mEncoding == UTF16)
-	{
-		int textLen = 0;
-		for (;;)
-		{
-			unsigned int len;
-			int r = DecodeUTF16((const unsigned char *)&text[textLen], &len);
-			if (r > 0)
-			{
-				textLen += len;
-			}
-			else if (r < 0)
-			{
-				textLen++;
-			}
-			else
-				return textLen;
-		}
-	}
-
-	// Both UTF8 and standard ASCII strings can use strlen
-	return (int)strlen(text);
-}
-
-//----------------------------------------------------------------------------
-// Own
-//----------------------------------------------------------------------------
-float Font::GetBottomOffset()
-{
-	return mScale * (mBase - mFontHeight);
-}
-
-float Font::GetTopOffset()
-{
-	return mScale * (mBase - 0);
-}
-
-//----------------------------------------------------------------------------
-int Font::AdjustForKerningPairs(int first, int second)
-{
-	SCharDescr *ch = GetChar(first);
-	if (ch == 0) return 0;
-	for (UINT n = 0; n < ch->kerningPairs.size(); n += 2)
-	{
-		if (ch->kerningPairs[n] == second)
-			return Round(ch->kerningPairs[n + 1] * mScale);
-	}
-
-	return 0;
-}
-
-//----------------------------------------------------------------------------
-SCharDescr *Font::GetChar(int id)
-{
-	std::map<int, SCharDescr*>::iterator it = mChars.find(id);
-	if (it == mChars.end()) return 0;
-
-	return it->second;
-}
-
-//----------------------------------------------------------------------------
-int Font::GetTextChar(const char *text, int pos, int *nextPos)
-{
-	int ch;
-	unsigned int len;
-	if (mEncoding == UTF8)
-	{
-		ch = DecodeUTF8((const unsigned char *)&text[pos], &len);
-		if (ch == -1) len = 1;
-	}
-	else if (mEncoding == UTF16)
-	{
-		ch = DecodeUTF16((const unsigned char *)&text[pos], &len);
-		if (ch == -1) len = 2;
-	}
-	else
-	{
-		len = 1;
-		ch = (unsigned char)text[pos];
-	}
-
-	if (nextPos) *nextPos = pos + len;
-	return ch;
-}
-
-void Font::SetRenderTargetSize(const Vec2I& rtSize)
-{
-	mRenderTargetSize = rtSize;
-	mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-		(float)mRenderTargetSize.x,
-		(float)mRenderTargetSize.y,
-		0.f, 1.0f);
-	mObjectConstants.gWorld.MakeIdentity();
-}
-
-void Font::RestoreRenderTargetSize()
-{
-	const auto& rtSize = gFBEnv->_pInternalRenderer->GetMainRTSize();
-	mRenderTargetSize = rtSize;
-	mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-		(float)mRenderTargetSize.x,
-		(float)mRenderTargetSize.y,
-		0.f, 1.0f);
-	mObjectConstants.gWorld.MakeIdentity();
-}
-
-std::wstring Font::StripTags(const wchar_t* text)
-{
-	std::wstring newText;
-	int len = wcslen(text);
-	bool tagStarted = false;
-	for (int i = 0; i < len; i++)
-	{
-		if (text[i] == L'[' && text[i + 1] == '$')
-		{
-			for (int e = i + 2; e < len; ++e)
-			{
-				if (text[e] == '$' && text[e + 1] == ']')
-				{
-					i = e + 2;
-					break;
-
-				}
-			}
-		}
-		if (i >= len)
-		{
-			break;
-		}
-		newText.push_back(text[i]);
-	}
-	return newText;
+std::wstring Font::StripTags(const wchar_t* text){
+	return mImpl->StripTags(text);
 }
 
 //=============================================================================
@@ -1701,15 +1041,10 @@ void FontLoader::LoadPage(int id, const char *pageFile, const std::string& fontF
 
 	// Load the font textures
 	str += pageFile;
-	font->mPages[id] = gFBEnv->pEngine->GetRenderer()->CreateTexture(str.c_str());
-	font->mPages[id]->SetShaderStage(BINDING_SHADER_PS);
-	font->mPages[id]->SetSlot(0);
-	//font->mPages[id]->SetSamplerDesc(SAMPLER_DESC());
-
-	//font->mPages[id]->SetSamplerDesc(SAMPLER_DESC());
-
-	if (font->mPages[id] == 0)
-		gFBEnv->pEngine->Log("Failed to load font page '$s'!", str.c_str());
+	auto renderer = Renderer::GetInstance();
+	font->mImpl->mPages[id] = renderer->CreateTexture(str.c_str(), true);
+	if (font->mImpl->mPages[id] == 0)
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to load font page '%s'", str.c_str()).c_str());
 }
 
 void FontLoader::SetFontInfo(int outlineThickness)
@@ -1719,17 +1054,17 @@ void FontLoader::SetFontInfo(int outlineThickness)
 
 void FontLoader::SetCommonInfo(int fontHeight, int base, int scaleW, int scaleH, int pages, bool isPacked)
 {
-	font->mFontHeight = fontHeight;
-	font->mScaledFontSize = font->mFontHeight;
-	font->mBase = base;
-	font->mScaleW = scaleW;
-	font->mScaleH = scaleH;
-	font->mPages.resize(pages);
+	font->mImpl->mFontHeight = fontHeight;
+	font->mImpl->mScaledFontSize = font->mImpl->mFontHeight;
+	font->mImpl->mBase = base;
+	font->mImpl->mScaleW = scaleW;
+	font->mImpl->mScaleH = scaleH;
+	font->mImpl->mPages.resize(pages);
 	for (int n = 0; n < pages; n++)
-		font->mPages[n] = 0;
+		font->mImpl->mPages[n] = 0;
 
 	if (isPacked && outlineThickness)
-		font->mHasOutline = true;
+		font->mImpl->mHasOutline = true;
 }
 
 void FontLoader::AddChar(int id, int x, int y, int w, int h, int xoffset, int yoffset, int xadvance, int page, int chnl)
@@ -1755,29 +1090,29 @@ void FontLoader::AddChar(int id, int x, int y, int w, int h, int xoffset, int yo
 		ch->page = page;
 		ch->chnl = chnl;
 
-		font->mChars.insert(std::map<int, SCharDescr*>::value_type(id, ch));
+		font->mImpl->mChars.insert(std::map<int, SCharDescr*>::value_type(id, ch));
 	}
 
 	if (id == -1)
 	{
-		font->mDefChar.srcX = x;
-		font->mDefChar.srcY = y;
-		font->mDefChar.srcW = w;
-		font->mDefChar.srcH = h;
-		font->mDefChar.xOff = xoffset;
-		font->mDefChar.yOff = yoffset;
-		font->mDefChar.xAdv = xadvance;
-		font->mDefChar.page = page;
-		font->mDefChar.chnl = chnl;
+		font->mImpl->mDefChar.srcX = x;
+		font->mImpl->mDefChar.srcY = y;
+		font->mImpl->mDefChar.srcW = w;
+		font->mImpl->mDefChar.srcH = h;
+		font->mImpl->mDefChar.xOff = xoffset;
+		font->mImpl->mDefChar.yOff = yoffset;
+		font->mImpl->mDefChar.xAdv = xadvance;
+		font->mImpl->mDefChar.page = page;
+		font->mImpl->mDefChar.chnl = chnl;
 	}
 }
 
 void FontLoader::AddKerningPair(int first, int second, int amount)
 {
-	if (first >= 0 && first < 256 && font->mChars[first])
+	if (first >= 0 && first < 256 && font->mImpl->mChars[first])
 	{
-		font->mChars[first]->kerningPairs.push_back(second);
-		font->mChars[first]->kerningPairs.push_back(amount);
+		font->mImpl->mChars[first]->kerningPairs.push_back(second);
+		font->mImpl->mChars[first]->kerningPairs.push_back(amount);
 	}
 }
 
@@ -2140,7 +1475,7 @@ int FontLoaderBinaryFormat::Load()
 	fread(magicString, 4, 1, f);
 	if (strncmp(magicString, "BMF\003", 4) != 0)
 	{
-		Log("Unrecognized format for '$s'", fontFile.c_str());
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Unrecognized format for '%s'", fontFile.c_str()).c_str());		
 		fclose(f);
 		return -1;
 	}
@@ -2171,7 +1506,7 @@ int FontLoaderBinaryFormat::Load()
 			ReadKerningPairsBlock(blockSize);
 			break;
 		default:
-			gFBEnv->pEngine->Log("Unexpected block type (%d)", blockType);
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Unexpected block type(%d)", blockType).c_str());
 			fclose(f);
 			return -1;
 		}
@@ -2209,14 +1544,14 @@ void FontLoaderBinaryFormat::ReadInfoBlock(int size)
 	};
 #pragma pack(pop)
 
-	char *buffer = FB_ARRNEW(char, size);
+	char *buffer = FB_ARRAY_NEW(char, size);
 	fread(buffer, size, 1, f);
 
 	// We're only interested in the outline thickness
 	infoBlock *blk = (infoBlock*)buffer;
 	SetFontInfo(blk->outline);
 
-	FB_ARRDELETE(buffer);
+	FB_ARRAY_DELETE(buffer);
 }
 
 void FontLoaderBinaryFormat::ReadCommonBlock(int size)
@@ -2239,14 +1574,14 @@ void FontLoaderBinaryFormat::ReadCommonBlock(int size)
 	};
 #pragma pack(pop)
 
-	char *buffer = FB_ARRNEW(char, size);
+	char *buffer = FB_ARRAY_NEW(char, size);
 	fread(buffer, size, 1, f);
 
 	commonBlock *blk = (commonBlock*)buffer;
 
 	SetCommonInfo(blk->lineHeight, blk->base, blk->scaleW, blk->scaleH, blk->pages, blk->packed ? true : false);
 
-	FB_ARRDELETE(buffer);
+	FB_ARRAY_DELETE(buffer);
 }
 
 void FontLoaderBinaryFormat::ReadPagesBlock(int size)
@@ -2259,7 +1594,7 @@ void FontLoaderBinaryFormat::ReadPagesBlock(int size)
 	};
 #pragma pack(pop)
 
-	char *buffer = FB_ARRNEW(char, size);
+	char *buffer = FB_ARRAY_NEW(char, size);
 	fread(buffer, size, 1, f);
 
 	pagesBlock *blk = (pagesBlock*)buffer;
@@ -2270,7 +1605,7 @@ void FontLoaderBinaryFormat::ReadPagesBlock(int size)
 		pos += 1 + (int)strlen(&blk->pageNames[pos]);
 	}
 
-	FB_ARRDELETE(buffer);
+	FB_ARRAY_DELETE(buffer);
 }
 
 void FontLoaderBinaryFormat::ReadCharsBlock(int size)
@@ -2295,7 +1630,7 @@ void FontLoaderBinaryFormat::ReadCharsBlock(int size)
 	};
 #pragma pack(pop)
 
-	char *buffer = FB_ARRNEW(char, size);
+	char *buffer = FB_ARRAY_NEW(char, size);
 	fread(buffer, size, 1, f);
 
 	charsBlock *blk = (charsBlock*)buffer;
@@ -2314,7 +1649,7 @@ void FontLoaderBinaryFormat::ReadCharsBlock(int size)
 			blk->chars[n].chnl);
 	}
 
-	FB_ARRDELETE(buffer);
+	FB_ARRAY_DELETE(buffer);
 }
 
 void FontLoaderBinaryFormat::ReadKerningPairsBlock(int size)
@@ -2332,7 +1667,7 @@ void FontLoaderBinaryFormat::ReadKerningPairsBlock(int size)
 	};
 #pragma pack(pop)
 
-	char *buffer = FB_ARRNEW(char, size);
+	char *buffer = FB_ARRAY_NEW(char, size);
 	fread(buffer, size, 1, f);
 
 	kerningPairsBlock *blk = (kerningPairsBlock*)buffer;
@@ -2344,7 +1679,7 @@ void FontLoaderBinaryFormat::ReadKerningPairsBlock(int size)
 			blk->kerningPairs[n].amount);
 	}
 
-	FB_ARRDELETE(buffer);
+	FB_ARRAY_DELETE(buffer);
 }
 
 }

@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Texture.h"
 #include "TinyXmlLib/tinyxml2.h"
+#include "FBStringLib/StringLib.h"
 
 namespace fastbird{
 	void TextureAtlasRegion::GetQuadUV(Vec2 uv[])
@@ -25,6 +26,15 @@ namespace fastbird{
 	}
 
 	//-----------------------------------------------------------------------
+	IMPLEMENT_STATIC_CREATE(TextureAtlas);
+	TextureAtlas::TextureAtlas(){
+
+	}
+
+	TextureAtlas::~TextureAtlas(){
+
+	}
+
 	TextureAtlasRegionPtr TextureAtlas::AddRegion(const char* name)
 	{
 		if (!name || strlen(name) == 0){
@@ -60,6 +70,26 @@ namespace fastbird{
 			Logger::Log(FB_DEFAULT_LOG_ARG, "region name(%s) is not found", name);
 			return 0;
 		}
+	}
+	
+	void TextureAtlas::SetTexture(TexturePtr texture){
+		mTexture = texture;
+	}
+
+	TexturePtr TextureAtlas::GetTexture() const{
+		return mTexture;
+	}
+
+	void TextureAtlas::SetPath(const char* path){
+		if (!ValidCString(path)){
+			Logger::Log(FB_ERROR_LOG_ARG, "Invalid arg.");
+			return;
+		}
+		mPath = path;
+	}
+
+	const char* TextureAtlas::GetPath() const{
+		return mPath.c_str();
 	}
 
 	bool TextureAtlas::ReloadTextureAtlas()

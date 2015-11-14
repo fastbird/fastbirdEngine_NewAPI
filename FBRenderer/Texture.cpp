@@ -6,10 +6,27 @@
 
 namespace fastbird{
 static std::vector<TextureWeakPtr> mAllTextures;
-size_t Texture::sNextTextureID = 0;
+TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformShader) {
+	for (auto it = mAllTextures.begin(); it != mAllTextures.end();){
+		auto texture = it->lock();
+		if (texture){
+			++it;
+			if (texture->GetPlatformTexture() == platformShader){
+				return texture;
+			}
+		}
+		else{
+			it = mAllTextures.erase(it);
+		}
+	}
+}
 
+size_t Texture::sNextTextureID = 0;
 class Texture::Impl{
 public:
+	// I think having texture properties like size, format in the Texture is good idea.
+	// Platform renderer doesn't use that information so don't need to have it.
+	// If that's true, let's move the data to here.
 	unsigned mTextureID;
 	IPlatformTexturePtr mPlatformTexture;	
 	TEXTURE_TYPE mType;
@@ -89,6 +106,10 @@ public:
 	void SetPlatformTexture(IPlatformTexturePtr platformTexture){
 		mPlatformTexture = platformTexture;
 	}
+
+	IPlatformTexturePtr GetPlatformTexture() const{
+		return mPlatformTexture;
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -103,6 +124,13 @@ Texture::Texture()
 }
 
 Texture::~Texture(){
+	auto itEnd = mAllTextures.end();
+	for (auto it = mAllTextures.begin(); it != itEnd; it++){
+		if (it->expired()){
+			mAllTextures.erase(it);
+			return;
+		}
+	}
 }
 
 Texture& Texture::operator = (const Texture& other){
@@ -183,6 +211,10 @@ void Texture::GenerateMips(){
 
 void Texture::SetPlatformTexture(IPlatformTexturePtr platformTexture){
 	mImpl->SetPlatformTexture(platformTexture);
+}
+
+IPlatformTexturePtr Texture::GetPlatformTexture() const{
+	return mImpl->GetPlatformTexture();
 }
 
 }

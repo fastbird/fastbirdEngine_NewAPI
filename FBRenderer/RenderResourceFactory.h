@@ -1,5 +1,5 @@
 #pragma once
-namespace fastbird{	
+namespace fastbird{
 	class RenderResourceFactory{
 		friend class Renderer;
 	private:

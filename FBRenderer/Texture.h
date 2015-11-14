@@ -60,5 +60,6 @@ namespace fastbird{
 		void SaveToFile(const char* filename);
 		void GenerateMips();
 		void SetPlatformTexture(IPlatformTexturePtr platformTexture);
+		IPlatformTexturePtr GetPlatformTexture() const;
 	};
 }

@@ -7,6 +7,7 @@ namespace fastbird{
 		ShaderDefine(const char* _name, const char* _value);
 		bool operator==(const ShaderDefine& b) const;
 		bool operator!=(const ShaderDefine& b) const;
+		bool operator< (const ShaderDefine& b) const;
 		std::string name;
 		std::string value;
 	};

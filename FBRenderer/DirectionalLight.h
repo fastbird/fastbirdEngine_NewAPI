@@ -1,5 +1,6 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
+#include "FBMathLib/Math.h"
 namespace fastbird
 {
 	DECLARE_SMART_PTR(DirectionalLight);

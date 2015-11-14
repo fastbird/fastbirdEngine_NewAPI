@@ -33,20 +33,20 @@ namespace fastbird{
 #else
 		strcat_s(buf, MAX_PATH, "_Release.dll");
 #endif
-		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf).c_str());
+		Logger::Log(FB_DEFAULT_LOG_ARG_NO_LINE, FormatString("Trying to load a module(%s)... ", buf).c_str());
 		HMODULE module = LoadLibraryA(buf);
 		if (!module) {
-			Logger::Log(FB_DEFAULT_LOG_ARG, "Failed.\n");
+			Logger::Log(FB_ERROR_LOG_ARG, "\tFailed.");
 			strcat_s(buf, MAX_PATH, ".dll");
-			Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Trying to load a module(%s)... ", buf).c_str());
+			Logger::Log(FB_DEFAULT_LOG_ARG_NO_LINE, FormatString("Trying to load a module(%s)... ", buf).c_str());
 			module = LoadLibraryA(buf);
 		}		
 		
 		if (!module) {
-			Logger::Log(FB_DEFAULT_LOG_ARG, "Failed.\n");
+			Logger::Log(FB_ERROR_LOG_ARG, "\tFailed.");
 		}
 		else{
-			Logger::Log(FB_DEFAULT_LOG_ARG, "Succeeded.\n");
+			Logger::Log(FB_DEFAULT_LOG_ARG, "\tSucceeded.");
 		}
 		return (intptr_t)module;
 #else

@@ -4,9 +4,13 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	typedef IPlatformRasterizerStatePtr RasterizerStatePtr;
+	typedef IPlatformRasterizerStateWeakPtr RasterizerStateWeakPtr;
 	typedef IPlatformBlendStatePtr BlendStatePtr;
+	typedef IPlatformBlendStateWeakPtr BlendStateWeakPtr;
 	typedef IPlatformDepthStencilStatePtr DepthStencilStatePtr;
+	typedef IPlatformDepthStencilStateWeakPtr DepthStencilStateWeakPtr;
 	typedef IPlatformSamplerStatePtr SamplerStatePtr;
+	typedef IPlatformSamplerStateWeakPtr SamplerStateWeakPtr;
 	////---------------------------------------------------------------------------
 	//DECLARE_SMART_PTR(RasterizerState);
 	//class FB_DLL_PUBLIC RasterizerState{
@@ -87,16 +91,17 @@ namespace fastbird{
 	//---------------------------------------------------------------------------
 	DECLARE_SMART_PTR(RenderStates);
 	/** represents RasterizerState, BlendState and DepthStencilState as one integrated object.
-	Not copyable but cloneable. RenderStates usually resides in Material. Whenever a Material
-	needs to change the RenderStates, It will call RenderStates::Clone in CopyOnWrite manner.
+	RenderStates usually resides in Material. Internal data will be efficiently shared among
+	RenderStates objects indicating the same states.
 	*/
 	class FB_DLL_PUBLIC RenderStates
 	{
-		DECLARE_PIMPL_NON_COPYABLE(RenderStates);
+		DECLARE_PIMPL(RenderStates);
 		RenderStates();
 
 	public:
 		static RenderStatesPtr Create();
+		RenderStates(const RenderStates& other);
 		~RenderStates();
 
 		void Reset();
@@ -106,8 +111,7 @@ namespace fastbird{
 		void CreateRasterizerState(const RASTERIZER_DESC& desc);
 		void CreateBlendState(const BLEND_DESC& desc);
 		void CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc);
-		void Bind();
-		void Bind(unsigned stencilRef);
-		RenderStatesPtr Clone() const;
+		void Bind() const;
+		void Bind(unsigned stencilRef) const;
 	};
 }

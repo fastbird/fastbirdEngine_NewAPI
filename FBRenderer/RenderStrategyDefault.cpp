@@ -13,6 +13,7 @@
 #include "GaussianDistribution.h"
 #include "StarDef.h"
 #include "RenderOptions.h"
+#include "SystemTextures.h"
 #include "FBMathLib/BoundingVolume.h"
 using namespace fastbird;
 
@@ -295,11 +296,10 @@ public:
 	void DepthTexture(bool bind) {
 		auto renderer = Renderer::GetInstance();
 		if (bind){
-			renderer->SetTexture(mDepthTarget, BINDING_SHADER_PS, 5);
-			renderer->SetTexture(mDepthTarget, BINDING_SHADER_GS, 5);
+			renderer->SetSystemTexture(SystemTextures::Depth, mDepthTarget);			
 		}
 		else{
-			renderer->SetTexture(0, BINDING_SHADER_PS, 5);
+			renderer->SetSystemTexture(SystemTextures::Depth, 0);
 		}
 	}
 
@@ -465,9 +465,9 @@ public:
 	{
 		auto renderer = Renderer::GetInstance();
 		if (bind && mShadowMap)
-			renderer->SetTexture(mShadowMap, BINDING_SHADER_PS, 8);
+			renderer->SetSystemTexture(SystemTextures::ShadowMap, mShadowMap);
 		else
-			renderer->SetTexture(0, BINDING_SHADER_PS, 8);
+			renderer->SetSystemTexture(SystemTextures::ShadowMap, 0);
 	}
 
 	void DepthWriteShaderCloud(){
@@ -505,9 +505,9 @@ public:
 	{
 		auto renderer = Renderer::GetInstance();
 		if (set)
-			renderer->SetTexture(mCloudVolumeDepth, BINDING_SHADER_PS, 6);
+			renderer->SetSystemTexture(SystemTextures::CloudVolume, mCloudVolumeDepth);
 		else
-			renderer->SetTexture(0, BINDING_SHADER_PS, 6);
+			renderer->SetSystemTexture(SystemTextures::CloudVolume, 0);
 	}
 
 
@@ -1246,14 +1246,19 @@ void RenderStrategyDefault::Render(size_t face){
 bool RenderStrategyDefault::IsHDR() const{
 	return true;
 }
-bool RenderStrategyDefault::SetHDRTarget(){
-	mImpl->HDRTarget(true);
+
+bool RenderStrategyDefault::IsGlowSupported(){
 	return true;
 }
 
 CameraPtr RenderStrategyDefault::GetLightCamera() const{
 	
 	return mImpl->mLightCamera;
+}
+
+bool RenderStrategyDefault::SetHDRTarget(){
+	mImpl->HDRTarget(true);
+	return true;
 }
 
 bool RenderStrategyDefault::SetSmallSilouetteBuffer(){
@@ -1264,6 +1269,10 @@ bool RenderStrategyDefault::SetBigSilouetteBuffer(){
 	return mImpl->SetBigSilouetteBuffer();
 }
 
-void RenderStrategyDefault::SetGlowRenderTarget(){
-	return mImpl->GlowTarget(true);
+void RenderStrategyDefault::GlowRenderTarget(bool bind){
+	return mImpl->GlowTarget(bind);
+}
+
+void RenderStrategyDefault::DepthTexture(bool bind){
+	return mImpl->DepthTexture(bind);
 }

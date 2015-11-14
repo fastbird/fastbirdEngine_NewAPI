@@ -38,11 +38,11 @@ namespace fastbird{
 		return s;
 	}
 
-	TString StripBoth(LPCTSTR s){
+	std::string StripBoth(LPCTSTR s){
 		if (s == 0)
 		{
 			assert(0);
-			return TString();
+			return std::string();
 		}
 		LPCTSTR b = s;
 		LPCTSTR e = s + _tstrlen(s);
@@ -54,7 +54,7 @@ namespace fastbird{
 		{
 			e--;
 		}
-		return TString(b, e - b);
+		return std::string(b, e - b);
 	}	
 
 	LPCTSTR FindLastOf(LPCTSTR s, TCHAR ch){
@@ -85,10 +85,10 @@ namespace fastbird{
 		*ppch = 0;
 	}
 
-	TStringVector Split(const TString& str, const TString& delims /*= "\t\n, "*/,
+	StringVector Split(const std::string& str, const std::string& delims /*= "\t\n, "*/,
 		unsigned int maxSplits /*= 0*/, bool preserveDelims /*= false*/)
 	{
-		TStringVector ret;
+		StringVector ret;
 		ret.reserve(maxSplits ? maxSplits + 1 : 10);
 		unsigned int numSplits = 0;
 		// Use STL methods 
@@ -100,11 +100,11 @@ namespace fastbird{
 			if (pos == start)
 			{
 				// Do nothing
-				ret.push_back(TString());
-				if (pos != TString::npos)
+				ret.push_back(std::string());
+				if (pos != std::string::npos)
 					start = pos + 1;
 			}
-			else if (pos == TString::npos || (maxSplits && numSplits == maxSplits))
+			else if (pos == std::string::npos || (maxSplits && numSplits == maxSplits))
 			{
 				// Copy the rest of the string
 				ret.push_back(str.substr(start));
@@ -121,7 +121,7 @@ namespace fastbird{
 					// Loop until we don't find any more delims
 					size_t delimStart = pos, delimPos;
 					delimPos = str.find_first_not_of(delims, delimStart);
-					if (delimPos == TString::npos)
+					if (delimPos == std::string::npos)
 					{
 						// Copy the rest of the string
 						ret.push_back(str.substr(delimStart));
@@ -138,12 +138,12 @@ namespace fastbird{
 			start = str.find_first_not_of(delims, start);
 			++numSplits;
 
-		} while (pos != TString::npos);
+		} while (pos != std::string::npos);
 
 		return ret;
 	}
 
-	int StringCompareNoCase(const TString& lhs, const TString& rhs){
+	int StringCompareNoCase(const std::string& lhs, const std::string& rhs){
 		auto size = lhs.size();
 		auto size2 = rhs.size();
 		for (unsigned i = 0; i < size; ++i){
@@ -162,20 +162,20 @@ namespace fastbird{
 
 	}
 
-	bool StartsWith(const TString& str, const TString& pattern, bool lowerCase){
+	bool StartsWith(const std::string& str, const std::string& pattern, bool lowerCase){
 		auto thisLen = str.length();
 		auto patternLen = pattern.length();
 		if (thisLen < patternLen || patternLen == 0)
 			return false;
 
-		TString startOfThis = str.substr(0, patternLen);
+		std::string startOfThis = str.substr(0, patternLen);
 		if (lowerCase)
 			ToLowerCase(startOfThis);
 
 		return (startOfThis == pattern);
 	}
 
-	void ToLowerCase(TString& str){
+	void ToLowerCase(std::string& str){
 		std::transform(
 			str.begin(),
 			str.end(),
@@ -183,7 +183,7 @@ namespace fastbird{
 			_ttolower);
 	}	
 
-	void ToUpperCase(TString& str){
+	void ToUpperCase(std::string& str){
 		std::transform(
 			str.begin(),
 			str.end(),

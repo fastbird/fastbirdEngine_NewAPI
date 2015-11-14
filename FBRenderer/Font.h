@@ -11,9 +11,8 @@ namespace fastbird{
 	DECLARE_SMART_PTR(Texture);
 	DECLARE_SMART_PTR(VertexBuffer);
 	DECLARE_SMART_PTR(Shader);
-	DECLARE_SMART_PTR(InputLayout);
 	DECLARE_SMART_PTR(Material);
-	class SCharDescr;
+	struct SCharDescr;
 	typedef DEFAULT_INPUTS::V_PCTB  FontVertex;
 	DECLARE_SMART_PTR(Font);
 	class Font
@@ -47,20 +46,20 @@ namespace fastbird{
 		virtual void PreRender(){}
 		virtual void Render(){}
 		virtual void PostRender(){}
-		virtual void Write(float x, float y, float z, unsigned int color,
+		virtual void Write(Real x, Real y, Real z, unsigned int color,
 			const char *text, int count, FONT_ALIGN mode);
 
-		virtual void SetHeight(float h);
-		virtual float GetHeight() const;
-		virtual float GetBaseHeight() const;
+		virtual void SetHeight(Real h);
+		virtual Real GetHeight() const;
+		virtual Real GetBaseHeight() const;
 		virtual void SetBackToOrigHeight();
-		virtual float GetTextWidth(const char *text, int count = -1, float *minY = 0, float *maxY = 0);
-		virtual std::wstring InsertLineFeed(const char *text, int count, unsigned wrapAt, float* outWidth, unsigned* outLines);
+		virtual Real GetTextWidth(const char *text, int count = -1, Real *minY = 0, Real *maxY = 0);
+		virtual std::wstring InsertLineFeed(const char *text, int count, unsigned wrapAt, Real* outWidth, unsigned* outLines);
 		virtual void PrepareRenderResources();
 		virtual void SetRenderStates(bool depthEnable = false, bool scissorEnable = false);
 
-		float GetBottomOffset();
-		float GetTopOffset();
+		Real GetBottomOffset();
+		Real GetTopOffset();
 
 		virtual void SetRenderTargetSize(const Vec2I& rtSize);
 		virtual void RestoreRenderTargetSize();
@@ -73,7 +72,7 @@ namespace fastbird{
 
 		bool ApplyTag(const char* text, int start, int end, int& x, int& y);
 		TextTags::Enum GetTagType(const char* tagStart, int length, char* buf = 0) const;
-		void InternalWrite(int x, int y, float z, const char *text, int count, int spacing = 0);
+		void InternalWrite(int x, int y, Real z, const char *text, int count, int spacing = 0);
 		void Flush(int page, const FontVertex* pVertices, unsigned int vertexCount);
 
 		int AdjustForKerningPairs(int first, int second);

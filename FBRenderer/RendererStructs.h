@@ -3,6 +3,7 @@
 #define _fastbird_RenderStructs_header_included_
 #include "RendererEnums.h"
 #include "Color.h"
+#include "FBMathLib/Math.h"
 
 namespace fastbird
 {
@@ -26,6 +27,11 @@ namespace fastbird
 		bool operator<(const RASTERIZER_DESC& other) const
 		{
 			return memcmp(this, &other, sizeof(RASTERIZER_DESC)) < 0;
+		}
+
+		bool operator==(const RASTERIZER_DESC& other) const
+		{
+			return memcmp(this, &other, sizeof(RASTERIZER_DESC)) == 0;
 		}
 
 		FILL_MODE		FillMode;
@@ -116,6 +122,10 @@ namespace fastbird
 			return memcmp(this, &other, sizeof(BLEND_DESC)) < 0;
 		}
 
+		bool operator==(const BLEND_DESC& other) const{
+			return memcmp(this, &other, sizeof(BLEND_DESC)) == 0;
+		}
+
 		bool						AlphaToCoverageEnable;
 		bool						IndependentBlendEnable;
 		char						padding[2];
@@ -156,6 +166,11 @@ namespace fastbird
 		bool operator<(const DEPTH_STENCIL_DESC& other) const
 		{
 			return memcmp(this, &other, sizeof(DEPTH_STENCIL_DESC)) < 0;
+		}
+
+		bool operator==(const DEPTH_STENCIL_DESC& other) const
+		{
+			return memcmp(this, &other, sizeof(DEPTH_STENCIL_DESC)) == 0;
 		}
 
 		DEPTH_WRITE_MASK DepthWriteMask;

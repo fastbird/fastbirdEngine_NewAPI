@@ -66,7 +66,6 @@ public:
 	bool mCurrentCamera;
 	bool mProcessInput;
 	Vec3 mPrevTargetPos;
-	typedef std::lock_guard<std::mutex> MUTEX_LOCK;
 	std::mutex mMutex;
 
 	Impl() :mViewPropertyChanged(true)

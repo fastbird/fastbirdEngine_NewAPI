@@ -68,22 +68,6 @@ namespace fastbird
 		}
 
 		//--------------------------------------------------------------------
-		const_iterator Insert(const _Val_type& data) const 
-		{
-			const_iterator i = std::lower_bound(
-				mVector.begin(), mVector.end(), data.first, key_compare());
-			if(i != mVector.end() && i->first == data.first)
-			{
-				i->second = data.second;		
-			}	
-			else
-			{
-				i = mVector.insert(i, data);
-			}
-			return i;
-		}
-
-		//--------------------------------------------------------------------
 		_Ty& operator [](const key_type& key )
 		{
 			iterator i =std::lower_bound(

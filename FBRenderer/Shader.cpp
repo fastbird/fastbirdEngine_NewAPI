@@ -4,10 +4,24 @@
 #include "Renderer.h"
 #include "FBCommonHeaders/Helpers.h"
 #include "FBTimerLib/Profiler.h"
-
+#include "FBStringLib/StringLib.h"
 using namespace fastbird;
 
-static std::vector<ShaderWeakPtr> mAllShaders;
+static std::vector<ShaderWeakPtr> sAllShaders;
+ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformTexture) {
+	for (auto it = sAllShaders.begin(); it != sAllShaders.end();){
+		auto shader = it->lock();
+		if (shader){
+			++it;
+			if (shader->GetPlatformShader() == platformTexture){
+				return shader;
+			}
+		}
+		else{
+			it = sAllShaders.erase(it);
+		}
+	}
+}
 
 class Shader::Impl{
 public:
@@ -50,6 +64,7 @@ public:
 	}
 	void SetShaderDefines(const SHADER_DEFINES& defines){
 		mDefines = defines;
+		std::sort(mDefines.begin(), mDefines.end());
 		if (mPlatformShader)
 			mPlatformShader->SetShaderDefines(defines);
 	}
@@ -73,7 +88,11 @@ public:
 		if (mPlatformShader)
 			mPlatformShader->SetDebugName(debugName);
 	}
-	
+
+	bool CheckIncludes(const char* shaderHeaderFile) const{
+		return mPlatformShader ? mPlatformShader->CheckIncludes(shaderHeaderFile) : false;
+	}
+
 	void SetPlatformShader(IPlatformShaderPtr shader){
 		mPlatformShader = shader;		
 	}
@@ -96,7 +115,7 @@ void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefi
 	std::string path = filepath;
 	ToLowerCase(path);
 	auto renderer = Renderer::GetInstance();
-	auto it = mAllShaders.begin(), itEnd = mAllShaders.end();
+	auto it = sAllShaders.begin(), itEnd = sAllShaders.end();
 	for (; it != itEnd; it++)
 	{
 		auto shader = it->lock();
@@ -116,7 +135,7 @@ void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefi
 
 ShaderPtr Shader::Create(){
 	auto shader = ShaderPtr(FB_NEW(Shader), [](Shader* obj){ FB_DELETE(obj); });
-	mAllShaders.push_back(shader);
+	sAllShaders.push_back(shader);
 	return shader;
 }
 
@@ -126,10 +145,10 @@ Shader::Shader()
 }
 
 Shader::~Shader(){
-	auto itEnd = mAllShaders.end();
-	for (auto it = mAllShaders.begin(); it != itEnd; it++){
+	auto itEnd = sAllShaders.end();
+	for (auto it = sAllShaders.begin(); it != itEnd; it++){
 		if (it->expired()){
-			mAllShaders.erase(it);
+			sAllShaders.erase(it);
 			return;
 		}
 	}
@@ -174,6 +193,10 @@ int Shader::GetBindingShaders() const{
 
 void Shader::SetDebugName(const char* debugName){
 	mImpl->SetDebugName(debugName);
+}
+
+bool Shader::CheckIncludes(const char* shaderHeaderFile) const{
+	return mImpl->CheckIncludes(shaderHeaderFile);
 }
 
 void Shader::SetPlatformShader(IPlatformShaderPtr shader){

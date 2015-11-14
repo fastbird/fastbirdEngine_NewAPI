@@ -27,6 +27,7 @@ namespace fastbird
 		void ApplyShaderDefines();
 		int GetBindingShaders() const;
 		void SetDebugName(const char* debugName);
+		bool CheckIncludes(const char* shaderHeaderFile) const;
 		void SetPlatformShader(IPlatformShaderPtr shader);
 		IPlatformShaderPtr GetPlatformShader() const;
 	};

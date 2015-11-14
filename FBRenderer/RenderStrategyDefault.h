@@ -20,10 +20,12 @@ namespace fastbird{
 		void SetRenderTarget(RenderTargetPtr renderTarget);
 		void Render(size_t face);
 		bool IsHDR() const;
-		bool SetHDRTarget();
+		bool IsGlowSupported();
 		CameraPtr GetLightCamera() const;
+		bool SetHDRTarget();
 		bool SetSmallSilouetteBuffer();
 		bool SetBigSilouetteBuffer();
-		void SetGlowRenderTarget();
+		void GlowRenderTarget(bool bind);
+		void DepthTexture(bool bind);
 	};
 }

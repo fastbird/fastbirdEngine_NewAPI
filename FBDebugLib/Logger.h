@@ -39,5 +39,7 @@ namespace fastbird{
 	};
 }
 
-#define FB_DEFAULT_LOG_ARG "%s: %s", __FUNCTION__
-#define FB_ERROR_LOG_ARG "%s: (error)%s", __FUNCTION__
+#define FB_DEFAULT_LOG_ARG "%s: %s\n", __FUNCTION__
+#define FB_DEFAULT_LOG_ARG_NO_LINE "%s: %s", __FUNCTION__
+#define FB_ERROR_LOG_ARG "%s: (error)%s\n", __FUNCTION__
+#define FB_ERROR_LOG_ARG_NO_LINE "%s: (error)%s", __FUNCTION__

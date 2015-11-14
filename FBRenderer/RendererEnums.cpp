@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RendererEnums.h"
+#include "FBStringLib/StringLib.h"
 namespace fastbird
 {
 	BINDING_SHADER BindingShaderFromString(const char* szShader)

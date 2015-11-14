@@ -39,7 +39,7 @@ int FileSystem::Rename(const char* path, const char* newpath){
 		boost::filesystem::rename(path, newpath);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()).c_str());
+		Logger::Log(FB_ERROR_LOG_ARG, err.what());
 	}
 	
 	return NO_ERROR;
@@ -51,7 +51,7 @@ bool FileSystem::Remove(const char* path){
 		ret = boost::filesystem::remove(path);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()).c_str());
+		Logger::Log(FB_ERROR_LOG_ARG, err.what());
 	}	
 	return ret;
 }
@@ -104,7 +104,7 @@ bool FileSystem::CreateDirectory(const char* filepath){
 		ret = boost::filesystem::create_directories(filepath);
 	}
 	catch (boost::filesystem::filesystem_error& err){
-		Logger::Log(FormatString(FB_DEFAULT_LOG_ARG, err.what()).c_str());
+		Logger::Log(FB_ERROR_LOG_ARG, err.what());
 	}
 	return ret;
 }

@@ -4,6 +4,7 @@
 #define FBCommonHeaders_Types_h
 #include <utility>
 #include <memory>
+#include <mutex>
 
 #define FB_DECLARE_HANDLE(name) struct name##__; typedef struct name##__ *name
 
@@ -21,6 +22,7 @@ namespace fastbird{
 
 	typedef std::pair<int, int> CoordinatesI;
 	typedef std::pair<Real, Real> CoordinatesR;
+	typedef std::lock_guard<std::mutex> MutexLock;
 }
 
 #define DECLARE_NON_COPYABLE(className) \
@@ -38,6 +40,7 @@ namespace fastbird{
 #define DECLARE_SMART_PTR(className) \
 	class className;\
 	typedef std::shared_ptr<className> className##Ptr;\
+	typedef std::shared_ptr<const className> className##ConstPtr;\
 	typedef std::weak_ptr<className> className##WeakPtr
 
 #define DECLARE_SMART_PTR_STRUCT(className) \

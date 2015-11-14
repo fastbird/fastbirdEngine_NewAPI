@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "RenderStates.h"
 #include "Renderer.h"
+#include "FBCommonHeaders/CowPtr.h"
 
 namespace fastbird{
 
@@ -10,10 +11,18 @@ public:
 	IPlatformBlendStatePtr mBlendState;
 	IPlatformDepthStencilStatePtr mDepthStencilState;
 
-	// todo: Good to be CowPtrs.
-	RASTERIZER_DESC mRDesc;
-	BLEND_DESC mBDesc;
-	DEPTH_STENCIL_DESC mDDesc;
+	CowPtr<RASTERIZER_DESC> mRDesc;
+	CowPtr<BLEND_DESC> mBDesc;
+	CowPtr<DEPTH_STENCIL_DESC> mDDesc;
+
+	static const RASTERIZER_DESC DefaultRDesc;
+	static const BLEND_DESC DefaultBDesc;
+	static const DEPTH_STENCIL_DESC DefaultDDesc;	
+
+	Impl()
+	{
+		Reset();
+	}
 
 	//-----------------------------------------------------------------------
 	void Reset(){
@@ -23,50 +32,72 @@ public:
 	}
 
 	void ResetRasterizerState(){
-		mRDesc = RASTERIZER_DESC();
-		CreateRasterizerState(mRDesc);
+		mRDesc.reset();
+		auto renderer = Renderer::GetInstance();
+		mRasterizerState = renderer->CreateRasterizerState(DefaultRDesc);
 	}
 
 	void ResetBlendState(){
-		mBDesc = BLEND_DESC();
-		CreateBlendState(mBDesc);
+		mBDesc.reset();
+		auto renderer = Renderer::GetInstance();
+		mBlendState = renderer->CreateBlendState(DefaultBDesc);
 	}
 
 	void ResetDepthStencilState(){
-		mDDesc = DEPTH_STENCIL_DESC();
-		CreateDepthStencilState(mDDesc);
+		mDDesc.reset();
+		auto renderer = Renderer::GetInstance();
+		mDepthStencilState = renderer->CreateDepthStencilState(DefaultDDesc);
 	}
 
 	void CreateRasterizerState(const RASTERIZER_DESC& desc){
-		mRDesc = desc;
 		auto renderer = Renderer::GetInstance();
-		mRasterizerState = renderer->CreateRasterizerState(desc);
+		if (DefaultRDesc == desc){
+			if (mRDesc){
+				mRDesc.reset();
+				mRasterizerState = renderer->CreateRasterizerState(DefaultRDesc);
+			}
+		}
+		else{
+			mRDesc = new RASTERIZER_DESC(desc);
+			mRasterizerState = renderer->CreateRasterizerState(desc);
+		}		
 	}
 
 	void CreateBlendState(const BLEND_DESC& desc){
-		mBDesc = desc;
 		auto renderer = Renderer::GetInstance();
-		mBlendState = renderer->CreateBlendState(desc);
+		if (DefaultBDesc == desc){
+			if (mBDesc){
+				mBDesc.reset();
+				mBlendState = renderer->CreateBlendState(DefaultBDesc);
+			}
+		}
+		else{
+			mBDesc = new BLEND_DESC(desc);
+			mBlendState = renderer->CreateBlendState(desc);
+		}
 	}
 
 	void CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc){
-		mDDesc = desc;
 		auto renderer = Renderer::GetInstance();
-		mDepthStencilState = renderer->CreateDepthStencilState(desc);
+		if (DefaultDDesc == desc){
+			if (mDDesc){
+				mDDesc.reset();
+				mDepthStencilState = renderer->CreateDepthStencilState(DefaultDDesc);
+			}
+		}
+		else{
+			mDDesc = new DEPTH_STENCIL_DESC(desc);
+			mDepthStencilState = renderer->CreateDepthStencilState(desc);
+		}		
 	}
 
-	void Bind(unsigned stencilRef){
-		mRasterizerState->Bind();
-		mBlendState->Bind();
-		mDepthStencilState->Bind(stencilRef);
-	}
-
-	RenderStatesPtr Clone() const{
-		RenderStatesPtr newObj = RenderStates::Create();		
-		newObj->CreateBlendState(mBDesc);
-		newObj->CreateDepthStencilState(mDDesc);
-		newObj->CreateRasterizerState(mRDesc);
-		return newObj;
+	void Bind(unsigned stencilRef) const{
+		if (mRasterizerState)
+			mRasterizerState->Bind();
+		if (mBlendState)
+			mBlendState->Bind();
+		if (mDepthStencilState)
+			mDepthStencilState->Bind(stencilRef);
 	}
 };
 
@@ -75,6 +106,11 @@ IMPLEMENT_STATIC_CREATE(RenderStates);
 RenderStates::RenderStates()
 	: mImpl(new Impl)
 {
+}
+
+RenderStates::RenderStates(const RenderStates& other)
+	: mImpl(new Impl(*other.mImpl)){
+
 }
 
 RenderStates::~RenderStates(){
@@ -102,15 +138,12 @@ void RenderStates::CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc){
 	mImpl->CreateDepthStencilState(desc);
 }
 
-void RenderStates::Bind(){
+void RenderStates::Bind() const{
 	mImpl->Bind(0);
 }
 
-void RenderStates::Bind(unsigned stencilRef){
+void RenderStates::Bind(unsigned stencilRef) const{
 	mImpl->Bind(stencilRef);
-}
-RenderStatesPtr RenderStates::Clone() const{
-	return mImpl->Clone();
 }
 
 }

@@ -22,7 +22,7 @@ public:
 	RendererWeakPtr mRenderer;
 	SceneWeakPtr mScene;
 	RenderTargetId mId;
-	
+
 	bool mEnabled;
 	bool mUsePool;
 	Vec2I mSize;
@@ -57,11 +57,11 @@ public:
 		, mWillCreateDepth(false), mUsePool(true)
 		, mDrawOnEvent(false), mDrawEventTriggered(false)
 		, mFace(0)
-		, mId(NextRenderTargetId++)		
+		, mId(NextRenderTargetId++)
 	{
 		mCamera = Camera::Create();
 		mStrategy = RenderStrategyDefault::Create();
-	}	
+	}
 
 	//-------------------------------------------------------------------
 	// Observable<IRenderTargetObserver>
@@ -97,7 +97,7 @@ public:
 	CameraPtr ReplaceCamera(CameraPtr cam){
 		auto prev = mCamera;
 		mCamera = cam;
-		return prev;		
+		return prev;
 	}
 
 	void SetColorTextureDesc(int width, int height, PIXEL_FORMAT format, bool srv, bool miplevel, bool cubeMap){
@@ -106,7 +106,7 @@ public:
 		mFormat = format;
 		mSRV = srv;
 		mMiplevel = miplevel;
-		mCubeMap = cubeMap;	
+		mCubeMap = cubeMap;
 		int type;
 		type = srv ? TEXTURE_TYPE_RENDER_TARGET_SRV : TEXTURE_TYPE_RENDER_TARGET;
 		if (miplevel)
@@ -145,14 +145,14 @@ public:
 			return;
 		auto renderer = Renderer::GetInstance();
 		if (!renderer)
-			return;		
-		
+			return;
+
 		renderer->SetCurrentRenderTarget(mSelf.lock());
 
 		if (mRenderTargetTexture)
 			mRenderTargetTexture->Unbind();
 		TexturePtr rt[] = { mRenderTargetTexture };
-		size_t rtViewIndex[] = { face };		
+		size_t rtViewIndex[] = { face };
 		renderer->SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, face);
 		renderer->SetViewports(&mViewport, 1);
 		renderer->Clear(mClearColor.r(), mClearColor.g(), mClearColor.b(), mClearColor.a(),
@@ -162,7 +162,7 @@ public:
 			auto light = scene->GetLight(0);
 			renderer->SetDirectionalLight(light, 0);
 			light = scene->GetLight(1);
-			renderer->SetDirectionalLight(light, 1);			
+			renderer->SetDirectionalLight(light, 1);
 		}
 
 		renderer->SetCamera(mCamera);
@@ -179,7 +179,7 @@ public:
 		auto const renderer = Renderer::GetInstance();
 		renderer->SetCurrentRenderTarget(mSelf.lock());
 		if (hdr &&  mStrategy->IsHDR() && renderer->GetOptions()->r_HDR){
-			mStrategy->SetHDRTarget();			
+			mStrategy->SetHDRTarget();
 		}
 		else{
 			if (mRenderTargetTexture)
@@ -191,6 +191,18 @@ public:
 			renderer->SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, mFace);
 			renderer->SetViewports(&mViewport, 1);
 		}
+	}
+
+	void BindDepthTexture(bool bind){
+		mStrategy->DepthTexture(bind);
+		auto renderer = Renderer::GetInstance();
+		if (bind)
+		{
+			renderer->SetTexture(mDepthTarget, BINDING_SHADER_PS, 5);
+			renderer->SetTexture(mDepthTarget, BINDING_SHADER_GS, 5);
+		}
+		else
+			renderer->SetTexture(0, BINDING_SHADER_PS, 5);
 	}
 
 	bool Render(size_t face)
@@ -211,7 +223,11 @@ public:
 	}
 
 	CameraPtr GetLightCamera() const {
-		return mStrategy->GetLightCamera();		
+		return mStrategy->GetLightCamera();
+	}
+
+	bool IsGlowSupported() const{
+		return mStrategy->IsGlowSupported();
 	}
 
 	//---------------------------------------------------------------------------
@@ -222,7 +238,7 @@ public:
 		auto lightCam = mStrategy->GetLightCamera();
 		if (lightCam){
 			lightCam->SetWidth(std::min(width, mSize.x * (width / 1600)));
-		}		
+		}
 	}
 
 	void SetLightCamHeight(Real height)
@@ -271,8 +287,8 @@ public:
 		}
 	}
 
-	void SetGlowRenderTarget(){
-		mStrategy->SetGlowRenderTarget();
+	void GlowRenderTarget(bool bind){
+		mStrategy->GlowRenderTarget(true);
 	}
 
 	void ConsumeInput(IInputInjectorPtr injector)
@@ -419,6 +435,10 @@ void RenderTarget::BindTargetOnly(bool hdr)
 	mImpl->BindTargetOnly(hdr);
 }
 
+void RenderTarget::BindDepthTexture(bool bind){
+	mImpl->BindDepthTexture(bind);
+}
+
 bool RenderTarget::Render(size_t face)
 {
 	return mImpl->Render(face);
@@ -429,8 +449,12 @@ void RenderTarget::Unbind()
 	mImpl->Unbind();
 }
 
-void RenderTarget::SetGlowRenderTarget(){
-	mImpl->SetGlowRenderTarget();
+void RenderTarget::GlowRenderTarget(bool bind){
+	mImpl->GlowRenderTarget(bind);
+}
+
+void RenderTarget::GlowRenderTarget(bool bind){
+	mImpl->GlowRenderTarget(bind);
 }
 
 void RenderTarget::SetEnable(bool enable) {
@@ -474,6 +498,10 @@ CameraPtr RenderTarget::GetLightCamera() const {
 
 const Viewport& RenderTarget::GetViewport() const{
 	return mImpl->mViewport;
+}
+
+bool RenderTarget::IsGlowSupported() const{
+	return mImpl->IsGlowSupported();
 }
 
 void RenderTarget::DrawOnEvent(bool set)

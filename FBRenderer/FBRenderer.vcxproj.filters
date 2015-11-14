@@ -66,6 +66,11 @@
     <ClInclude Include="IPlatformInputLayout.h" />
     <ClInclude Include="IPlatformIndexBuffer.h" />
     <ClInclude Include="IPlatformRenderStates.h" />
+    <ClInclude Include="InputLayout.h" />
+    <ClInclude Include="TextureBinding.h" />
+    <ClInclude Include="SystemTextures.h" />
+    <ClInclude Include="PointLightManager.h" />
+    <ClInclude Include="PointLight.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -101,6 +106,9 @@
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="ColorRamp.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="TextureBinding.cpp" />
+    <ClCompile Include="PointLightManager.cpp" />
+    <ClCompile Include="PointLight.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

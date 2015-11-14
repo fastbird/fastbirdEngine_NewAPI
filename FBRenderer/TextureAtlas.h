@@ -1,5 +1,6 @@
 #pragma once
 #include "FBCommonHeaders/VectorMap.h"
+#include "FBMathLib/Math.h"
 namespace fastbird{
 	DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
 	struct TextureAtlasRegion
@@ -30,13 +31,15 @@ namespace fastbird{
 		TextureAtlas();
 
 	public:
-		static TextureAtlasPtr CreateTextureAtlas();
-		~TextureAtlas()
-		{
-		}
+		static TextureAtlasPtr Create();
+		~TextureAtlas();
 
 		TextureAtlasRegionPtr AddRegion(const char* name);
 		TextureAtlasRegionPtr GetRegion(const char* name);
-		bool ReloadTextureAtlas();
+		void SetTexture(TexturePtr texture);
+		TexturePtr GetTexture() const;
+		void SetPath(const char* path);		
+		const char* GetPath() const;
+		bool ReloadTextureAtlas();		
 	};
 }

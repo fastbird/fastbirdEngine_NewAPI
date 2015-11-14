@@ -20,4 +20,12 @@ namespace fastbird{
 	bool ShaderDefine::operator!=(const ShaderDefine& b) const{
 		return !operator==(b);
 	}
+
+	bool ShaderDefine::operator< (const ShaderDefine& b) const{
+		if (name < b.name)
+			return true;
+		else if (name == b.name){
+			return value < b.value;
+		}
+	}
 }

@@ -17,6 +17,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="GaussianDistribution.h" />
     <ClInclude Include="ICameraObserver.h" />
+    <ClInclude Include="InputLayout.h" />
     <ClInclude Include="IPlatformIndexBuffer.h" />
     <ClInclude Include="IPlatformInputLayout.h" />
     <ClInclude Include="IndexBuffer.h" />
@@ -34,6 +35,8 @@
     <ClInclude Include="IPlatformVertexBuffer.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="PointLight.h" />
+    <ClInclude Include="PointLightManager.h" />
     <ClInclude Include="Renderable.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererEnums.h" />
@@ -52,9 +55,11 @@
     <ClInclude Include="Spatial.h" />
     <ClInclude Include="StarDef.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SystemTextures.h" />
     <ClInclude Include="TextTags.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureAtlas.h" />
+    <ClInclude Include="TextureBinding.h" />
     <ClInclude Include="VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
@@ -66,6 +71,8 @@
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="InputElementDesc.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
@@ -83,6 +90,7 @@
     </ClCompile>
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureAtlas.cpp" />
+    <ClCompile Include="TextureBinding.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
