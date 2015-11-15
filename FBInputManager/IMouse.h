@@ -53,13 +53,13 @@ namespace fastbird
 		// Positions
 		virtual void GetHDDeltaXY(long &x, long &y) const = 0;
 		virtual void GetDeltaXY(long &x, long &y) const = 0;
-		virtual CoordinatesI GetDeltaXY() const = 0;
+		virtual Vec2ITuple GetDeltaXY() const = 0;
 		virtual void GetPos(long &x, long &y) const = 0;
-		virtual CoordinatesI GetPos() const = 0;
+		virtual Vec2ITuple GetPos() const = 0;
 		virtual void GetPrevPos(long &x, long &y) const = 0;
 		// normalized pos(0.0~1.0)
 		virtual void GetNPos(Real &x, Real &y) const = 0;
-		virtual CoordinatesR GetNPos() const = 0;
+		virtual Vec2Tuple GetNPos() const = 0;
 		virtual bool IsMoved() const = 0;
 		virtual void LockMousePos(bool lock, void* key) = 0;
 		virtual bool IsIn(int left, int top, int right, int bottom) = 0;
@@ -67,7 +67,7 @@ namespace fastbird
 
 		// Dragging
 		virtual void GetDragStart(long &x, long &y) const = 0;
-		virtual CoordinatesI GetDragStartedPos() const = 0;
+		virtual Vec2ITuple GetDragStartedPos() const = 0;
 		virtual bool IsDragStartIn(int left, int top, int right, int bottom) const = 0;
 		virtual bool IsDragStarted(int& outX, int& outY) const = 0;
 		virtual bool IsDragEnded() const = 0;

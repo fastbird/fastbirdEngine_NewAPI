@@ -93,10 +93,10 @@ void InputInjector::GetDeltaXY(long &x, long &y) const{
 		mImpl->mMouse->GetDeltaXY(x, y);
 }
 
-CoordinatesI InputInjector::GetDeltaXY() const{
+Vec2ITuple InputInjector::GetDeltaXY() const{
 	if (mImpl->mMouse)
 		return mImpl->mMouse->GetDeltaXY();
-	return{ 0, 0 };
+	return std::make_tuple(0, 0);
 }
 
 void InputInjector::GetMousePos(long &x, long &y) const{
@@ -104,10 +104,10 @@ void InputInjector::GetMousePos(long &x, long &y) const{
 		mImpl->mMouse->GetPos(x, y);
 }
 
-CoordinatesI InputInjector::GetMousePos() const{
+Vec2ITuple InputInjector::GetMousePos() const{
 	if (mImpl->mMouse)
 		return mImpl->mMouse->GetPos();
-	return{ 0, 0 };
+	return std::make_tuple(0, 0);
 }
 
 void InputInjector::GetMousePrevPos(long &x, long &y) const{
@@ -120,10 +120,10 @@ void InputInjector::GetMouseNPos(Real &x, Real &y) const{ // normalized pos(0.0~
 		mImpl->mMouse->GetNPos(x, y);
 }
 
-CoordinatesR InputInjector::GetMouseNPos() const{
+Vec2Tuple InputInjector::GetMouseNPos() const{
 	if (mImpl->mMouse)
 		return mImpl->mMouse->GetNPos();
-	return{ 0., 0. };
+	return std::make_tuple(0., 0.);
 }
 
 bool InputInjector::IsMouseMoved() const{
@@ -155,10 +155,10 @@ void InputInjector::GetDragStart(long &x, long &y) const{
 		mImpl->mMouse->GetDragStart(x, y);
 }
 
-CoordinatesI InputInjector::GetDragStartedPos() const{
+Vec2ITuple InputInjector::GetDragStartedPos() const{
 	if (mImpl->mMouse)
 		return mImpl->mMouse->GetDragStartedPos();
-	return{ 0, 0 };
+	return std::make_tuple(0, 0);
 }
 
 bool InputInjector::IsDragStartIn(int left, int top, int right, int bottom) const{

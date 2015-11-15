@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="Timer.h" />
-    <ClInclude Include="Profiler.h" />
-    <ClInclude Include="TimeString.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="LuaObject.h" />
+    <ClInclude Include="LuaUtils.h" />
+    <ClInclude Include="luawrapper.hpp" />
+    <ClInclude Include="luawrapperutil.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Timer.cpp" />
-    <ClCompile Include="Profiler.cpp" />
-    <ClCompile Include="TimeString.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="LuaUtils.cpp" />
+    <ClCompile Include="LuaObject.cpp" />
   </ItemGroup>
 </Project>

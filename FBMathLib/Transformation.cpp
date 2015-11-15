@@ -32,6 +32,19 @@ Transformation::Transformation(const Quat& q)
 
 }
 
+Transformation::Transformation(const TransformationTuple& t)
+	: mMat(	std::get<0>(t), std::get<1>(t), std::get<2>(t),
+			std::get<3>(t), std::get<4>(t), std::get<5>(t),
+			std::get<6>(t), std::get<7>(t), std::get<8>(t))
+	, mR(std::get<9>(t), std::get<10>(t), std::get<11>(t), std::get<12>(t))
+	, mT(std::get<13>(t), std::get<14>(t), std::get<15>(t))
+	, mS(std::get<16>(t), std::get<17>(t), std::get<18>(t))
+	, mIdentity(std::get<19>(t))
+	, mRSSeperated(std::get<20>(t))
+	, mUniformScale(std::get<21>(t))
+{
+}
+
 //----------------------------------------------------------------------------
 void Transformation::MakeIdentity ()
 {
@@ -648,6 +661,17 @@ bool Transformation::operator==(const Transformation& other) const
 	{
 		return mMat == other.mMat && mT == other.mT;
 	}
+}
+
+Transformation::operator TransformationTuple() const{
+	return std::make_tuple(
+		mMat[0][0], mMat[0][1], mMat[0][2],
+		mMat[1][0], mMat[1][1], mMat[1][2],
+		mMat[2][0], mMat[2][1], mMat[2][2],
+		mR.w, mR.x, mR.y, mR.z,
+		mT.x, mT.y, mT.z,
+		mS.x, mS.y, mS.y,
+		mIdentity, mRSSeperated, mUniformScale);
 }
 
 }

@@ -15,7 +15,7 @@ namespace fastbird
 		Vec2I();
 		Vec2I(int _x, int _y);
 		Vec2I(const Vec2& v);
-		Vec2I(const std::pair<int, int>& coordinates);
+		explicit Vec2I(const Vec2ITuple& t);
 
 		//-------------------------------------------------------------------
 		Vec2I operator+ (int s) const;
@@ -31,6 +31,7 @@ namespace fastbird
 		bool operator== (const Vec2I& v) const;
 		bool operator!=(const Vec2I& v) const;		
 		bool operator<(const Vec2I& v) const;
+		operator Vec2ITuple() const;
 
 		int Cross(const Vec2I& right);
 		int Dot(const Vec2I& right);

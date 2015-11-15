@@ -47,11 +47,11 @@ public:
 	bool mLButtonDoubleClicked;
 	bool mLockMouse;
 
-	CoordinatesI mLastDownPos;
+	Vec2ITuple mLastDownPos;
 	Real mLastLeftDownTime;
 	Real mLastRightDownTime;
 	Real mLastUpTime;
-	CoordinatesI mLastClickPos;
+	Vec2ITuple mLastClickPos;
 	Real mLastClickTime;
 
 	Real mLastWheelPush;
@@ -68,7 +68,7 @@ public:
 	void* mLockMouseKey;
 	bool mInvalidatedTemporary;
 	bool mNoClickOnce;
-	std::map<HWindow, CoordinatesI> mRenderTargetSizes;
+	std::map<HWindow, Vec2ITuple> mRenderTargetSizes;
 	std::vector<HWindow> mInterestedWindows;
 	Real mSensitivity;
 	Real mWheelSensitivity;
@@ -172,8 +172,8 @@ public:
 		{
 			GetCurrentMousePos(mAbsX, mAbsY, mPhysicalX, mPhysicalY);
 			const auto& size = mRenderTargetSizes[handle];
-			mNPosX = (Real)mAbsX / (Real)size.first;
-			mNPosY = (Real)mAbsY / (Real)size.second;
+			mNPosX = (Real)mAbsX / (Real)std::get<0>(size);
+			mNPosY = (Real)mAbsY / (Real)std::get<1>(size);
 			if (!IsLButtonDown()){
 				auto hwnd = FBWindowFromPoint(mPhysicalX, mPhysicalY);
 				if (hwnd != handle)
@@ -205,8 +205,7 @@ public:
 			mButtonsPressed |= MOUSE_BUTTON_LEFT;
 
 			mLastLeftDownTime = gameTimeInSec;
-			mLastDownPos.first = mAbsX;
-			mLastDownPos.second = mAbsY;
+			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (IsLButtonDown() && !mDragStarted)
 		{
@@ -228,8 +227,7 @@ public:
 			mButtonsPressed |= MOUSE_BUTTON_RIGHT;
 
 			mLastRightDownTime = gameTimeInSec;
-			mLastDownPos.first = mAbsX;
-			mLastDownPos.second = mAbsY;
+			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (IsRButtonDown() && !mRDragStarted)
 		{
@@ -242,8 +240,7 @@ public:
 			mButtonsPressed |= MOUSE_BUTTON_MIDDLE;
 
 			//mLastDownTime = gFBEnv->pTimer->GetTime();
-			mLastDownPos.first = mAbsX;
-			mLastDownPos.second = mAbsY;
+			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (mouseEvent.usButtonFlags & MOUSE_BUTTON_FLAG_BUTTON_4_DOWN)
 		{
@@ -251,8 +248,7 @@ public:
 			mButtonsPressed |= MOUSE_BUTTON_4;
 
 			//mLastDownTime = gFBEnv->pTimer->GetTime();
-			mLastDownPos.first = mAbsX;
-			mLastDownPos.second = mAbsY;
+			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (mouseEvent.usButtonFlags & MOUSE_BUTTON_FLAG_BUTTON_5_DOWN)
 		{
@@ -260,12 +256,11 @@ public:
 			mButtonsPressed |= MOUSE_BUTTON_5;
 
 			//mLastDownTime = gFBEnv->pTimer->GetTime();
-			mLastDownPos.first = mAbsX;
-			mLastDownPos.second = mAbsY;
+			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 
 
-		bool mouseNotMoved = abs((mLastDownPos.first - mAbsX)) < 4 && abs((mLastDownPos.second - mAbsY)) < 4;
+		bool mouseNotMoved = abs((std::get<0>(mLastDownPos) - mAbsX)) < 4 && abs((std::get<1>(mLastDownPos)- mAbsY)) < 4;
 
 		auto curTime = gameTimeInSec;
 		auto leftElapsedTime = (curTime - mLastLeftDownTime);
@@ -294,7 +289,7 @@ public:
 				mButtonsDown &= ~MOUSE_BUTTON_LEFT;
 
 				Real doubleClickElapsedTime = curTime - mLastClickTime;
-				bool doubleClickMouseNotMoved = abs((mLastClickPos.first - mAbsX)) < 6 && abs((mLastClickPos.second - mAbsY)) < 6;
+				bool doubleClickMouseNotMoved = abs((std::get<0>(mLastClickPos)- mAbsX)) < 6 && abs((std::get<1>(mLastClickPos)- mAbsY)) < 6;
 				if (doubleClickElapsedTime < mDoubleClickSpeed && doubleClickMouseNotMoved)
 				{
 					mLButtonDoubleClicked = true;
@@ -309,7 +304,7 @@ public:
 					else{
 						mButtonsClicked |= MOUSE_BUTTON_LEFT;
 						mLastClickTime = gameTimeInSec;
-						mLastClickPos = CoordinatesI(mAbsX, mAbsY);
+						mLastClickPos = Vec2ITuple(mAbsX, mAbsY);
 					}
 				}
 			}
@@ -338,7 +333,7 @@ public:
 			else{
 				mButtonsClicked |= MOUSE_BUTTON_RIGHT;
 				mLastClickTime = gameTimeInSec;
-				mLastClickPos = { mAbsX, mAbsY };
+				mLastClickPos = std::make_tuple( mAbsX, mAbsY );
 			}
 
 			LockMousePos(false, (void*)-1);
@@ -348,7 +343,7 @@ public:
 			mButtonsDown &= ~MOUSE_BUTTON_MIDDLE;
 			mButtonsClicked |= MOUSE_BUTTON_MIDDLE;
 			mLastClickTime = gameTimeInSec;
-			mLastClickPos = { mAbsX, mAbsY };
+			mLastClickPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (mouseEvent.usButtonFlags & MOUSE_BUTTON_FLAG_BUTTON_4_UP)
 		{
@@ -357,7 +352,7 @@ public:
 			{
 				mButtonsClicked |= MOUSE_BUTTON_4;
 				mLastClickTime = gameTimeInSec;
-				mLastClickPos = { mAbsX, mAbsY };
+				mLastClickPos = std::make_tuple(mAbsX, mAbsY);
 			}
 		}
 		if (mouseEvent.usButtonFlags & MOUSE_BUTTON_FLAG_BUTTON_5_UP)
@@ -367,7 +362,7 @@ public:
 			{
 				mButtonsClicked |= MOUSE_BUTTON_5;
 				mLastClickTime = gameTimeInSec;
-				mLastClickPos = { mAbsX, mAbsY };
+				mLastClickPos = std::make_tuple(mAbsX, mAbsY);
 			}
 		}
 
@@ -388,8 +383,8 @@ public:
 		y = mAbsY - mAbsYPrev;
 	}
 
-	CoordinatesI GetDeltaXY() const{
-		return CoordinatesI(mAbsX - mAbsXPrev, mAbsY - mAbsYPrev);
+	Vec2ITuple GetDeltaXY() const{
+		return Vec2ITuple(mAbsX - mAbsXPrev, mAbsY - mAbsYPrev);
 	}
 
 	void GetPos(long &x, long &y) const{
@@ -397,8 +392,8 @@ public:
 		y = mAbsY;
 	}
 
-	CoordinatesI GetPos() const{
-		return CoordinatesI(mAbsX, mAbsY);
+	Vec2ITuple GetPos() const{
+		return Vec2ITuple(mAbsX, mAbsY);
 	}
 
 	void GetPrevPos(long &x, long &y) const{
@@ -411,8 +406,8 @@ public:
 		y = mNPosY;
 	}
 
-	CoordinatesR GetNPos() const{
-		return{ mNPosX, mNPosY };
+	Vec2Tuple GetNPos() const{
+		return std::make_tuple(mNPosX, mNPosY);
 	}
 
 	bool IsLButtonDownPrev() const{
@@ -468,8 +463,8 @@ public:
 		y = mDragStartY;
 	}
 
-	CoordinatesI GetDragStartedPos() const{
-		return{ mDragStartX, mDragStartY };
+	Vec2ITuple GetDragStartedPos() const{
+		return std::make_tuple(mDragStartX, mDragStartY);
 	}
 
 	bool IsDragStartIn(int left, int top, int right, int bottom) const{
@@ -590,8 +585,8 @@ public:
 	void OnSetFocus(HWindow hWnd){
 		GetCurrentMousePos(mAbsX, mAbsY, mPhysicalX, mPhysicalY);
 		const auto& size = mRenderTargetSizes[hWnd];			
-		mNPosX = (Real)mAbsX / (Real)size.first;
-		mNPosY = (Real)mAbsY / (Real)size.second;
+		mNPosX = (Real)mAbsX / (Real)std::get<0>(size);
+		mNPosY = (Real)mAbsY / (Real)std::get<1>(size);
 		mAbsXPrev = mAbsX;
 		mAbsYPrev = mAbsY;
 
@@ -610,12 +605,12 @@ public:
 	void CursorToCenter(){
 		if (IsMainWindowForeground()){			
 			auto size = GetForegroundRenderTargetSize();
-			size = { Round(size.first / 2) , Round(size.second / 2) };
-			SetCurrentMousePos(size.first, size.second);
-			mAbsX = size.first;
-			mAbsY = size.second;
-			mAbsXPrev = size.first;
-			mAbsYPrev = size.second;
+			size = std::make_tuple( Round(std::get<0>(size) / 2) , Round(std::get<1>(size) / 2) );
+			SetCurrentMousePos(std::get<0>(size), std::get<1>(size));
+			mAbsX = std::get<0>(size);
+			mAbsY = std::get<1>(size);
+			mAbsXPrev = std::get<0>(size);
+			mAbsYPrev = std::get<1>(size);
 		}
 	}
 
@@ -640,7 +635,7 @@ public:
 	}
 
 	void OnRenderTargetSizeChanged(int x, int y, HWindow associatedWindow){
-		mRenderTargetSizes[associatedWindow] = CoordinatesI(x, y);
+		mRenderTargetSizes[associatedWindow] = Vec2ITuple(x, y);
 		if (FBGetForegroundWindow() == associatedWindow){
 			mNPosX = mAbsX / (Real)x;
 			mNPosY = mAbsY / (Real)y;
@@ -651,7 +646,7 @@ public:
 	{
 #ifdef _PLATFORM_WINDOWS_
 		auto rtSize = GetForegroundRenderTargetSize();		
-		CoordinatesI windowSize = GetForgroundWindowSize();
+		Vec2ITuple windowSize = GetForgroundWindowSize();
 
 		POINT cursor;
 		GetCursorPos(&cursor);
@@ -661,8 +656,8 @@ public:
 		x = cursor.x;
 		y = cursor.y;
 		if (windowSize != rtSize){
-			Real xr = rtSize.first / (Real)windowSize.first;
-			Real yr = rtSize.second / (Real)windowSize.second;
+			Real xr = std::get<0>(rtSize) / (Real)std::get<0>(windowSize);
+			Real yr = std::get<1>(rtSize) / (Real)std::get<1>(windowSize);
 			x = Round(x * xr);
 			y = Round(y * yr);
 		}
@@ -675,10 +670,10 @@ public:
 	{
 #ifdef _PLATFORM_WINDOWS_
 		auto rtSize = GetForegroundRenderTargetSize();
-		CoordinatesI windowSize = GetForgroundWindowSize();
+		Vec2ITuple windowSize = GetForgroundWindowSize();
 		if (windowSize != rtSize){
-			Real xr = windowSize.first / (Real)rtSize.first;
-			Real yr = windowSize.second / (Real)rtSize.second;
+			Real xr = std::get<0>(windowSize) / (Real)std::get<0>(rtSize);
+			Real yr = std::get<1>(windowSize) / (Real)std::get<1>(rtSize);
 			x = Round(x*xr);
 			y = Round(y*yr);
 		}
@@ -706,18 +701,18 @@ public:
 		mRDragEnd = true;
 	}
 
-	CoordinatesI GetForgroundWindowSize(){
+	Vec2ITuple GetForgroundWindowSize(){
 #if defined(_PLATFORM_WINDOWS_)
 		auto wnd = GetForegroundWindow();
 		RECT rect;
 		GetWindowRect(wnd, &rect);
-		return CoordinatesI(rect.right - rect.left, rect.bottom - rect.top);
+		return Vec2ITuple(rect.right - rect.left, rect.bottom - rect.top);
 #else
 		assert(0 && "Not implemented");
 #endif
 	}
 
-	CoordinatesI GetForegroundRenderTargetSize(){
+	Vec2ITuple GetForegroundRenderTargetSize(){
 		HWindow wnd = (HWindow)GetForegroundWindow();
 		return mRenderTargetSizes[wnd];
 	}
@@ -791,7 +786,7 @@ void Mouse::GetDeltaXY(long &x, long &y) const	{
 	mImpl->GetDeltaXY(x, y);
 }
 
-CoordinatesI Mouse::GetDeltaXY() const{
+Vec2ITuple Mouse::GetDeltaXY() const{
 	return mImpl->GetDeltaXY();
 }
 
@@ -799,7 +794,7 @@ void Mouse::GetPos(long &x, long &y) const{
 	mImpl->GetPos(x, y);
 }
 
-CoordinatesI Mouse::GetPos() const{
+Vec2ITuple Mouse::GetPos() const{
 	return mImpl->GetPos();
 }
 
@@ -816,11 +811,11 @@ void Mouse::GetDragStart(long &x, long &y) const	{
 	mImpl->GetDragStart(x, y);
 }
 
-CoordinatesI Mouse::GetDragStartedPos() const{
+Vec2ITuple Mouse::GetDragStartedPos() const{
 	return mImpl->GetDragStartedPos();
 }
 
-CoordinatesR Mouse::GetNPos() const{
+Vec2Tuple Mouse::GetNPos() const{
 	return mImpl->GetNPos();
 }
 

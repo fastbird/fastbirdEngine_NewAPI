@@ -17,6 +17,7 @@ namespace fastbird
 		Vec3I();
 		Vec3I(int _x, int _y, int _z);
 		explicit Vec3I(const Vec3& v);
+		explicit Vec3I(const Vec3ITuple& t);
 
 		//-------------------------------------------------------------------
 		Vec3I operator+ (int s) const;
@@ -31,6 +32,7 @@ namespace fastbird
 		bool operator== (const Vec3I& v) const;
 		bool operator!=(const Vec3I& v) const;
 		bool operator<(const Vec3I& other) const;
+		operator Vec3ITuple() const;
 
 		//-------------------------------------------------------------------
 		Real length() const;

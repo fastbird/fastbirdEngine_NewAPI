@@ -1,10 +1,10 @@
 #pragma once
 #include <stack>
-#include "FBCommonHeaders/Types.h"
+#include "FBCommonHeaders/platform.h"
 #include "Timer.h"
 namespace fastbird
 {
-	class Profiler
+	class FB_DLL_PUBLIC Profiler
 	{
 		static int indent;
 		typedef std::stack<std::string> MSG_STACK;
@@ -23,7 +23,7 @@ namespace fastbird
 		void Reset();	
 	};
 
-	class ProfilerSimple
+	class FB_DLL_PUBLIC ProfilerSimple
 	{
 		const char* mName;
 		INT64 mStartTick;

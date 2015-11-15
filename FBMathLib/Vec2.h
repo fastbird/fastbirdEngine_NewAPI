@@ -16,8 +16,8 @@ namespace fastbird
 		//-------------------------------------------------------------------
 		Vec2();
 		Vec2(Real _x, Real _y);
-		explicit Vec2(const Vec2I& v);
-		Vec2(const std::pair<Real, Real>& coordinates);
+		explicit Vec2(const Vec2I& v);		
+		explicit Vec2(const Vec2Tuple& t);
 
 		//-------------------------------------------------------------------
 		Vec2 operator+ (Real s) const;
@@ -45,6 +45,7 @@ namespace fastbird
 		Real operator[] (const size_t i) const;
 		Real& operator[] (const size_t i);
 		bool operator<(const Vec2& other) const;
+		operator Vec2Tuple() const;
 
 		//-------------------------------------------------------------------
 		Real Normalize();

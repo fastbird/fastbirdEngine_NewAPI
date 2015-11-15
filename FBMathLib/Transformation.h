@@ -10,6 +10,19 @@ namespace fastbird
 {
 	class Plane;
 	class Mat44;
+	typedef std::tuple <
+		// rotation
+		Real, Real, Real,
+		Real, Real, Real,
+		Real, Real, Real,
+		// quaternion
+		Real, Real, Real, Real,
+		// translation
+		Real, Real, Real,
+		// scale
+		Real, Real, Real, 
+		// itentity, RSSeperated, UniformScale
+		bool, bool, bool> TransformationTuple;
 	class Transformation
 	{
 	private:
@@ -27,6 +40,7 @@ namespace fastbird
 		Transformation();
 		~Transformation();
 		Transformation(const Quat& q);
+		explicit Transformation(const TransformationTuple& t);
 
 		void MakeIdentity ();
 		void MakeUnitScale ();
@@ -96,6 +110,7 @@ namespace fastbird
 		Vec3 GetUp() const;	
 
 		bool operator==(const Transformation& other) const;	
+		operator TransformationTuple() const;
 
 		// for serialization
 		const Mat33& _GetMat33() { return mMat; }

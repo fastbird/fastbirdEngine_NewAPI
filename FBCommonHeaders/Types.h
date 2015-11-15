@@ -19,10 +19,32 @@ namespace fastbird{
 	typedef __int64 INT64;
 	typedef __int64 HWindowId;
 	FB_DECLARE_HANDLE(HWindow);
-
-	typedef std::pair<int, int> CoordinatesI;
-	typedef std::pair<Real, Real> CoordinatesR;
 	typedef std::lock_guard<std::mutex> MutexLock;
+
+	typedef std::tuple<int, int> Vec2ITuple;
+	typedef std::tuple<int, int, int> Vec3ITuple;
+	typedef std::tuple<Real, Real> Vec2Tuple;
+	typedef std::tuple<Real, Real, Real> Vec3Tuple;
+	typedef std::tuple<Real, Real, Real, Real> Vec4Tuple;
+	typedef struct QUAT_TUPLE{
+		QUAT_TUPLE(){};
+		QUAT_TUPLE(Real w, Real x, Real y, Real z)
+			:value(w, x, y, z)	{}
+		std::tuple < Real, Real, Real, Real > value;
+	} QuatTuple;
+	typedef std::tuple <
+		// rotation
+		Real, Real, Real,
+		Real, Real, Real,
+		Real, Real, Real,
+		// quaternion
+		Real, Real, Real, Real,
+		// translation
+		Real, Real, Real,
+		// scale
+		Real, Real, Real,
+		// itentity, RSSeperated, UniformScale
+		bool, bool, bool> TransformationTuple;
 }
 
 #define DECLARE_NON_COPYABLE(className) \

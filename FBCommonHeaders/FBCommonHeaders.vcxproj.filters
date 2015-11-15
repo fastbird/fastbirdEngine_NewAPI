@@ -9,5 +9,6 @@
     <ClInclude Include="VectorMap.h" />
     <ClInclude Include="Observable.h" />
     <ClInclude Include="CowPtr.h" />
+    <ClInclude Include="SpinLock.h" />
   </ItemGroup>
 </Project>

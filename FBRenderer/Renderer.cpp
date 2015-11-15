@@ -16,6 +16,7 @@
 #include "Material.h"
 #include "TextureAtlas.h"
 #include "PointLightManager.h"
+#include "DebugHud.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/VectorMap.h"
@@ -23,6 +24,7 @@
 #include "FBSystemLib/ModuleHandler.h"
 #include "FBFileSystem/FileSystem.h"
 #include "FBSceneManager/Scene.h"
+#include "FBLua/LuaObject.h"
 #include "TinyXmlLib/tinyxml2.h"
 #include <set>
 namespace fastbird{
@@ -42,6 +44,7 @@ public:
 	typedef std::vector<RenderTargetWeakPtr> RenderTargets;
 
 	Renderer* mObject;
+	lua_State* mL;
 	std::string mPlatformRendererType;
 	IPlatformRendererPtr mPlatformRenderer;
 	ModuleHandle mLoadedModule;
@@ -238,6 +241,10 @@ public:
 		shadowBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 8 });
 		auto& ggxBindings = mSystemTextureBindings[SystemTextures::GGXPrecalc];
 		ggxBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 9 });
+	}
+
+	void SetLuaState(lua_State* L){
+		mL = L;
 	}
 
 	void PrepareRenderEngine(const char* type){
@@ -467,17 +474,17 @@ public:
 		//-----------------------------------------------------------------------
 		static_assert(DEFAULT_INPUTS::COUNT == 10, "You may not define a new element of mInputLayoutDesc for the new description.");
 
-		LuaObject multiFontSet(gFBEnv->pScriptSystem->GetLuaState(), "r_multiFont");
+		LuaObject multiFontSet(mL, "r_multiFont");
 		if (multiFontSet.IsValid()){
 			auto it = multiFontSet.GetSequenceIterator();
 			LuaObject data;
 			while (it.GetNext(data)){
 				auto fontPath = data.GetString();
 				if (!fontPath.empty()){
-					SmartPtr<IFont> font = FB_NEW(Font);
+					FontPtr font = Font::Create();
 					auto err = font->Init(fontPath.c_str());
 					if (!err){
-						font->SetTextEncoding(IFont::UTF16);
+						font->SetTextEncoding(Font::UTF16);
 						int height = Round(font->GetHeight());
 						mFonts[height] = font;
 					}
@@ -485,15 +492,16 @@ public:
 			}
 		}
 		else{
-			SmartPtr<IFont> font = FB_NEW(Font);
-			std::string fontPath = gFBEnv->pScriptSystem->GetStringVariable("r_font");
+			FontPtr font = Font::Create();
+			LuaObject r_font(mL, "r_font");
+			std::string fontPath = r_font.GetString();
 			if (fontPath.empty())
 			{
 				fontPath = "es/fonts/font22.fnt";
 			}
 			auto err = font->Init(fontPath.c_str());
 			if (!err){
-				font->SetTextEncoding(IFont::UTF16);
+				font->SetTextEncoding(Font::UTF16);
 				int height = Round(font->GetHeight());
 				mFonts[height] = font;
 			}
@@ -1143,8 +1151,7 @@ public:
 	void SetDepthWriteShader(){
 		if (!mDepthWriteShader)
 		{
-			mDepthWriteShader = CreateShader("es/shaders/depth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS,
-				IMaterial::SHADER_DEFINES());
+			mDepthWriteShader = CreateShader("es/shaders/depth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
 			if (!mPositionInputLayout)
 				mPositionInputLayout = GetInputLayout(DEFAULT_INPUTS::POSITION, mDepthWriteShader);
 		}
@@ -1709,6 +1716,22 @@ public:
 		return mOptions;
 	}
 
+	//-------------------------------------------------------------------
+	// ISceneObserver
+	//-------------------------------------------------------------------
+	void OnAfterMakeVisibleSet(Scene* scene){
+
+	}
+
+	void OnBeforeRenderingOpaques(Scene* scene){
+		if (mDebugHud){
+			mDebugHud->OnBeforeRenderingTransparents(scene);
+		}
+	}
+
+	void OnBeforeRenderingTransparents(Scene* scene){
+
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -1734,13 +1757,14 @@ RendererPtr Renderer::CreateRenderer(){
 	return renderer;
 }
 
-RendererPtr Renderer::CreateRenderer(const char* renderEngineName){
+RendererPtr Renderer::CreateRenderer(const char* renderEngineName, lua_State* L){
 	if (sRenderer.lock()){
 		Logger::Log(FB_ERROR_LOG_ARG, "You can create only one renderer!");
 		return 0;
 	}
 	auto renderer = RendererPtr(FB_NEW(Renderer), [](Renderer* obj){ delete obj; });
 	renderer->mMe = renderer;
+	renderer->SetLuaState(L);
 	renderer->PrepareRenderEngine(renderEngineName);
 	sRenderer = renderer;
 	return renderer;
@@ -1750,8 +1774,16 @@ RendererPtr Renderer::GetInstance(){
 	return sRenderer.lock();
 }
 
+void Renderer::SetLuaState(lua_State* L){
+	mImpl->SetLuaState(L);
+}
+
 void Renderer::PrepareRenderEngine(const char* renderEngineName){
 	mImpl->PrepareRenderEngine(renderEngineName);
+}
+
+void Renderer::SetLuaState(lua_State* L){
+
 }
 
 bool Renderer::InitCanvas(HWindowId id, HWindow window, int width, int height){
@@ -1939,4 +1971,20 @@ void Renderer::GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Ve
 
 bool Renderer::IsLuminanceOnCpu() const{
 	return mImpl->IsLuminanceOnCpu();
+}
+
+
+//-------------------------------------------------------------------
+// ISceneObserver
+//-------------------------------------------------------------------
+void Renderer::OnAfterMakeVisibleSet(Scene* scene){
+	mImpl->OnAfterMakeVisibleSet(scene);
+}
+
+void Renderer::OnBeforeRenderingOpaques(Scene* scene){
+	mImpl->OnBeforeRenderingOpaques(scene);
+}
+
+void Renderer::OnBeforeRenderingTransparents(Scene* scene){
+	mImpl->OnBeforeRenderingTransparents(scene)
 }

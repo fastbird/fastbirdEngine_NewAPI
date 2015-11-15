@@ -9,6 +9,7 @@
 #include "RenderTargetParam.h"
 #include "FBSceneManager/Scene.h"
 #include "FBInputManager/IInputInjector.h"
+#include "FBCommonHeaders/Observable.h"
 
 namespace fastbird
 {
@@ -91,6 +92,9 @@ public:
 	{
 		auto prevScene = mScene;
 		mScene = scene;
+		if (scene){
+			scene->AddObserver(ISceneObserver::Timing, Renderer::GetInstance());
+		}
 		return prevScene.lock();
 	}
 
@@ -194,15 +198,7 @@ public:
 	}
 
 	void BindDepthTexture(bool bind){
-		mStrategy->DepthTexture(bind);
-		auto renderer = Renderer::GetInstance();
-		if (bind)
-		{
-			renderer->SetTexture(mDepthTarget, BINDING_SHADER_PS, 5);
-			renderer->SetTexture(mDepthTarget, BINDING_SHADER_GS, 5);
-		}
-		else
-			renderer->SetTexture(0, BINDING_SHADER_PS, 5);
+		mStrategy->DepthTexture(bind);		
 	}
 
 	bool Render(size_t face)

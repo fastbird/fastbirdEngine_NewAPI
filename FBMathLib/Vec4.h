@@ -20,6 +20,7 @@ namespace fastbird
 		Vec4(const Vec3& xyz, Real _w);
 		explicit Vec4(const Vec3& xyz);
 		explicit Vec4(const char* s);
+		explicit Vec4(const Vec4Tuple& t);
 
 		//-------------------------------------------------------------------------
 		Vec4 operator+(const Vec4& r) const;
@@ -30,6 +31,7 @@ namespace fastbird
 		Vec4 operator* (const Vec4& r) const;
 		Vec4& operator/=(Real scalar);
 		bool operator== (const Vec4& other) const;
+		operator Vec4Tuple() const;
 		
 		//-------------------------------------------------------------------------
 		Real Dot(const Vec4& other) const;			

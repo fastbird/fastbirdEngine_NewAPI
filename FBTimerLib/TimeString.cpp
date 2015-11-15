@@ -1,10 +1,11 @@
-#include "Time.h"
+#include "stdafx.h"
+#include "TimeString.h"
 #include <ctime>
 #include <iomanip>
 
 namespace fastbird
 {
-	std::string GetTimeString()
+	std::string TimeString::GetTimeString()
 	{
 		auto t = std::time(nullptr);
 		char buffer[1024];
@@ -14,7 +15,7 @@ namespace fastbird
 		return std::string(buffer);
 	}
 
-	std::string GetTimeStringForFileName()
+	std::string TimeString::GetTimeStringForFileName()
 	{
 		auto t = std::time(nullptr);
 		struct tm newtime;

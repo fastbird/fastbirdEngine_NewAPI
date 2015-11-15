@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Profiler.h"
 #include "FBCommonHeaders/platform.h"
 #include <stdarg.h>

@@ -27,7 +27,6 @@ namespace fastbird{
 			RenderableHUD,
 			RenderableLast = RenderableHUD, /// You can define your own renderable type from RenderableLast+1
 		};
-		virtual ~IRenderable() {}		
 		virtual IRenderablePtr Clone() const{ return 0; }
 		virtual void SetName(const char* name) {}
 		virtual const char* GetName() const { return ""; }
@@ -75,28 +74,31 @@ namespace fastbird{
 		virtual void SetRadius(Real r){}
 		virtual void SetDistToCam(Real dist){}
 		virtual Real GetDistToCam() const { return -1; }
-		virtual const Vec3& GetPos() const { return Vec3::ZERO; }
-		virtual void SetPos(const Vec3& pos) {}
+		virtual const Vec3& GetPosition() const { return Vec3::ZERO; }
+		virtual void SetPosition(const Vec3& pos) {}
 		virtual BoundingVolume* GetBoundingVolume(){ return 0; }
 
 		//-------------------------------------------------------------------
 		// Rendering
 		//-------------------------------------------------------------------
-		virtual void PreRender() = 0;
-		virtual void Render() = 0;
-		virtual void PostRender() = 0;
+		virtual void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
+		virtual void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
+		virtual void PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
 
 		virtual void SetEnableHighlight(bool highlight) {}
-		const AnimationPtr GetAnimation() const { return 0; }
+		virtual const AnimationPtr GetAnimation() const { return 0; }
 
 		//-------------------------------------------------------------------
 		// Debugging features
 		//-------------------------------------------------------------------
-		virtual void SetGameType(int type) = 0;
-		virtual int GetGameType() const = 0;
-		virtual void SetGameId(unsigned id) = 0;
-		virtual unsigned GetGameId() const = 0;
-		virtual void SetGamePtr(void* ptr) = 0;
-		virtual void* GetGamePtr() const = 0;
+		virtual void SetGameType(int type){}
+		virtual int GetGameType() const { return -1; }
+		virtual void SetGameId(unsigned id) {}
+		virtual unsigned GetGameId() const { return -1; }
+		virtual void SetGamePtr(void* ptr) {}
+		virtual void* GetGamePtr() const { return 0; }
+
+	protected:
+		virtual ~IRenderable() {}
 	};
 }

@@ -14,6 +14,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Color.h" />
     <ClInclude Include="ColorRamp.h" />
+    <ClInclude Include="DebugHud.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="GaussianDistribution.h" />
     <ClInclude Include="ICameraObserver.h" />
@@ -66,6 +67,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Color.cpp" />
     <ClCompile Include="ColorRamp.cpp" />
+    <ClCompile Include="DebugHud.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
@@ -103,11 +105,17 @@
     <ProjectReference Include="..\FBInputManager\FBInputManager.vcxproj">
       <Project>{c8797aa0-b737-4f09-a6a4-131350b54bc9}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\FBLua\FBLua.vcxproj">
+      <Project>{e6362f4a-1e01-45cd-87d3-d4a964683bd5}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\FBMathLib\FBMathLib.vcxproj">
       <Project>{2df8e079-28e5-4e7d-9c6a-ff87c1329eb5}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
       <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBRenderableFactory\FBRenderableFactory.vcxproj">
+      <Project>{5f32ea1b-6ca3-41b6-b918-fa4f1470c360}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBStringLib\FBStringLib.vcxproj">
       <Project>{97920097-3e86-410d-8d98-a2ecad02a35f}</Project>

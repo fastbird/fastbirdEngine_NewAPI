@@ -30,6 +30,7 @@ namespace fastbird
 		Quat(Real radian, const Vec3& axis);
 		Quat(const Vec3& xAxis, const Vec3& yAxis, const Vec3& zAxis);
 		explicit Quat(const Vec3& euler);
+		explicit Quat(const QuatTuple& t);
 
 		//-------------------------------------------------------------------		
 		Quat operator-(void) const;		
@@ -40,7 +41,8 @@ namespace fastbird
 		bool operator== (const Quat& rhs) const;
 		bool operator!= (const Quat& rhs) const;
 		Real operator [] (const size_t i) const;
-		Real& operator[] (const size_t i);		
+		Real& operator[] (const size_t i);
+		operator QuatTuple() const;
 
 		//-------------------------------------------------------------------
 		void Swap(Quat& other);

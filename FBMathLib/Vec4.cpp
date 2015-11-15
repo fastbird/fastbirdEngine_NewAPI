@@ -53,6 +53,14 @@ Vec4::Vec4(const char* s)
 	}			
 }
 
+Vec4::Vec4(const Vec4Tuple& t)
+	: x(std::get<0>(t))
+	, y(std::get<1>(t))
+	, z(std::get<2>(t))
+	, w(std::get<3>(t))
+{
+}
+
 //-------------------------------------------------------------------------
 Vec4 Vec4::operator+ (const Vec4& r) const
 {
@@ -104,6 +112,10 @@ Vec4& Vec4::operator/=(Real scalar)
 bool Vec4::operator== (const Vec4& other) const
 {
 	return (IsEqual(x, other.x) && IsEqual(y, other.y) && IsEqual(z, other.z) && IsEqual(w, other.w));
+}
+
+Vec4::operator Vec4Tuple() const{
+	return std::make_tuple(x, y, z, w);
 }
 
 //-------------------------------------------------------------------------

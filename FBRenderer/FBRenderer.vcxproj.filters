@@ -71,6 +71,7 @@
     <ClInclude Include="SystemTextures.h" />
     <ClInclude Include="PointLightManager.h" />
     <ClInclude Include="PointLight.h" />
+    <ClInclude Include="DebugHud.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -109,6 +110,7 @@
     <ClCompile Include="TextureBinding.cpp" />
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="DebugHud.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

@@ -23,8 +23,9 @@ namespace fastbird
 	{
 	}
 
-	Vec2::Vec2(const std::pair<Real, Real>& coordinates)
-		: x(coordinates.first), y(coordinates.second)
+	Vec2::Vec2(const Vec2Tuple& t)
+		: x(std::get<0>(t))
+		, y(std::get<1>(t))
 	{
 
 	}
@@ -156,6 +157,10 @@ namespace fastbird
 			return y<other.y;
 
 		return false;
+	}
+
+	Vec2::operator Vec2Tuple() const{
+		return std::make_tuple(x, y);
 	}
 
 	//--------------------------------------------------------------------------

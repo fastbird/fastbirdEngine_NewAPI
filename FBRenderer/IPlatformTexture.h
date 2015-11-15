@@ -9,7 +9,7 @@ namespace fastbird
 	{
 	public:
 		virtual const char* GetPath() const = 0;
-		virtual const std::pair<int, int> GetSize() const = 0;
+		virtual const Vec2ITuple GetSize() const = 0;
 		virtual PIXEL_FORMAT GetPixelFormat() const = 0;		
 		virtual bool IsReady() const = 0;
 		virtual void Bind(BINDING_SHADER shader, int slot) const = 0;

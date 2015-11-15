@@ -25,7 +25,8 @@ namespace fastbird
 		explicit Vec3(const Vec2& v2, Real _z);
 		explicit Vec3(Real s);		
 		explicit Vec3(const Vec3I& v);
-		explicit Vec3(const char* s);		
+		explicit Vec3(const char* s);
+		explicit Vec3(const Vec3Tuple& t);
 
 		//-------------------------------------------------------------------
 		Vec3 operator+ (const Vec3& r) const;
@@ -51,6 +52,7 @@ namespace fastbird
 		bool operator <= (const Vec3& other) const;
 		Real operator[] (const size_t i) const;
 		Real& operator[] (const size_t i);
+		operator Vec3Tuple() const;
 		Vec3 xyz();
 		Vec3 yxy();
 		Vec3 zzx();

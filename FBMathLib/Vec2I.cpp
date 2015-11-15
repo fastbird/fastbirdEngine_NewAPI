@@ -21,10 +21,10 @@ namespace fastbird
 		y = Round(v.y);
 	}	
 
-	Vec2I::Vec2I(const std::pair<int, int>& coordinates)
-		: x(coordinates.first), y(coordinates.second)
+	Vec2I::Vec2I(const Vec2ITuple& t)
+		: x(std::get<0>(t))
+		, y(std::get<1>(t))
 	{
-
 	}
 
 	//-------------------------------------------------------------------
@@ -107,6 +107,10 @@ namespace fastbird
 		}
 
 		return false;
+	}
+
+	Vec2I::operator Vec2ITuple() const{
+		return std::make_tuple(x, y);
 	}
 
 	int Vec2I::Cross(const Vec2I& right){

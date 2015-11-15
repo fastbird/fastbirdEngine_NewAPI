@@ -51,6 +51,14 @@ Quat::Quat(const Vec3& euler) {
 	this->z = cx * cy * sz - sx * sy * cz;
 }
 
+Quat::Quat(const QuatTuple& t)
+	: w(std::get<0>(t.value))
+	, x(std::get<1>(t.value))
+	, y(std::get<2>(t.value))
+	, z(std::get<3>(t.value))
+{
+}
+
 //-------------------------------------------------------------------------
 Quat Quat::operator-(void) const{
 	return Quat(-w, -x, -y, -z);
@@ -115,6 +123,10 @@ Real& Quat::operator[] (const size_t i)
 {
 	assert(i<4);
 	return *(&w + i);
+}
+
+Quat::operator QuatTuple() const{
+	return QuatTuple(w, x, y, z);
 }
 
 //-------------------------------------------------------------------

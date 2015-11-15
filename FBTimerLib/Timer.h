@@ -1,30 +1,23 @@
 #pragma once
-#include "FBCommonHeaders/Types.h"
+#include "FBCommonHeaders/platform.h"
 #include <memory>
 #include <chrono>
 namespace fastbird
 {
 	DECLARE_SMART_PTR(Timer);
-	class Timer
+	class FB_DLL_PUBLIC Timer
 	{
+		DECLARE_PIMPL(Timer);
+		Timer();
+
 	public:
 		// unsigned int : safe for 828 'days' at 60 frames/sec
 		// unsigned long long : safe for 9749040289 'years' at 60 frames/sec
-		typedef unsigned int FRAME_PRECISION; 
+		typedef unsigned int FRAME_PRECISION;
 		typedef Real TIME_PRECISION;
 
-	private:
-		std::chrono::high_resolution_clock::time_point mPreviousTimePoint;
-		FRAME_PRECISION mFrames;		
-		TIME_PRECISION mTime;
-		TIME_PRECISION mTimeNotPausable;
-		TIME_PRECISION mDeltaTime;
-		TIME_PRECISION mDeltaTimeNotPausable;
-
-		bool mPaused;
-
-	public:
-		Timer();	
+		static TimerPtr Create();
+		static TimerPtr GetMainTimer();		
 		~Timer();		
 
 		void Tick();
@@ -40,5 +33,6 @@ namespace fastbird
 		bool IsPause() const;
 		
 	};
+	/// only declaration. you need to define it.
 	extern Timer* gpTimer;
 }

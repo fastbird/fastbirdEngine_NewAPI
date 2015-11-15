@@ -11,9 +11,11 @@
 #include "RenderStates.h"
 #include "TextureBinding.h"
 #include "SystemTextures.h"
+#include "FBSceneManager/ISceneObserver.h"
 #include "FBMathLib/Math.h"
 #include "FBTimerLib/Timer.h"
 #include "../EssentialEngineData/shaders/Constants.h"
+struct lua_State;
 namespace fastbird{	
 	class RenderOptions;
 	typedef unsigned RenderTargetId;
@@ -38,7 +40,7 @@ namespace fastbird{
 	render states, lights and render targets.
 	\ingroup FBRenderer
 	*/
-	class FB_DLL_PUBLIC Renderer : public Observable<IRendererObserver>{
+	class FB_DLL_PUBLIC Renderer : public Observable<IRendererObserver>, public ISceneObserver{
 		RendererWeakPtr mMe;
 
 		DECLARE_PIMPL_NON_COPYABLE(Renderer);
@@ -51,9 +53,10 @@ namespace fastbird{
 
 		/** Create a Renderer with the platform specific render engine you specified in \a rendererPlugInName 
 		\param rendererPlugInName The renderer plug-in name. You can specify "FBRendererD3D11" for
-		the default renderer on Windows, and "FBRendererGL41" for Mac. \n		
+		the default renderer on Windows, and "FBRendererGL41" for Mac. \n
+		\param L Renderer need the lua_State* to read the configuration file. If you pass NULL, all setting will be default.
 		*/
-		static RendererPtr CreateRenderer(const char* rendererPlugInName);
+		static RendererPtr CreateRenderer(const char* rendererPlugInName, lua_State* L);
 
 		static RendererPtr GetInstance();
 	public:
@@ -64,6 +67,12 @@ namespace fastbird{
 		static const int FB_NUM_TONEMAP_TEXTURES_NEW = 5;
 		static const int FB_NUM_LUMINANCE_TEXTURES = 3;
 		static const int FB_MAX_SAMPLES = 16;      // Maximum number of texture grabs
+
+		/** Set lua state.
+		Renderer load configuration file using lua. You need to set it before you call Renderer::PrepareRenderEngine()
+		If you don't set the lua_State, all setting will be default values.
+		*/
+		void SetLuaState(lua_State* L);
 
 		/** Prepare the platform specific render engine
 		You don't call this function if you initiate the Renderer with the function
@@ -360,6 +369,12 @@ namespace fastbird{
 		void RefreshPointLight();
 		bool NeedToRefreshPointLight() const;
 
+		//-------------------------------------------------------------------
+		// ISceneObserver
+		//-------------------------------------------------------------------
+		void OnAfterMakeVisibleSet(Scene* scene);
+		void OnBeforeRenderingOpaques(Scene* scene);
+		void OnBeforeRenderingTransparents(Scene* scene);
 	};
 
 }

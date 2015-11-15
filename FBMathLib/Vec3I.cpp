@@ -26,6 +26,13 @@ namespace fastbird
 		z = (int)v.z;
 	}
 
+	Vec3I::Vec3I(const Vec3ITuple& t)
+		: x(std::get<0>(t))
+		, y(std::get<1>(t))
+		, z(std::get<2>(t))
+	{
+	}
+
 	//-------------------------------------------------------------------
 	Vec3I Vec3I::operator+ (int s) const
 	{
@@ -85,6 +92,10 @@ namespace fastbird
 	bool Vec3I::operator<(const Vec3I& other) const
 	{
 		return memcmp(this, &other, sizeof(Vec3I)) < 0;
+	}
+
+	Vec3I::operator Vec3ITuple() const{
+		return std::make_tuple(x, y, z);
 	}
 
 	//-------------------------------------------------------------------

@@ -64,6 +64,13 @@ namespace fastbird
 		}
 	}
 
+	Vec3::Vec3(const Vec3Tuple& t)
+		: x(std::get<0>(t))
+		, y(std::get<1>(t))
+		, z(std::get<2>(t))
+	{
+	}
+
 	//-------------------------------------------------------------------
 	Vec3 Vec3::operator+ (const Vec3& r) const
 	{
@@ -221,6 +228,10 @@ namespace fastbird
 		assert(i < 3);
 
 		return *(&x + i);
+	}
+
+	Vec3::operator Vec3Tuple() const{
+		return std::make_tuple(x, y, z);
 	}
 
 	Vec3 Vec3::xyz()
