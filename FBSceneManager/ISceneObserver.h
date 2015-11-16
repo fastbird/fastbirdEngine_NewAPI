@@ -3,8 +3,7 @@
 namespace fastbird
 {
 	DECLARE_SMART_PTR(Scene);
-	DECLARE_SMART_PTR(ISceneObserver);
-	class ISceneObserver
+	class FB_DLL_PUBLIC ISceneObserver
 	{
 	public:
 		enum{

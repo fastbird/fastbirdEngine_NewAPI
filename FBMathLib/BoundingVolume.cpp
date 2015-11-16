@@ -17,4 +17,8 @@ namespace fastbird{
 			return 0;
 		}
 	}
+
+	BoundingVolume& BoundingVolume::operator = (const BoundingVolume& other){
+		mAlwaysPass = other.mAlwaysPass;
+	}
 }

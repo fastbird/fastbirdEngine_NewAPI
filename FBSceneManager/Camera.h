@@ -2,6 +2,7 @@
 #ifndef _Camera_Header_included_
 #define _Camera_Header_included_
 #include "FBCommonHeaders/Observable.h"
+#include "FBMathLib/Math.h"
 #include "ICameraObserver.h"
 
 namespace fastbird
@@ -9,7 +10,8 @@ namespace fastbird
 	DECLARE_SMART_PTR(IInputInjector);
 	DECLARE_SMART_PTR(IMouse);
 	DECLARE_SMART_PTR(IKeyboard);
-	DECLARE_SMART_PTR(IRenderable);
+	DECLARE_SMART_PTR(SpatialObject);
+	DECLARE_SMART_PTR(ICameraObserver);
 	DECLARE_SMART_PTR(Camera);
 	class FB_DLL_PUBLIC Camera : public Observable<ICameraObserver>
 	{
@@ -78,11 +80,10 @@ namespace fastbird
 		Ray3 ScreenPosToRay(long x, long y);
 		Vec2I WorldToScreen(const Vec3& worldPos) const;
 		void SetYZSwap(bool enable);
-		void SetTarget(IRenderablePtr pObj);
+		void SetTarget(SpatialObjectPtr pObj);
 		void SetDistanceFromTarget(Real dist);
-		IRenderablePtr GetTarget() const;
+		SpatialObjectPtr GetTarget() const;
 		void SetCurrent(bool cur);
-		void OnInput(IMousePtr mouse, IKeyboardPtr keyboard);
 		void SetCameraIndex(size_t idx);
 		void SetEnalbeInput(bool enable);
 		void SetInitialDistToTarget(Real dist);

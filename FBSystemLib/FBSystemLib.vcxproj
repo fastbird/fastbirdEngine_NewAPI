@@ -68,15 +68,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ClipboardData.h" />
     <ClInclude Include="ModuleHandler.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StdOutRedirect.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClipboardData.cpp" />
     <ClCompile Include="ModuleHandler.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="StdOutRedirect.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

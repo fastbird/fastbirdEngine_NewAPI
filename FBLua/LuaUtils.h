@@ -182,6 +182,7 @@ namespace fastbird
 		static float GetLuaVarAsFloat(lua_State* L, const char* varName);
 		static unsigned GetLuaVarAsUnsigned(lua_State* L, const char* varName);
 		static void SetLuaVar(lua_State* L, const char* varName, bool value);
+		static bool ExecuteLua(lua_State* L, const char* chunk);
 	};	
 }
 

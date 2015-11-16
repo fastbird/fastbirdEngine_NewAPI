@@ -11,15 +11,15 @@ namespace fastbird
 		static  MSG_STACK msgs;
 		std::string mName;
 		INT64 mStartTick;
-		Timer::TIME_PRECISION* mAccumulator;		
+		TIME_PRECISION* mAccumulator;		
 
 	public:
 		Profiler(const char* name);
-		Profiler(const char* name, Timer::TIME_PRECISION* accumulator);
+		Profiler(const char* name, TIME_PRECISION* accumulator);
 		~Profiler();
 
-		void SetAccumulator(Timer::TIME_PRECISION* p);
-		Timer::TIME_PRECISION GetDt();
+		void SetAccumulator(TIME_PRECISION* p);
+		TIME_PRECISION GetDt();
 		void Reset();	
 	};
 
@@ -27,11 +27,11 @@ namespace fastbird
 	{
 		const char* mName;
 		INT64 mStartTick;
-		Timer::TIME_PRECISION mPrevDT;
+		TIME_PRECISION mPrevDT;
 
 	public:
 		ProfilerSimple(const char* name);
-		Timer::TIME_PRECISION GetDT();
+		TIME_PRECISION GetDT();
 		const char* GetName() const;
 		void Reset();		
 	};

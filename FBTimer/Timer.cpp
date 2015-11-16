@@ -121,17 +121,17 @@ namespace fastbird
 		mImpl->Reset();
 	}
 
-	Timer::TIME_PRECISION Timer::GetDeltaTime() const
+	TIME_PRECISION Timer::GetDeltaTime() const
 	{
 		return mImpl->GetDeltaTime();
 	}
 
-	Timer::TIME_PRECISION Timer::GetDeltaTimeNotPausable() const
+	TIME_PRECISION Timer::GetDeltaTimeNotPausable() const
 	{
 		return mImpl->GetDeltaTimeNotPausable();
 	}
 
-	Timer::TIME_PRECISION Timer::GetTime() const
+	TIME_PRECISION Timer::GetTime() const
 	{
 		return mImpl->GetTime();
 	}

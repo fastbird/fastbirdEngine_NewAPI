@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "LuaUtils.h"
 #include "LuaObject.h"
+#include "FBCommonHeaders/Helpers.h"
 
 namespace fastbird
 {
@@ -276,6 +277,21 @@ namespace fastbird
 		LUA_STACK_WATCHER w(L, "void SetLuaVar(lua_State* L, const char* varName, bool value)");
 		lua_pushboolean(L, value);
 		lua_setglobal(L, varName);
+	}
+
+	bool LuaUtils::ExecuteLua(lua_State* L, const char* chunk){
+		if (!ValidCStringLength(chunk))
+			return false;
+
+		int error;
+		error = luaL_loadbuffer(L, chunk, strlen(chunk), "line") || lua_pcall(L, 0, 0, 0);
+		if (error)
+		{
+			const char* errorString = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			PrintLuaErrorString(L, errorString);			
+		}
+		return true;
 	}
 }
 

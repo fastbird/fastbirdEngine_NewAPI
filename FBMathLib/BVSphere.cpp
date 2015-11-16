@@ -15,6 +15,13 @@ BVSphere::BVSphere(const Vec3& center, Real radius)
 {
 }
 
+BVSphere& BVSphere::operator = (const BVSphere& other){
+	__super::operator=(other);
+	mCenter = other.mCenter;
+	mRadius = other.mRadius;
+	mVertices = other.mVertices;
+}
+
 //----------------------------------------------------------------------------
 void BVSphere::ComputeFromData(const Vec3* pVertices, size_t numVertices)
 {
@@ -68,10 +75,10 @@ void BVSphere::EndComputeFromData()
 
 //----------------------------------------------------------------------------
 void BVSphere::TransformBy(const Transformation& transform,
-			BoundingVolume* result)
+			BoundingVolumePtr result)
 {
 	assert(result);
-	BVSphere* pNewSphere = (BVSphere*)result;
+	BVSphere* pNewSphere = (BVSphere*)result.get();
 	Vec3 newCenter = transform.ApplyForward(mCenter);
 	Real newRadius = transform.GetNorm() * mRadius;
 	pNewSphere->SetCenter(newCenter);
@@ -106,7 +113,7 @@ bool BVSphere::TestIntersection(const Ray3& ray) const
 }
 
 //----------------------------------------------------------------------------
-bool BVSphere::TestIntersection(BoundingVolume* pBV) const
+bool BVSphere::TestIntersection(BoundingVolumePtr pBV) const
 {
 	Real distSQ =  pBV->GetCenter().DistanceToSQ(mCenter);
 	Real radiusSQ = mRadius + pBV->GetRadius();
@@ -114,7 +121,7 @@ bool BVSphere::TestIntersection(BoundingVolume* pBV) const
 }
 
 //----------------------------------------------------------------------------
-void BVSphere::Merge(const BoundingVolume* pBV)
+void BVSphere::Merge(const BoundingVolumePtr pBV)
 {
 	Vec3 dir = mCenter - pBV->GetCenter();
 	Real distance = dir.Normalize();

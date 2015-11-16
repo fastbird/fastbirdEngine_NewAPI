@@ -16,7 +16,7 @@ Ray3::Ray3(const Vec3& origin, const Vec3& dir)
 	SetDir(dir);
 }
 
-Ray3::IResult Ray3::intersects(BoundingVolume* pBoundingVolume) const
+Ray3::IResult Ray3::Intersects(const BoundingVolume* pBoundingVolume) const
 {
 	assert(pBoundingVolume);
     // to relative space
@@ -51,7 +51,7 @@ Ray3::IResult Ray3::intersects(BoundingVolume* pBoundingVolume) const
     }
 }
 
-Ray3::IResult Ray3::intersects(const Plane3& p) const
+Ray3::IResult Ray3::Intersects(const Plane3& p) const
 {
 	Real denom = p.mNormal.Dot(mDir);
 	if (abs(denom) < std::numeric_limits<Real>::epsilon())
@@ -66,7 +66,7 @@ Ray3::IResult Ray3::intersects(const Plane3& p) const
 	}
 }
 
-Ray3::IResult Ray3::intersects(const AABB& aabb, Vec3& normal) const
+Ray3::IResult Ray3::Intersects(const AABB& aabb, Vec3& normal) const
 {
 	Real min = 1.0f;
 	Real pseudo_min = 0.0f;

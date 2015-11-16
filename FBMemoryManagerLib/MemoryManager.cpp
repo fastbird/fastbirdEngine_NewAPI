@@ -14,7 +14,7 @@ namespace fastbird
 	unsigned long long gNumMemoryAllocation = 0;	
 	struct MemLoc
 	{
-		MemLoc(LPCTSTR file, size_t line, LPCTSTR func)
+		MemLoc(const char* file, size_t line, const char* func)
 		{
 			if (file)  mFile = file;
 			mLine = line;
@@ -40,7 +40,7 @@ namespace fastbird
 	}
 
 	//-----------------------------------------------------------------------
-	void* AllocBytes(size_t size, LPCTSTR file, size_t line, LPCTSTR func)
+	void* AllocBytes(size_t size, const char* file, size_t line, const char* func)
 	{
 		void* p = malloc(size);
 		if (!p)
@@ -52,7 +52,7 @@ namespace fastbird
 		return p;
 	}
 
-	void* AllocBytesAligned(size_t size, size_t align, LPCTSTR file, size_t line, LPCTSTR func)
+	void* AllocBytesAligned(size_t size, size_t align, const char* file, size_t line, const char* func)
 	{
 #if defined(_PLATFORM_WINDOWS_)
 		void* p = _aligned_malloc(size, align);
@@ -73,7 +73,7 @@ namespace fastbird
 	}
 
 	//-----------------------------------------------------------------------
-	void DeallocBytes(void* ptr, LPCTSTR file, size_t line, LPCTSTR func)
+	void DeallocBytes(void* ptr, const char* file, size_t line, const char* func)
 	{
 		if (!ptr)
 			return;
@@ -96,7 +96,7 @@ namespace fastbird
 	}
 
 	//-----------------------------------------------------------------------
-	void DeallocBytesAligned(void* ptr, LPCTSTR file, size_t line, LPCTSTR func)
+	void DeallocBytesAligned(void* ptr, const char* file, size_t line, const char* func)
 	{
 		if (!ptr)
 			return;

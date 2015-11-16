@@ -91,7 +91,6 @@ namespace fastbird{
 		MaterialPtr GetSubPassMaterial(RENDER_PASS p) const;
 		bool BindSubPass(RENDER_PASS p, bool includeInputLayout);
 		void BindMaterialParams();
-		void RegisterReloading();
 		void SetTransparent(bool trans);
 		void SetGlow(bool glow);
 		bool IsTransparent() const;

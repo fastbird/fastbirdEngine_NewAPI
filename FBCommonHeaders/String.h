@@ -5,8 +5,6 @@
 #include <cstdarg>
 
 typedef wchar_t WCHAR;    // wc,   16-bit UNICODE character
-typedef std::vector<std::string> StringVector;
-typedef std::vector<std::wstring> WStringVector;
 
 #if defined(_PLATFORM_MAC_)
 static inline int sprintf(TCHAR* str, size_t size, LPCTSTR format, ...){

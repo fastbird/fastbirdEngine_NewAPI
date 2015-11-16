@@ -5,6 +5,14 @@ Convenent macros for manipulating stl containers.
 \author Jungwan Byun
 \ingroup FBCommonHeaders
 */
+#include <memory>
+namespace fastbird{
+	template <typename T>
+	bool operator == (const std::weak_ptr<T>& a, const std::shared_ptr<T>& b)
+	{
+		return a.lock() == b;
+	}
+}
 
 #define ValueExistsInVector(arr, v)	(std::find(arr.begin(), arr.end(), v) != arr.end())
 
@@ -33,4 +41,4 @@ Convenent macros for manipulating stl containers.
 		}\
 	unsigned arr ## SizeAfter = arr.size();
 
-#define ValidCString(szStr) szStr && strlen((szStr))
+#define ValidCStringLength(szStr) szStr && strlen((szStr))

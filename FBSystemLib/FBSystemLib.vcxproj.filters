@@ -3,9 +3,13 @@
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ModuleHandler.h" />
+    <ClInclude Include="StdOutRedirect.h" />
+    <ClInclude Include="ClipboardData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="ModuleHandler.cpp" />
+    <ClCompile Include="StdOutRedirect.cpp" />
+    <ClCompile Include="ClipboardData.cpp" />
   </ItemGroup>
 </Project>

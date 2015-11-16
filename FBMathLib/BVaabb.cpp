@@ -12,7 +12,15 @@ BVaabb::BVaabb()
 {
 }
 
-void BVaabb::Merge(const BoundingVolume* pBV)
+BVaabb& BVaabb::operator=(const BVaabb& other){
+	__super::operator=(other);
+	mAABB = other.mAABB;
+	mCenter = other.mCenter;
+	mRadius = other.mRadius;
+	return *this;
+}
+
+void BVaabb::Merge(const BoundingVolumePtr pBV)
 {
 	assert(pBV);
 	const Vec3& center = pBV->GetCenter();
@@ -115,10 +123,10 @@ void BVaabb::EndComputeFromData()
 }
 
 void BVaabb::TransformBy(const Transformation& transform,
-	BoundingVolume* result)
+	BoundingVolumePtr result)
 {
 	assert(result);
-	BVaabb* pNewBound = (BVaabb*)result;
+	BVaabb* pNewBound = (BVaabb*)result.get();
 	AABB newAABB = mAABB;
 	newAABB.Translate(transform.GetTranslation());
 	pNewBound->SetAABB(newAABB);
@@ -145,12 +153,12 @@ int BVaabb::WhichSide(const Plane3& plane) const
 bool BVaabb::TestIntersection(const Ray3& ray) const
 {
 	Vec3 normal;
-	Ray3::IResult ret = ray.intersects(mAABB, normal);
+	Ray3::IResult ret = ray.Intersects(mAABB, normal);
 	return ret.first;
 }
 
 
-bool BVaabb::TestIntersection(BoundingVolume* pBV) const
+bool BVaabb::TestIntersection(BoundingVolumePtr pBV) const
 {
 	Real R = pBV->GetRadius();
 	const auto& S = pBV->GetCenter();
@@ -173,22 +181,12 @@ void BVaabb::SetAABB(const AABB& aabb)
 	mRadius = (mAABB.GetMax() - mAABB.GetMin()).Length() * .5f;
 }
 
-BoundingVolume& BVaabb::operator= (const BoundingVolume& other)
-{
-	mAABB.Invalidate();
-	mAABB.Merge(other.GetCenter());
-	Real radius = other.GetRadius();
-	SetRadius(radius);
-	mCenter = mAABB.GetCenter();
-	return *this;
-}
-
 Vec3 BVaabb::GetSurfaceFrom(const Vec3& src, Vec3& normal)
 {
 	Vec3 dir = mCenter - src;
 	dir.Normalize();
 	Ray3 ray(src, dir);
-	Ray3::IResult ret = ray.intersects(mAABB, normal);
+	Ray3::IResult ret = ray.Intersects(mAABB, normal);
 	return dir * ret.second;
 }
 
@@ -216,7 +214,7 @@ Vec3 BVaabb::GetRandomPosInVolume(const Vec3* nearLocal) const
 	Vec3 dir = (pos - mAABB.GetCenter()).NormalizeCopy();
 	Ray3 ray(pos, -dir);
 	Vec3 normal;
-	Ray3::IResult ret = ray.intersects(mAABB, normal);
+	Ray3::IResult ret = ray.Intersects(mAABB, normal);
 	if (ret.first)
 	{
 		if (mAABB.Contain(pos))

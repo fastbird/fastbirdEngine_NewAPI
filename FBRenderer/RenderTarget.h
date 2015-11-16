@@ -90,5 +90,8 @@ namespace fastbird
 
 		void DrawOnEvent(bool set);
 		void TriggerDrawEvent();
+
+		bool SetSmallSilouetteBuffer();
+		bool SetBigSilouetteBuffer();
 	};
 }

@@ -5,7 +5,7 @@
 #include <memory>
 namespace fastbird{
 	DECLARE_SMART_PTR(IInputInjector);
-	DECLARE_SMART_PTR(InputConsumer);
+	DECLARE_SMART_PTR(IInputConsumer);
 	/** When ever you have a class that need to get input device
 	information inherit this class.
 	\ingroup FBInputManager

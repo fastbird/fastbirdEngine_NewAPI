@@ -19,7 +19,7 @@ namespace fastbird
 		};
 		virtual ~IKeyboard(){}
 		virtual void PushEvent(HWindow hWnd, const KeyboardEvent& keyboardEvent) = 0;
-		virtual void PushChar(HWindow hWnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec) = 0;
+		virtual void PushChar(HWindow hWnd, unsigned keycode, TIME_PRECISION gameTimeInSec) = 0;
 		virtual bool IsKeyDown(unsigned short keycode) const = 0;
 		virtual bool IsKeyPressed(unsigned short keycode) const = 0;
 		virtual bool IsKeyUp(unsigned short keycode) const = 0;

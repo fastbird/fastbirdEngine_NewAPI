@@ -81,7 +81,7 @@ namespace fastbird{
 	}
 
 	void TextureAtlas::SetPath(const char* path){
-		if (!ValidCString(path)){
+		if (!ValidCStringLength(path)){
 			Logger::Log(FB_ERROR_LOG_ARG, "Invalid arg.");
 			return;
 		}

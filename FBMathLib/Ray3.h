@@ -6,7 +6,7 @@
 
 namespace fastbird
 {
-	class BoundingVolume;
+	DECLARE_SMART_PTR(BoundingVolume);
 	class AABB;
 	class Ray3
 	{
@@ -21,9 +21,9 @@ namespace fastbird
 
 		// IntersectionResult
 		typedef std::pair<bool, Real> IResult;
-		IResult intersects(BoundingVolume* pBoundingVolume) const;
-		IResult intersects(const AABB& aabb, Vec3& normal) const;
-		IResult intersects(const Plane3& p) const;
+		IResult Intersects(const BoundingVolume* pBoundingVolume) const;
+		IResult Intersects(const AABB& aabb, Vec3& normal) const;
+		IResult Intersects(const Plane3& p) const;
 
 		const Vec3& GetDir() const { return mDir; }
 		const Vec3& GetOrigin() const { return mOrigin; }

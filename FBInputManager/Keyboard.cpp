@@ -17,7 +17,7 @@ public:
 	bool mKeyPressed[255]; // Down - up
 	bool mKeyUp[255];
 	std::queue<unsigned> mCurrentChar;
-	Timer::TIME_PRECISION mLastPushKeyTime;
+	TIME_PRECISION mLastPushKeyTime;
 	bool mInvalidatedTemporary;
 
 	//--------------------------------------------------------------------------
@@ -28,7 +28,7 @@ public:
 		memset(mKeyUp, 0, sizeof(mKeyUp));
 	}
 
-	void EndFrame(Timer::TIME_PRECISION gameTimeInSecond){
+	void EndFrame(TIME_PRECISION gameTimeInSecond){
 		mValid = true;
 		memset(mKeyPressed, 0, sizeof(mKeyPressed));
 		memset(mKeyUp, 0, sizeof(mKeyUp));
@@ -90,7 +90,7 @@ public:
 		}
 	}
 
-	void PushChar(HWindow hWnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec){
+	void PushChar(HWindow hWnd, unsigned keycode, TIME_PRECISION gameTimeInSec){
 		mCurrentChar.push(keycode);
 		while (mCurrentChar.size() > 10)
 		{
@@ -186,12 +186,12 @@ public:
 		mImpl->PushEvent(hWnd, keyboardEvent);
 	}
 
-	void Keyboard::PushChar(HWindow hWnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec){
+	void Keyboard::PushChar(HWindow hWnd, unsigned keycode, TIME_PRECISION gameTimeInSec){
 		mImpl->PushChar(hWnd, keycode, gameTimeInSec);
 	}
 
 	//--------------------------------------------------------------------------
-	void Keyboard::EndFrame(Timer::TIME_PRECISION gameTimeInSecond) {
+	void Keyboard::EndFrame(TIME_PRECISION gameTimeInSecond) {
 		mImpl->EndFrame(gameTimeInSecond);
 	}
 

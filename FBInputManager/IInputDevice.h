@@ -7,7 +7,7 @@ Required libraries: \b FBDebugLib \b FBTimerLib
 #pragma once
 #include <memory>
 #include "FBCommonHeaders/Types.h"
-#include "FBTimerLib/Timer.h"
+#include "FBTimer/Timer.h"
 namespace fastbird
 {
 	class IInputDevice;
@@ -16,7 +16,7 @@ namespace fastbird
 	class IInputDevice
 	{
 	public:
-		virtual void EndFrame(Timer::TIME_PRECISION gameTimeInSecond) = 0;
+		virtual void EndFrame(TIME_PRECISION gameTimeInSecond) = 0;
 		virtual bool IsValid() const = 0;
 		virtual void Invalidate(bool buttonClicked = false) = 0;
 		virtual void InvalidTemporary(bool invalidate) = 0;

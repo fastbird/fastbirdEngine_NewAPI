@@ -8,6 +8,7 @@ namespace fastbird
 	public:
 		BVSphere();
 		BVSphere(const Vec3& center, Real radius);
+		BVSphere& operator=(const BVSphere& other);
 		virtual ~BVSphere(){}
 		//--------------------------------------------------------------------
 		// BoundingVolume Interfaces
@@ -24,11 +25,11 @@ namespace fastbird
 		virtual void AddComputeData(const Vec3& vert);
 		virtual void EndComputeFromData();
 		virtual void TransformBy(const Transformation& transform,
-			BoundingVolume* result);
+			BoundingVolumePtr result);
 		virtual int WhichSide(const Plane3& plane) const;
 		virtual bool TestIntersection(const Ray3& ray) const;
-		virtual bool TestIntersection(BoundingVolume* pBV) const;
-		virtual void Merge(const BoundingVolume* pBV);
+		virtual bool TestIntersection(BoundingVolumePtr pBV) const;
+		virtual void Merge(const BoundingVolumePtr pBV);
 		virtual void Merge(const Vec3& pos);
 		virtual BoundingVolume& operator= (const BoundingVolume& other);
 		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal);

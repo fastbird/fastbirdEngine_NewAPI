@@ -11,11 +11,6 @@ namespace fastbird
 		Timer();
 
 	public:
-		// unsigned int : safe for 828 'days' at 60 frames/sec
-		// unsigned long long : safe for 9749040289 'years' at 60 frames/sec
-		typedef unsigned int FRAME_PRECISION;
-		typedef Real TIME_PRECISION;
-
 		static TimerPtr Create();
 		static TimerPtr GetMainTimer();		
 		~Timer();		

@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "RenderStrategyDefault.h"
 #include "Texture.h"
-#include "Camera.h"
 #include "GaussianDistribution.h"
 #include "RenderEventMarker.h"
 #include "RenderTarget.h"
@@ -14,6 +13,9 @@
 #include "StarDef.h"
 #include "RenderOptions.h"
 #include "SystemTextures.h"
+#include "FBStringLib/StringLib.h"
+#include "FBSceneManager/SceneObjectType.h"
+#include "FBSceneManager/Camera.h"
 #include "FBMathLib/BoundingVolume.h"
 using namespace fastbird;
 
@@ -140,7 +142,7 @@ public:
 		renderer->SetNoDepthWriteLessEqual();
 		renderer->SetGreenAlphaMaskAddMinusBlend(); // replace very first far volume face, and next will be added if it is not culled.
 		renderParam.mSpecialRenderables = true;
-		renderParam.mFilter = IRenderable::RenderableCloudVolumes;
+		renderParam.mFilter = SceneObjectType::CloudVolumes;
 		scene->PreRender(renderParam, 0);
 		scene->Render(renderParam, 0);
 		renderer->RestoreRasterizerState();

@@ -29,7 +29,7 @@ namespace fastbird
 #endif
 	}
 
-	Profiler::Profiler(const char* name, Timer::TIME_PRECISION* accumulator)
+	Profiler::Profiler(const char* name, TIME_PRECISION* accumulator)
 		: mName(name)
 		, mAccumulator(accumulator)
 	{
@@ -37,7 +37,7 @@ namespace fastbird
 		indent++;
 	}
 
-	void Profiler::SetAccumulator(Timer::TIME_PRECISION* p)
+	void Profiler::SetAccumulator(TIME_PRECISION* p)
 	{
 		mAccumulator = p;
 	}
@@ -45,7 +45,7 @@ namespace fastbird
 	Profiler::~Profiler()
 	{
 		indent--;
-		Timer::TIME_PRECISION elapsedTime = (gpTimer->GetTickCount() - mStartTick) / (Timer::TIME_PRECISION)std::milli::den;
+		TIME_PRECISION elapsedTime = (gpTimer->GetTickCount() - mStartTick) / (TIME_PRECISION)std::milli::den;
 		char sp[10];
 		memset(sp, '\t', 10);
 		if (indent > 9)
@@ -77,8 +77,8 @@ namespace fastbird
 			*mAccumulator += elapsedTime;		
 	}
 
-	Timer::TIME_PRECISION Profiler::GetDt(){
-		return (gpTimer->GetTickCount() - mStartTick) / (Timer::TIME_PRECISION)std::milli::den;
+	TIME_PRECISION Profiler::GetDt(){
+		return (gpTimer->GetTickCount() - mStartTick) / (TIME_PRECISION)std::milli::den;
 	}
 
 	void Profiler::Reset(){
@@ -93,9 +93,9 @@ namespace fastbird
 		mStartTick = gpTimer->GetTickCount();
 	}
 
-	Timer::TIME_PRECISION ProfilerSimple::GetDT()
+	TIME_PRECISION ProfilerSimple::GetDT()
 	{
-		Timer::TIME_PRECISION dt = (gpTimer->GetTickCount() - mStartTick) / (Timer::TIME_PRECISION)std::milli::den;
+		TIME_PRECISION dt = (gpTimer->GetTickCount() - mStartTick) / (TIME_PRECISION)std::milli::den;
 		mPrevDT = (dt + mPrevDT) * .5;
 		return mPrevDT;
 	}

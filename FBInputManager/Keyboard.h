@@ -19,13 +19,13 @@ namespace fastbird
 		//-------------------------------------------------------------------
 		// IInputDevice
 		//-------------------------------------------------------------------
-		virtual void EndFrame(Timer::TIME_PRECISION gameTimeInSecond);
+		virtual void EndFrame(TIME_PRECISION gameTimeInSecond);
 		virtual bool IsValid() const;
 		virtual void Invalidate(bool buttonClicked = false);
 		virtual void InvalidTemporary(bool invalidate);
 
 		virtual void PushEvent(HWindow hWnd, const KeyboardEvent& keyboardEvent);
-		virtual void PushChar(HWindow hWnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec);
+		virtual void PushChar(HWindow hWnd, unsigned keycode, TIME_PRECISION gameTimeInSec);
 		virtual bool IsKeyDown(unsigned short keycode) const;
 		virtual bool IsKeyPressed(unsigned short keycode) const;
 		virtual bool IsKeyUp(unsigned short keycode) const;

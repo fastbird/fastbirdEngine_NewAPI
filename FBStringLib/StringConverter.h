@@ -38,8 +38,8 @@ namespace fastbird{
 		static bool ParseBool(const TString& val, bool defaultValue = 0);
 
 		/** Checks the TString is a valid number value. */
-		static bool isNumber(const TString& val);
-		TStringVector ParseStringVector(const TString& val);
-		bool IsNumber(const TString& val);
+		static bool IsNumber(const TString& val);
+		static TStringVector ParseStringVector(const TString& val);		
+		
 	};
 }

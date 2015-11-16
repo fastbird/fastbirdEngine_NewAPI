@@ -7,28 +7,13 @@
 #include "FBCommonHeaders/Helpers.h"
 
 using namespace fastbird;
-InputManager* InputManager::sInputManager = 0;
-InputManager* InputManager::CreateInputManager(){
-	if (sInputManager)
-		return sInputManager;
-	sInputManager = new InputManager;
-	return sInputManager;
-}
-
-InputManager* InputManager::GetInstance(){
-	return sInputManager;
-}
-void InputManager::DeleteInputManager(){
-	delete sInputManager;
-	sInputManager = 0;
-}
-
 class InputManager::Impl{
 public:
+	InputManagerWeakPtr mSelf;
 	IKeyboardPtr mKeyboard;
 	IMousePtr mMouse;
 	IInputInjectorPtr mInjector;
-	std::map<int, std::vector<IInputConsumer*>> mConsumers;
+	std::map<int, std::vector<IInputConsumerWeakPtr>> mConsumers;
 	int mValid;
 
 	Impl()
@@ -39,48 +24,50 @@ public:
 		}
 	}
 
-	void RegisterInputConsumer(IInputConsumer* consumer, int priority){
+	void RegisterInputConsumer(IInputConsumerPtr consumer, int priority){
 		auto& consumers = mConsumers[priority];
 		if (!ValueExistsInVector(consumers, consumer)){
 			consumers.push_back(consumer);			
 		}
 	}
-	void UnregisterInputConsumer(IInputConsumer* consumer, int priority){
+	void UnregisterInputConsumer(IInputConsumerPtr consumer, int priority){
 		auto& consumers = mConsumers[priority];
 		DeleteValuesInVector(consumers, consumer);
 	}
 
 	void Update(InputManager* inputManager){
 		mValid = 0;
-		for (int i = 0; i < FBInputDevice::DeviceNum; ++i){
-			mValid += 1 << i;
-		}
-		for (const auto& it : mConsumers){
-			for (const auto& consumer : it.second){
-				consumer->ConsumeInput(mInjector);
-				if (!(mValid & FBInputDevice::AllMask))
-					return;
+		mValid = FBInputDevice::AllMask;		
+		for (auto& it : mConsumers){
+			for (auto weak = it.second.begin(); weak != it.second.end();){
+
+				auto consumer = weak->lock();
+				if (consumer){
+					consumer->ConsumeInput(mInjector);
+					if (!(mValid & FBInputDevice::AllMask))
+						return;
+					++weak;
+				}
+				else{
+					weak = it.second.erase(weak);
+				}
 			}
 		}
 	}
 
 	void Invalidate(FBInputDevice::Enum type, bool includeButtonClicks){
 		if (mValid & type)
-			mValid -= type;
-		switch (type){
-		case FBInputDevice::DeviceKeyboard:
+			mValid -= mValid & type;
+		if (type & FBInputDevice::DeviceKeyboard){
 			if (mKeyboard){
 				mKeyboard->Invalidate(includeButtonClicks);
 			}
-			break;
-		case FBInputDevice::DeviceMouse:
+		}
+		if (type & FBInputDevice::DeviceMouse) {
 			if (mMouse){
 				mMouse->Invalidate(includeButtonClicks);
 			}
-			break;
-		default:
-			assert(0 && "Not implemented");
-		}
+		}		
 	}
 
 	void InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
@@ -118,7 +105,7 @@ public:
 		return false;
 	}
 
-	void EndFrame(Timer::TIME_PRECISION gameTimeInSecond){
+	void EndFrame(TIME_PRECISION gameTimeInSecond){
 		if (mKeyboard){
 			mKeyboard->EndFrame(gameTimeInSecond);
 		}
@@ -133,6 +120,21 @@ public:
 		mInjector->SetMouse(mMouse);
 	}
 };
+
+//---------------------------------------------------------------------------
+InputManagerWeakPtr sInputManager;
+InputManagerPtr InputManager::Create(){
+	if (sInputManager.expired()){
+		auto inputManager = InputManagerPtr(new InputManager, [](InputManager* obj){ delete obj; });
+		sInputManager = inputManager;
+		inputManager->mImpl->mSelf = inputManager;
+	}
+	return sInputManager.lock();
+}
+
+InputManagerPtr InputManager::GetInstance(){
+	return sInputManager.lock();
+}
 
 InputManager::InputManager()
 : mImpl(new Impl)
@@ -161,11 +163,11 @@ void InputManager::SetMouse(IMousePtr mouse){
 	mImpl->mMouse = mouse;
 }
 
-void InputManager::RegisterInputConsumer(IInputConsumer* consumer, int priority){
+void InputManager::RegisterInputConsumer(IInputConsumerPtr consumer, int priority){
 	mImpl->RegisterInputConsumer(consumer, priority);
 }
 
-void InputManager::UnregisterInputConsumer(IInputConsumer* consumer, int priority){
+void InputManager::UnregisterInputConsumer(IInputConsumerPtr consumer, int priority){
 	mImpl->UnregisterInputConsumer(consumer, priority);
 }
 
@@ -185,7 +187,7 @@ bool InputManager::IsValid(FBInputDevice::Enum type) const{
 	return mImpl->IsValid(type);
 }
 
-void InputManager::EndFrame(Timer::TIME_PRECISION gameTimeInSecond){
+void InputManager::EndFrame(TIME_PRECISION gameTimeInSecond){
 	mImpl->EndFrame(gameTimeInSecond);
 }
 
@@ -226,16 +228,22 @@ void InputManager::PushKeyEvent(HWindow hwnd, const KeyboardEvent& keyboardEvent
 	}
 }
 
-void InputManager::PushChar(HWindow hwnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec){
+void InputManager::PushChar(HWindow hwnd, unsigned keycode, TIME_PRECISION gameTimeInSec){
 	if (mImpl->mKeyboard){
 		mImpl->mKeyboard->PushChar(hwnd, keycode, gameTimeInSec);
+	}
+}
+
+void InputManager::ClearBuffer(){
+	if (mImpl->mKeyboard){
+		mImpl->mKeyboard->ClearBuffer();
 	}
 }
 
 //-------------------------------------------------------------------
 // Mouse
 //-------------------------------------------------------------------
-void InputManager::PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION timeInSec){
+void InputManager::PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION timeInSec){
 	if (mImpl->mMouse){
 		mImpl->mMouse->PushEvent(handle, mouseEvent, timeInSec);
 	}

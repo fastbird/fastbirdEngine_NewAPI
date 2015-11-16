@@ -7,7 +7,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(DirectionalLight);
 	DECLARE_SMART_PTR(Scene);
-	class FB_DLL_PUBLIC Scene : public Observable<ISceneObserverPtr>{
+	class FB_DLL_PUBLIC Scene : public Observable<ISceneObserver>{
 		DECLARE_PIMPL_NON_COPYABLE(Scene);		
 		Scene();		
 		
@@ -19,5 +19,6 @@ namespace fastbird{
 		void PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 
 		DirectionalLightPtr GetLight(unsigned idx);
+		int GetRenderPass() const;
 	};
 }

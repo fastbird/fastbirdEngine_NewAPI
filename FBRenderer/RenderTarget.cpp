@@ -1,13 +1,13 @@
 #include "stdafx.h"
 #include "RenderTarget.h"
 #include "Renderer.h"
-#include "Camera.h"
 #include "Texture.h"
 #include "RenderStrategyDefault.h"
 #include "RenderEventMarker.h"
 #include "RenderOptions.h"
 #include "RenderTargetParam.h"
 #include "FBSceneManager/Scene.h"
+#include "FBSceneManager/Camera.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBCommonHeaders/Observable.h"
 
@@ -224,6 +224,14 @@ public:
 
 	bool IsGlowSupported() const{
 		return mStrategy->IsGlowSupported();
+	}
+
+	bool SetSmallSilouetteBuffer(){
+		return mStrategy->SetSmallSilouetteBuffer();
+	}
+
+	bool SetBigSilouetteBuffer(){
+		return mStrategy->SetBigSilouetteBuffer();
 	}
 
 	//---------------------------------------------------------------------------
@@ -508,5 +516,13 @@ void RenderTarget::DrawOnEvent(bool set)
 void RenderTarget::TriggerDrawEvent()
 {
 	mImpl->mDrawEventTriggered = true;
+}
+
+bool RenderTarget::SetSmallSilouetteBuffer(){
+	mImpl->SetSmallSilouetteBuffer();
+}
+
+bool RenderTarget::SetBigSilouetteBuffer(){
+	mImpl->SetBigSilouetteBuffer();
 }
 }

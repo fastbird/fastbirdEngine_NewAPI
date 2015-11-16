@@ -9,7 +9,7 @@
 #include "TextureAtlas.h"
 #include "RenderOptions.h"
 #include "Shader.h"
-#include "FBTimerLib/Profiler.h"
+#include "FBTimer/Profiler.h"
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
 namespace fastbird{

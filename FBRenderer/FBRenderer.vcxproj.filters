@@ -9,9 +9,7 @@
     <ClInclude Include="RenderResourceFactory.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureAtlas.h" />
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="IRenderable.h" />
-    <ClInclude Include="ICameraObserver.h" />
     <ClInclude Include="IRenderTargetObserver.h" />
     <ClInclude Include="IRendererObserver.h" />
     <ClInclude Include="Spatial.h" />
@@ -72,6 +70,10 @@
     <ClInclude Include="PointLightManager.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="DebugHud.h" />
+    <ClInclude Include="GeometryRenderer.h" />
+    <ClInclude Include="ConsoleDataType.h" />
+    <ClInclude Include="Console.h" />
+    <ClInclude Include="CandidatesData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -80,7 +82,6 @@
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureAtlas.cpp" />
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Spatial.cpp" />
     <ClCompile Include="Renderable.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
@@ -111,6 +112,11 @@
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="DebugHud.cpp" />
+    <ClCompile Include="MaterialTest.cpp" />
+    <ClCompile Include="GeometryRenderer.cpp" />
+    <ClCompile Include="ConsoleDataType.cpp" />
+    <ClCompile Include="Console.cpp" />
+    <ClCompile Include="CandidatesData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

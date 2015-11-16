@@ -1,13 +1,4 @@
 #include "StringMathConverter.h"
-#include "FBMathLib/Vec2.h"
-#include "FBMathLib/Vec2I.h"
-#include "FBMathLib/Vec3.h"
-#include "FBMathLib/Vec3I.h"
-#include "FBMathLib/Vec4.h"
-#include "FBMathLib/Mat33.h"
-#include "FBMathLib/Mat44.h"
-#include "FBMathLib/Quat.h"
-#include "FBMathLib/Rect.h"
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
 #include <sstream>

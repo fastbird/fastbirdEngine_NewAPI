@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Camera.h"
-#include "IRenderable.h"
+#include "SpatialObject.h"
 #include "FBMathLib/BoundingVolume.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBInputManager/KeyCodes.h"
@@ -60,7 +60,7 @@ public:
 	Real mHeight;
 	std::string mName;
 	Plane3 mPlanes[6];
-	IRenderableWeakPtr mTarget;
+	SpatialObjectWeakPtr mTarget;
 	size_t mCamIndex;
 	bool mYZSwap;
 	bool mCurrentCamera;
@@ -163,7 +163,7 @@ public:
 		auto target = mTarget.lock();
 		if (!mProcessInput || !mCurrentCamera || !target)
 			return;
-		if (mUserParams.Changed() || mPrevTargetPos != target->GetPos())
+		if (mUserParams.Changed() || mPrevTargetPos != target->GetPosition())
 		{
 			mInternalParams.dist += mUserParams.dDist;
 			mInternalParams.dist = std::max(2.0, mInternalParams.dist);
@@ -204,10 +204,10 @@ public:
 			Mat33 rot(right.x, forward.x, up.x,
 				right.y, forward.y, up.y,
 				right.z, forward.z, up.z);
-			Vec3 pos = target->GetPos() + toCam * mInternalParams.dist;
+			Vec3 pos = target->GetPosition() + toCam * mInternalParams.dist;
 			SetTransform(pos, Quat(rot));
 			mUserParams.Clear();
-			mPrevTargetPos = target->GetPos();
+			mPrevTargetPos = target->GetPosition();
 		}
 	}
 
@@ -265,13 +265,15 @@ public:
 
 			if (viewChanged && !cam->mObservers_.empty()){
 				auto observers = cam->mObservers_[TransformChanged];
-				for (auto observer : observers){
+				for (auto it : observers){
+					auto observer = it.lock();
 					observer->OnViewMatrixChanged();
 				}
 			}
 			if (projChanged && !cam->mObservers_.empty()){
 				auto observers = cam->mObservers_[TransformChanged];
-				for (auto observer : observers){
+				for (auto it : observers){
+					auto observer = it.lock();
 					observer->OnProjMatrixChanged();
 				}
 			}			
@@ -369,7 +371,7 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void SetTarget(IRenderablePtr obj)
+	void SetTarget(SpatialObjectPtr obj)
 	{
 		if (mTarget.lock() == obj)
 			return;
@@ -392,7 +394,7 @@ public:
 			return;
 		if (injector->IsValid(FBInputDevice::DeviceMouse) && !injector->IsKeyDown(VK_CONTROL)){
 			const Vec3 camPos = GetPosition();
-			Vec3 toCam = camPos - target->GetPos();
+			Vec3 toCam = camPos - target->GetPosition();
 			const Real distToTarget = toCam.Normalize();
 			long dx, dy;
 			injector->GetHDDeltaXY(dx, dy);
@@ -620,7 +622,7 @@ void Camera::SetYZSwap(bool enable){
 	mImpl->SetYZSwap(enable);
 }
 
-void Camera::SetTarget(IRenderablePtr pObj){
+void Camera::SetTarget(SpatialObjectPtr pObj){
 	mImpl->SetTarget(pObj);
 }
 
@@ -628,7 +630,7 @@ void Camera::SetDistanceFromTarget(Real dist){
 	mImpl->SetDistanceFromTarget(dist);
 }
 
-IRenderablePtr Camera::GetTarget() const { 
+SpatialObjectPtr Camera::GetTarget() const {
 	return mImpl->mTarget.lock(); 
 }
 

@@ -27,7 +27,8 @@ namespace fastbird
 		static BoundingVolumePtr Create(BVType type = BV_SPHERE);
 
 		BoundingVolume() : mAlwaysPass(false) {}
-		virtual ~BoundingVolume(){}
+		virtual ~BoundingVolume(){}		
+		BoundingVolume& operator=(const BoundingVolume& other);
 
 	public:
 		void SetAlwaysPass(bool p) { mAlwaysPass = p; }
@@ -42,16 +43,15 @@ namespace fastbird
 		virtual void AddComputeData(const Vec3* pVertices, size_t numVertices) = 0;
 		virtual void AddComputeData(const Vec3& vert) = 0;
 		virtual void EndComputeFromData() = 0;
-		virtual void TransformBy(const Transformation& transform,BoundingVolume* result) = 0;
+		virtual void TransformBy(const Transformation& transform,BoundingVolumePtr result) = 0;
 		virtual int WhichSide(const Plane3& plane) const { assert(0); return -1;}
 		virtual int WhichSide(const Vec3& min, const Vec3& max) const { assert(0); return -1;}
 		virtual bool TestIntersection(const Ray3& ray) const = 0;
-		virtual bool TestIntersection(BoundingVolume* pBV) const = 0;
+		virtual bool TestIntersection(BoundingVolumePtr pBV) const = 0;
 		virtual Vec3 GetRandomPosInVolume(const Vec3* nearLocal = 0) const = 0;
 		virtual bool Contain(const Vec3& pos) const = 0;
-		virtual void Merge(const BoundingVolume* pBV) = 0;
+		virtual void Merge(const BoundingVolumePtr pBV) = 0;
 		virtual void Merge(const Vec3& pos) = 0;
-		virtual BoundingVolume& operator= (const BoundingVolume& other) = 0;
 		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal) = 0;
 		virtual void Invalidate() = 0;		
 	};

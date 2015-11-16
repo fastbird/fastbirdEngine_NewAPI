@@ -9,6 +9,10 @@ namespace fastbird
 const Transformation Transformation::IDENTITY;
 
 //----------------------------------------------------------------------------
+TransformationPtr Transformation::Create(){
+	return TransformationPtr(new Transformation, [](Transformation* obj){ delete obj; });
+}
+
 Transformation::Transformation ()
 	: mMat(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f)
 	, mT(0.0f,0.0f,0.0f)

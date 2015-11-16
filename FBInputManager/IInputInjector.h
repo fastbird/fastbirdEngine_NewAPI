@@ -2,6 +2,7 @@
 #define FB_INPUT_INJECTOR_VERSION 1
 #include "FBInputDevice.h"
 #include "FBCommonHeaders/Types.h"
+#include "FBInputManager/KeyCodes.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(IKeyboard);
 	DECLARE_SMART_PTR(IMouse);

@@ -23,7 +23,7 @@ namespace fastbird
 		//-------------------------------------------------------------------
 		// IInputDevice
 		//-------------------------------------------------------------------
-		virtual void EndFrame(Timer::TIME_PRECISION gameTimeInSec);
+		virtual void EndFrame(TIME_PRECISION gameTimeInSec);
 		virtual bool IsValid() const;
 		virtual void Invalidate(bool buttonClicked = false);
 		virtual void InvalidTemporary(bool invalidate);
@@ -31,7 +31,7 @@ namespace fastbird
 		//-------------------------------------------------------------------
 		// IMouse
 		//-------------------------------------------------------------------
-		virtual void PushEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION);
+		virtual void PushEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION);
 		
 		// Positions
 		virtual void GetHDDeltaXY(long &x, long &y) const;

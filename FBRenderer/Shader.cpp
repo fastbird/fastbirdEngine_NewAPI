@@ -3,7 +3,7 @@
 #include "IPlatformShader.h"
 #include "Renderer.h"
 #include "FBCommonHeaders/Helpers.h"
-#include "FBTimerLib/Profiler.h"
+#include "FBTimer/Profiler.h"
 #include "FBStringLib/StringLib.h"
 using namespace fastbird;
 

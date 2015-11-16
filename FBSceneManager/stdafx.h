@@ -20,5 +20,7 @@ Plugin:
 #include <memory>
 #include <map>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include "FBDebugLib/Logger.h"

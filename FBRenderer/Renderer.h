@@ -12,8 +12,9 @@
 #include "TextureBinding.h"
 #include "SystemTextures.h"
 #include "FBSceneManager/ISceneObserver.h"
+#include "FBInputManager/IInputConsumer.h"
 #include "FBMathLib/Math.h"
-#include "FBTimerLib/Timer.h"
+#include "FBTimer/Timer.h"
 #include "../EssentialEngineData/shaders/Constants.h"
 struct lua_State;
 namespace fastbird{	
@@ -40,9 +41,7 @@ namespace fastbird{
 	render states, lights and render targets.
 	\ingroup FBRenderer
 	*/
-	class FB_DLL_PUBLIC Renderer : public Observable<IRendererObserver>, public ISceneObserver{
-		RendererWeakPtr mMe;
-
+	class FB_DLL_PUBLIC Renderer : public Observable<IRendererObserver>, public ISceneObserver, public IInputConsumer{
 		DECLARE_PIMPL_NON_COPYABLE(Renderer);
 		Renderer();		
 
@@ -215,6 +214,7 @@ namespace fastbird{
 		void SetGreenAlphaMask();
 		void SetGreenMask();
 		void SetBlueMask();
+		void SetNoColorWriteState();
 		void SetGreenAlphaMaskMax();
 		void SetGreenAlphaMaskAddAddBlend();
 		void SetRedAlphaMaskAddMinusBlend();
@@ -224,8 +224,10 @@ namespace fastbird{
 		void SetNoDepthWriteLessEqual();
 		void SetLessEqualDepth();
 		void SetNoDepthStencil();
+		void SetDepthOnlyShader();
 		// raster
 		void SetFrontFaceCullRS();
+		void SetOneBiasedDepthRS();
 		// sampler
 		void SetSamplerState(SAMPLERS::Enum s, BINDING_SHADER shader, int slot);
 
@@ -301,7 +303,7 @@ namespace fastbird{
 		void SetEnvironmentTextureOverride(TexturePtr texture);		
 		void SetDebugRenderTarget(unsigned idx, const char* textureName);
 		void SetFadeAlpha(Real alpha);
-		PointLightManPtr GetPointLightMan() const;
+		PointLightManagerPtr GetPointLightMan() const;
 		void RegisterVideoPlayer(VideoPlayerPtr player);
 		void UnregisterVideoPlayer(VideoPlayerPtr player);
 		void GetSampleOffsets_GaussBlur5x5(DWORD texWidth, DWORD texHeight, Vec4** avTexCoordOffset, Vec4** avSampleWeight, Real fMultiplier);
@@ -316,6 +318,7 @@ namespace fastbird{
 		void SetCamera(CameraPtr pCamera);
 		CameraPtr GetCamera() const; // this is for current carmera.
 		CameraPtr GetMainCamera() const;
+		HWindow GetMainWindowHandle();
 		HWindow GetWindowHandle(RenderTargetId rtId);
 		Vec2I ToSreenPos(HWindowId id, const Vec3& ndcPos) const;
 		Vec2 ToNdcPos(HWindowId id, const Vec2I& screenPos) const;
@@ -323,6 +326,7 @@ namespace fastbird{
 		Vec2I FindClosestSize(HWindowId id, const Vec2I& input);
 		bool GetResolutionList(unsigned& outNum, Vec2I* list);
 		RenderOptions* GetOptions() const;
+		lua_State* GetLua() const;
 
 		//-------------------------------------------------------------------
 		// Drawing
@@ -365,7 +369,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// Internal
 		//-------------------------------------------------------------------
-		void GatherPointLightData(BoundingVolume* aabb, const Transformation& transform, POINT_LIGHT_CONSTANTS* plConst);
+		void GatherPointLightData(const BoundingVolume* aabb, const Transformation& transform, POINT_LIGHT_CONSTANTS* plConst);
 		void RefreshPointLight();
 		bool NeedToRefreshPointLight() const;
 
@@ -375,6 +379,11 @@ namespace fastbird{
 		void OnAfterMakeVisibleSet(Scene* scene);
 		void OnBeforeRenderingOpaques(Scene* scene);
 		void OnBeforeRenderingTransparents(Scene* scene);
+
+		//-------------------------------------------------------------------
+		// ISceneObserver
+		//-------------------------------------------------------------------
+		void ConsumeInput(IInputInjectorPtr injector); /// inject to main camera
 	};
 
 }

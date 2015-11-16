@@ -17,6 +17,7 @@
 #include "TextureAtlas.h"
 #include "PointLightManager.h"
 #include "DebugHud.h"
+#include "GeometryRenderer.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/VectorMap.h"
@@ -36,13 +37,12 @@ using namespace fastbird;
 DECLARE_SMART_PTR(UI3DObj);
 DECLARE_SMART_PTR(UIObject);
 DECLARE_SMART_PTR(SkySphere);
-DECLARE_SMART_PTR(DebugHud);
-DECLARE_SMART_PTR(GeometryRenderer);
 class Renderer::Impl{
 public:
 	typedef fastbird::Factory<IPlatformRenderer>::CreateCallback CreateCallback;
 	typedef std::vector<RenderTargetWeakPtr> RenderTargets;
 
+	RendererWeakPtr mSelf;
 	Renderer* mObject;
 	lua_State* mL;
 	std::string mPlatformRendererType;
@@ -70,11 +70,12 @@ public:
 	RasterizerStatePtr mDefaultRasterizerState;
 	RasterizerStatePtr mFrontFaceCullRS;
 	RasterizerStatePtr mOneBiasedDepthRS;
-	BlendStatePtr mDefaultBlendState;
+	BlendStatePtr mDefaultBlendState;	
 	BlendStatePtr mAdditiveBlendState;
 	BlendStatePtr mAlphaBlendState;
 	BlendStatePtr mMaxBlendState;
 
+	DepthStencilStatePtr mDefaultDepthStencilState;
 	DepthStencilStatePtr mNoDepthStencilState;
 	DepthStencilStatePtr mNoDepthWriteLessEqualState;
 	DepthStencilStatePtr mLessEqualDepthState;
@@ -507,11 +508,8 @@ public:
 			}
 		}
 
-		mDebugHud = FB_NEW(DebugHud);
-		mGeomRenderer = FB_NEW(GeometryRenderer);
-
-		if (gFBEnv->pConsole)
-			gFBEnv->pConsole->Init();
+		mDebugHud = DebugHud::Create();
+		mGeomRenderer = GeometryRenderer::Create();	
 
 		mDefaultRasterizerState = CreateRasterizerState(RASTERIZER_DESC());
 		mDefaultBlendState = CreateBlendState(BLEND_DESC());
@@ -521,19 +519,18 @@ public:
 		ddesc.DepthWriteMask = DEPTH_WRITE_MASK_ZERO;
 		mNoDepthStencilState = CreateDepthStencilState(ddesc);
 
-
-		IMaterial::SHADER_DEFINES emptyShaderDefines;
+		SHADER_DEFINES emptyShaderDefines;
 		mFullscreenQuadVSNear = CreateShader("es/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS,
 			emptyShaderDefines);
-		IMaterial::SHADER_DEFINES shaderDefinesFar;
-		shaderDefinesFar.push_back(IMaterial::ShaderDefine("_FAR_SIDE_QUAD", "1"));
+		SHADER_DEFINES shaderDefinesFar;
+		shaderDefinesFar.push_back(ShaderDefine("_FAR_SIDE_QUAD", "1"));
 		mFullscreenQuadVSFar = CreateShader("es/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS,
 			shaderDefinesFar);
 
 		mCopyPS = CreateShader("es/shaders/copyps.hlsl", BINDING_SHADER_PS,
 			emptyShaderDefines);
-		IMaterial::SHADER_DEFINES multiSampleSD;
-		multiSampleSD.push_back(IMaterial::ShaderDefine("_MULTI_SAMPLE", "1"));
+		SHADER_DEFINES multiSampleSD;
+		multiSampleSD.push_back(ShaderDefine("_MULTI_SAMPLE", "1"));
 		mCopyPSMS = CreateShader("es/shaders/copyps.hlsl", BINDING_SHADER_PS,
 			multiSampleSD);
 
@@ -584,11 +581,9 @@ public:
 
 		SetSamplerState(SAMPLERS::POINT, BINDING_SHADER_VS, SAMPLERS::POINT);
 
-		mMiddleGray = gFBEnv->pConsole->GetEngineCommand()->r_HDRMiddleGray;
-		mStarPower = gFBEnv->pConsole->GetEngineCommand()->r_StarPower;
-		mBloomPower = gFBEnv->pConsole->GetEngineCommand()->r_BloomPower;
-
-		SkySphere::CreateSharedEnvRT();
+		mMiddleGray = mOptions->r_HDRMiddleGray;
+		mStarPower = mOptions->r_StarPower;
+		mBloomPower = mOptions->r_BloomPower;
 
 		UpdateRareConstantsBuffer();
 
@@ -669,7 +664,7 @@ public:
 
 	static VectorMap<std::string, IPlatformTextureWeakPtr> sPlatformTextures;
 	TexturePtr CreateTexture(const char* file, bool async){
-		if (!ValidCString(file)){
+		if (!ValidCStringLength(file)){
 			Logger::Log(FB_ERROR_LOG_ARG, "Invalid arg.");
 			return 0;
 		}
@@ -799,7 +794,7 @@ public:
 
 	static VectorMap<std::string, MaterialWeakPtr> sLoadedMaterials;
 	MaterialPtr CreateMaterial(const char* file){
-		if (!ValidCString(file)){
+		if (!ValidCStringLength(file)){
 			Logger::Log(FB_ERROR_LOG_ARG, "Invalid arg.");
 			return 0;
 		}
@@ -940,7 +935,7 @@ public:
 		if (doc.Error())
 		{
 			const char* errMsg = doc.GetErrorStr1();
-			if (ValidCString(errMsg)){
+			if (ValidCStringLength(errMsg)){
 				Logger::Log(FB_ERROR_LOG_ARG, FormatString("%s(%s)", errMsg, path));
 			}
 			else{
@@ -1290,6 +1285,9 @@ public:
 	void SetBlueMask(){
 		
 	}
+	void SetNoColorWriteState(){
+
+	}
 	void SetGreenAlphaMaskMax(){
 		
 	}
@@ -1315,9 +1313,15 @@ public:
 	void SetNoDepthStencil(){
 		
 	}
+	void SetDepthOnlyShader(){
+
+	}
 	// raster
 	void SetFrontFaceCullRS(){
 		
+	}
+	void SetOneBiasedDepthRS(){
+
 	}
 	// sampler
 	void SetSamplerState(SAMPLERS::Enum s, BINDING_SHADER shader, int slot){
@@ -1693,6 +1697,11 @@ public:
 	CameraPtr GetMainCamera() const{
 		
 	}
+
+	HWindow GetMainWindowHandle(){
+
+	}
+
 	HWindow GetWindowHandle(RenderTargetId rtId){
 		assert(0);
 		return 0;
@@ -1714,6 +1723,10 @@ public:
 	}
 	RenderOptionsPtr GetOptions() const{
 		return mOptions;
+	}
+
+	lua_State* GetLua() const{
+		return mL;
 	}
 
 	//-------------------------------------------------------------------
@@ -1745,29 +1758,26 @@ Renderer::~Renderer(){
 }
 
 static RendererWeakPtr sRenderer;
-
 RendererPtr Renderer::CreateRenderer(){
-	if (sRenderer.lock()){
-		Logger::Log(FB_ERROR_LOG_ARG, "You can create only one renderer!");
-		return 0;
-	}
-	auto renderer = RendererPtr(FB_NEW(Renderer), [](Renderer* obj){ delete obj; });
-	renderer->mMe = renderer;
-	sRenderer = renderer;
-	return renderer;
+	if (sRenderer.expired()){
+		auto renderer = RendererPtr(FB_NEW(Renderer), [](Renderer* obj){ FB_DELETE(obj); });
+		renderer->mImpl->mSelf = renderer;
+		sRenderer = renderer;
+	}		
+	return sRenderer.lock();
 }
 
 RendererPtr Renderer::CreateRenderer(const char* renderEngineName, lua_State* L){
-	if (sRenderer.lock()){
-		Logger::Log(FB_ERROR_LOG_ARG, "You can create only one renderer!");
-		return 0;
+	if (sRenderer.expired()){
+		auto renderer = CreateRenderer();		
+		renderer->SetLuaState(L);
+		renderer->PrepareRenderEngine(renderEngineName);
+		return renderer;
 	}
-	auto renderer = RendererPtr(FB_NEW(Renderer), [](Renderer* obj){ delete obj; });
-	renderer->mMe = renderer;
-	renderer->SetLuaState(L);
-	renderer->PrepareRenderEngine(renderEngineName);
-	sRenderer = renderer;
-	return renderer;
+	else{
+		Logger::Log(FB_ERROR_LOG_ARG, "You can create only one renderer!");
+		return sRenderer.lock();
+	}
 }
 
 RendererPtr Renderer::GetInstance(){
@@ -1814,6 +1824,9 @@ TexturePtr Renderer::CreateTexture(const char* file, bool async){
 	return mImpl->CreateTexture(file, async);
 }
 
+HWindow Renderer::GetMainWindowHandle(){
+	return mImpl->GetMainWindowHandle();
+}
 
 HWindow Renderer::GetWindowHandle(RenderTargetId rtId){
 	return mImpl->GetWindowHandle(rtId);

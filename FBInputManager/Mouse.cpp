@@ -158,7 +158,7 @@ public:
 	//-------------------------------------------------------------------
 	// IMouse
 	//-------------------------------------------------------------------
-	void PushEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION gameTimeInSec){
+	void PushEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION gameTimeInSec){
 		/*DebugOutput("usFlags = %x, usButtonFlags = %x, usButtonData = %x, ulRawButtons = %x, lLastX = %d, lLastY = %d, ulExtraInformation = %d",
 		mouseEvent.usFlags,
 		mouseEvent.usButtonFlags,
@@ -757,11 +757,11 @@ Mouse::~Mouse(){
 	delete mImpl;
 }	
 
-void Mouse::PushEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION gameTimeInSec)	{
+void Mouse::PushEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION gameTimeInSec)	{
 	mImpl->PushEvent(handle, mouseEvent, gameTimeInSec);
 }
 
-void Mouse::EndFrame(Timer::TIME_PRECISION gameTimeInSec)	{
+void Mouse::EndFrame(TIME_PRECISION gameTimeInSec)	{
 	mImpl->EndFrame(gameTimeInSec);
 }
 

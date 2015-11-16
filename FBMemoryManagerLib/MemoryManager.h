@@ -7,7 +7,6 @@ Provide a ceteralized method for memory allocation and deallocation
 */
 #pragma once
 #include <cstddef>
-#include "FBCommonHeaders/String.h"
 #ifdef NOT_USING_FB_MEMORY_MANAGER
 #define FB_NEW(T) new T
 #define FB_ARRAY_NEW(T, count) new T[count]
@@ -19,10 +18,10 @@ namespace fastbird
 {
 	/// \ingroup FBMemoryManager
 	void FBReportMemoryForModule();
-    void* AllocBytes(size_t size, LPCTSTR file, size_t line, LPCTSTR func);
-	void* AllocBytesAligned(size_t size, size_t align, LPCTSTR file, size_t line, LPCTSTR func);
-	void DeallocBytes(void* prt, LPCTSTR file, size_t line, LPCTSTR func);
-	void DeallocBytesAligned(void* ptr, LPCTSTR file, size_t line, LPCTSTR func);
+    void* AllocBytes(size_t size, const char* file, size_t line, const char* func);
+	void* AllocBytesAligned(size_t size, size_t align, const char* file, size_t line, const char* func);
+	void DeallocBytes(void* prt, const char* file, size_t line, const char* func);
+	void DeallocBytesAligned(void* ptr, const char* file, size_t line, const char* func);
 	
 	template <typename T>
 	inline T* ConstructN(T* startp, size_t num)
@@ -46,7 +45,7 @@ namespace fastbird
 	}
 
 	template <typename T>
-	inline void Delete(T* p, LPCTSTR file, size_t line, LPCTSTR func)
+	inline void Delete(T* p, const char* file, size_t line, const char* func)
 	{
 		if (!p)
 			return;
@@ -55,7 +54,7 @@ namespace fastbird
 	}
 
 	template <typename T>
-	inline void DeleteAligned(T* p, LPCTSTR file, size_t line, LPCTSTR func)
+	inline void DeleteAligned(T* p, const char* file, size_t line, const char* func)
 	{
 		if (!p)
 			return;
@@ -64,7 +63,7 @@ namespace fastbird
 	}
 
 	template <typename T>
-	inline void DeleteArr(T* p, LPCTSTR file, size_t line, LPCTSTR func)
+	inline void DeleteArr(T* p, const char* file, size_t line, const char* func)
 	{
 		if (!p)
 			return;

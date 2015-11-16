@@ -2,12 +2,13 @@
 #include "KeyboardEvent.h"
 #include "MouseEvent.h"
 #include "FBInputDevice.h"
-#include "FBTimerLib/Timer.h"
+#include "FBTimer/Timer.h"
 namespace fastbird{
-	class IInputConsumer;
 	DECLARE_SMART_PTR(IMouse);
 	DECLARE_SMART_PTR(IKeyboard);
+	DECLARE_SMART_PTR(IInputConsumer);
 	DECLARE_SMART_PTR(IInputInjector);
+	DECLARE_SMART_PTR(InputManager);
 	/** Handles user input. 
 	You can register your objects which need to receive user input, 
 	inherit the object from IInputConsumer and register it to 
@@ -19,12 +20,10 @@ namespace fastbird{
 		DECLARE_PIMPL_NON_COPYABLE(InputManager);
 		InputManager();
 		~InputManager();
-		static InputManager* sInputManager;
 	public:
 
-		static InputManager* CreateInputManager();
-		static InputManager* GetInstance();
-		static void DeleteInputManager();
+		static InputManagerPtr Create();
+		static InputManagerPtr GetInstance();
 
 		//-------------------------------------------------------------------
 		// Manager
@@ -40,10 +39,10 @@ namespace fastbird{
 		\param consumer
 		\param priority number one priority is handled first. 
 		i.e. the lowest value is handled first. Check the default 
-		priority IInputConsumer::Priority
+		priority at IInputConsumer::Priority
 		*/
-		void RegisterInputConsumer(IInputConsumer* consumer, int priority);
-		void UnregisterInputConsumer(IInputConsumer* consumer, int priority);
+		void RegisterInputConsumer(IInputConsumerPtr consumer, int priority);
+		void UnregisterInputConsumer(IInputConsumerPtr consumer, int priority);
 
 		/** Will send input injector to every consumers
 		*/
@@ -52,7 +51,7 @@ namespace fastbird{
 		void Invalidate(FBInputDevice::Enum type, bool includeButtonClicks = false);
 		void InvalidTemporary(FBInputDevice::Enum type, bool invalidate);
 		bool IsValid(FBInputDevice::Enum type) const;
-		void EndFrame(Timer::TIME_PRECISION gameTimeInSecond);
+		void EndFrame(TIME_PRECISION gameTimeInSecond);
 
 		//-------------------------------------------------------------------
 		// Common
@@ -66,13 +65,14 @@ namespace fastbird{
 		// Keyboard
 		//-------------------------------------------------------------------
 		void PushKeyEvent(HWindow hWnd, const KeyboardEvent& keyboardEvent);
-		void PushChar(HWindow hWnd, unsigned keycode, Timer::TIME_PRECISION gameTimeInSec);
+		void PushChar(HWindow hWnd, unsigned keycode, TIME_PRECISION gameTimeInSec);
+		void ClearBuffer();
 		
 
 		//-------------------------------------------------------------------
 		// Mouse
 		//-------------------------------------------------------------------
-		void PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION);
+		void PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION);
 		Real GetSensitivity() const;
 		void SetSensitivity(Real sens);
 		Real GetWheelSensitivity() const;

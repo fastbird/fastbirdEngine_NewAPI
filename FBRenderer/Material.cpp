@@ -808,7 +808,7 @@ public:
 		mMaterialData->mMaterialParameters[index] = value;
 	}
 
-	const Vec4& GetMaterialParameters(unsigned index) const
+	const Vec4& GetMaterialParameter(unsigned index) const
 	{
 		auto& params = mMaterialData->mMaterialParameters;
 		auto it = params.Find(index);
@@ -817,6 +817,27 @@ public:
 			return Vec4::ZERO;
 		}
 		return it->second;
+	}
+
+	const Parameters& GetMaterialParameters() const
+	{
+		return mMaterialData->mMaterialParameters;		
+	}
+
+	const MATERIAL_CONSTANTS& GetMaterialConstants() const {
+		return mMaterialData->mMaterialConstants;
+	}
+
+	const Textures& GetTextures() const {
+		return mMaterialData->mTextures;
+	}
+
+	const TexturesByBinding& GetTexturesByBinding() const {
+		return mMaterialData->mTexturesByBinding;
+	}
+
+	const BindingsByTexture& GetBindingsByTexture() const {
+		return mMaterialData->mBindingsByTexture;
 	}
 
 	bool IsUsingMaterialParameter(unsigned index) const{
@@ -958,6 +979,24 @@ public:
 		return mShaderData->mShaders; 
 	}
 
+	void CopyMaterialParamFrom(const MaterialPtr src) {
+		mMaterialData->mMaterialParameters = src->GetMaterialParameters();
+	}
+
+	void CopyMaterialConstFrom(const MaterialPtr src) {
+		mMaterialData->mMaterialConstants = src->GetMaterialConstants();
+	}
+
+	void CopyTexturesFrom(const MaterialPtr src) {
+		mMaterialData->mTextures = src->GetTextures();
+		mMaterialData->mBindingsByTexture = src->GetBindingsByTexture();
+		mMaterialData->mTexturesByBinding = src->GetTexturesByBinding();
+	}
+
+	void CopyShaderDefinesFrom(const MaterialPtr src) {
+		mShaderData->mShaderDefines = src->GetShaderDefines();
+	}
+
 	void SetRasterizerState(const RASTERIZER_DESC& desc)
 	{
 		mRenderStatesData->mRenderStates->CreateRasterizerState(desc);
@@ -975,6 +1014,10 @@ public:
 
 	RenderStatesPtr GetRenderStates() const { 
 		return mRenderStatesData->mRenderStates.data();
+	}
+
+	RENDER_PASS GetRenderPass() const {
+		return mUniqueData->mRenderPass;
 	}
 
 	void ClearRasterizerState()
@@ -1097,3 +1140,256 @@ MaterialPtr Material::Clone() const{
 	auto material = Material::Create(*this);
 	return material;
 }
+
+bool Material::LoadFromFile(const char* filepath) {
+	return mImpl->LoadFromFile(filepath);
+}
+
+bool Material::LoadFromXml(tinyxml2::XMLElement* pRoot) {
+	return mImpl->LoadFromXml(pRoot);
+}
+
+const char* Material::GetName() const {
+	return mImpl->GetName();
+}
+
+void Material::SetAmbientColor(float r, float g, float b, float a) {
+	mImpl->SetAmbientColor(r, g, b, a);
+}
+
+void Material::SetAmbientColor(const Vec4& ambient) {
+	mImpl->SetAmbientColor(ambient);
+}
+
+void Material::SetDiffuseColor(float r, float g, float b, float a) {
+	mImpl->SetDiffuseColor(r, g, b, a);
+}
+
+void Material::SetDiffuseColor(const Vec4& diffuse) {
+	mImpl->SetDiffuseColor(diffuse);
+}
+
+void Material::SetSpecularColor(float r, float g, float b, float shine) {
+	mImpl->SetSpecularColor(r, g, b, shine);
+}
+
+void Material::SetSpecularColor(const Vec4& specular) {
+	mImpl->SetSpecularColor(specular);
+}
+
+void Material::SetEmissiveColor(float r, float g, float b, float strength) {
+	mImpl->SetEmissiveColor(r, g, b, strength);
+}
+
+void Material::SetEmissiveColor(const Vec4& emissive) {
+	mImpl->SetEmissiveColor(emissive);
+}
+
+void Material::SetTexture(const char* filepath, BINDING_SHADER shader, int slot, const SAMPLER_DESC& samplerDesc) {
+	mImpl->SetTexture(filepath, shader, slot, samplerDesc);
+}
+
+void Material::SetTexture(TexturePtr pTexture, BINDING_SHADER shader, int slot, const SAMPLER_DESC& samplerDesc) {
+	mImpl->SetTexture(pTexture, shader, slot, samplerDesc);
+}
+
+TexturePtr Material::GetTexture(BINDING_SHADER shader, int slot) {
+	return mImpl->GetTexture(shader, slot);
+}
+
+void Material::SetColorRampTexture(ColorRamp& cr, BINDING_SHADER shader, int slot, const SAMPLER_DESC& samplerDesc) {
+	mImpl->SetColorRampTexture(cr, shader, slot, samplerDesc);
+}
+
+void Material::RemoveTexture(TexturePtr pTexture) {
+	mImpl->RemoveTexture(pTexture);
+}
+
+void Material::RemoveTexture(BINDING_SHADER shader, int slot) {
+	mImpl->RemoveTexture(shader, slot);
+}
+
+ColorRamp& Material::GetColorRamp(int slot, BINDING_SHADER shader) {
+	return mImpl->GetColorRamp(slot, shader);
+}
+
+void Material::RefreshColorRampTexture(int slot, BINDING_SHADER shader) {
+	mImpl->RefreshColorRampTexture(slot, shader);
+}
+
+bool Material::AddShaderDefine(const char* def, const char* val) {
+	return mImpl->AddShaderDefine(def, val);
+}
+
+bool Material::RemoveShaderDefine(const char* def) {
+	return mImpl->RemoveShaderDefine(def);
+}
+
+void Material::ApplyShaderDefines() {
+	mImpl->ApplyShaderDefines();
+}
+
+void Material::SetMaterialParameters(unsigned index, const Vec4& value) {
+	mImpl->SetMaterialParameters(index, value);
+}
+
+const SHADER_DEFINES& Material::GetShaderDefines() const {
+	return mImpl->GetShaderDefines();
+}
+
+const Vec4& Material::GetAmbientColor() const {
+	return mImpl->GetAmbientColor();
+}
+
+const Vec4& Material::GetDiffuseColor() const {
+	return mImpl->GetDiffuseColor();
+}
+
+const Vec4& Material::GetSpecularColor() const {
+	return mImpl->GetSpecularColor();
+}
+
+const Vec4& Material::GetEmissiveColor() const {
+	return mImpl->GetEmissiveColor();
+}
+
+const char* Material::GetShaderFile() const {
+	return mImpl->GetShaderFile();
+}
+
+void* Material::GetShaderByteCode(unsigned& size) const {
+	return mImpl->GetShaderByteCode(size);
+}
+
+const Vec4& Material::GetMaterialParameter(unsigned index) const {
+	return mImpl->GetMaterialParameter(index);
+}
+
+const Material::Parameters& Material::GetMaterialParameters() const {
+	return mImpl->GetMaterialParameters();
+}
+
+const MATERIAL_CONSTANTS& Material::GetMaterialConstants() const {
+	return mImpl->GetMaterialConstants();
+}
+
+const Material::Textures& Material::GetTextures() const {
+	return mImpl->GetTextures();
+}
+
+const Material::TexturesByBinding& Material::GetTexturesByBinding() const {
+	return mImpl->GetTexturesByBinding();
+}
+
+const Material::BindingsByTexture& Material::GetBindingsByTexture() const {
+	return mImpl->GetBindingsByTexture();
+}
+
+bool Material::IsUsingMaterialParameter(unsigned index) {
+	return mImpl->IsUsingMaterialParameter(index);
+}
+
+bool Material::IsRelatedShader(const char* shaderFile) {
+	return mImpl->IsRelatedShader(shaderFile);
+}
+
+void Material::Bind(bool inputLayout, unsigned stencilRef) {
+	mImpl->Bind(inputLayout, stencilRef);
+}
+
+void Material::Unbind() {
+	mImpl->Unbind();
+}
+
+MaterialPtr Material::GetSubPassMaterial(RENDER_PASS p) const {
+	return mImpl->GetSubPassMaterial(p);
+}
+
+bool Material::BindSubPass(RENDER_PASS p, bool includeInputLayout) {
+	return mImpl->BindSubPass(p, includeInputLayout);
+}
+
+void Material::BindMaterialParams() {
+	mImpl->BindMaterialParams();
+}
+
+void Material::SetTransparent(bool trans) {
+	mImpl->SetTransparent(trans);
+}
+
+void Material::SetGlow(bool glow) {
+	mImpl->SetGlow(glow);
+}
+
+bool Material::IsTransparent() const {
+	return mImpl->IsTransparent();
+}
+
+bool Material::IsGlow() const {
+	return mImpl->IsGlow();
+}
+
+bool Material::IsNoShadowCast() const {
+	return mImpl->IsNoShadowCast();
+}
+
+bool Material::IsDoubleSided() const {
+	return mImpl->IsDoubleSided();
+}
+
+int Material::GetBindingShaders() const {
+	return mImpl->GetBindingShaders();
+}
+
+void Material::CopyMaterialParamFrom(const MaterialPtr src) {
+	mImpl->CopyMaterialParamFrom(src);
+}
+
+void Material::CopyMaterialConstFrom(const MaterialPtr src) {
+	mImpl->CopyMaterialConstFrom(src);
+}
+
+void Material::CopyTexturesFrom(const MaterialPtr src) {
+	mImpl->CopyTexturesFrom(src);
+}
+
+void Material::CopyShaderDefinesFrom(const MaterialPtr src) {
+	mImpl->CopyShaderDefinesFrom(src);
+}
+
+void Material::SetRasterizerState(const RASTERIZER_DESC& desc) {
+	mImpl->SetRasterizerState(desc);
+}
+
+void Material::SetBlendState(const BLEND_DESC& desc) {
+	mImpl->SetBlendState(desc);
+}
+
+void Material::SetDepthStencilState(const DEPTH_STENCIL_DESC& desc) {
+	mImpl->SetDepthStencilState(desc);
+}
+
+RenderStatesPtr Material::GetRenderStates() const {
+	return mImpl->GetRenderStates();
+}
+
+RENDER_PASS Material::GetRenderPass() const {
+	return mImpl->GetRenderPass();
+}
+
+void Material::ClearRasterizerState() {
+	mImpl->ClearRasterizerState();
+}
+
+void Material::ClearBlendState(const BLEND_DESC& desc) {
+	mImpl->ClearBlendState(desc);
+}
+
+void Material::ClearDepthStencilState(const DEPTH_STENCIL_DESC& desc) {
+	mImpl->ClearDepthStencilState(desc);
+}
+
+void Material::SetInputLayout(const INPUT_ELEMENT_DESCS& desc) {
+	mImpl->SetInputLayout(desc);
+}
+

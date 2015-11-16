@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include "Scene.h"
+#include "SkySphere.h"
 
 using namespace fastbird;
 
@@ -11,7 +12,7 @@ SceneManager* SceneManager::CreateSceneManager(){
 	sSceneManager = new SceneManager;
 	return sSceneManager;
 }
-SceneManager* SceneManager::GetSceneManager(){
+SceneManager* SceneManager::GetInstance(){
 	return sSceneManager;
 }
 void SceneManager::DeleteSceneManager(){
@@ -23,6 +24,13 @@ void SceneManager::DeleteSceneManager(){
 class SceneManager::Impl{
 public:
 	std::map<std::string, SceneWeakPtr> mScenes;
+
+	Impl(){
+		SkySphere::CreateSharedEnvRT();
+	}
+	~Impl(){
+		SkySphere::DeleteSharedEnvRT();
+	}
 };
 
 //---------------------------------------------------------------------------

@@ -48,7 +48,7 @@ namespace fastbird
 			MOUSE_BUTTON_5 = 0x10,
 		};
 
-		virtual void PushEvent(HWindow handle, const MouseEvent& mouseEvent, Timer::TIME_PRECISION gameTimeInSec) = 0;
+		virtual void PushEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION gameTimeInSec) = 0;
 
 		// Positions
 		virtual void GetHDDeltaXY(long &x, long &y) const = 0;
