@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "Texture.h"
 #include "Renderer.h"
@@ -24,11 +51,9 @@ TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformShader) {
 size_t Texture::sNextTextureID = 0;
 class Texture::Impl{
 public:
-	// I think having texture properties like size, format in the Texture is good idea.
-	// Platform renderer doesn't use that information so don't need to have it.
-	// If that's true, let's move the data to here.
 	unsigned mTextureID;
 	IPlatformTexturePtr mPlatformTexture;	
+	std::string mFilePath;
 	TEXTURE_TYPE mType;
 	//---------------------------------------------------------------------------
 	Impl()
@@ -37,8 +62,15 @@ public:
 	{
 	}
 
-	const char* GetName() const{
-		return mPlatformTexture->GetPath();
+	const char* GetFilePath() const{
+		return mFilePath.c_str();
+	}
+
+	void SetFilePath(const char* path){
+		if (path)
+			mFilePath = path;
+		else
+			mFilePath.clear();
 	}
 
 	void SetType(TEXTURE_TYPE type){
@@ -50,11 +82,11 @@ public:
 	}
 
 	int GetWidth() const{
-		return mPlatformTexture->GetSize().first;
+		return std::get<0>(mPlatformTexture->GetSize());
 	}
 
 	int GetHeight() const{
-		return mPlatformTexture->GetSize().second;
+		return std::get<1>(mPlatformTexture->GetSize());
 	}
 
 	Vec2I GetSize() const{
@@ -142,8 +174,12 @@ size_t Texture::GetTextureID() const{
 	return mImpl->mTextureID;
 }
 
-const char* Texture::GetName() const{
-	return mImpl->GetName();
+const char* Texture::GetFilePath() const{
+	return mImpl->GetFilePath();
+}
+
+void Texture::SetFilePath(const char* filepath){
+	mImpl->SetFilePath(filepath);
 }
 
 void Texture::SetType(TEXTURE_TYPE type)

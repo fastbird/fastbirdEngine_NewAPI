@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "RenderStrategyDefault.h"
 #include "Texture.h"
@@ -16,6 +43,7 @@
 #include "FBStringLib/StringLib.h"
 #include "FBSceneManager/SceneObjectType.h"
 #include "FBSceneManager/Camera.h"
+#include "FBSceneManager/SpatialObject.h"
 #include "FBMathLib/BoundingVolume.h"
 using namespace fastbird;
 
@@ -86,8 +114,8 @@ public:
 	void Render(size_t face){		
 		auto scene = mScene.lock();
 		auto renderTarget = mRenderTarget.lock();
-		auto renderer = Renderer::GetInstance();
-		if (!scene || !renderTarget || !renderer)
+		auto& renderer = Renderer::GetInstance();
+		if (!scene || !renderTarget)
 			return;
 
 		RenderEventMarker marker("Rendering with default strategy.");
@@ -105,7 +133,7 @@ public:
 		scene->PreRender(param, 0);
 
 		GlowTarget(true);
-		renderer->Clear(0., 0., 0., 1.);
+		renderer.Clear(0., 0., 0., 1.);
 		GlowTarget(false);		
 		{
 			RenderEventMarker marker("Shadow Pass");
@@ -133,24 +161,24 @@ public:
 		memset(&renderParamOut, 0, sizeof(RenderParamOut));
 		renderParam.mRenderPass = PASS_DEPTH;
 		CloudVolumeTarget(true);
-		renderer->LockDepthStencilState();
-		renderer->SetBlueMask();
+		renderer.LockDepthStencilState();
+		renderer.SetBlueMask();
 		scene->Render(renderParam, 0);
-		renderer->UnlockDepthStencilState();
+		renderer.UnlockDepthStencilState();
 		DepthWriteShaderCloud();
-		renderer->SetFrontFaceCullRS();
-		renderer->SetNoDepthWriteLessEqual();
-		renderer->SetGreenAlphaMaskAddMinusBlend(); // replace very first far volume face, and next will be added if it is not culled.
+		renderer.SetFrontFaceCullRS();
+		renderer.SetNoDepthWriteLessEqual();
+		renderer.SetGreenAlphaMaskAddMinusBlend(); // replace very first far volume face, and next will be added if it is not culled.
 		renderParam.mSpecialRenderables = true;
 		renderParam.mFilter = SceneObjectType::CloudVolumes;
 		scene->PreRender(renderParam, 0);
 		scene->Render(renderParam, 0);
-		renderer->RestoreRasterizerState();
-		renderer->SetRedAlphaMaskAddAddBlend();
+		renderer.RestoreRasterizerState();
+		renderer.SetRedAlphaMaskAddAddBlend();
 		scene->Render(renderParam, 0);
-		renderer->RestoreRasterizerState();
-		renderer->RestoreBlendState();
-		renderer->RestoreDepthStencilState();
+		renderer.RestoreRasterizerState();
+		renderer.RestoreBlendState();
+		renderer.RestoreDepthStencilState();
 		CloudVolumeTarget(false);
 	}
 	{
@@ -168,7 +196,7 @@ public:
 		memset(&renderParamOut, 0, sizeof(RenderParamOut));
 		renderParam.mRenderPass = PASS_NORMAL;
 		HDRTarget(true);
-		renderer->Clear(0., 0., 0., 1.);
+		renderer.Clear(0., 0., 0., 1.);
 		DepthTexture(true);
 		CloudVolumeTexture(true);
 		ShadowMap(true);
@@ -197,120 +225,120 @@ public:
 
 
 	bool SetSmallSilouetteBuffer(){
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		const auto& size = rt->GetSize();
 		Vec2I halfSize((int)(size.x * 0.5f), (int)(size.y * 0.5f));
 		if (!mSmallSilouetteBuffer)
 		{
-			mSmallSilouetteBuffer = renderer->CreateTexture(0, halfSize.x, halfSize.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
+			mSmallSilouetteBuffer = renderer.CreateTexture(0, halfSize.x, halfSize.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
 				BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 		}
-		auto halfDepthBuffer = renderer->GetTemporalDepthBuffer(halfSize);
+		auto halfDepthBuffer = renderer.GetTemporalDepthBuffer(halfSize);
 		TexturePtr rts[] = { mSmallSilouetteBuffer };
 		unsigned index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, halfDepthBuffer, 0);
+		renderer.SetRenderTarget(rts, index, 1, halfDepthBuffer, 0);
 		Viewport vps = { 0, 0, (Real)halfSize.x, (Real)halfSize.y, 0.0f, 1.0f };
-		renderer->SetViewports(&vps, 1);
+		renderer.SetViewports(&vps, 1);
 		return true;
 	}
 
 	bool SetBigSilouetteBuffer(){
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		const auto& size = rt->GetSize();
 		if (!mBigSilouetteBuffer)
 		{
-			mBigSilouetteBuffer = renderer->CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
+			mBigSilouetteBuffer = renderer.CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
 				BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 		}
-		auto depthBuffer = renderer->GetTemporalDepthBuffer(size);
+		auto depthBuffer = renderer.GetTemporalDepthBuffer(size);
 		TexturePtr rts[] = { mBigSilouetteBuffer };
 		unsigned index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, depthBuffer, 0);
+		renderer.SetRenderTarget(rts, index, 1, depthBuffer, 0);
 		Viewport vps = { 0, 0, (Real)size.x, (Real)size.y, 0.0f, 1.0f };
-		renderer->SetViewports(&vps, 1);
+		renderer.SetViewports(&vps, 1);
 		return true;
 	}
 
 	//-------------------------------------------------------------------
 	void ClearSilouetteBuffer(){
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		{
 			Vec2I halfSize((int)(mSize.x * 0.5f), (int)(mSize.y * 0.5f));
 			if (!mSmallSilouetteBuffer)
 			{
-				mSmallSilouetteBuffer = renderer->CreateTexture(0, halfSize.x, halfSize.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mSmallSilouetteBuffer = renderer.CreateTexture(0, halfSize.x, halfSize.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			}
 			TexturePtr rts[] = { mSmallSilouetteBuffer };
 			unsigned index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, 0, 0);
+			renderer.SetRenderTarget(rts, index, 1, 0, 0);
 			Viewport vps = { 0, 0, (Real)halfSize.x, (Real)halfSize.y, 0.0f, 1.0f };
-			renderer->SetViewports(&vps, 1);
-			renderer->Clear(1, 1, 1, 1, 1, 0);
+			renderer.SetViewports(&vps, 1);
+			renderer.Clear(1, 1, 1, 1, 1, 0);
 		}
 		{
 			if (!mBigSilouetteBuffer)
 			{
-				mBigSilouetteBuffer = renderer->CreateTexture(0, mSize.x, mSize.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mBigSilouetteBuffer = renderer.CreateTexture(0, mSize.x, mSize.y, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			}
 			TexturePtr rts[] = { mBigSilouetteBuffer };
 			unsigned index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, 0, 0);
+			renderer.SetRenderTarget(rts, index, 1, 0, 0);
 			Viewport vps = { 0, 0, (Real)mSize.x, (Real)mSize.y, 0.0f, 1.0f };
-			renderer->SetViewports(&vps, 1);
-			renderer->Clear(1, 1, 1, 1, 1, 0);
+			renderer.SetViewports(&vps, 1);
+			renderer.Clear(1, 1, 1, 1, 1, 0);
 		}
 	}
 
 	void DepthTarget(bool bind, bool clear)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		if (bind){
 			int width = int(mSize.x);
 			int height = int(mSize.y);
 			if (!mDepthTarget)
 			{
-				mDepthTarget = renderer->CreateTexture(0, width, height, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mDepthTarget = renderer.CreateTexture(0, width, height, PIXEL_FORMAT_R16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			}
 			TexturePtr rts[] = { mDepthTarget };
 			size_t rtViewIndex[] = { 0 };
 
-			auto depthBuffer = renderer->GetTemporalDepthBuffer(Vec2I(width, height));
-			renderer->SetRenderTarget(rts, rtViewIndex, 1, depthBuffer, 0);
+			auto depthBuffer = renderer.GetTemporalDepthBuffer(Vec2I(width, height));
+			renderer.SetRenderTarget(rts, rtViewIndex, 1, depthBuffer, 0);
 			Viewport vp = { 0, 0, (Real)width, (Real)height, 0, 1 };
-			renderer->SetViewports(&vp, 1);
+			renderer.SetViewports(&vp, 1);
 			if (clear)
-				renderer->Clear(1, 1, 1, 1, 1, 0);
-			renderer->LockBlendState();
+				renderer.Clear(1, 1, 1, 1, 1, 0);
+			renderer.LockBlendState();
 		}
 		else{
 			rt->BindTargetOnly(false);
-			renderer->UnlockBlendState();
+			renderer.UnlockBlendState();
 		}
 	}
 
 	void DepthTexture(bool bind) {
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (bind){
-			renderer->SetSystemTexture(SystemTextures::Depth, mDepthTarget);			
+			renderer.SetSystemTexture(SystemTextures::Depth, mDepthTarget);			
 		}
 		else{
-			renderer->SetSystemTexture(SystemTextures::Depth, 0);
+			renderer.SetSystemTexture(SystemTextures::Depth, 0);
 		}
 	}
 
 	void GlowTarget(bool bind)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		if (bind){
-			if (!renderer->GetOptions()->r_Glow){
+			if (!renderer.GetOptions()->r_Glow){
 				rt->BindTargetOnly(true);
 			}
 
@@ -329,32 +357,32 @@ public:
 				multiple render-target-slots simultaneously. A view may be reused as long as the resources are not used simultaneously.
 
 				*/				
-				mGlowTarget = renderer->CreateTexture(0, mSize.x, mSize.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mGlowTarget = renderer.CreateTexture(0, mSize.x, mSize.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);				
 				mGlowTarget->SetDebugName(FormatString("rt%u_%u_%u_GlowTarget", rt->GetId(), mSize.x, mSize.y).c_str());
 
-				mGlowTexture[0] = renderer->CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mGlowTexture[0] = renderer.CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
 				mGlowTexture[0]->SetDebugName(FormatString("rt%u_%u_%u_GlowTexture0", rt->GetId(), mSize.x, mSize.y).c_str());
 
-				mGlowTexture[1] = renderer->CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mGlowTexture[1] = renderer.CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
 				mGlowTexture[1]->SetDebugName(FormatString("rt%u_%u_%u_GlowTexture1", rt->GetId(), mSize.x, mSize.y).c_str());
 			}
 
 			TexturePtr rts[] = { rt->GetRenderTargetTexture(), mGlowTarget };
-			if (mHDRTarget && renderer->GetOptions()->r_HDR)
+			if (mHDRTarget && renderer.GetOptions()->r_HDR)
 			{
 				rts[0] = mHDRTarget;
 			}
 
 			assert(mRenderingFace == 0);
 			size_t rtViewIndex[] = { mRenderingFace, 0 };
-			renderer->SetRenderTarget(rts, rtViewIndex, 2, rt->GetDepthStencilTexture(), mRenderingFace);
+			renderer.SetRenderTarget(rts, rtViewIndex, 2, rt->GetDepthStencilTexture(), mRenderingFace);
 
 			auto viewPort = rt->GetViewport();
 			Viewport viewports[] = { viewPort, viewPort };
-			renderer->SetViewports(viewports, 2);
+			renderer.SetViewports(viewports, 2);
 			mGlowSet = true;
 		}
 		else{
@@ -368,13 +396,13 @@ public:
 
 	void UpdateLightCamera()
 	{
-		auto renderer = Renderer::GetInstance();
-		auto cam = renderer->GetCamera();
+		auto& renderer = Renderer::GetInstance();
+		auto cam = renderer.GetCamera();
 		if (!mLightCamera)
 		{
 			mLightCamera = Camera::Create();				
 			mLightCamera->SetOrthogonal(true);
-			auto cmd = renderer->GetOptions();
+			auto cmd = renderer.GetOptions();
 			float width = std::min(cmd->r_ShadowCamWidth, mSize.x * (cmd->r_ShadowCamWidth / 1600.f));
 			float height = std::min(cmd->r_ShadowCamHeight, mSize.y * (cmd->r_ShadowCamHeight / 900.f));
 			width = std::max(16.f, width);
@@ -403,12 +431,12 @@ public:
 
 
 		auto target = cam->GetTarget();
-		float shadowCamDist = renderer->GetOptions()->r_ShadowCamDist;
+		float shadowCamDist = renderer.GetOptions()->r_ShadowCamDist;
 		auto light = mScene.lock()->GetLight(0);
 		assert(light);
 		if (target && target->GetBoundingVolume() && target->GetBoundingVolume()->GetRadius() < shadowCamDist)
 		{
-			mLightCamera->SetPosition(target->GetPos() + cam->GetDirection() * 10.0f + light->GetPosition() *shadowCamDist);
+			mLightCamera->SetPosition(target->GetPosition() + cam->GetDirection() * 10.0f + light->GetPosition() *shadowCamDist);
 		}
 		else
 		{
@@ -419,11 +447,11 @@ public:
 
 	void ShadowTarget(bool bind)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		if (bind){
 
-			auto cmd = renderer->GetOptions();
+			auto cmd = renderer.GetOptions();
 			if (!mShadowMap)
 			{
 				const auto& size = mSize;
@@ -435,7 +463,7 @@ public:
 				width = std::max(16, width);
 				height = std::max(16, height);
 
-				mShadowMap = renderer->CreateTexture(0,
+				mShadowMap = renderer.CreateTexture(0,
 					width, height,
 					PIXEL_FORMAT_D32_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_DEPTH_STENCIL_SRV);
@@ -445,31 +473,31 @@ public:
 
 			TexturePtr rts[] = { 0 };
 			size_t index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, mShadowMap, 0);
-			renderer->SetShadowMapShader();
+			renderer.SetRenderTarget(rts, index, 1, mShadowMap, 0);
+			renderer.SetShadowMapShader();
 			const auto& size = mShadowMap->GetSize();
 			Viewport vp = { 0, 0,
 				(Real)size.x,
 				(Real)size.y,
 				0, 1 };
-			renderer->SetViewports(&vp, 1);
-			renderer->SetCamera(mLightCamera);
-			renderer->Clear(0, 0, 0, 0, 1.0f, 0);
+			renderer.SetViewports(&vp, 1);
+			renderer.SetCamera(mLightCamera);
+			renderer.Clear(0, 0, 0, 0, 1.0f, 0);
 		}
 		else{
 			assert(mShadowMap);
 			rt->BindTargetOnly(false);
-			renderer->SetCamera(rt->GetCamera());
+			renderer.SetCamera(rt->GetCamera());
 		}
 	}
 
 	void ShadowMap(bool bind)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (bind && mShadowMap)
-			renderer->SetSystemTexture(SystemTextures::ShadowMap, mShadowMap);
+			renderer.SetSystemTexture(SystemTextures::ShadowMap, mShadowMap);
 		else
-			renderer->SetSystemTexture(SystemTextures::ShadowMap, 0);
+			renderer.SetSystemTexture(SystemTextures::ShadowMap, 0);
 	}
 
 	void DepthWriteShaderCloud(){
@@ -478,24 +506,24 @@ public:
 
 	void CloudVolumeTarget(bool bind)
 	{
-		auto renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();		
 		if (bind){
 
 			const auto& size = mSize;
 			if (!mCloudVolumeDepth)
 			{
-				mCloudVolumeDepth = renderer->CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mCloudVolumeDepth = renderer.CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			}
-			auto depthBuffer = renderer->GetTemporalDepthBuffer(Vec2I(size.x / 2, size.y / 2));
+			auto depthBuffer = renderer.GetTemporalDepthBuffer(Vec2I(size.x / 2, size.y / 2));
 			assert(depthBuffer);
 			TexturePtr rts[] = { mCloudVolumeDepth };
 			size_t index[] = { 0 };
 			// mTempDepthBufferHalf already filled with scene objects. while writing the depth texture;
-			renderer->SetRenderTarget(rts, index, 1, depthBuffer, 0);
+			renderer.SetRenderTarget(rts, index, 1, depthBuffer, 0);
 			Viewport vp = { 0, 0, size.x * .5f, size.y * .5f, 0, 1 };
-			renderer->SetViewports(&vp, 1);
-			renderer->Clear(0.0f, 0.0f, 0.0f, 0, 1, 0);
+			renderer.SetViewports(&vp, 1);
+			renderer.Clear(0.0f, 0.0f, 0.0f, 0, 1, 0);
 		}
 		else{
 			auto rt = mRenderTarget.lock();
@@ -505,38 +533,38 @@ public:
 
 	void CloudVolumeTexture(bool set)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (set)
-			renderer->SetSystemTexture(SystemTextures::CloudVolume, mCloudVolumeDepth);
+			renderer.SetSystemTexture(SystemTextures::CloudVolume, mCloudVolumeDepth);
 		else
-			renderer->SetSystemTexture(SystemTextures::CloudVolume, 0);
+			renderer.SetSystemTexture(SystemTextures::CloudVolume, 0);
 	}
 
 
 	void GodRayTarget(bool bind)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (bind){			
 			const auto& size = mSize;
 			if (!mGodRayTarget[0])
 			{
 				for (int i = 0; i < 2; i++)
 				{
-					mGodRayTarget[i] = renderer->CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_R8G8B8A8_UNORM,
+					mGodRayTarget[i] = renderer.CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_R8G8B8A8_UNORM,
 						BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 				}
-				mNoMSDepthStencil = renderer->CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_D24_UNORM_S8_UINT,
+				mNoMSDepthStencil = renderer.CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_D24_UNORM_S8_UINT,
 					BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_DEPTH_STENCIL);
-				renderer->GetGodRayPS();
+				renderer.GetGodRayPS();
 			}
 
 
 			TexturePtr rts[] = { mGodRayTarget[1] };
 			size_t index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, mNoMSDepthStencil, 0);
+			renderer.SetRenderTarget(rts, index, 1, mNoMSDepthStencil, 0);
 			Viewport vp = { 0, 0, (Real)size.x*.5f, (Real)size.y*.5f, 0, 1 };
-			renderer->SetViewports(&vp, 1);
-			renderer->Clear(0, 0, 0, 1, 1, 0);
+			renderer.SetViewports(&vp, 1);
+			renderer.Clear(0, 0, 0, 1, 1, 0);
 		}
 		else{
 
@@ -545,9 +573,9 @@ public:
 
 	void GodRay()
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
-		DirectionalLightPtr light = renderer->GetDirectionalLight(0);
+		DirectionalLightPtr light = renderer.GetDirectionalLight(0);
 		assert(light);
 		auto camera = rt->GetCamera();
 		Vec4 lightPos(camera->GetPosition() + light->GetPosition(), 1);
@@ -557,24 +585,24 @@ public:
 
 		TexturePtr rts[] = { mGodRayTarget[0] };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
-		renderer->SetTexture(mGodRayTarget[1], BINDING_SHADER_PS, 0);
-		Vec4* pData = (Vec4*)renderer->MapMaterialParameterBuffer();
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetTexture(mGodRayTarget[1], BINDING_SHADER_PS, 0);
+		Vec4* pData = (Vec4*)renderer.MapMaterialParameterBuffer();
 		if (pData)
 		{
 			*pData = camera->GetMatrix(Camera::ViewProj) * lightPos; // only x,y needed.
 			pData->x = lightPos.x;
 			pData->y = lightPos.y;
-			auto pEC = renderer->GetOptions();
+			auto pEC = renderer.GetOptions();
 
 			pData->z = pEC->r_GodRayDensity; // density
 			pData->w = pEC->r_GodRayDecay; // decay
 			++pData;
 			pData->x = pEC->r_GodRayWeight; // weight
 			pData->y = pEC->r_GodRayExposure; // exposure
-			renderer->UnmapMaterialParameterBuffer();
+			renderer.UnmapMaterialParameterBuffer();
 		}
-		renderer->DrawFullscreenQuad(renderer->GetGodRayPS(), false);
+		renderer.DrawFullscreenQuad(renderer.GetGodRayPS(), false);
 
 		rt->BindTargetOnly(false);
 	}
@@ -583,11 +611,11 @@ public:
 	//---------------------------------------------------------------------------
 	void HDRTarget(bool bind)
 	{
-		auto renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();		
 		const auto& size = mSize;
 		if (!mHDRTarget)
 		{
-			mHDRTarget = renderer->CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE,
+			mHDRTarget = renderer.CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE,
 				TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
 			if (!mHDRTarget)
 			{
@@ -600,19 +628,19 @@ public:
 		TexturePtr rts[] = { mHDRTarget };
 		size_t index[] = { 0 };
 		auto rt = mRenderTarget.lock();
-		renderer->SetRenderTarget(rts, index, 1, rt->GetDepthStencilTexture(), 0);
-		renderer->SetViewports(&rt->GetViewport(), 1);
+		renderer.SetRenderTarget(rts, index, 1, rt->GetDepthStencilTexture(), 0);
+		renderer.SetViewports(&rt->GetViewport(), 1);
 	}
 
 	void Silouette()
 	{
 		auto rt = mRenderTarget.lock();
 		rt->BindTargetOnly(true);
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 
 		TexturePtr ts[] = { mSmallSilouetteBuffer, mBigSilouetteBuffer, mDepthTarget };
-		renderer->SetTextures(ts, 3, BINDING_SHADER_PS, 0);
-		renderer->DrawFullscreenQuad(renderer->GetSilouetteShader(), false);
+		renderer.SetTextures(ts, 3, BINDING_SHADER_PS, 0);
+		renderer.DrawFullscreenQuad(renderer.GetSilouetteShader(), false);
 	}
 
 	//---------------------------------------------------------------------------
@@ -623,7 +651,7 @@ public:
 			return;
 		}
 
-		auto const renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		const auto& oriSize = mSize;
 		Vec2I size((int)(oriSize.x*0.25f), (int)(oriSize.y*0.25f));
@@ -632,12 +660,12 @@ public:
 			assert(mGlowTarget);
 			TexturePtr rt[] = { mGlowTexture[1] };
 			size_t index[] = { 0 };
-			renderer->SetRenderTarget(rt, index, 1, 0, 0);
-			renderer->SetTexture(mGlowTarget, BINDING_SHADER_PS, 0);
-			renderer->RestoreBlendState();
+			renderer.SetRenderTarget(rt, index, 1, 0, 0);
+			renderer.SetTexture(mGlowTarget, BINDING_SHADER_PS, 0);
+			renderer.RestoreBlendState();
 			Vec2I resol = mGlowTexture[0]->GetSize();
 			Viewport vp = { 0, 0, (Real)resol.x, (Real)resol.y, 0, 1 };
-			renderer->SetViewports(&vp, 1);
+			renderer.SetViewports(&vp, 1);
 
 			if (!mGaussianDistBlendGlow)
 			{
@@ -646,39 +674,39 @@ public:
 			}
 
 			// Horizontal Blur		
-			BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+			BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 			Vec4* avSampleOffsets = pData->gSampleOffsets;
 			Vec4* avSampleWeights = pData->gSampleWeights;
 			memcpy(avSampleOffsets, mGaussianDistBlendGlow->mGaussianDistOffsetX, sizeof(Vec4) * 15);
 			memcpy(avSampleWeights, mGaussianDistBlendGlow->mGaussianDistWeightX, sizeof(Vec4) * 15);
-			renderer->UnmapBigBuffer();
+			renderer.UnmapBigBuffer();
 			// mGlowPS is same with BloomPS except it has the _MULTI_SAMPLE shader define.
-			renderer->DrawFullscreenQuad(renderer->GetGlowShader(), false);
+			renderer.DrawFullscreenQuad(renderer.GetGlowShader(), false);
 
 			// Vertical Blur
-			pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+			pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 			avSampleOffsets = pData->gSampleOffsets;
 			avSampleWeights = pData->gSampleWeights;
 			memcpy(avSampleOffsets, mGaussianDistBlendGlow->mGaussianDistOffsetY, sizeof(Vec4) * 15);
 			memcpy(avSampleWeights, mGaussianDistBlendGlow->mGaussianDistWeightY, sizeof(Vec4) * 15);
-			renderer->UnmapBigBuffer();
+			renderer.UnmapBigBuffer();
 			rt[0] = mGlowTexture[0];
-			renderer->SetRenderTarget(rt, index, 1, 0, 0);
-			renderer->SetTexture(mGlowTexture[1], BINDING_SHADER_PS, 0);
-			renderer->DrawFullscreenQuad(renderer->GetGlowShader(), false);
+			renderer.SetRenderTarget(rt, index, 1, 0, 0);
+			renderer.SetTexture(mGlowTexture[1], BINDING_SHADER_PS, 0);
+			renderer.DrawFullscreenQuad(renderer.GetGlowShader(), false);
 		}
 
 	{
 		RenderEventMarker marker("Glow Blend");
 		rt->BindTargetOnly(true);
-		renderer->SetTexture(mGlowTexture[0], BINDING_SHADER_PS, 0);
-		renderer->SetAdditiveBlendState();
-		renderer->SetNoDepthStencil();
-		if (renderer->GetMultiSampleCount() == 1)
-			renderer->DrawFullscreenQuad(renderer->GetCopyPS(), false);
+		renderer.SetTexture(mGlowTexture[0], BINDING_SHADER_PS, 0);
+		renderer.SetAdditiveBlendState();
+		renderer.SetNoDepthStencil();
+		if (renderer.GetMultiSampleCount() == 1)
+			renderer.DrawFullscreenQuad(renderer.GetCopyPS(), false);
 		else
-			renderer->DrawFullscreenQuad(renderer->GetCopyPSMS(), false);
-		renderer->RestoreBlendState();
+			renderer.DrawFullscreenQuad(renderer.GetCopyPSMS(), false);
+		renderer.RestoreBlendState();
 	}
 	}
 
@@ -687,98 +715,98 @@ public:
 	{
 		RenderEventMarker marker("GodRay Blending");
 		assert(mGodRayTarget[0]);
-		auto const renderer = Renderer::GetInstance();
-		renderer->SetTexture(mGodRayTarget[0], BINDING_SHADER_PS, 0);
-		renderer->SetAdditiveBlendState();
-		renderer->SetNoDepthStencil();
-		renderer->DrawFullscreenQuad(renderer->GetCopyPS(), false);
-		renderer->RestoreBlendState();
+		auto& renderer = Renderer::GetInstance();
+		renderer.SetTexture(mGodRayTarget[0], BINDING_SHADER_PS, 0);
+		renderer.SetAdditiveBlendState();
+		renderer.SetNoDepthStencil();
+		renderer.DrawFullscreenQuad(renderer.GetCopyPS(), false);
+		renderer.RestoreBlendState();
 	}
 
 	////---------------------------------------------------------------------------
 	void MeasureLuminanceOfHDRTarget()
 	{
-		auto const renderer = Renderer::GetInstance();
-		renderer->RestoreBlendState();
-		renderer->SetNoDepthStencil();
+		auto& renderer = Renderer::GetInstance();
+		renderer.RestoreBlendState();
+		renderer.SetNoDepthStencil();
 
 		RenderEventMarker mark("Luminance");
 		assert(mHDRTarget);
 		int dwCurTexture = Renderer::FB_NUM_TONEMAP_TEXTURES_NEW - 1;
-		TexturePtr renderTarget = renderer->GetToneMap(dwCurTexture);
+		TexturePtr renderTarget = renderer.GetToneMap(dwCurTexture);
 		TexturePtr rts[] = { renderTarget };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
-		renderer->SetTexture(mHDRTarget, BINDING_SHADER_PS, 0);
-		bool msaa = renderer->GetMultiSampleCount() > 1;
+		renderer.SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
+		renderer.SetTexture(mHDRTarget, BINDING_SHADER_PS, 0);
+		bool msaa = renderer.GetMultiSampleCount() > 1;
 		if (msaa)
 		{
-			Vec4* pDest = (Vec4*)renderer->MapMaterialParameterBuffer();
+			Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
 			if (pDest)
 			{
 				pDest->x = (Real)mHDRTarget->GetWidth();
 				pDest->y = (Real)mHDRTarget->GetHeight();
-				renderer->UnmapMaterialParameterBuffer();
+				renderer.UnmapMaterialParameterBuffer();
 			}
 		}
 
 		const Vec2I& resol = renderTarget->GetSize();
 		Viewport vp = { 0, 0, (Real)resol.x, (Real)resol.y, 0, 1 };
-		renderer->SetViewports(&vp, 1);
-		renderer->DrawFullscreenQuad(renderer->GetSampleLumInitialShader(), false);
+		renderer.SetViewports(&vp, 1);
+		renderer.DrawFullscreenQuad(renderer.GetSampleLumInitialShader(), false);
 		--dwCurTexture;
 
 		while (dwCurTexture>0)
 		{
-			TexturePtr src = renderer->GetToneMap(dwCurTexture + 1);
-			TexturePtr renderTarget = renderer->GetToneMap(dwCurTexture);
+			TexturePtr src = renderer.GetToneMap(dwCurTexture + 1);
+			TexturePtr renderTarget = renderer.GetToneMap(dwCurTexture);
 
 			TexturePtr rts[] = { renderTarget };
 			size_t index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
-			renderer->SetTexture(src, BINDING_SHADER_PS, 0);
+			renderer.SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
+			renderer.SetTexture(src, BINDING_SHADER_PS, 0);
 
 			const Vec2I& resol = renderTarget->GetSize();
 			Viewport vp = { 0, 0, (Real)resol.x, (Real)resol.y, 0, 1 };
-			renderer->SetViewports(&vp, 1);
-			renderer->DrawFullscreenQuad(renderer->GetSampleLumIterativeShader(), false);
+			renderer.SetViewports(&vp, 1);
+			renderer.DrawFullscreenQuad(renderer.GetSampleLumIterativeShader(), false);
 			--dwCurTexture;
 		}
 
 		// Perform the final pass of the average luminance calculation.
 	{
-		TexturePtr src = renderer->GetToneMap(dwCurTexture + 1);
-		TexturePtr renderTarget = renderer->GetToneMap(dwCurTexture);
+		TexturePtr src = renderer.GetToneMap(dwCurTexture + 1);
+		TexturePtr renderTarget = renderer.GetToneMap(dwCurTexture);
 		TexturePtr rts[] = { renderTarget };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
-		renderer->SetTexture(src, BINDING_SHADER_PS, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
+		renderer.SetTexture(src, BINDING_SHADER_PS, 0);
 		const Vec2I& resol = renderTarget->GetSize();
 		{Viewport vp = { 0, 0, (Real)resol.x, (Real)resol.y, 0, 1 };
-		renderer->SetViewports(&vp, 1); }
+		renderer.SetViewports(&vp, 1); }
 
-		renderer->DrawFullscreenQuad(renderer->GetSampleLumFinalShader(), false);
+		renderer.DrawFullscreenQuad(renderer.GetSampleLumFinalShader(), false);
 	}
 
 	// AdaptedLum
 	{
-		renderer->SwapLuminanceMap();
-		auto luminanceMap0 = renderer->GetLuminanceMap(0);
+		renderer.SwapLuminanceMap();
+		auto luminanceMap0 = renderer.GetLuminanceMap(0);
 		TexturePtr rts[] = { luminanceMap0 };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
-		renderer->SetTexture(renderer->GetLuminanceMap(1), BINDING_SHADER_PS, 0);
-		renderer->SetTexture(renderer->GetToneMap(0), BINDING_SHADER_PS, 1);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
+		renderer.SetTexture(renderer.GetLuminanceMap(1), BINDING_SHADER_PS, 0);
+		renderer.SetTexture(renderer.GetToneMap(0), BINDING_SHADER_PS, 1);
 		Viewport vp = { 0, 0, (Real)luminanceMap0->GetWidth(), (Real)luminanceMap0->GetHeight(), 0, 1 };
-		renderer->SetViewports(&vp, 1);
-		renderer->DrawFullscreenQuad(renderer->GetCalcAdapedLumShader(), false);
+		renderer.SetViewports(&vp, 1);
+		renderer.DrawFullscreenQuad(renderer.GetCalcAdapedLumShader(), false);
 	}
 	}
 
 	//---------------------------------------------------------------------------
 	void BrightPass()
 	{
-		auto const renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		const auto& size = mSize;
 		if (!mBrightPassTexture)
@@ -787,7 +815,7 @@ public:
 				CropSize8((int)(size.x* 0.25f)),
 				CropSize8((int)(size.y * 0.25f))
 				);
-			mBrightPassTexture = renderer->CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
+			mBrightPassTexture = renderer.CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
 				BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);			
 			mBrightPassTexture->SetDebugName(FormatString("rt%u_%u_%u_BrightPass", rt->GetId(), size.x, size.y).c_str());
 		}
@@ -798,135 +826,135 @@ public:
 			// brightpass
 			TexturePtr rts[] = { mBrightPassTexture };
 			size_t index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
+			renderer.SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
 
-			TexturePtr rvs[] = { mHDRTarget, renderer->GetLuminanceMap(0) };
-			renderer->SetTextures(rvs, 2, BINDING_SHADER_PS, 0);
+			TexturePtr rvs[] = { mHDRTarget, renderer.GetLuminanceMap(0) };
+			renderer.SetTextures(rvs, 2, BINDING_SHADER_PS, 0);
 
 			Viewport vp = { 0, 0, (Real)resol.x, (Real)resol.y, 0, 1 };
-			renderer->SetViewports(&vp, 1);
+			renderer.SetViewports(&vp, 1);
 
-			if (renderer->GetMultiSampleCount() != 1)
+			if (renderer.GetMultiSampleCount() != 1)
 			{
-				Vec4* pDest = (Vec4*)renderer->MapMaterialParameterBuffer();
+				Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
 				if (pDest)
 				{
 					pDest->x = (Real)mHDRTarget->GetWidth();
 					pDest->y = (Real)mHDRTarget->GetHeight();
-					renderer->UnmapMaterialParameterBuffer();
+					renderer.UnmapMaterialParameterBuffer();
 				}
 			}
 
-			renderer->DrawFullscreenQuad(renderer->GetBrightPassPS(), false);
+			renderer.DrawFullscreenQuad(renderer.GetBrightPassPS(), false);
 		}
 	}
 
 	//---------------------------------------------------------------------------
 	void BrightPassToStarSource()
 	{
-		auto const renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();		
 		const auto& size = mSize;
 		if (!mStarSourceTex)
 		{
 			Vec2I starSourceSize(CropSize8((int)(size.x*0.25f)),
 				CropSize8((int)(size.y*0.25f))
 				);
-			mStarSourceTex = renderer->CreateTexture(0, starSourceSize.x, starSourceSize.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
+			mStarSourceTex = renderer.CreateTexture(0, starSourceSize.x, starSourceSize.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
 				BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 		}
 		RenderEventMarker mark("BrightPassToStarSource");
 
 		Vec4* pOffsets = 0;
 		Vec4* pWeights = 0;
-		renderer->GetSampleOffsets_GaussBlur5x5(mGlowTarget->GetWidth(), mGlowTarget->GetHeight(),
+		renderer.GetSampleOffsets_GaussBlur5x5(mGlowTarget->GetWidth(), mGlowTarget->GetHeight(),
 			&pOffsets, &pWeights, 1.0f);
 		assert(pOffsets && pWeights);
 
-		BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+		BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 		memcpy(pData->gSampleOffsets, pOffsets, sizeof(Vec4) * 13);
 		memcpy(pData->gSampleWeights, pWeights, sizeof(Vec4) * 13);
-		renderer->UnmapBigBuffer();
+		renderer.UnmapBigBuffer();
 
 		TexturePtr rts[] = { mStarSourceTex };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
 		Viewport vp = { 0, 0, (Real)mStarSourceTex->GetWidth(), (Real)mStarSourceTex->GetHeight(), 0, 1 };
-		renderer->SetViewports(&vp, 1);
-		renderer->Clear(0, 0, 0, 1);
-		renderer->SetTexture(mGlowTarget, BINDING_SHADER_PS, 0);
-		if (renderer->GetMultiSampleCount() != 1)
+		renderer.SetViewports(&vp, 1);
+		renderer.Clear(0, 0, 0, 1);
+		renderer.SetTexture(mGlowTarget, BINDING_SHADER_PS, 0);
+		if (renderer.GetMultiSampleCount() != 1)
 		{
-			Vec4* pDest = (Vec4*)renderer->MapMaterialParameterBuffer();
+			Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
 			if (pDest)
 			{
 				pDest->x = (Real)mGlowTarget->GetWidth();
 				pDest->y = (Real)mGlowTarget->GetHeight();
-				renderer->UnmapMaterialParameterBuffer();
+				renderer.UnmapMaterialParameterBuffer();
 			}
 		}
 
-		renderer->DrawFullscreenQuad(renderer->GetBlur5x5PS(), false);
+		renderer.DrawFullscreenQuad(renderer.GetBlur5x5PS(), false);
 	}
 
 	//---------------------------------------------------------------------------
 	void StarSourceToBloomSource()
 	{
 		RenderEventMarker mark("StarSourceToBloomSource");
-		auto const renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();		
 		const auto& size = mSize;
 		if (!mBloomSourceTex)
 		{
 			Vec2I bloomSourceSize(CropSize8(size.x / 8), CropSize8(size.y / 8));
-			mBloomSourceTex = renderer->CreateTexture(0, bloomSourceSize.x, bloomSourceSize.y, PIXEL_FORMAT_R8G8B8A8_UNORM, BUFFER_USAGE_DEFAULT,
+			mBloomSourceTex = renderer.CreateTexture(0, bloomSourceSize.x, bloomSourceSize.y, PIXEL_FORMAT_R8G8B8A8_UNORM, BUFFER_USAGE_DEFAULT,
 				BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 		}
-		auto blur5x5 = renderer->GetBlur5x5PS();
+		auto blur5x5 = renderer.GetBlur5x5PS();
 		assert(blur5x5);
 		Vec4* pOffsets = 0;
 		Vec4* pWeights = 0;
-		renderer->GetSampleOffsets_GaussBlur5x5(mBrightPassTexture->GetWidth(), mBrightPassTexture->GetHeight(),
+		renderer.GetSampleOffsets_GaussBlur5x5(mBrightPassTexture->GetWidth(), mBrightPassTexture->GetHeight(),
 			&pOffsets, &pWeights, 1.0f);
 		assert(pOffsets && pWeights);
 
-		BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+		BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 		memcpy(pData->gSampleOffsets, pOffsets, sizeof(Vec4) * 13);
 		memcpy(pData->gSampleWeights, pWeights, sizeof(Vec4) * 13);
-		renderer->UnmapBigBuffer();
+		renderer.UnmapBigBuffer();
 
 		TexturePtr rts[] = { mBloomSourceTex };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
 
 		Viewport vp = { 0, 0, (Real)mBloomSourceTex->GetWidth(), (Real)mBloomSourceTex->GetHeight(), 0, 1 };
-		renderer->SetViewports(&vp, 1);
+		renderer.SetViewports(&vp, 1);
 
-		renderer->SetTexture(mBrightPassTexture, BINDING_SHADER_PS, 0);
+		renderer.SetTexture(mBrightPassTexture, BINDING_SHADER_PS, 0);
 
-		if (renderer->GetMultiSampleCount() != 1)
+		if (renderer.GetMultiSampleCount() != 1)
 		{
-			Vec4* pDest = (Vec4*)renderer->MapMaterialParameterBuffer();
+			Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
 			if (pDest)
 			{
 				pDest->x = (Real)mBrightPassTexture->GetWidth();
 				pDest->y = (Real)mBrightPassTexture->GetHeight();
-				renderer->UnmapMaterialParameterBuffer();
+				renderer.UnmapMaterialParameterBuffer();
 			}
 		}
 
-		renderer->DrawFullscreenQuad(blur5x5, false);
+		renderer.DrawFullscreenQuad(blur5x5, false);
 	}
 
 	//---------------------------------------------------------------------------
 	void Bloom()
 	{
-		auto const renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (!mBloomTexture[0])
 		{
 			Vec2I size(CropSize8(mSize.x / 8),
 				CropSize8(mSize.y / 8));
 			for (int i = 0; i < FB_NUM_BLOOM_TEXTURES; i++)
 			{
-				mBloomTexture[i] = renderer->CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
+				mBloomTexture[i] = renderer.CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
 					BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 				char buff[255];
 				sprintf_s(buff, "rt%u_%u_%u_Bloom(%d) %u", mId, size.x, size.y, i);
@@ -939,41 +967,41 @@ public:
 		assert(mBloomSourceTex);
 		TexturePtr rts[] = { mBloomTexture[2] };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
 		Viewport vp = { 0, 0, (Real)mBloomTexture[2]->GetWidth(), (Real)mBloomTexture[2]->GetHeight(), 0, 1 };
-		renderer->SetViewports(&vp, 1);
+		renderer.SetViewports(&vp, 1);
 
-		renderer->SetTexture(mBloomSourceTex, BINDING_SHADER_PS, 0);
+		renderer.SetTexture(mBloomSourceTex, BINDING_SHADER_PS, 0);
 
 		Vec4* pOffsets = 0;
 		Vec4* pWeights = 0;
-		renderer->GetSampleOffsets_GaussBlur5x5(mBrightPassTexture->GetWidth(), mBrightPassTexture->GetHeight(),
+		renderer.GetSampleOffsets_GaussBlur5x5(mBrightPassTexture->GetWidth(), mBrightPassTexture->GetHeight(),
 			&pOffsets, &pWeights, 1.0f);
 		assert(pOffsets && pWeights);
 
-		BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+		BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 		memcpy(pData->gSampleOffsets, pOffsets, sizeof(Vec4) * 13);
 		memcpy(pData->gSampleWeights, pWeights, sizeof(Vec4) * 13);
-		renderer->UnmapBigBuffer();
+		renderer.UnmapBigBuffer();
 
-		if (renderer->GetMultiSampleCount() != 1)
+		if (renderer.GetMultiSampleCount() != 1)
 		{
-			Vec4* pDest = (Vec4*)renderer->MapMaterialParameterBuffer();
+			Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
 			if (pDest)
 			{
 				pDest->x = (Real)mBloomSourceTex->GetWidth();
 				pDest->y = (Real)mBloomSourceTex->GetHeight();
-				renderer->UnmapMaterialParameterBuffer();
+				renderer.UnmapMaterialParameterBuffer();
 			}
 		}
 
-		renderer->DrawFullscreenQuad(renderer->GetBlur5x5PS(), false);
+		renderer.DrawFullscreenQuad(renderer.GetBlur5x5PS(), false);
 
 		const Vec2I& resol = mBloomTexture[2]->GetSize();
 		// Horizontal Blur
 		{
 			RenderEventMarker mark("Bloom - Apply hori gaussian filter");
-			BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+			BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 			Vec4* avSampleOffsets = pData->gSampleOffsets;
 			Vec4* avSampleWeights = pData->gSampleWeights;
 			if (!mGaussianDistBloom)
@@ -983,33 +1011,33 @@ public:
 			}
 			memcpy(avSampleOffsets, mGaussianDistBloom->mGaussianDistOffsetX, sizeof(Vec4) * 15);
 			memcpy(avSampleWeights, mGaussianDistBloom->mGaussianDistWeightX, sizeof(Vec4) * 15);
-			renderer->UnmapBigBuffer();
+			renderer.UnmapBigBuffer();
 
 			TexturePtr rts[] = { mBloomTexture[1] };
 			size_t index[] = { 0 };
-			renderer->SetRenderTarget(rts, index, 1, 0, 0);
-			renderer->SetTexture(mBloomTexture[2], BINDING_SHADER_PS, 0);
-			renderer->DrawFullscreenQuad(renderer->GetBloomPS(), false);
+			renderer.SetRenderTarget(rts, index, 1, 0, 0);
+			renderer.SetTexture(mBloomTexture[2], BINDING_SHADER_PS, 0);
+			renderer.DrawFullscreenQuad(renderer.GetBloomPS(), false);
 		}
 
 		// Vertical Blur
 	{
 		RenderEventMarker mark("Bloom - Apply verti gaussian filter");
-		BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+		BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 		Vec4* avSampleOffsets = pData->gSampleOffsets;
 		Vec4* avSampleWeights = pData->gSampleWeights;
 		memcpy(avSampleOffsets, mGaussianDistBloom->mGaussianDistOffsetY, sizeof(Vec4) * 15);
 		memcpy(avSampleWeights, mGaussianDistBloom->mGaussianDistWeightY, sizeof(Vec4) * 15);
-		renderer->UnmapBigBuffer();
+		renderer.UnmapBigBuffer();
 
-		renderer->SetTexture(0, BINDING_SHADER_PS, 0);
-		renderer->SetTexture(0, BINDING_SHADER_PS, 1);
-		renderer->SetTexture(0, BINDING_SHADER_PS, 2);
+		renderer.SetTexture(0, BINDING_SHADER_PS, 0);
+		renderer.SetTexture(0, BINDING_SHADER_PS, 1);
+		renderer.SetTexture(0, BINDING_SHADER_PS, 2);
 		rts[0] = mBloomTexture[0];
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
-		renderer->SetTexture(mBloomTexture[1], BINDING_SHADER_PS, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetTexture(mBloomTexture[1], BINDING_SHADER_PS, 0);
 
-		renderer->DrawFullscreenQuad(renderer->GetBloomPS(), false);
+		renderer.DrawFullscreenQuad(renderer.GetBloomPS(), false);
 	}
 	}
 	
@@ -1041,23 +1069,23 @@ public:
 	//---------------------------------------------------------------------------
 	void RenderStarGlare()
 	{
-		auto const renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (mStarTextures[0] == 0)
 		{
 			Vec2I size(CropSize8((int)(mSize.x * 0.25f)), CropSize8((int)(mSize.y*0.25f)));
 			for (int i = 0; i < FB_NUM_STAR_TEXTURES; ++i)
 			{
-				mStarTextures[i] = renderer->CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
+				mStarTextures[i] = renderer.CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			}
 		}
 
 		TexturePtr rts[] = { mStarTextures[0] };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
 		Viewport vp = { 0, 0, (Real)mStarTextures[0]->GetWidth(), (Real)mStarTextures[0]->GetHeight(), 0, 1 };
-		renderer->SetViewports(&vp, 1);
-		renderer->Clear(0, 0, 0, 1);
+		renderer.SetViewports(&vp, 1);
+		renderer.Clear(0, 0, 0, 1);
 
 		auto rt = mRenderTarget.lock();
 		const Real fTanFoV = rt->GetCamera()->GetFOV();
@@ -1138,16 +1166,16 @@ public:
 					}
 
 				}
-				BIG_BUFFER* pData = (BIG_BUFFER*)renderer->MapBigBuffer();
+				BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 				memcpy(pData->gSampleOffsets, avSampleOffsets, sizeof(Vec4)* Renderer::FB_MAX_SAMPLES);
 				memcpy(pData->gSampleWeights, avSampleWeights, sizeof(Vec4)* Renderer::FB_MAX_SAMPLES);
-				renderer->UnmapBigBuffer();
+				renderer.UnmapBigBuffer();
 
 				TexturePtr rts[] = { pDestTexture };
 				size_t index[] = { 0 };
-				renderer->SetRenderTarget(rts, index, 1, 0, 0);
-				renderer->SetTexture(pSrcTexture, BINDING_SHADER_PS, 0);
-				renderer->DrawFullscreenQuad(renderer->GetStarGlareShader(), false);
+				renderer.SetRenderTarget(rts, index, 1, 0, 0);
+				renderer.SetTexture(pSrcTexture, BINDING_SHADER_PS, 0);
+				renderer.DrawFullscreenQuad(renderer.GetStarGlareShader(), false);
 
 				// Setup next expansion
 				vtStepUV *= starGlareSamples;
@@ -1177,14 +1205,14 @@ public:
 	{
 		TexturePtr rts[] = { pDestTexture };
 		size_t index[] = { 0 };
-		renderer->SetRenderTarget(rts, index, 1, 0, 0);
+		renderer.SetRenderTarget(rts, index, 1, 0, 0);
 	}
-	renderer->SetTextures(&textures[0], textures.size(), BINDING_SHADER_PS, 0);
+	renderer.SetTextures(&textures[0], textures.size(), BINDING_SHADER_PS, 0);
 
 	switch (starGlareDef->m_nStarLines)
 	{
 	case 2:
-		renderer->DrawFullscreenQuad(renderer->GetMergeTexturePS(), false);
+		renderer.DrawFullscreenQuad(renderer.GetMergeTexturePS(), false);
 		break;
 
 	default:
@@ -1196,31 +1224,31 @@ public:
 	{
 		textures.push_back(0);
 	}
-	renderer->SetTextures(&textures[0], starGlareDef->m_nStarLines, BINDING_SHADER_PS, 0);
+	renderer.SetTextures(&textures[0], starGlareDef->m_nStarLines, BINDING_SHADER_PS, 0);
 	}
 
 	//---------------------------------------------------------------------------
 	void ToneMapping()
 	{
 		RenderEventMarker mark("ToneMapping");
-		auto renderer = Renderer::GetInstance();
-		TexturePtr textures[] = { mHDRTarget, renderer->GetLuminanceMap(0), mBloomTexture[0], mStarTextures[0] };
+		auto& renderer = Renderer::GetInstance();
+		TexturePtr textures[] = { mHDRTarget, renderer.GetLuminanceMap(0), mBloomTexture[0], mStarTextures[0] };
 		auto rt = mRenderTarget.lock();
 		rt->BindTargetOnly(false);
-		renderer->SetTextures(textures, 4, BINDING_SHADER_PS, 0);
-		if (renderer->IsLuminanceOnCpu())
+		renderer.SetTextures(textures, 4, BINDING_SHADER_PS, 0);
+		if (renderer.IsLuminanceOnCpu())
 		{
-			Vec4* pData = (Vec4*)renderer->MapMaterialParameterBuffer();
+			Vec4* pData = (Vec4*)renderer.MapMaterialParameterBuffer();
 			if (pData)
 			{
 				*pData = float4(mLuminance, 0, 0, 0);
-				renderer->UnmapMaterialParameterBuffer();
+				renderer.UnmapMaterialParameterBuffer();
 			}
 		}
 
-		renderer->DrawFullscreenQuad(renderer->GetToneMappingPS(), false);
-		renderer->RestoreDepthStencilState();
-		renderer->SetTexture(0, BINDING_SHADER_PS, 3);
+		renderer.DrawFullscreenQuad(renderer.GetToneMappingPS(), false);
+		renderer.RestoreDepthStencilState();
+		renderer.SetTexture(0, BINDING_SHADER_PS, 3);
 	}
 
 	TexturePtr GetShadowMap() const{

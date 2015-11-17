@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "RenderStates.h"
 #include "Renderer.h"
@@ -33,61 +60,61 @@ public:
 
 	void ResetRasterizerState(){
 		mRDesc.reset();
-		auto renderer = Renderer::GetInstance();
-		mRasterizerState = renderer->CreateRasterizerState(DefaultRDesc);
+		auto& renderer = Renderer::GetInstance();
+		mRasterizerState = renderer.CreateRasterizerState(DefaultRDesc);
 	}
 
 	void ResetBlendState(){
 		mBDesc.reset();
-		auto renderer = Renderer::GetInstance();
-		mBlendState = renderer->CreateBlendState(DefaultBDesc);
+		auto& renderer = Renderer::GetInstance();
+		mBlendState = renderer.CreateBlendState(DefaultBDesc);
 	}
 
 	void ResetDepthStencilState(){
 		mDDesc.reset();
-		auto renderer = Renderer::GetInstance();
-		mDepthStencilState = renderer->CreateDepthStencilState(DefaultDDesc);
+		auto& renderer = Renderer::GetInstance();
+		mDepthStencilState = renderer.CreateDepthStencilState(DefaultDDesc);
 	}
 
 	void CreateRasterizerState(const RASTERIZER_DESC& desc){
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (DefaultRDesc == desc){
 			if (mRDesc){
 				mRDesc.reset();
-				mRasterizerState = renderer->CreateRasterizerState(DefaultRDesc);
+				mRasterizerState = renderer.CreateRasterizerState(DefaultRDesc);
 			}
 		}
 		else{
 			mRDesc = new RASTERIZER_DESC(desc);
-			mRasterizerState = renderer->CreateRasterizerState(desc);
+			mRasterizerState = renderer.CreateRasterizerState(desc);
 		}		
 	}
 
 	void CreateBlendState(const BLEND_DESC& desc){
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (DefaultBDesc == desc){
 			if (mBDesc){
 				mBDesc.reset();
-				mBlendState = renderer->CreateBlendState(DefaultBDesc);
+				mBlendState = renderer.CreateBlendState(DefaultBDesc);
 			}
 		}
 		else{
 			mBDesc = new BLEND_DESC(desc);
-			mBlendState = renderer->CreateBlendState(desc);
+			mBlendState = renderer.CreateBlendState(desc);
 		}
 	}
 
 	void CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc){
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (DefaultDDesc == desc){
 			if (mDDesc){
 				mDDesc.reset();
-				mDepthStencilState = renderer->CreateDepthStencilState(DefaultDDesc);
+				mDepthStencilState = renderer.CreateDepthStencilState(DefaultDDesc);
 			}
 		}
 		else{
 			mDDesc = new DEPTH_STENCIL_DESC(desc);
-			mDepthStencilState = renderer->CreateDepthStencilState(desc);
+			mDepthStencilState = renderer.CreateDepthStencilState(desc);
 		}		
 	}
 

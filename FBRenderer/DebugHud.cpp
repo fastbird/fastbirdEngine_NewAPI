@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "DebugHud.h"
 #include "Renderer.h"
@@ -10,8 +37,8 @@
 #include "Shader.h"
 #include "VertexBuffer.h"
 #include "FBSceneManager/Camera.h"
-#include "FBRenderableFactory/RenderableFactory.h"
-#include "FBRenderableFactory/MeshObject.h"
+#include "FBSceneManager/SceneManager.h"
+#include "FBSceneManager/MeshObject.h"
 
 using namespace fastbird;
 
@@ -119,12 +146,12 @@ public:
 
 		mObjectConstants_WorldLine.gWorld.MakeIdentity();
 		mObjectConstants_WorldLine.gWorldViewProj.MakeIdentity();
-		auto renderer = Renderer::GetInstance();
-		mLineShader = renderer->CreateShader(
+		auto& renderer = Renderer::GetInstance();
+		mLineShader = renderer.CreateShader(
 			"es/shaders/Line.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
 
-		mInputLayout = renderer->GetInputLayout(DEFAULT_INPUTS::POSITION_COLOR, mLineShader);
-		mVertexBuffer = renderer->CreateVertexBuffer(0, LINE_STRIDE, MAX_LINE_VERTEX,
+		mInputLayout = renderer.GetInputLayout(DEFAULT_INPUTS::POSITION_COLOR, mLineShader);
+		mVertexBuffer = renderer.CreateVertexBuffer(0, LINE_STRIDE, MAX_LINE_VERTEX,
 			BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
 
 		DEPTH_STENCIL_DESC ddesc;
@@ -132,9 +159,8 @@ public:
 		mRenderStates = RenderStates::Create();
 		mRenderStates->CreateDepthStencilState(ddesc);
 
-		auto factory = RenderableFactory::Create();
-		mSphereMesh = factory->CreateMesh("es/objects/DebugSphere.dae");
-		mBoxMesh = factory->CreateMesh("es/objects/DebugBox.dae");		
+		mSphereMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugSphere.dae");
+		mBoxMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugBox.dae");
 	}
 
 	void SetRenderTargetSize(const Vec2I& size){
@@ -153,8 +179,8 @@ public:
 			it = mTextsForDur.insert(std::make_pair(pos, MessageBuffer())).first;
 		}
 		it->second.insert(it->second.begin(), TextData(pos, text, color, size, secs));
-		auto renderer = Renderer::GetInstance();
-		auto font = renderer->GetFont(size);
+		auto& renderer = Renderer::GetInstance();
+		auto font = renderer.GetFont(size);
 		if (font){
 			it->second.begin()->mWidth = font->GetTextWidth((const char*)text);
 		}
@@ -177,8 +203,8 @@ public:
 
 	void Draw3DText(const Vec3& pos, WCHAR* text, const Color& color, float size)
 	{
-		auto renderer = Renderer::GetInstance();
-		auto cam = renderer->GetCamera();
+		auto& renderer = Renderer::GetInstance();
+		auto cam = renderer.GetCamera();
 		if (cam)
 		{
 			Vec2I spos = cam->WorldToScreen(pos);
@@ -266,24 +292,24 @@ public:
 	//----------------------------------------------------------------------------
 	void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
-		auto renderer = Renderer::GetInstance();
-		if (!renderer->GetOptions()->r_debugDraw)
+		auto& renderer = Renderer::GetInstance();
+		if (!renderer.GetOptions()->r_debugDraw)
 			return;
 		if (renderParam.mRenderPass != RENDER_PASS::PASS_NORMAL)
 			return;
 
 		mObjectConstants_WorldLine.gWorldViewProj = 
-			renderer->GetCamera()->GetMatrix(Camera::ViewProj);
+			renderer.GetCamera()->GetMatrix(Camera::ViewProj);
 
 		//Profiler profile("void Render()");
-		renderer->BeginEvent("Debug Hud");
+		renderer.BeginEvent("Debug Hud");
 
 		// object constant buffer
 		mRenderStates->Bind();
 		mInputLayout->Bind();
 		mLineShader->Bind();
-		renderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINELIST);
-		renderer->UpdateObjectConstantsBuffer(&mObjectConstants_WorldLine);
+		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINELIST);
+		renderer.UpdateObjectConstantsBuffer(&mObjectConstants_WorldLine);
 		unsigned lineCount = mWorldLines.size();
 		if (lineCount > 0)
 		{
@@ -303,19 +329,19 @@ public:
 					}
 					mVertexBuffer->Unmap();
 					mVertexBuffer->Bind();
-					renderer->Draw(numVertex, 0);
+					renderer.Draw(numVertex, 0);
 				}
 			}
 			mWorldLines.clear();
 		}
 
-		const auto& size = renderer->GetMainRTSize();
+		const auto& size = renderer.GetMainRTSize();
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
 			(float)size.x,
 			(float)size.y,
 			0.f, 1.0f);
 		mObjectConstants.gWorld.MakeIdentity();
-		renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+		renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 		lineCount = mScreenLines.size();
 		if (lineCount > 0)
 		{
@@ -334,19 +360,19 @@ public:
 					}
 					mVertexBuffer->Unmap();
 					mVertexBuffer->Bind();
-					renderer->Draw(numVertex, 0);
+					renderer.Draw(numVertex, 0);
 				}
 			}
 			mScreenLines.clear();
 		}
 		bool updateRs = true;
 		for (auto& q : mQuads){
-			renderer->DrawQuad(q.mPos, q.mSize, q.mColor, updateRs);
+			renderer.DrawQuad(q.mPos, q.mSize, q.mColor, updateRs);
 			updateRs = false;
 		}
 		mQuads.clear();
 
-		auto pFont = renderer->GetFont(20.f);
+		auto pFont = renderer.GetFont(20.f);
 		float curFontHeight = 20.f;
 
 		pFont->PrepareRenderResources();
@@ -355,7 +381,7 @@ public:
 		{
 			const TextData& textData = mTexts.front();
 			if (curFontHeight != textData.mSize){
-				pFont = renderer->GetFont(textData.mSize);
+				pFont = renderer.GetFont(textData.mSize);
 				curFontHeight = textData.mSize;
 			}
 			pFont->Write((float)textData.mPos.x, (float)textData.mPos.y, 0.5f, textData.mColor.Get4Byte(),
@@ -409,7 +435,7 @@ public:
 						Color color = it->mColor;
 						float proportion = 1.0f - (it->mSecs / it->mDuration);
 						color.a() = 1.0f - (proportion*proportion);
-						renderer->DrawQuad(Vec2I(drawPos.x - 4, drawPos.y - (int)it->mSize - 2), Vec2I((int)it->mWidth + 8, (int)it->mSize + 4), Color(0, 0, 0, color.a()*0.7f));
+						renderer.DrawQuad(Vec2I(drawPos.x - 4, drawPos.y - (int)it->mSize - 2), Vec2I((int)it->mWidth + 8, (int)it->mSize + 4), Color(0, 0, 0, color.a()*0.7f));
 						pFont->PrepareRenderResources();
 						pFont->Write((float)drawPos.x, (float)drawPos.y, 0.5f, color.Get4Byte(),
 							(const char*)it->mText.c_str(), -1, Font::FONT_ALIGN_LEFT);
@@ -425,8 +451,8 @@ public:
 
 		if (mSphereMesh)
 		{
-			renderer->BeginEvent("Debug Hud - Spheres");			
-			renderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			renderer.BeginEvent("Debug Hud - Spheres");			
+			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			for (auto& sphere : mSpheres)
 			{
 				Transformation t;
@@ -434,9 +460,9 @@ public:
 				t.SetTranslation(sphere.mPos);
 				t.GetHomogeneous(mObjectConstants.gWorld);
 				// only world are available. other matrix will be calculated in the shader
-				//mObjectConstants.gWorldView = gFBEnv->renderer->GetCamera()->GetViewMat() * mObjectConstants.gWorld;
-				//mObjectConstants.gWorldViewProj = gFBEnv->renderer->GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
-				renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+				//mObjectConstants.gWorldView = gFBEnv->renderer.GetCamera()->GetViewMat() * mObjectConstants.gWorld;
+				//mObjectConstants.gWorldViewProj = gFBEnv->renderer.GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
+				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 				mSphereMesh->GetMaterial()->SetMaterialParameters(0, sphere.mColor.GetVec4());
 				mSphereMesh->GetMaterial()->Bind(true);
 				mSphereMesh->RenderSimple();
@@ -447,7 +473,7 @@ public:
 		if (mBoxMesh)
 		{
 			D3DEventMarker mark("Render - Boxes()");
-			gFBEnv->renderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			gFBEnv->renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			for (auto& box : mBoxes)
 			{
 				Transformation t;
@@ -455,7 +481,7 @@ public:
 				t.SetTranslation(box.mPos);
 				t.GetHomogeneous(mObjectConstants.gWorld);
 
-				gFBEnv->renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+				gFBEnv->renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 				Vec4 color = box.mColor.GetVec4();
 				color.w = box.mAlpha;
 				mBoxMesh->GetMaterial()->SetMaterialParameters(0, color);
@@ -471,7 +497,7 @@ public:
 			{
 				Vec4 color = tri.mColor.GetVec4();
 				color.w = tri.mAlpha;
-				gFBEnv->renderer->DrawTriangleNow(tri.a, tri.b, tri.c, color, mTriMaterial);
+				gFBEnv->renderer.DrawTriangleNow(tri.a, tri.b, tri.c, color, mTriMaterial);
 			}
 		}
 		mTriangles.clear();
@@ -494,8 +520,8 @@ public:
 		// object constant buffer
 		mInputLayout->Bind();
 		mLineShader->Bind();
-		renderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINELIST);
-		renderer->UpdateObjectConstantsBuffer(&mObjectConstants_WorldLine);
+		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINELIST);
+		renderer.UpdateObjectConstantsBuffer(&mObjectConstants_WorldLine);
 		if (lineCount > 0)
 		{
 			while (lineCount)
@@ -513,7 +539,7 @@ public:
 					}
 					mVertexBuffer->Unmap();
 					mVertexBuffer->Bind();
-					renderer->Draw(numVertex, 0);
+					renderer.Draw(numVertex, 0);
 				}
 			}
 			mWorldLinesBeforeAlphaPass.clear();

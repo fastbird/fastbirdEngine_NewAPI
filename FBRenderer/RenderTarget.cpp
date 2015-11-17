@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "RenderTarget.h"
 #include "Renderer.h"
@@ -68,12 +95,10 @@ public:
 	// Observable<IRenderTargetObserver>
 	//-------------------------------------------------------------------
 	void OnObserverAdded(IRenderTargetObserver* observer){
-		auto renderer = Renderer::GetInstance();
-		if (renderer){
-			HWindow hwnd = renderer->GetWindowHandle(mId);
-			if (hwnd){
-				observer->OnRenderTargetSizeChanged(mSize.x, mSize.y, hwnd);
-			}
+		auto& renderer = Renderer::GetInstance();
+		HWindow hwnd = renderer.GetWindowHandle(mId);
+		if (hwnd){
+			observer->OnRenderTargetSizeChanged(mSize.x, mSize.y, hwnd);
 		}
 	}
 	void OnObserverRemoved(IRenderTargetObserver* observer){
@@ -93,7 +118,7 @@ public:
 		auto prevScene = mScene;
 		mScene = scene;
 		if (scene){
-			scene->AddObserver(ISceneObserver::Timing, Renderer::GetInstance());
+			scene->AddObserver(ISceneObserver::Timing, Renderer::GetInstancePtr());
 		}
 		return prevScene.lock();
 	}
@@ -117,9 +142,8 @@ public:
 			type |= TEXTURE_TYPE_MIPS;
 		if (cubeMap)
 			type |= TEXTURE_TYPE_CUBE_MAP;
-		auto renderer = Renderer::GetInstance();
-		if (!renderer) return;
-		mRenderTargetTexture = renderer->CreateTexture(0, width, height, format,
+		auto& renderer = Renderer::GetInstance();		
+		mRenderTargetTexture = renderer.CreateTexture(0, width, height, format,
 			BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, type);
 		mCamera->SetWidth((float)width);
 		mCamera->SetHeight((float)height);
@@ -136,9 +160,8 @@ public:
 		type = srv ? TEXTURE_TYPE_DEPTH_STENCIL_SRV : TEXTURE_TYPE_DEPTH_STENCIL;
 		if (cubeMap)
 			type |= TEXTURE_TYPE_CUBE_MAP;
-		auto renderer = Renderer::GetInstance();
-		if (!renderer) return;
-		mDepthStencilTexture = renderer->CreateTexture(0, width, height, format,
+		auto& renderer = Renderer::GetInstance();		
+		mDepthStencilTexture = renderer.CreateTexture(0, width, height, format,
 			BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, type);
 		mWillCreateDepth = true;
 	}
@@ -147,42 +170,39 @@ public:
 	{
 		if (!mEnabled)
 			return;
-		auto renderer = Renderer::GetInstance();
-		if (!renderer)
-			return;
-
-		renderer->SetCurrentRenderTarget(mSelf.lock());
+		auto& renderer = Renderer::GetInstance();
+		renderer.SetCurrentRenderTarget(mSelf.lock());
 
 		if (mRenderTargetTexture)
 			mRenderTargetTexture->Unbind();
 		TexturePtr rt[] = { mRenderTargetTexture };
 		size_t rtViewIndex[] = { face };
-		renderer->SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, face);
-		renderer->SetViewports(&mViewport, 1);
-		renderer->Clear(mClearColor.r(), mClearColor.g(), mClearColor.b(), mClearColor.a(),
+		renderer.SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, face);
+		renderer.SetViewports(&mViewport, 1);
+		renderer.Clear(mClearColor.r(), mClearColor.g(), mClearColor.b(), mClearColor.a(),
 			mDepthClear, mStencilClear);
 		auto scene = mScene.lock();
 		if (scene){
 			auto light = scene->GetLight(0);
-			renderer->SetDirectionalLight(light, 0);
+			renderer.SetDirectionalLight(light, 0);
 			light = scene->GetLight(1);
-			renderer->SetDirectionalLight(light, 1);
+			renderer.SetDirectionalLight(light, 1);
 		}
 
-		renderer->SetCamera(mCamera);
+		renderer.SetCamera(mCamera);
 		if (mCamera)
 			mCamera->ProcessInputData();
 
 		if (mEnvTexture)
-			renderer->SetEnvironmentTextureOverride(mEnvTexture);
-		renderer->RestoreRenderStates();
+			renderer.SetEnvironmentTextureOverride(mEnvTexture);
+		renderer.RestoreRenderStates();
 	}
 
 	void BindTargetOnly(bool hdr)
 	{
-		auto const renderer = Renderer::GetInstance();
-		renderer->SetCurrentRenderTarget(mSelf.lock());
-		if (hdr &&  mStrategy->IsHDR() && renderer->GetOptions()->r_HDR){
+		auto& renderer = Renderer::GetInstance();
+		renderer.SetCurrentRenderTarget(mSelf.lock());
+		if (hdr &&  mStrategy->IsHDR() && renderer.GetOptions()->r_HDR){
 			mStrategy->SetHDRTarget();
 		}
 		else{
@@ -192,8 +212,8 @@ public:
 			// we need to have 6 glow textures to support for cube map.
 			// but don't need to.
 			size_t rtViewIndex[] = { mFace };
-			renderer->SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, mFace);
-			renderer->SetViewports(&mViewport, 1);
+			renderer.SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, mFace);
+			renderer.SetViewports(&mViewport, 1);
 		}
 	}
 
@@ -211,7 +231,7 @@ public:
 		mDrawEventTriggered = false;
 
 		mFace = face;
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 
 		RenderEventMarker mark("RenderTarget");
 		mStrategy->Render(face);
@@ -284,10 +304,10 @@ public:
 
 	void Unbind()
 	{
-		auto const renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (mEnvTexture)
 		{
-			renderer->SetEnvironmentTextureOverride(0);
+			renderer.SetEnvironmentTextureOverride(0);
 		}
 	}
 
@@ -309,7 +329,7 @@ public:
 	{
 		mRenderTargetTexture = pTexture;
 		mSize = pTexture->GetSize();
-		auto const renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		mSizeCropped = Vec2I(CropSize8(mSize.x), CropSize8(mSize.y));
 		mFormat = pTexture->GetFormat();
 		mViewport.mTopLeftX = 0;
@@ -451,10 +471,6 @@ bool RenderTarget::Render(size_t face)
 void RenderTarget::Unbind()
 {
 	mImpl->Unbind();
-}
-
-void RenderTarget::GlowRenderTarget(bool bind){
-	mImpl->GlowRenderTarget(bind);
 }
 
 void RenderTarget::GlowRenderTarget(bool bind){

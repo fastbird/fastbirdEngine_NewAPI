@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "Console.h"
 #include "CandidatesData.h"
@@ -219,10 +246,10 @@ public:
 		std::cerr << buf << std::endl;
 
 		std::wstring strw = AnsiToWide(buf, strlen(buf));
-		auto renderer = Renderer::GetInstance();
-		if (renderer && renderer->GetFont(sFontSize))
+		auto& renderer = Renderer::GetInstance();
+		if (renderer.GetFont(sFontSize))
 		{
-			FontPtr pFont = renderer->GetFont(sFontSize);
+			FontPtr pFont = renderer.GetFont(sFontSize);
 			int textWidth = (int)pFont->GetTextWidth((char*)strw.c_str());
 			const auto& size = mRTSize;
 			int consoleWidth = size.x;
@@ -313,14 +340,14 @@ public:
 	{
 		if (!mOpen)
 			return;
-		auto renderer = Renderer::GetInstance();
-		FontPtr pFont = renderer->GetFont(sFontSize);
+		auto& renderer = Renderer::GetInstance();
+		FontPtr pFont = renderer.GetFont(sFontSize);
 		pFont->SetHeight((float)sFontSize);
 		const int lineHeight = (int)pFont->GetHeight();
 
 		// Draw Background
 		const auto& size = mRTSize;
-		renderer->DrawQuad(Vec2I(0, 0), Vec2I(size.x, mHeight),
+		renderer.DrawQuad(Vec2I(0, 0), Vec2I(size.x, mHeight),
 			Color::DarkGray);
 
 		// DrawHighlight
@@ -342,14 +369,14 @@ public:
 
 			highlightEndPos.y += lineHeight;
 
-			renderer->DrawQuad(highlightStartPos, highlightEndPos - highlightStartPos,
+			renderer.DrawQuad(highlightStartPos, highlightEndPos - highlightStartPos,
 				Color::Gray);
 		}
 
 		// Draw Cursor
 		Vec2I cursorPos = mInputPosition;
 		cursorPos.x += (int)pFont->GetTextWidth((char*)mInputStringw.c_str(), mCursorPos * 2);
-		renderer->DrawQuad(cursorPos, Vec2I(mCursorWidth, 2), Color::Yellow);
+		renderer.DrawQuad(cursorPos, Vec2I(mCursorWidth, 2), Color::Yellow);
 
 		// Draw prompt
 		pFont->PrepareRenderResources();
@@ -388,13 +415,13 @@ public:
 		if (!mOpen)
 			return;	
 		
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (unsigned int chr = injector->GetChar())
 		{
 			if (chr == 22) // Synchronous idle - ^V
 			{
 				injector->PopChar();
-				std::string data = GetClipboardDataAsString(renderer->GetMainWindowHandle());
+				std::string data = GetClipboardDataAsString(renderer.GetMainWindowHandle());
 				if (!data.empty())
 				{
 					auto insertionPos = mInputString.begin() + mCursorPos;
@@ -639,8 +666,8 @@ public:
 		{
 			std::string newstring = std::string("  ") + command;
 			Log(newstring.c_str());
-			auto renderer = Renderer::GetInstance();
-			processed =  LuaUtils::ExecuteLua(renderer->GetLua() , command);
+			auto& renderer = Renderer::GetInstance();
+			processed =  LuaUtils::ExecuteLua(renderer.GetLua() , command);
 			if (history){
 				if (pushed)
 					mValidHistory.push_back(processed);

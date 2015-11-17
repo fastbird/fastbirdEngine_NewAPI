@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "Font.h"
 #include "Renderer.h"
@@ -170,21 +197,21 @@ public:
 			r = loader->Load();
 			FB_SAFE_DELETE(loader);
 		}
-		auto renderer = Renderer::GetInstance();
-		mVertexBuffer = renderer->CreateVertexBuffer(0, sizeof(FontVertex), MAX_BATCH,
+		auto& renderer = Renderer::GetInstance();
+		mVertexBuffer = renderer.CreateVertexBuffer(0, sizeof(FontVertex), MAX_BATCH,
 			BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
 		assert(mVertexBuffer);
 
 		// init shader
-		mShader = renderer->CreateShader("es/shaders/font.hlsl", 
+		mShader = renderer.CreateShader("es/shaders/font.hlsl", 
 			BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
-		mInputLayout = renderer->GetInputLayout(
+		mInputLayout = renderer.GetInputLayout(
 			DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD_BLENDINDICES, mShader);
 		mInputLayout->SetDebugName("Font input layout");
 
 		mInitialized = r == 0;
 
-		mTextureMaterial = renderer->GetMaterial(DEFAULT_MATERIALS::QUAD_TEXTURE);
+		mTextureMaterial = renderer.GetMaterial(DEFAULT_MATERIALS::QUAD_TEXTURE);
 
 		BLEND_DESC desc;
 		desc.RenderTarget[0].BlendEnable = true;
@@ -194,7 +221,7 @@ public:
 		desc.RenderTarget[0].RenderTargetWriteMask = COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE;
 		mTextureMaterial->SetBlendState(desc);
 		
-		mRenderTargetSize = renderer->GetMainRTSize();
+		mRenderTargetSize = renderer.GetMainRTSize();
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
 			(Real)mRenderTargetSize.x,
 			(Real)mRenderTargetSize.y,
@@ -213,7 +240,7 @@ public:
 
 	bool ApplyTag(const char* text, int start, int end, int& x, int& y)
 	{
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 
 		assert(end - start > 8);
 		char buf[256];
@@ -235,7 +262,7 @@ public:
 						yoffset = Round((mScaledFontSize - imgSize.y) * .5f);
 					}
 					mTextureMaterial->SetDiffuseColor(Vec4(1, 1, 1, ((mColor & 0xff000000) >> 24) / 255.f));
-					renderer->DrawQuadWithTextureUV(Vec2I(x, y + yoffset), imgSize, region->mUVStart, region->mUVEnd,
+					renderer.DrawQuadWithTextureUV(Vec2I(x, y + yoffset), imgSize, region->mUVStart, region->mUVEnd,
 						Color::White, mTextureAtlas->GetTexture(), mTextureMaterial);
 
 					x += imgSize.x;
@@ -382,8 +409,8 @@ public:
 				PrepareRenderResources();
 				if (page != -1)
 					mPages[page]->Bind(BINDING_SHADER_PS, 0);
-				auto renderer = Renderer::GetInstance();
-				renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+				auto& renderer = Renderer::GetInstance();
+				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 			}
 
 			int charId = GetTextChar(text, n, &n);
@@ -486,18 +513,18 @@ public:
 		if (page == -1 || vertexCount == 0)
 			return;
 
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 
-		MapData data = renderer->MapVertexBuffer(mVertexBuffer, 0,
+		MapData data = renderer.MapVertexBuffer(mVertexBuffer, 0,
 			MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 		FontVertex* pDest = (FontVertex*)data.pData;
 		memcpy(pDest + mVertexLocation, pVertices + mVertexLocation,
 			vertexCount * sizeof(FontVertex));
 
-		renderer->UnmapVertexBuffer(mVertexBuffer, 0);
+		renderer.UnmapVertexBuffer(mVertexBuffer, 0);
 		mVertexBuffer->Bind();
-		renderer->SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		renderer->Draw(vertexCount, mVertexLocation);
+		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		renderer.Draw(vertexCount, mVertexLocation);
 	}
 
 	//----------------------------------------------------------------------------
@@ -506,8 +533,8 @@ public:
 	{
 		if (!mInitialized)
 			return;
-		auto renderer = Renderer::GetInstance();
-		if (renderer->GetOptions()->r_noText)
+		auto& renderer = Renderer::GetInstance();
+		if (renderer.GetOptions()->r_noText)
 			return;
 
 		//
@@ -527,7 +554,7 @@ public:
 
 		mColor = color;
 
-		renderer->UpdateObjectConstantsBuffer(&mObjectConstants);
+		renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 
 		InternalWrite(Round(x), Round(y), z, text, count);
 	}
@@ -724,8 +751,8 @@ public:
 	{
 		if (!mInitialized)
 			return;
-		auto renderer = Renderer::GetInstance();
-		renderer->SetAlphaBlendState();
+		auto& renderer = Renderer::GetInstance();
+		renderer.SetAlphaBlendState();
 		mShader->Bind();
 		mInputLayout->Bind();
 	}
@@ -860,8 +887,8 @@ public:
 
 	void RestoreRenderTargetSize()
 	{
-		auto renderer = Renderer::GetInstance();
-		const auto& rtSize = renderer->GetMainRTSize();
+		auto& renderer = Renderer::GetInstance();
+		const auto& rtSize = renderer.GetMainRTSize();
 		mRenderTargetSize = rtSize;
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
 			(Real)mRenderTargetSize.x,
@@ -1041,8 +1068,8 @@ void FontLoader::LoadPage(int id, const char *pageFile, const std::string& fontF
 
 	// Load the font textures
 	str += pageFile;
-	auto renderer = Renderer::GetInstance();
-	font->mImpl->mPages[id] = renderer->CreateTexture(str.c_str(), true);
+	auto& renderer = Renderer::GetInstance();
+	font->mImpl->mPages[id] = renderer.CreateTexture(str.c_str(), true);
 	if (font->mImpl->mPages[id] == 0)
 		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to load font page '%s'", str.c_str()).c_str());
 }

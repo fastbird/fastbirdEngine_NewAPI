@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 /**
 \file FBFileSystem.h
 Handling file operations. Implemented on the top of boost::filesystem
@@ -50,6 +77,13 @@ namespace fastbird{
 		/** If filepath exists, rename it to preserve. \a numKeeping decides how many backup files
 		need to be kept.\n*/
 		static void BackupFile(const char* filepath, unsigned numKeeping);
+		/** Compares the last modified time
+		\return -1, if a is older. 0, if the same. 1, if b is older
+		*/
+		static int CompareFileModifiedTime(const char* file1, const char* file2);
+		static bool SecurityOK(const char* filepath);		
+		static BinaryData ReadBinaryFile(const char* path, std::streamoff& outLength);
+		static void WriteBinaryFile(const char* path, char* data, size_t length);
 
 		//---------------------------------------------------------------------------
 		// Directory Operataions
@@ -74,6 +108,14 @@ namespace fastbird{
 		If the extension is found, '.' is included in the returned string.
 		*/
 		static const char* GetExtension(const char* path);	
+		/** Get file name.
+		Extension(from the last dot to end) and path are excluded.		
+		*/
+		static std::string GetName(const char* path);
+		/** Returns the parent path.
+		ex) dir1/dir2/file.exe -> dir1/dir1
+		*/
+		static std::string GetParentPath(const char* path);
 		static std::string ConcatPath(const char* path1, const char* path2);
 	};
 }

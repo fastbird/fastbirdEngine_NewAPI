@@ -1,23 +1,46 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 #ifndef _fastbird_ShaderD3D11_header_included_
 #define _fastbird_ShaderD3D11_header_included_
 
-#include <Engine/Shader.h>
-#include <d3d11.h>
-#include <D3Dcompiler.h>
-
+#include "FBRenderer/IPlatformShader.h"
 namespace fastbird
 {
-	class ShaderD3D11 : public Shader
+	DECLARE_SMART_PTR(ShaderD3D11);
+	class ShaderD3D11 : public IPlatformShader
 	{
+		DECLARE_PIMPL_NON_COPYABLE(ShaderD3D11);
+		ShaderD3D11();
+
 	public:
-		static ShaderD3D11* CreateInstance(const char* name);
-		virtual void Delete();
-
-		virtual ~ShaderD3D11();
-
-	protected:
-		virtual void FinishSmartPtr();
+		static ShaderD3D11Ptr Create(const char* name);
+		~ShaderD3D11();
 
 	public:
 		
@@ -43,7 +66,10 @@ namespace fastbird
 		ID3D11PixelShader* GetPixelShader() const { return m_pPixelShader; }
 		bool IsValid() const;
 		virtual void SetDebugName(const char*);
+		typedef std::set<std::string> INCLUDE_FILES;
 
+		void SetIncludeFiles(const INCLUDE_FILES& ifs);
+		void SetCompileFailed(bool failed);
 
 	protected:
 		ShaderD3D11( const char* name );
@@ -55,7 +81,7 @@ namespace fastbird
 		ID3D11DomainShader* m_pDomainShader;
 		ID3D11PixelShader* m_pPixelShader;
 		bool mValid;
-		BinaryData mVSBytecode;
+		char* mVSBytecode;
 		size_t mBytecodeSize;
 	};
 }

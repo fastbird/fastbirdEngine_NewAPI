@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 #include "FBCommonHeaders/Observable.h"
 #include "IRendererObserver.h"
@@ -57,11 +84,27 @@ namespace fastbird{
 		*/
 		static RendererPtr CreateRenderer(const char* rendererPlugInName, lua_State* L);
 
-		static RendererPtr GetInstance();
+		/** Returns the Renderer as a reference.
+		This function does not check the validity whether the Renderer is created or not.
+		It will cause a crash if you call this function without calling CreateRenderer()
+		If you need to check the validity use Renderer::DoesExists() function.
+		*/
+		static Renderer& GetInstance();
+
+		/** Checks whether the renderer does exists or not.
+		*/
+		static bool DoesExists();
+
+		/** Used for only in the Renderer project.
+		*/
+		static RendererPtr GetInstancePtr();
+
+		
 	public:
 		~Renderer();
 
 		static const HWindowId INVALID_HWND_ID = (HWindowId)-1;
+		static const HWindow INVALID_HWND;
 		static const int FB_NUM_TONEMAP_TEXTURES = 4;
 		static const int FB_NUM_TONEMAP_TEXTURES_NEW = 5;
 		static const int FB_NUM_LUMINANCE_TEXTURES = 3;
@@ -87,8 +130,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		bool InitCanvas(HWindowId id, HWindow window, int width, int height);
 		void ReleaseCanvas(HWindowId id);
-		void SetTimer(TimerPtr timer);
-		TimerPtr GetTimer() const;
+		void Render(TIME_PRECISION dt);
 
 		//-------------------------------------------------------------------
 		// Resource Creation
@@ -147,18 +189,9 @@ namespace fastbird{
 			TexturePtr pDepthStencil, size_t dsViewIndex);		
 		void SetViewports(const Viewport viewports[], int num);
 		void SetScissorRects(Rect rects[], int num);
-		void SetVertexBuffer(unsigned int startSlot, unsigned int numBuffers,
+		void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
 			VertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]);
-		void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt);
-		void SetInputLayout(InputLayoutPtr pInputLayout);
-		void SetIndexBuffer(IndexBufferPtr pIndexBuffer);
-		void SetShaders(ShaderPtr pShader);
-		void SetVSShader(ShaderPtr pShader);
-		void SetPSShader(ShaderPtr pShader);
-		void SetGSShader(ShaderPtr pShader);
-		void SetDSShader(ShaderPtr pShader);
-		void SetHSShader(ShaderPtr pShader);		
-		void SetTexture(TexturePtr pTexture, BINDING_SHADER shaderType, unsigned int slot);
+		void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt);		
 		/** Bind serveral texture at once.
 		The texture order apears in the shader(BINDING_SHADER) should be sequential.
 		*/
@@ -267,6 +300,14 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation);
 		void Draw(unsigned int vertexCount, unsigned int startVertexLocation);
+		void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs = true);
+		void DrawQuadLine(const DrawQuadLineParam& param);
+		void DrawQuadWithTexture(const DrawQuadWithTextureParam& param);
+		void DrawQuadWithTextureUV(const DrawQuadWithTextureUVParam& param);
+		void DrawBillboardWorldQuad(const DrawBillboardWorldQuadParam& param);
+		void DrawFullscreenQuad(IPlatformShader* pixelShader, bool farside);
+		void DrawTriangle(const DrawTriangleParam& param);
+
 		void SetClearColor(HWindowId id, const Color& color);
 		void SetClearDepthStencil(HWindowId id, Real z, UINT8 stencil);
 		void Clear(Real r, Real g, Real b, Real a, Real z, UINT8 stencil);

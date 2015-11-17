@@ -27,5 +27,6 @@
     <ClInclude Include="ResourceBinder.h" />
     <ClInclude Include="RenderStatesD3D11.h" />
     <ClInclude Include="ResourceMapper.h" />
+    <ClInclude Include="D3D11Types.h" />
   </ItemGroup>
 </Project>

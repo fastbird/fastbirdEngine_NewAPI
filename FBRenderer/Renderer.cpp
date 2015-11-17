@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "Renderer.h"
 #include "IPlatformRenderer.h"
@@ -5,7 +32,6 @@
 #include "RendererStructs.h"
 #include "Texture.h"
 #include "RenderTarget.h"
-#include "RenderResourceFactory.h"
 #include "IRenderable.h"
 #include "IPlatformTexture.h"
 #include "Font.h"
@@ -18,6 +44,7 @@
 #include "PointLightManager.h"
 #include "DebugHud.h"
 #include "GeometryRenderer.h"
+#include "Console.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/VectorMap.h"
@@ -37,6 +64,9 @@ using namespace fastbird;
 DECLARE_SMART_PTR(UI3DObj);
 DECLARE_SMART_PTR(UIObject);
 DECLARE_SMART_PTR(SkySphere);
+
+const HWindow Renderer::INVALID_HWND = (HWindow)-1;
+Timer* fastbird::gpTimer = 0;
 class Renderer::Impl{
 public:
 	typedef fastbird::Factory<IPlatformRenderer>::CreateCallback CreateCallback;
@@ -64,6 +94,7 @@ public:
 	PointLightManagerPtr mPointLightMan;
 	DebugHudPtr		mDebugHud;
 	GeometryRendererPtr mGeomRenderer;
+	ConsolePtr mConsole;
 	VectorMap<int, FontPtr> mFonts;
 	MaterialPtr mMaterials[DEFAULT_MATERIALS::COUNT];
 	MaterialPtr mMissingMaterial;
@@ -219,16 +250,23 @@ public:
 
 	ShaderPtr mGGXGenShader;
 	TexturePtr mGGXGenTarget;
-	TimerPtr mTimer;
 	bool mTakeScreenShot;
 
 	VectorMap<SystemTextures::Enum, std::vector< TextureBinding > > mSystemTextureBindings;
+	PRIMITIVE_TOPOLOGY mCurrentTopology;
+
+	FRAME_CONSTANTS			mFrameConstants;
+	CAMERA_CONSTANTS		mCameraConstants;
+	RENDERTARGET_CONSTANTS	mRenderTargetConstants;
+	SCENE_CONSTANTS			mSceneConstants;
 	
 	//-----------------------------------------------------------------------
 	Impl(Renderer* renderer)
 		: mObject(renderer)
 		, mLoadedModule(0)
+		, mCurrentTopology(PRIMITIVE_TOPOLOGY_UNKNOWN)
 	{
+		gpTimer = Timer::GetMainTimer().get();
 		auto& envBindings = mSystemTextureBindings[SystemTextures::Environment];
 		envBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 4 });
 		auto& depthBindings = mSystemTextureBindings[SystemTextures::Depth];
@@ -286,7 +324,7 @@ public:
 		mWindowSizes[id] = { width, height };		
 		IPlatformTexturePtr colorTexture;
 		IPlatformTexturePtr depthTexture;
-		mPlatformRenderer->InitCanvas(id, window, width, height, colorTexture, depthTexture);
+		mPlatformRenderer->InitCanvas(id, window, width, height, false, colorTexture, depthTexture);
 		if (colorTexture && depthTexture){
 			RenderTargetParam param;
 			param.mSize = { width, height };
@@ -296,6 +334,10 @@ public:
 			rt->SetColorTexture(CreateTexture(colorTexture));
 			rt->SetDepthTexture(CreateTexture(depthTexture));
 
+			mRenderTargetConstants.gScreenSize = Vec2(width, height);
+			mRenderTargetConstants.gScreenRatio = width / (float)height;
+			mRenderTargetConstants.rendertarget_dummy = 0;
+			mPlatformRenderer->UpdateShaderConstants(ShaderConstants::RenderTarget, &mRenderTargetConstants, sizeof(RENDERTARGET_CONSTANTS));
 			if (mainCanvas){
 				OnMainCavasCreated();
 			}
@@ -597,9 +639,8 @@ public:
 		if (mGeomRenderer){
 			mGeomRenderer->SetRenderTargetSize(rtSize);
 		}
-
-		if (gFBEnv->pConsole){
-			gFBEnv->pConsole->SetRenderTargetSize(rtSize);
+		if (mConsole){
+			mConsole->SetRenderTargetSize(rtSize);
 		}
 	}
 
@@ -611,12 +652,8 @@ public:
 		}
 	}
 
-	void SetTimer(TimerPtr timer){
-		mTimer = timer;
-	}
+	void Render(TIME_PRECISION dt){
 
-	TimerPtr GetTimer() const{
-		return mTimer;
 	}
 
 	//-------------------------------------------------------------------
@@ -637,7 +674,7 @@ public:
 			}
 		}
 
-		auto rt = RenderResourceFactory::CreateResource<RenderTarget>();
+		auto rt = RenderTarget::Create();
 		mRenderTargets.push_back(rt);
 		rt->SetColorTextureDesc(param.mSize.x, param.mSize.y, param.mPixelFormat, param.mShaderResourceView,
 				param.mMipmap, param.mCubemap);
@@ -687,7 +724,9 @@ public:
 			return 0;
 		}
 		sPlatformTextures[loweredFilepath] = platformTexture;
-		return CreateTexture(platformTexture);
+		auto texture = CreateTexture(platformTexture);
+		texture->SetFilePath(loweredFilepath.c_str());
+		return texture;
 	}
 
 	TexturePtr CreateTexture(void* data, int width, int height, PIXEL_FORMAT format,
@@ -697,13 +736,13 @@ public:
 			Logger::Log(FB_ERROR_LOG_ARG, "Failed to create texture with data.");
 			return 0;
 		}
-		auto texture = RenderResourceFactory::CreateResource<Texture>();
+		auto texture = Texture::Create();
 		texture->SetPlatformTexture(platformTexture);
 		return texture;
 	}
 
 	TexturePtr CreateTexture(IPlatformTexturePtr platformTexture){
-		auto texture = RenderResourceFactory::CreateResource<Texture>();
+		auto texture = Texture::Create();
 		texture->SetPlatformTexture(platformTexture);
 		return texture;
 	}
@@ -715,7 +754,7 @@ public:
 			Logger::Log(FB_ERROR_LOG_ARG, "Platform renderer failed to create a vertex buffer");
 			return 0;
 		}
-		auto vertexBuffer = RenderResourceFactory::CreateResource<VertexBuffer>();
+		auto vertexBuffer = VertexBuffer::Create(stride, numVertices);
 		vertexBuffer->SetPlatformBuffer(platformBuffer);
 		return vertexBuffer;
 	}
@@ -727,7 +766,7 @@ public:
 			Logger::Log(FB_ERROR_LOG_ARG, "Platform renderer failed to create a index buffer");
 			return 0;
 		}
-		auto indexBuffer = RenderResourceFactory::CreateResource<IndexBuffer>();
+		auto indexBuffer = IndexBuffer::Create(numIndices, format);
 		indexBuffer->SetPlatformBuffer(platformBuffer);
 		return indexBuffer;
 	}
@@ -751,7 +790,13 @@ public:
 					return mDefines < other.mDefines;
 				}
 			}
+			return false;
 		}
+
+		bool operator == (const ShaderCreationInfo& other) const{
+			return mShaders == other.mShaders && mFilepath == other.mFilepath && mDefines == other.mDefines;
+		}
+
 		int mShaders;
 		std::string mFilepath;		
 		SHADER_DEFINES mDefines;
@@ -776,7 +821,7 @@ public:
 					return shader;
 				}
 				else{
-					auto shader = RenderResourceFactory::CreateResource<Shader>();
+					auto shader = Shader::Create();
 					shader->SetPlatformShader(platformShader);
 					shader->SetShaderDefines(sortedDefines);
 					return shader;
@@ -785,7 +830,7 @@ public:
 		}
 
 		auto platformShader = mPlatformRenderer->CreateShader(filepath, shaders, sortedDefines);
-		auto shader = RenderResourceFactory::CreateResource<Shader>();
+		auto shader = Shader::Create();
 		shader->SetPlatformShader(platformShader);
 		shader->SetShaderDefines(sortedDefines);
 		sPlatformShaders[key] = platformShader;
@@ -807,7 +852,7 @@ public:
 				return material->Clone();
 			}
 		}
-		auto material = RenderResourceFactory::CreateResource<Material>();
+		auto material = Material::Create();
 		if (!material->LoadFromFile(file))
 			return 0;
 
@@ -955,7 +1000,7 @@ public:
 		TextureAtlasPtr pTextureAtlas;
 		if (szBuffer)
 		{			
-			pTextureAtlas = RenderResourceFactory::CreateResource<TextureAtlas>();
+			pTextureAtlas = TextureAtlas::Create();
 			pTextureAtlas->SetPath(filepath.c_str());			
 			pTextureAtlas->SetTexture(CreateTexture(szBuffer, true));
 			sTextureAtlas[filepath] = pTextureAtlas;		
@@ -1044,10 +1089,20 @@ public:
 	//-------------------------------------------------------------------
 	// Resource Bindings
 	//-------------------------------------------------------------------
+	std::vector<TexturePtr> mCurrentRTTextures;
+	std::vector<size_t> mCurrentViewIndices;
+	TexturePtr mCurrentDSTexture;
+	size_t mCurrentDSViewIndex;
 	void SetRenderTarget(TexturePtr pRenderTargets[], size_t rtViewIndex[], int num,
 		TexturePtr pDepthStencil, size_t dsViewIndex){
-		static float time = 0;
-		static std::set<TextureWeakPtr> usedRenderTargets;
+		assert(num <= 4);
+		if (mCurrentDSTexture == pDepthStencil && mCurrentDSViewIndex == dsViewIndex &&
+			std::equal(mCurrentRTTextures.begin(), mCurrentRTTextures.end(), pRenderTargets, pRenderTargets + num) &&
+			std::equal(mCurrentViewIndices.begin(), mCurrentViewIndices.end(), rtViewIndex, rtViewIndex + num)){
+			return;
+		}
+		static TIME_PRECISION time = 0;
+		static std::set<TextureWeakPtr, std::owner_less<TextureWeakPtr>> usedRenderTargets;
 		if (GetOptions()->r_numRenderTargets && mTimer)
 		{
 			for (int i = 0; i<num; i++)
@@ -1060,6 +1115,20 @@ public:
 				Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("used RenderTargets", usedRenderTargets.size()).c_str());				
 			}
 		}
+		mCurrentRTTextures.clear();
+		mCurrentViewIndices.clear();		
+		std::copy(pRenderTargets, pRenderTargets + num, std::back_inserter(mCurrentRTTextures));
+		std::copy(rtViewIndex, rtViewIndex + num, std::back_inserter(mCurrentViewIndices));
+		mCurrentDSTexture = pDepthStencil;
+		mCurrentDSViewIndex = dsViewIndex;
+		IPlatformTexturePtr platformRTs[4] = { 0 };
+		for (unsigned i = 0; i < num; ++i){
+			platformRTs[i] = pRenderTargets[i]->GetPlatformTexture();
+		}
+
+		mPlatformRenderer->SetRenderTarget(platformRTs, rtViewIndex, num,
+			pDepthStencil->GetPlatformTexture(), dsViewIndex);
+
 		if (pRenderTargets && num>0 && pRenderTargets[0])
 		{
 			mCurRTSize = pRenderTargets[0]->GetSize();
@@ -1068,6 +1137,7 @@ public:
 		{
 			mCurRTSize = GetMainRTSize();
 		}
+
 		for (auto it : mFonts){
 			it.second->SetRenderTargetSize(mCurRTSize);
 		}
@@ -1083,36 +1153,22 @@ public:
 		mPlatformRenderer->SetScissorRects(rects, num);
 	}
 
-	void SetVertexBuffer(unsigned int startSlot, unsigned int numBuffers,
+	void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
 		VertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]) {
 		static const unsigned int numMaxVertexInputSlot = 32; //D3D11_IA_VERTEX_INPUT_RESOURCE_SLOT_COUNT (32)
 		IPlatformVertexBufferPtr platformBuffers[numMaxVertexInputSlot];
 		numBuffers = std::min(numMaxVertexInputSlot, numBuffers);		
-		for (int i = 0; i < numBuffers; ++i){
+		for (unsigned i = 0; i < numBuffers; ++i){
 			platformBuffers[i] = pVertexBuffers[i]->GetPlatformBuffer();
 		}
-		mPlatformRenderer->SetVertexBuffer(startSlot, numBuffers, platformBuffers, strides, offsets);
+		mPlatformRenderer->SetVertexBuffers(startSlot, numBuffers, platformBuffers, strides, offsets);
 	}
 
 	void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt){
+		if (mCurrentTopology == pt)
+			return;
 		mPlatformRenderer->SetPrimitiveTopology(pt);
-	}
-
-	void SetInputLayout(InputLayoutPtr pInputLayout){
-		mPlatformRenderer->SetInputLayout(pInputLayout);
-	}
-
-	void SetIndexBuffer(IndexBufferPtr pIndexBuffer){
-		mPlatformRenderer->SetIndexBuffer(pIndexBuffer->GetPlatformBuffer());
-	}
-
-	void SetShaders(ShaderPtr pShader){
-		mPlatformRenderer->SetShaders(pShader->GetPlatformShader());
-	}
-	
-	void SetTexture(TexturePtr pTexture, BINDING_SHADER shaderType, unsigned int slot){
-		auto texture = pTexture->GetPlatformTexture();
-		mPlatformRenderer->SetTexture(texture, shaderType, slot);
+		mCurrentTopology = pt;
 	}
 
 	void SetTextures(TexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot){
@@ -1132,7 +1188,7 @@ public:
 			return;
 		}
 		for (const auto& binding : it->second){
-			SetTexture(texture, binding.mShader, binding.mSlot);
+			texture->Bind(binding.mShader, binding.mSlot);
 		}
 	}
 
@@ -1407,6 +1463,37 @@ public:
 		mPlatformRenderer->Draw(vertexCount, startVertexLocation);
 	}
 
+	void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs = true){
+		// vertex buffer
+		MapData mapped = mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Map(
+			MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+		DEFAULT_INPUTS::V_PC data[4] = {
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x, (float)pos.y, 0.f), color.Get4Byte()),
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x + size.x, (float)pos.y, 0.f), color.Get4Byte()),
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x, (float)pos.y + size.y, 0.f), color.Get4Byte()),
+			DEFAULT_INPUTS::V_PC(Vec3((float)pos.x + size.x, (float)pos.y + size.y, 0.f), color.Get4Byte()),
+		};
+		if (mapped.pData)
+		{
+			memcpy(mapped.pData, data, sizeof(data));
+			mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Unmap();
+		}
+
+		if (updateRs){
+			UpdateObjectConstantsBuffer(&mObjConst);
+			// set primitive topology
+			SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+			// set material
+			mMaterials[DEFAULT_MATERIALS::QUAD]->Bind(true);
+		}
+
+
+		// set vertex buffer
+		mDynVBs[DEFAULT_INPUTS::POSITION_COLOR]->Bind();
+		// draw
+		Draw(4, 0);
+	}
+
 	void SetClearColor(HWindowId id, const Color& color){
 		auto it = mWindowRenderTargets.Find(id);
 		if (it == mWindowRenderTargets.end()){
@@ -1633,9 +1720,7 @@ public:
 
 	void SetEnvironmentTexture(TexturePtr pTexture){
 		mEnvironmentTexture = pTexture;
-		mEnvironmentTexture->SetShaderStage(BINDING_SHADER_PS);
-		mEnvironmentTexture->SetSlot(4); // hardcoded environment slot.
-		mEnvironmentTexture->Bind();
+		SetSystemTexture(SystemTextures::Environment, mEnvironmentTexture);
 	}
 
 	void SetEnvironmentTextureOverride(TexturePtr texture){
@@ -1650,8 +1735,8 @@ public:
 	
 	}
 
-	PointLightManPtr GetPointLightMan() const{
-	
+	PointLightManagerPtr GetPointLightMan() const{
+		return mPointLightMan;
 	}
 
 	void RegisterVideoPlayer(VideoPlayerPtr player){
@@ -1671,7 +1756,7 @@ public:
 	}
 
 	bool IsLuminanceOnCpu() const{
-	
+		return mLuminanceOnCpu;
 	}
 
 	//-------------------------------------------------------------------
@@ -1680,14 +1765,26 @@ public:
 	unsigned GetMultiSampleCount() const{
 		
 	}
+
 	RenderTargetPtr GetRenderTarget(HWindowId id) const{
+		auto it = mWindowRenderTargets.Find(id);
+		if (it != mWindowRenderTargets.end()){
+			return it->second;
+		}
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to find the render target for the window id(%u)", id).c_str());
+		return 0;
+	}
+
+	RenderTargetPtr GetRenderTarget(HWindow hwnd) const{
 		auto it = mWindowIds.Find(hwnd);
 		if (it == mWindowIds.end()){
 			Logger::Log(FB_ERROR_LOG_ARG, "Failed to find window Id");
 			return 0;
 		}
-		return GetRenderTarget(it->second);		
+		return GetRenderTarget(it->second);
 	}
+
+
 	void SetCamera(CameraPtr pCamera){
 		
 	}
@@ -1699,7 +1796,11 @@ public:
 	}
 
 	HWindow GetMainWindowHandle(){
-
+		auto it = mWindowHandles.Find(mMainWindowId);
+		if (it != mWindowHandles.end())
+			return it->second;
+		Logger::Log(FB_ERROR_LOG_ARG, "Cannot find maint window handle.");
+		return INVALID_HWND;
 	}
 
 	HWindow GetWindowHandle(RenderTargetId rtId){
@@ -1780,7 +1881,15 @@ RendererPtr Renderer::CreateRenderer(const char* renderEngineName, lua_State* L)
 	}
 }
 
-RendererPtr Renderer::GetInstance(){
+Renderer& Renderer::GetInstance(){
+	return *sRenderer.lock();
+}
+
+bool Renderer::DoesExists(){
+	return sRenderer.lock() != 0;
+}
+
+RendererPtr Renderer::GetInstancePtr(){
 	return sRenderer.lock();
 }
 
@@ -1792,10 +1901,6 @@ void Renderer::PrepareRenderEngine(const char* renderEngineName){
 	mImpl->PrepareRenderEngine(renderEngineName);
 }
 
-void Renderer::SetLuaState(lua_State* L){
-
-}
-
 bool Renderer::InitCanvas(HWindowId id, HWindow window, int width, int height){
 	return mImpl->InitCanvas(id, window, width, height);
 }
@@ -1804,12 +1909,8 @@ void Renderer::ReleaseCanvas(HWindowId id){
 	mImpl->ReleaseCanvas(id);
 }
 
-void Renderer::SetTimer(TimerPtr timer){
-	mImpl->SetTimer(timer);
-}
-
-TimerPtr Renderer::GetTimer() const{
-	return mImpl->GetTimer();
+void Renderer::Render(TIME_PRECISION dt){
+	mImpl->Render(dt);
 }
 
 RenderTargetPtr Renderer::CreateRenderTarget(const RenderTargetParam& param){
@@ -1962,7 +2063,7 @@ void Renderer::SetFadeAlpha(Real alpha){
 	mImpl->SetFadeAlpha(alpha);
 }
 
-PointLightManPtr Renderer::GetPointLightMan() const{
+PointLightManagerPtr Renderer::GetPointLightMan() const{
 	return mImpl->GetPointLightMan();
 }
 
@@ -1974,11 +2075,11 @@ void Renderer::UnregisterVideoPlayer(VideoPlayerPtr player){
 	mImpl->UnregisterVideoPlayer(player);
 }
 
-void Renderer::GetSampleOffsets_GaussBlur5x5(DWORD texWidth, DWORD texHeight, Vec4** avTexCoordOffset, Vec4** avSampleWeight, Real fMultiplier){
+void Renderer::GetSampleOffsets_GaussBlur5x5(fastbird::DWORD texWidth, fastbird::DWORD texHeight, Vec4** avTexCoordOffset, Vec4** avSampleWeight, Real fMultiplier){
 	mImpl->GetSampleOffsets_GaussBlur5x5(texWidth, texHeight, avTexCoordOffset, avSampleWeight, fMultiplier);
 }
 
-void Renderer::GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Vec4* avTexCoordOffset){
+void Renderer::GetSampleOffsets_DownScale2x2(fastbird::DWORD texWidth, fastbird::DWORD texHeight, Vec4* avTexCoordOffset){
 	mImpl->GetSampleOffsets_DownScale2x2(texWidth, texHeight, avTexCoordOffset);
 }
 
@@ -1999,5 +2100,5 @@ void Renderer::OnBeforeRenderingOpaques(Scene* scene){
 }
 
 void Renderer::OnBeforeRenderingTransparents(Scene* scene){
-	mImpl->OnBeforeRenderingTransparents(scene)
+	mImpl->OnBeforeRenderingTransparents(scene);
 }

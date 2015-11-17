@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "MeshObject.h"
 #include "Animation.h"
@@ -69,11 +96,8 @@ public:
 	{
 		mTopology = PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		mObjectConstants.gWorld.MakeIdentity();
-		auto renderer = Renderer::GetInstance();
-		if (renderer)
-		{
-			SetMaterial(renderer->GetMissingMaterial(), 0);
-		}
+		auto& renderer = Renderer::GetInstance();
+		SetMaterial(renderer.GetMissingMaterial(), 0);
 		for (int i = 0; i < BUFFER_TYPE_NUM; ++i)
 		{
 			mUseDynamicVB[i] = false;
@@ -88,8 +112,8 @@ public:
 
 	void SetMaterial(const char* name, int pass){
 		CreateMaterialGroupFor(0);
-		auto renderer = Renderer::GetInstance();
-		mMaterialGroups[0].mMaterial = renderer->CreateMaterial(name);		
+		auto& renderer = Renderer::GetInstance();
+		mMaterialGroups[0].mMaterial = renderer.CreateMaterial(name);		
 	}
 	
 	void SetMaterial(MaterialPtr pMat, int pass){
@@ -129,13 +153,13 @@ public:
 		mLastPreRendered = currentFrame;
 		auto& animatedLocation = self->GetAnimatedLocation();
 		animatedLocation.GetHomogeneous(mObjectConstants.gWorld);
-		auto renderer = Renderer::GetInstance();
-		renderer->GatherPointLightData(self->GetAABB().get(), animatedLocation, &mPointLightConstants);
+		auto& renderer = Renderer::GetInstance();
+		renderer.GatherPointLightData(self->GetAABB().get(), animatedLocation, &mPointLightConstants);
 	}
 	
 	void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut){
-		auto renderer = Renderer::GetInstance();		
-		auto renderOption = renderer->GetOptions();
+		auto& renderer = Renderer::GetInstance();		
+		auto renderOption = renderer.GetOptions();
 		if (renderOption->r_noMesh)
 			return;
 		auto self = mSelf.lock();
@@ -153,16 +177,16 @@ public:
 		if (distToCam > 250 && radius < 5.0f)
 			return;
 
-		renderer->BeginEvent("MeshObject");		
+		renderer.BeginEvent("MeshObject");		
 
-		mObjectConstants.gWorldView = renderer->GetCamera()->GetMatrix(Camera::View) * mObjectConstants.gWorld;
-		mObjectConstants.gWorldViewProj = renderer->GetCamera()->GetMatrix(Camera::ViewProj) * mObjectConstants.gWorld;
-		renderer->UpdateObjectConstantsBuffer(&mObjectConstants, true);
+		mObjectConstants.gWorldView = renderer.GetCamera()->GetMatrix(Camera::View) * mObjectConstants.gWorld;
+		mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetMatrix(Camera::ViewProj) * mObjectConstants.gWorld;
+		renderer.UpdateObjectConstantsBuffer(&mObjectConstants, true);
 
 		if (renderParam.mRenderPass == RENDER_PASS::PASS_NORMAL)
-			renderer->UpdatePointLightConstantsBuffer(&mPointLightConstants);
+			renderer.UpdatePointLightConstantsBuffer(&mPointLightConstants);
 
-		renderer->SetPrimitiveTopology(mTopology);
+		renderer.SetPrimitiveTopology(mTopology);
 
 		bool noDedicatedHighlight = !self->HasObjFlag(SceneObjectFlag::HighlightDedi);
 		bool renderDepthPath = !self->HasObjFlag(SceneObjectFlag::NoDepthPath);
@@ -175,8 +199,8 @@ public:
 					continue;
 				if (!it.mMaterial->BindSubPass(RENDER_PASS::PASS_SHADOW, true))
 				{
-					renderer->SetPositionInputLayout();
-					renderer->SetShadowMapShader();
+					renderer.SetPositionInputLayout();
+					renderer.SetShadowMapShader();
 				}
 				RenderMaterialGroup(&it, true);
 			}
@@ -192,12 +216,12 @@ public:
 				bool materialReady = false;
 				if (it.mMaterial->BindSubPass(RENDER_PASS::PASS_DEPTH, false))
 				{
-					renderer->SetPositionInputLayout();
+					renderer.SetPositionInputLayout();
 					materialReady = true;
 				}
 				else
 				{
-					renderer->SetDepthWriteShader();
+					renderer.SetDepthWriteShader();
 					materialReady = true;
 				}
 
@@ -211,17 +235,17 @@ public:
 		// PASS_GODRAY_OCC_PRE
 		if (renderParam.mRenderPass == RENDER_PASS::PASS_GODRAY_OCC_PRE && useDepthPassAndNormalHighlight && !mForceAlphaBlending)
 		{
-			renderer->SetPositionInputLayout();
+			renderer.SetPositionInputLayout();
 			for(auto& it: mMaterialGroups)
 			{
 				if (!it.mMaterial || !it.mVBPos || it.mMaterial->IsNoShadowCast())
 					continue;
 
 				if (it.mMaterial->GetBindingShaders() & BINDING_SHADER_GS) {
-					renderer->SetOccPreGSShader();
+					renderer.SetOccPreGSShader();
 				}
 				else {
-					renderer->SetOccPreShader();
+					renderer.SetOccPreShader();
 				}
 				it.mMaterial->BindMaterialParams();
 
@@ -244,7 +268,7 @@ public:
 				}
 				if (mForceAlphaBlending && !mMaterialGroups.empty()){
 					auto it = mMaterialGroups.begin();
-					renderer->SetPositionInputLayout();
+					renderer.SetPositionInputLayout();
 
 					bool hasSubMat = it->mMaterial->BindSubPass(RENDER_PASS::PASS_DEPTH_ONLY, false);
 					if (hasSubMat){
@@ -256,11 +280,11 @@ public:
 						}
 					}
 					else{
-						renderer->RestoreDepthStencilState();
-						renderer->SetOneBiasedDepthRS();
-						renderer->SetNoColorWriteState();
+						renderer.RestoreDepthStencilState();
+						renderer.SetOneBiasedDepthRS();
+						renderer.SetNoColorWriteState();
 
-						renderer->SetDepthOnlyShader();
+						renderer.SetDepthOnlyShader();
 						// write only depth
 						for(auto& it:mMaterialGroups)
 						{
@@ -279,12 +303,12 @@ public:
 					material->Unbind();
 				}
 			}
-			bool mainRt = renderer->IsMainRenderTarget();
+			bool mainRt = renderer.IsMainRenderTarget();
 			// HIGHLIGHT
 			if (mRenderHighlight && mainRt && !mForceAlphaBlending)
 			{
 				// draw silhouett to samll buffer
-				auto rt = renderer->GetCurrentRenderTarget();
+				auto rt = renderer.GetCurrentRenderTarget();
 				assert(rt);
 				if (rt->SetSmallSilouetteBuffer())
 				{
@@ -295,13 +319,13 @@ public:
 						bool materialReady = false;
 						if (it.mMaterial && it.mMaterial->BindSubPass(RENDER_PASS::PASS_DEPTH, false))
 						{
-							renderer->SetPositionInputLayout();
+							renderer.SetPositionInputLayout();
 							materialReady = true;
 						}
 						else
 						{
-							renderer->SetPositionInputLayout();
-							renderer->SetDepthWriteShader();
+							renderer.SetPositionInputLayout();
+							renderer.SetDepthWriteShader();
 							materialReady = true;
 						}
 						if (materialReady)
@@ -319,13 +343,13 @@ public:
 						bool materialReady = false;
 						if (it.mMaterial && it.mMaterial->BindSubPass(RENDER_PASS::PASS_DEPTH, false))
 						{
-							renderer->SetPositionInputLayout();
+							renderer.SetPositionInputLayout();
 							materialReady = true;
 						}
 						else
 						{
-							renderer->SetPositionInputLayout();
-							renderer->SetDepthWriteShader();
+							renderer.SetPositionInputLayout();
+							renderer.SetDepthWriteShader();
 							materialReady = true;
 						}
 						if (materialReady)
@@ -341,7 +365,7 @@ public:
 			if (renderOption->r_gameId && self->GetGameId() != -1){
 				char buf[255];
 				sprintf_s(buf, "%u", self->GetGameId());
-				renderer->Draw3DText(self->GetPosition(), buf, Color::White);
+				renderer.Draw3DText(self->GetPosition(), buf, Color::White);
 			}
 		}
 	}
@@ -489,29 +513,25 @@ public:
 	}
 
 	void SetIndices(int matGroupIdx, const UINT* indices, size_t numIndices){
-		auto renderer = Renderer::GetInstance();
-		if (!renderer)
-			return;
+		auto& renderer = Renderer::GetInstance();
 		CreateMaterialGroupFor(matGroupIdx);
 		if (numIndices <= std::numeric_limits<USHORT>::max())
 		{
 			std::vector<USHORT> sIndices(indices, indices + numIndices);
 			mMaterialGroups[matGroupIdx].mIndexBuffer =
-				renderer->CreateIndexBuffer(&sIndices[0], numIndices, INDEXBUFFER_FORMAT_16BIT);
+				renderer.CreateIndexBuffer(&sIndices[0], numIndices, INDEXBUFFER_FORMAT_16BIT);
 		}
 		else
 		{
 			mMaterialGroups[matGroupIdx].mIndexBuffer =
-				renderer->CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_32BIT);
+				renderer.CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_32BIT);
 		}
 	}
 
 	void SetIndices(int matGroupIdx, const USHORT* indices, size_t numIndices){
 		CreateMaterialGroupFor(matGroupIdx);
-		auto renderer = Renderer::GetInstance();
-		if (!renderer)
-			return;
-		mMaterialGroups[matGroupIdx].mIndexBuffer = renderer->CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_16BIT);
+		auto& renderer = Renderer::GetInstance();
+		mMaterialGroups[matGroupIdx].mIndexBuffer = renderer.CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_16BIT);
 	}
 
 	void SetIndexBuffer(int matGroupIdx, IndexBufferPtr pIndexBuffer){
@@ -595,10 +615,10 @@ public:
 		mAABB->StartComputeFromData();
 		for(auto& it: mMaterialGroups)
 		{
-			auto renderer = Renderer::GetInstance();
-			if (!it.mPositions.empty() && renderer)
+			auto& renderer = Renderer::GetInstance();
+			if (!it.mPositions.empty())
 			{
-				it.mVBPos = renderer->CreateVertexBuffer(
+				it.mVBPos = renderer.CreateVertexBuffer(
 					&it.mPositions[0], sizeof(Vec3), it.mPositions.size(),
 					mUseDynamicVB[BUFFER_TYPE_POSITION] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[BUFFER_TYPE_POSITION] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
@@ -608,10 +628,10 @@ public:
 			{
 				it.mVBPos = 0;
 			}
-			if (!it.mNormals.empty() && renderer)
+			if (!it.mNormals.empty())
 			{
 				assert(it.mPositions.size() == it.mNormals.size());
-				it.mVBNormal = renderer->CreateVertexBuffer(
+				it.mVBNormal = renderer.CreateVertexBuffer(
 					&it.mNormals[0], sizeof(Vec3), it.mNormals.size(),
 					mUseDynamicVB[BUFFER_TYPE_NORMAL] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[BUFFER_TYPE_NORMAL] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
@@ -620,10 +640,10 @@ public:
 			{
 				it.mVBNormal = 0;
 			}
-			if (!it.mUVs.empty() && renderer)
+			if (!it.mUVs.empty())
 			{
 				assert(it.mPositions.size() == it.mUVs.size());
-				it.mVBUV = renderer->CreateVertexBuffer(
+				it.mVBUV = renderer.CreateVertexBuffer(
 					&it.mUVs[0], sizeof(Vec2), it.mUVs.size(),
 					mUseDynamicVB[BUFFER_TYPE_UV] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[BUFFER_TYPE_UV] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
@@ -633,10 +653,10 @@ public:
 				it.mVBUV = 0;
 			}
 
-			if (!it.mColors.empty() && renderer)
+			if (!it.mColors.empty())
 			{
 				assert(it.mPositions.size() == it.mColors.size());
-				it.mVBColor = renderer->CreateVertexBuffer(
+				it.mVBColor = renderer.CreateVertexBuffer(
 					&it.mColors[0], sizeof(DWORD), it.mColors.size(),
 					mUseDynamicVB[BUFFER_TYPE_COLOR] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[BUFFER_TYPE_COLOR] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
@@ -646,10 +666,10 @@ public:
 				it.mVBColor = 0;
 			}
 
-			if (!it.mTangents.empty() && renderer)
+			if (!it.mTangents.empty())
 			{
 				assert(it.mPositions.size() == it.mTangents.size());
-				it.mVBTangent = renderer->CreateVertexBuffer(
+				it.mVBTangent = renderer.CreateVertexBuffer(
 					&it.mTangents[0], sizeof(Vec3), it.mTangents.size(),
 					mUseDynamicVB[BUFFER_TYPE_TANGENT] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[BUFFER_TYPE_TANGENT] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
@@ -845,9 +865,9 @@ public:
 	}
 
 	bool RayCast(const Ray3& ray, Vec3& location, const ModelTriangle** outTri = 0) const{
-		auto sceneMgr = SceneManager::GetInstance();
+		auto& sceneMgr = SceneManager::GetInstance();
 		auto self = mSelf.lock();
-		auto mesh = sceneMgr->GetMeshArcheType(self->GetName());
+		auto mesh = sceneMgr.GetMeshArcheType(self->GetName());
 		assert(mesh);
 		const Real maxRayDistance = 100000;
 		Real tMin = maxRayDistance;
@@ -1054,16 +1074,15 @@ public:
 		if ((int)mMaterialGroups.size() <= matGroupIdx)
 		{
 			mMaterialGroups.push_back(MaterialGroup());
-			auto renderer = Renderer::GetInstance();
-			if (renderer)
-				mMaterialGroups.back().mMaterial = renderer->GetMissingMaterial();
+			auto& renderer = Renderer::GetInstance();
+			mMaterialGroups.back().mMaterial = renderer.GetMissingMaterial();
 		}
 	}
 	void RenderMaterialGroup(MaterialGroup* it, bool onlyPos){
 		assert(it);
 		if (!it || !it->mMaterial || !it->mVBPos)
 			return;
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		if (onlyPos)
 		{
 			const unsigned int numBuffers = 1;
@@ -1071,15 +1090,15 @@ public:
 			VertexBufferPtr buffers[numBuffers] = { it->mVBPos };
 			unsigned int strides[numBuffers] = { it->mVBPos->GetStride() };
 			unsigned int offsets[numBuffers] = { 0 };
-			renderer->SetVertexBuffer(0, numBuffers, buffers, strides, offsets);
+			renderer.SetVertexBuffer(0, numBuffers, buffers, strides, offsets);
 			if (it->mIndexBuffer)
 			{
-				renderer->SetIndexBuffer(it->mIndexBuffer);
-				renderer->DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
+				renderer.SetIndexBuffer(it->mIndexBuffer);
+				renderer.DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
 			}
 			else
 			{
-				renderer->Draw(it->mVBPos->GetNumVertices(), 0);
+				renderer.Draw(it->mVBPos->GetNumVertices(), 0);
 			}
 		}
 		else
@@ -1093,15 +1112,15 @@ public:
 				it->mVBColor ? it->mVBColor->GetStride() : 0,
 				it->mVBTangent ? it->mVBTangent->GetStride() : 0 };
 			unsigned int offsets[numBuffers] = { 0, 0, 0, 0, 0 };
-			renderer->SetVertexBuffer(0, numBuffers, buffers, strides, offsets);
+			renderer.SetVertexBuffer(0, numBuffers, buffers, strides, offsets);
 			if (it->mIndexBuffer)
 			{
-				renderer->SetIndexBuffer(it->mIndexBuffer);
-				renderer->DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
+				renderer.SetIndexBuffer(it->mIndexBuffer);
+				renderer.DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
 			}
 			else
 			{
-				renderer->Draw(it->mVBPos->GetNumVertices(), 0);
+				renderer.Draw(it->mVBPos->GetNumVertices(), 0);
 			}
 		}
 	}

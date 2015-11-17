@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 // Should not define data in this file.
 // Only typedefs or defines are allowed.
 #pragma once
@@ -24,7 +51,7 @@ namespace fastbird{
 
 	typedef std::vector<std::string> StringVector;
 	typedef std::vector<std::wstring> WStringVector;
-	
+	typedef std::shared_ptr < char > BinaryData;
 	// unsigned int : safe for 828 'days' at 60 frames/sec
 	// unsigned long long : safe for 9749040289 'years' at 60 frames/sec
 	typedef unsigned int FRAME_PRECISION;
@@ -57,6 +84,12 @@ namespace fastbird{
 		Real, Real, Real,
 		// itentity, RSSeperated, UniformScale
 		bool, bool, bool> TransformationTuple;
+
+	template <typename T>
+	bool operator == (const std::weak_ptr<T>& a, const std::shared_ptr<T>& b)
+	{
+		return a.lock() == b;
+	}
 }
 
 #define DECLARE_NON_COPYABLE(className) \

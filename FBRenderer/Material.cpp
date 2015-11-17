@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "Material.h"
 #include "Shader.h"
@@ -431,17 +458,15 @@ public:
 			}
 		}
 
-		auto renderer = Renderer::GetInstance();
+		auto& renderer = Renderer::GetInstance();
 		tinyxml2::XMLElement* pShaderFileElem = pRoot->FirstChildElement("ShaderFile");
 		if (pShaderFileElem)
 		{
 			const char* shaderFile = pShaderFileElem->GetText();
 			if (shaderFile)
 			{
-				if (renderer){
-					mShaderData->mShaderFile = shaderFile;
-					mShaderData->mShaderChanged = true;
-				}				
+				mShaderData->mShaderFile = shaderFile;
+				mShaderData->mShaderChanged = true;
 			}
 		}
 
@@ -561,8 +586,8 @@ public:
 
 		if (!pTexture)
 		{
-			auto renderer = Renderer::GetInstance();
-			pTexture = renderer->CreateTexture(filepath, true);
+			auto& renderer = Renderer::GetInstance();
+			pTexture = renderer.CreateTexture(filepath, true);
 			if (pTexture)
 			{
 				pTexture->SetType(TEXTURE_TYPE_DEFAULT);
@@ -746,12 +771,12 @@ public:
 
 	void ApplyShaderDefines()
 	{
-		auto renderer = Renderer::GetInstance();
-		mShaderData->mShader = renderer->CreateShader(
+		auto& renderer = Renderer::GetInstance();
+		mShaderData->mShader = renderer.CreateShader(
 			mShaderData->mShaderFile.c_str(), mShaderData->mShaders, mShaderData->mShaderDefines);
 		if (mUniqueData->mInputDescChanged){
 			mUniqueData->mInputDescChanged = false;
-			mUniqueData->mInputLayout = renderer->CreateInputLayout(mUniqueData->mInputElementDescs, mShaderData->mShader);
+			mUniqueData->mInputLayout = renderer.CreateInputLayout(mUniqueData->mInputElementDescs, mShaderData->mShader);
 		}
 	}
 
@@ -864,7 +889,7 @@ public:
 	{
 		mRenderStatesData->mRenderStates->Bind(stencilRef);
 
-		auto renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();		
 		if (mShaderData->mShader)
 		{
 			mShaderData->mShader->Bind();
@@ -873,7 +898,7 @@ public:
 		{
 			mUniqueData->mInputLayout->Bind();
 		}
-		renderer->UpdateMaterialConstantsBuffer(&mMaterialData->mMaterialConstants);
+		renderer.UpdateMaterialConstantsBuffer(&mMaterialData->mMaterialConstants);
 
 		BindMaterialParams();
 
@@ -884,7 +909,7 @@ public:
 
 		if (mRenderStatesData->mGlow)
 		{
-			auto rt = renderer->GetCurrentRenderTarget();
+			auto rt = renderer.GetCurrentRenderTarget();
 			if (rt->IsGlowSupported())
 				rt->GlowRenderTarget(true);
 		}
@@ -894,8 +919,8 @@ public:
 	{
 		if (mRenderStatesData->mGlow)
 		{
-			auto renderer = Renderer::GetInstance();
-			auto rt = renderer->GetCurrentRenderTarget();
+			auto& renderer = Renderer::GetInstance();
+			auto rt = renderer.GetCurrentRenderTarget();
 			if (rt->IsGlowSupported())
 				rt->GlowRenderTarget(false);
 		}
@@ -929,8 +954,8 @@ public:
 		const auto& materialParams = mMaterialData->mMaterialParameters;
 		if (!materialParams.empty())
 		{
-			auto renderer = Renderer::GetInstance();
-			Vec4* pDest = (Vec4*)renderer->MapMaterialParameterBuffer();
+			auto& renderer = Renderer::GetInstance();
+			Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
 			if (pDest)
 			{
 				auto it = materialParams.begin(), itEnd = materialParams.end();
@@ -939,7 +964,7 @@ public:
 					Vec4* pCurDest = pDest + it->first;
 					memcpy(pCurDest, &(it->second), sizeof(Vec4));
 				}
-				renderer->UnmapMaterialParameterBuffer();
+				renderer.UnmapMaterialParameterBuffer();
 			}
 		}
 	}
@@ -1058,8 +1083,8 @@ public:
 		{
 			pixels[127 - x] = cr[x].Get4Byte();
 		}
-		auto renderer = Renderer::GetInstance();
-		TexturePtr pTexture = renderer->CreateTexture(pixels, 128, 1, PIXEL_FORMAT_R8G8B8A8_UNORM,
+		auto& renderer = Renderer::GetInstance();
+		TexturePtr pTexture = renderer.CreateTexture(pixels, 128, 1, PIXEL_FORMAT_R8G8B8A8_UNORM,
 			BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE, TEXTURE_TYPE_DEFAULT); // default is right.
 		mMaterialData->mColorRampMap.insert(ColorRampsByTexture::value_type(pTexture, cr));
 		return pTexture;

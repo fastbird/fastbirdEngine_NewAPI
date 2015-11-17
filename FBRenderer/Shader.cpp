@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "Shader.h"
 #include "IPlatformShader.h"
@@ -114,7 +141,7 @@ void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefi
 	Profiler profile("Reloading Shaders");
 	std::string path = filepath;
 	ToLowerCase(path);
-	auto renderer = Renderer::GetInstance();
+	auto& renderer = Renderer::GetInstance();
 	auto it = sAllShaders.begin(), itEnd = sAllShaders.end();
 	for (; it != itEnd; it++)
 	{
@@ -123,7 +150,7 @@ void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefi
 			if (strcmp(path.c_str(), shader->GetName()) == 0 || shader->mImpl->mPlatformShader->CheckIncludes(path))
 			{
 				if (!shaderDefines.empty() || shader->GetShaderDefines() == shaderDefines){
-					auto failed = renderer->ReloadShader(shader);
+					auto failed = renderer.ReloadShader(shader);
 					if (failed){
 						Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to reload a shader(%s)", path).c_str());
 					}

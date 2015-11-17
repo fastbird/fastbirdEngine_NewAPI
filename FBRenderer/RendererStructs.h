@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 #ifndef _fastbird_RenderStructs_header_included_
 #define _fastbird_RenderStructs_header_included_
@@ -37,8 +64,8 @@ namespace fastbird
 		FILL_MODE		FillMode;
 		CULL_MODE		CullMode;		
 		int             DepthBias;
-		Real           DepthBiasClamp;
-		Real           SlopeScaledDepthBias;
+		float           DepthBiasClamp;
+		float           SlopeScaledDepthBias;
 		bool            FrontCounterClockwise;
 		bool            DepthClipEnable;
 		bool            ScissorEnable;
@@ -69,16 +96,20 @@ namespace fastbird
 			return memcmp(this, &other, sizeof(SAMPLER_DESC)) < 0;
 		}
 
+		bool operator == (const SAMPLER_DESC& other) const{
+			return memcmp(this, &other, sizeof(SAMPLER_DESC)) == 0;
+		}
+
 		TEXTURE_FILTER       Filter;
 		TEXTURE_ADDRESS_MODE AddressU;
 		TEXTURE_ADDRESS_MODE AddressV;
 		TEXTURE_ADDRESS_MODE AddressW;
-		Real                MipLODBias;
+		float                MipLODBias;
 		unsigned int         MaxAnisotropy;
 		COMPARISON_FUNC      ComparisonFunc;
-		Real                BorderColor[4];
-		Real                MinLOD;
-		Real                MaxLOD;
+		float                BorderColor[4];
+		float                MinLOD;
+		float                MaxLOD;
 	};
 
 	struct RENDER_TARGET_BLEND_DESC
@@ -202,14 +233,14 @@ namespace fastbird
 			NumUpdateObjectConst = 0;
 		}
 
-		void UpdateFrameRate(Real dt)
+		void UpdateFrameRate(TIME_PRECISION dt)
 		{
 			FrameRateDisplayUpdateTime += dt;
-			dt = std::max(0.0000001, dt);
-			FrameRate = (FrameRate + 1.0f/dt)/2.0f;
-			if (FrameRateDisplayUpdateTime>0.5f)
+			dt = std::max((TIME_PRECISION)0.0000001, dt);
+			FrameRate = (FrameRate + 1.0 / (Real)dt) / 2.0;
+			if (FrameRateDisplayUpdateTime>0.5)
 			{
-				FrameRateDisplayUpdateTime = 0.f;
+				FrameRateDisplayUpdateTime = 0.;
 				FrameRateDisplay = FrameRate;
 			}
 
@@ -223,7 +254,7 @@ namespace fastbird
 
 		Real FrameRate;
 		Real FrameRateDisplay;
-		Real FrameRateDisplayUpdateTime;
+		TIME_PRECISION FrameRateDisplayUpdateTime;
 
 		unsigned int NumUpdateObjectConst;
 	};
@@ -238,12 +269,12 @@ namespace fastbird
 
 	struct Viewport
 	{
-		Real mTopLeftX;
-		Real mTopLeftY;
-		Real mWidth;
-		Real mHeight;
-		Real mMinDepth;
-		Real mMaxDepth;
+		float mTopLeftX;
+		float mTopLeftY;
+		float mWidth;
+		float mHeight;
+		float mMinDepth;
+		float mMaxDepth;
 	};
 
 	struct Box3D
@@ -274,17 +305,17 @@ namespace fastbird
 	struct POSITION_V
 	{
 		POSITION_V() {}
-		POSITION_V(const fastbird::Vec3& _p) : p(_p) { }
-		fastbird::Vec3 p;
+		POSITION_V(const Vec3& _p) : p(_p) { }
+		Vec3 p;
 	};
 	typedef POSITION_V V_P;
 
 	struct POSITION_COLOR_V
 	{
 		POSITION_COLOR_V() {}
-		POSITION_COLOR_V(const fastbird::Vec3& _p, unsigned int _c)
+		POSITION_COLOR_V(const Vec3& _p, unsigned int _c)
 			: p(_p), color(_c) {}
-		fastbird::Vec3 p;
+		Vec3 p;
 		unsigned int color;
 	};
 	typedef POSITION_COLOR_V V_PC;
@@ -292,53 +323,53 @@ namespace fastbird
 	struct POSITION_COLOR_TEXCOORD_V
 	{
 		POSITION_COLOR_TEXCOORD_V() {}
-		POSITION_COLOR_TEXCOORD_V(const fastbird::Vec3& _p, unsigned int _c, Vec2 _tex)
+		POSITION_COLOR_TEXCOORD_V(const Vec3& _p, unsigned int _c, Vec2 _tex)
 			: p(_p), color(_c), t(_tex) {}
-		fastbird::Vec3 p;
+		Vec3 p;
 		unsigned int color;
-		fastbird::Vec2 t;
+		Vec2 t;
 	};
 	typedef POSITION_COLOR_TEXCOORD_V V_PCT;
 
 	struct POSITION_HDRCOLOR_V
 	{
 		POSITION_HDRCOLOR_V() {}
-		POSITION_HDRCOLOR_V(const fastbird::Vec3& _p, const fastbird::Color& _c)
+		POSITION_HDRCOLOR_V(const Vec3& _p, const Color& _c)
 			: p(_p), color(_c) {}
-		fastbird::Vec3 p;
-		fastbird::Color color;
+		Vec3 p;
+		Color color;
 	};
 	typedef POSITION_HDRCOLOR_V V_PhC;
 
 	struct POSITION_NORMAL_V
 	{
 		POSITION_NORMAL_V() {}
-		POSITION_NORMAL_V(const fastbird::Vec3& _p, const fastbird::Vec3& _n)
+		POSITION_NORMAL_V(const Vec3& _p, const Vec3& _n)
 			: p(_p), n(_n) {}
-		fastbird::Vec3 p;
-		fastbird::Vec3 n;
+		Vec3 p;
+		Vec3 n;
 	};
 	typedef POSITION_NORMAL_V V_PN;
 
 	struct POSITION_TEXCOORD_V
 	{
 		POSITION_TEXCOORD_V(){}
-		POSITION_TEXCOORD_V(const fastbird::Vec3& _p, const fastbird::Vec2& _uv)
+		POSITION_TEXCOORD_V(const Vec3& _p, const Vec2& _uv)
 			: p(_p), uv(_uv) {}
-		fastbird::Vec3 p;
-		fastbird::Vec2 uv;
+		Vec3 p;
+		Vec2 uv;
 	};
 	typedef POSITION_TEXCOORD_V V_PT;
 
 	struct POSITION_COLOR_TEXCOORD_BLENDINDICES_V
 	{
 		POSITION_COLOR_TEXCOORD_BLENDINDICES_V(){}
-		POSITION_COLOR_TEXCOORD_BLENDINDICES_V(const fastbird::Vec3& _p, unsigned int _c,
-			const fastbird::Vec2& _uv, unsigned int _bindex)
+		POSITION_COLOR_TEXCOORD_BLENDINDICES_V(const Vec3& _p, unsigned int _c,
+			const Vec2& _uv, unsigned int _bindex)
 			: p(_p), color(_c), uv(_uv), bindex(_bindex){}
-		fastbird::Vec3 p;		// 12
+		Vec3 p;		// 12
 		unsigned int color;		// 4
-		fastbird::Vec2 uv;		// 8
+		Vec2 uv;		// 8
 		unsigned int bindex;	// 4
 	};
 	typedef POSITION_COLOR_TEXCOORD_BLENDINDICES_V V_PCTB;
@@ -346,8 +377,8 @@ namespace fastbird
 	struct POSITION_NORMAL_TEXCOORD_V
 	{
 		POSITION_NORMAL_TEXCOORD_V() {}
-		POSITION_NORMAL_TEXCOORD_V(const fastbird::Vec3& _p, const fastbird::Vec3& _n, 
-			const fastbird::Vec2 _uv)
+		POSITION_NORMAL_TEXCOORD_V(const Vec3& _p, const Vec3& _n, 
+			const Vec2 _uv)
 			: p(_p), n(_n),  uv(_uv){}
 
 		bool operator==(const POSITION_NORMAL_TEXCOORD_V& other) const
@@ -359,29 +390,29 @@ namespace fastbird
 		{
 			return memcmp(this, &other, sizeof(POSITION_NORMAL_TEXCOORD_V)) < 0;
 		}
-		fastbird::Vec3 p;	// 12
-		fastbird::Vec3 n;	// 12
-		fastbird::Vec2 uv;	// 8
+		Vec3 p;	// 12
+		Vec3 n;	// 12
+		Vec2 uv;	// 8
 	};
 	typedef POSITION_NORMAL_TEXCOORD_V V_PNT;
 
 	struct POSITION_VEC4_V
 	{
 		POSITION_VEC4_V(){}
-		POSITION_VEC4_V(const fastbird::Vec3& _p, const fastbird::Vec4& _v4)
+		POSITION_VEC4_V(const Vec3& _p, const Vec4& _v4)
 			: p(_p), v4(_v4){}
-		fastbird::Vec3 p;		// 12
-		fastbird::Vec4 v4;		// 4
+		Vec3 p;		// 12
+		Vec4 v4;		// 4
 	};
 	typedef POSITION_VEC4_V V_PV4;
 
 	struct POSITION_VEC4_COLOR_V
 	{
 		POSITION_VEC4_COLOR_V(){}
-		POSITION_VEC4_COLOR_V(const fastbird::Vec3& _p, const fastbird::Vec4& _v4, DWORD _color)
+		POSITION_VEC4_COLOR_V(const Vec3& _p, const Vec4& _v4, DWORD _color)
 			: p(_p), v4(_v4), color(_color){}
-		fastbird::Vec3 p;		// 12
-		fastbird::Vec4 v4;		// 28
+		Vec3 p;		// 12
+		Vec4 v4;		// 28
 		DWORD color;			// 32
 	};
 	typedef POSITION_VEC4_COLOR_V V_PV4C;

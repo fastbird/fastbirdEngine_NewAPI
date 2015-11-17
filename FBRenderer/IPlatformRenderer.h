@@ -1,7 +1,38 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 #define FB_RENDERER_VERSION "1"
 #include "IPlatformRendererStructs.h"
 #include "FBCommonHeaders/Types.h"
+#include "IPlatformIndexBuffer.h"
+#include "ShaderDefines.h"
+#include "InputElementDesc.h"
+#include "ShaderConstants.h"
 #include <memory>
 
 namespace fastbird{
@@ -20,29 +51,49 @@ namespace fastbird{
 	/** Plug-in interface for render engine like D3D11, OpenGL.	
 	*/
 	class IPlatformRenderer{
-	public:
-		virtual bool InitCanvas(HWindowId id, HWindow window, int width, int height,
+	public:		
+		//-------------------------------------------------------------------
+		// Device features
+		//-------------------------------------------------------------------		
+		virtual Vec2ITuple FindClosestSize(HWindowId id, const Vec2ITuple& input) = 0;
+		/** Returns resolution list.
+		First, call this function with \a list = 0. Then you will get how many resolutions are supported.
+		Allocated Vec2ITuple array with that count, and call this function again with valid \a list.
+		*/
+		virtual bool GetResolutionList(unsigned& outNum, Vec2ITuple* list) = 0;
+		/** Initializes canvas(swap-chain)
+		\param fullscreen 0: window mode, 1: full-screen, 2: faked full-screen
+		*/
+		virtual bool InitCanvas(HWindowId id, HWindow window, int width, int height, int fullscreen,
+			IPlatformTexturePtr& outColorTexture, IPlatformTexturePtr& outDepthTexture) = 0;		
+		virtual void DeinitCanvas(HWindowId id, HWindow window) = 0;
+		virtual bool ChangeResolution(HWindowId id, HWindow window, const Vec2ITuple& resol,
 			IPlatformTexturePtr& outColorTexture, IPlatformTexturePtr& outDepthTexture) = 0;
+		virtual bool ChangeFullscreenMode(HWindowId id, HWindow window, int mode) = 0;
+		virtual unsigned GetMultiSampleCount() const = 0;
+		
 
 		//-------------------------------------------------------------------
 		// Resource creation
-		//-------------------------------------------------------------------		
+		//-------------------------------------------------------------------
+		virtual void SetShaderCacheOption(bool useShaderCache, bool generateCache) = 0;
 		virtual IPlatformTexturePtr CreateTexture(const char* path, bool async) = 0;
 		virtual IPlatformTexturePtr CreateTexture(void* data, int width, int height,
 			PIXEL_FORMAT format, BUFFER_USAGE usage, int  buffer_cpu_access,
 			int texture_type) = 0;		
-		virtual IPlatformVertexBuffer CreateVertexBuffer(void* data, unsigned stride,
+		virtual IPlatformVertexBufferPtr CreateVertexBuffer(void* data, unsigned stride,
 			unsigned numVertices, BUFFER_USAGE usage, BUFFER_CPU_ACCESS_FLAG accessFlag) = 0;
 		virtual IPlatformIndexBufferPtr CreateIndexBuffer(void* data, unsigned int numIndices,
 			INDEXBUFFER_FORMAT format) = 0;
 		virtual IPlatformShaderPtr CreateShader(const char* path, int shaders,
 			const SHADER_DEFINES& defines);
-		virtual IPlatformInputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& desc,
+		virtual IPlatformInputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& descs,
 			void* shaderByteCode, unsigned size) = 0;
 		virtual IPlatformBlendStatePtr CreateBlendState(const BLEND_DESC& desc) = 0;
 		virtual IPlatformDepthStencilStatePtr CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc) = 0;
 		virtual IPlatformRasterizerStatePtr CreateRasterizerState(const RASTERIZER_DESC& desc) = 0;
 		virtual IPlatformSamplerStatePtr CreateSamplerState(const SAMPLER_DESC& desc) = 0;
+		virtual unsigned GetNumLoadingTexture() const = 0;
 
 		//-------------------------------------------------------------------
 		// Resource Bindings
@@ -51,29 +102,12 @@ namespace fastbird{
 			IPlatformTexturePtr pDepthStencil, size_t dsViewIndex) = 0;
 		virtual void SetViewports(const Viewport viewports[], int num) = 0;
 		virtual void SetScissorRects(const Rect rects[], int num) = 0;
-		virtual void SetVertexBuffer(unsigned int startSlot, unsigned int numBuffers,
+		virtual void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
 			IPlatformVertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]) = 0;
 		virtual void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt) = 0;
-		virtual void SetInputLayout(IPlatformInputLayoutPtr pInputLayout) = 0;
-		virtual void SetIndexBuffer(IPlatformIndexBufferPtr pIndexBuffer) = 0;
-		virtual void SetShaders(IPlatformShaderPtr pShader) = 0;		
-		virtual void SetTexture(IPlatformTexturePtr pTexture, BINDING_SHADER shaderType, unsigned int slot) = 0;
 		virtual void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot) = 0;
+		virtual void UpdateShaderConstants(ShaderConstants::Enum type, void* data, int size) = 0;		
 
-		//-------------------------------------------------------------------
-		// Data
-		//-------------------------------------------------------------------
-		virtual void FrameData(void* data, int size) = 0;
-		virtual void ObjectData(void* data, int size) = 0;
-		virtual void PointLightData(void* data, int size) = 0;
-		virtual void CameraData(void* data, int size) = 0;
-		virtual void RenderTargetData(void* data, int size) = 0;
-		virtual void SceneData(void* data, int size) = 0;		
-		virtual void RareChangeData(void* data, int size) = 0;
-		virtual void RadianceData(void* data, int size) = 0;
-		virtual void MaterialData(void* data, int size) = 0;
-		virtual void MaterialParamData(void* data, int size) = 0;
-		virtual void BigData(void* data, int size) = 0;
 
 		//-------------------------------------------------------------------
 		// Drawing
