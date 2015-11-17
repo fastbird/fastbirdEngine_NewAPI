@@ -7,6 +7,7 @@ extern "C"
 
 #include "lua/lua.h"
 #include "lua/lauxlib.h"
+#include "lua/lualib.h"
 
 #ifndef LUAW_NO_EXTERN_C
 }

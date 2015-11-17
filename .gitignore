@@ -9,6 +9,16 @@ EngineEssentialData/
 *.vscache
 *.pscache
 
+Scripts/Pimpler.bat
+Scripts/CopyrightNotice.txt
+Scripts/CopyrightMarker.lua
+
+FBDev*/*.cpp
+FBDev*/*.h
+
+Executables
+lua.dll
+
 # User-specific files
 *.suo
 *.user

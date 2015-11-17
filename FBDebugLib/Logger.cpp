@@ -90,6 +90,7 @@ void Logger::Output(const char* str, ...){
 	va_end(args);
 #if defined(_PLATFORM_WINDOWS_)
 	OutputDebugStringA(buffer);
+	std::cerr << buffer;
 #else
 	std::cerr << str;
 #endif

@@ -2,6 +2,72 @@
 #include "LuaUtils.h"
 #include "LuaObject.h"
 #include "FBCommonHeaders/Helpers.h"
+#include "luawrapperutil.hpp"
+
+// luawapper util
+template<>
+struct luaU_Impl < std::string >
+{
+	static std::string luaU_check(lua_State* L, int index);
+	static std::string luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const std::string& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::Vec2ITuple >
+{
+	static fastbird::Vec2ITuple luaU_check(lua_State* L, int index);
+	static fastbird::Vec2ITuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::Vec2ITuple& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::Vec2Tuple >
+{
+	static fastbird::Vec2Tuple luaU_check(lua_State* L, int index);
+	static fastbird::Vec2Tuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::Vec2Tuple& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::Vec3ITuple >
+{
+	static fastbird::Vec3ITuple luaU_check(lua_State* L, int index);
+	static fastbird::Vec3ITuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::Vec3ITuple& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::Vec3Tuple >
+{
+	static fastbird::Vec3Tuple luaU_check(lua_State* L, int index);
+	static fastbird::Vec3Tuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::Vec3Tuple& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::Vec4Tuple >
+{
+	static fastbird::Vec4Tuple luaU_check(lua_State* L, int index);
+	static fastbird::Vec4Tuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::Vec4Tuple& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::QuatTuple >
+{
+	static fastbird::QuatTuple luaU_check(lua_State* L, int index);
+	static fastbird::QuatTuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::QuatTuple& val);
+};
+
+template<>
+struct luaU_Impl < fastbird::TransformationTuple >
+{
+	static fastbird::TransformationTuple luaU_check(lua_State* L, int index);
+	static fastbird::TransformationTuple luaU_to(lua_State* L, int index);
+	static void luaU_push(lua_State* L, const fastbird::TransformationTuple& val);
+};
 
 namespace fastbird
 {
@@ -14,6 +80,30 @@ namespace fastbird
 #endif
 		return buf;
 	}
+
+	static lua_State* sLuaState = 0;
+	lua_State* LuaUtils::OpenLuaState(){
+		auto L = luaL_newstate();
+		luaL_openlibs(L);
+		if (sLuaState == 0)
+			sLuaState = L;
+		return L;
+	}
+
+	lua_State* LuaUtils::GetLuaState(){
+		return sLuaState;
+	}
+
+	void LuaUtils::CloseLuaState(lua_State* L){
+		if (L == sLuaState || (L == 0 && sLuaState)){
+			lua_close(sLuaState);
+			sLuaState = 0;
+		}
+		else if (L){
+			lua_close(L);
+		}
+	}
+
 
 	void LuaUtils::CallLuaFunction(lua_State* L, const char* func, const char* sig, ...)
 	{
@@ -293,7 +383,79 @@ namespace fastbird
 		}
 		return true;
 	}
+
+	bool LuaUtils::DoFile(lua_State* L, const char* filepath){
+		int error = luaL_dofile(L, filepath);
+		if (error)
+		{
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Running script(%s) is failed: %s", filepath, lua_tostring(L, -1)).c_str());			
+			return false;
+		}
+		return true;
+	}
+
+	bool LuaUtils::DoFile(const char* filepath){
+		if (sLuaState){
+			return DoFile(sLuaState, filepath);
+		}
+		Logger::Log(FB_ERROR_LOG_ARG, "Main lua state is not prepared.");
+		return false;
+	}
+
+	int LuaUtils::Traceback(lua_State *L) {
+		const char *msg = lua_tostring(L, 1);
+		if (msg)
+			luaL_traceback(L, L, msg, 1);
+		//else if (!lua_isnoneornil(L, 1)) {  /* is there an error object? */
+		//	if (!luaL_callmeta(L, 1, "__tostring"))  /* try its 'tostring' metamethod */
+		//		lua_pushliteral(L, "(no error message)");
+		//}
+		return 1;
+	}
+
+	const char* LuaUtils::Push(lua_State* L, const char* str){
+		return lua_pushstring(L, str);
+	}
+
+	const char* LuaUtils::Push(const char* str){
+		if (sLuaState)
+			return Push(sLuaState, str);
+		return 0;
+	}
+
+	//---------------------------------------------------------------------------
+	// Stack watcher
+	//---------------------------------------------------------------------------
+	LUA_STACK_WATCHER::LUA_STACK_WATCHER(lua_State* L, const char* name)
+		: lua(L), mName(name)
+	{
+		assert(name != 0);
+		top = lua_gettop(L);
+	}
+
+	LUA_STACK_WATCHER::~LUA_STACK_WATCHER()
+	{
+		int now = lua_gettop(lua);
+		if (top != now)
+		{
+			Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Stack is polluted.", mName).c_str());
+		}
+		assert(top == now);
+	}
+
+	LUA_STACK_CLIPPER::LUA_STACK_CLIPPER(lua_State* L)
+	{
+		lua = L;
+		top = lua_gettop(L);
+	}
+
+	LUA_STACK_CLIPPER::~LUA_STACK_CLIPPER()
+	{
+		lua_settop(lua, top);
+	}	
 }
+
+
 
 //---------------------------------------------------------------------------
 // Tuple Helper
@@ -370,6 +532,20 @@ void PullNumbers(lua_State* L, int index, int& n, std::tuple<Args...>& t)
 	TupleIteratorPull<decltype(t), sizeof...(Args)>::iterate(L, index, n, t);
 }
 
+//---------------------------------------------------------------------------
+// string
+//---------------------------------------------------------------------------
+std::string luaU_Impl<std::string>::luaU_check(lua_State* L, int index) {
+	return std::string(luaL_checkstring(L, index));
+}
+
+std::string luaU_Impl<std::string>::luaU_to(lua_State* L, int index){
+	return std::string(lua_tostring(L, index));
+}
+
+void luaU_Impl<std::string>::luaU_push(lua_State* L, const std::string& val){
+	lua_pushstring(L, val.c_str());
+}
 
 //---------------------------------------------------------------------------
 // Vec2ITuple

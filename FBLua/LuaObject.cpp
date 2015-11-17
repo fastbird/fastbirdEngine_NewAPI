@@ -2,6 +2,7 @@
 #include "LuaObject.h"
 #include "LuaUtils.h"
 #include "FBStringLib/StringConverter.h"
+#include "luawrapperutil.hpp"
 using namespace fastbird;
 
 fastbird::VectorMap<int, unsigned> LuaObject::sUsedCount;

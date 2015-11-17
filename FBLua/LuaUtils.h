@@ -1,25 +1,15 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "luawrapperutil.hpp"
 #include "FBStringLib/StringLib.h"
 #include "FBDebugLib/Logger.h"
 #include "FBCommonHeaders/Types.h"
+#include <assert.h>
 
 struct lua_State;
+
 namespace fastbird
 { 
 	const char* GetCWD();
-}
-
-static int traceback(lua_State *L) {
-	const char *msg = lua_tostring(L, 1);
-	if (msg)
-		luaL_traceback(L, L, msg, 1);
-	//else if (!lua_isnoneornil(L, 1)) {  /* is there an error object? */
-	//	if (!luaL_callmeta(L, 1, "__tostring"))  /* try its 'tostring' metamethod */
-	//		lua_pushliteral(L, "(no error message)");
-	//}
-	return 1;
 }
 
 #define CHECK_NUM_LUA_ARGS_FB(x) \
@@ -45,7 +35,7 @@ if (numLuaArgs != (x)) \
 
 #define LUA_PCALL_RET_FALSE(lua, arg, ret) \
 int cfuncbase = lua_gettop(lua) - (arg);  /* function index */\
-lua_pushcfunction(lua, traceback);  /* push traceback function */\
+lua_pushcfunction(lua, LuaUtils::Traceback);  /* push traceback function */\
 lua_insert(lua, cfuncbase);  /* put it under chunk and args */\
 if(int error = lua_pcall((lua), (arg), ret, cfuncbase)) \
 {\
@@ -129,48 +119,38 @@ namespace fastbird
 {
 	struct FB_DLL_PUBLIC LUA_STACK_WATCHER
 	{
-		LUA_STACK_WATCHER(lua_State* L, const char* name)
-			: lua(L), mName(name)
-		{
-			assert(name != 0);
-			top = lua_gettop(L);
-		}
-
-		~LUA_STACK_WATCHER()
-		{
-			int now = lua_gettop(lua);
-			if (top != now)
-			{
-				Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Stack is polluted.", mName).c_str());
-			}
-			assert(top == now);
-		}
-
 		lua_State* lua;
 		int top;
 		const char* mName;
+
+		LUA_STACK_WATCHER(lua_State* L, const char* name);
+		~LUA_STACK_WATCHER();
+		
 	};
 
 	struct FB_DLL_PUBLIC LUA_STACK_CLIPPER
 	{
-		LUA_STACK_CLIPPER(lua_State* L)
-		{
-			lua = L;
-			top = lua_gettop(L);
-		}
-
-		~LUA_STACK_CLIPPER()
-		{
-			lua_settop(lua, top);
-		}
-
 		lua_State* lua;
 		int top;
+
+		LUA_STACK_CLIPPER(lua_State* L);
+		~LUA_STACK_CLIPPER();		
 	};
 
+	//---------------------------------------------------------------------------
 	// Generic lua call
+	//---------------------------------------------------------------------------
 	class FB_DLL_PUBLIC LuaUtils{
 	public:
+		/** The first lua state created by this function will be the main state.
+		*/
+		static lua_State* OpenLuaState();
+		/** Returns the main lua state.
+		*/
+		static lua_State* GetLuaState();
+		/** Close lus state. If L is 0, then the main state will be closed.
+		*/
+		static void CloseLuaState(lua_State* L);
 		static void CallLuaFunction(lua_State* L, const char* func, const char* sig, ...);
 		static bool CheckLuaGlobalExist(lua_State* L, const char* name);
 		static void PrintLuaErrorString(lua_State* L, const char* luaString);
@@ -183,82 +163,17 @@ namespace fastbird
 		static unsigned GetLuaVarAsUnsigned(lua_State* L, const char* varName);
 		static void SetLuaVar(lua_State* L, const char* varName, bool value);
 		static bool ExecuteLua(lua_State* L, const char* chunk);
+		static bool DoFile(lua_State* L, const char* filepath);
+		static bool DoFile(const char* filepath);
+		static int Traceback(lua_State *L);
+
+		/** Pushes the zero-terminated string pointed to by s onto the stack. 
+		Lua makes (or reuses) an internal copy of the given string, so the memory 
+		at str can be freed or reused immediately after the function returns.
+		Returns a pointer to the internal copy of the string. If s is NULL, 
+		pushes nil and returns NULL. 
+		*/
+		static const char* Push(lua_State* L, const char* str);
+		static const char* Push(const char* str);
 	};	
 }
-
-// luawapper util
-// std::string
-template<>
-struct luaU_Impl<std::string>
-{
-	static std::string luaU_check(lua_State* L, int index)
-	{
-		return std::string(luaL_checkstring(L, index));
-	}
-
-	static std::string luaU_to(lua_State* L, int index)
-	{
-		return std::string(lua_tostring(L, index));
-	}
-
-	static void luaU_push(lua_State* L, const std::string& val)
-	{
-		lua_pushstring(L, val.c_str());
-	}
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec2ITuple >
-{
-	static fastbird::Vec2ITuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec2ITuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec2ITuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec2Tuple >
-{
-	static fastbird::Vec2Tuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec2Tuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec2Tuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec3ITuple >
-{
-	static fastbird::Vec3ITuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec3ITuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec3ITuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec3Tuple >
-{
-	static fastbird::Vec3Tuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec3Tuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec3Tuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec4Tuple >
-{
-	static fastbird::Vec4Tuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec4Tuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec4Tuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::QuatTuple >
-{
-	static fastbird::QuatTuple luaU_check(lua_State* L, int index);
-	static fastbird::QuatTuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::QuatTuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::TransformationTuple >
-{
-	static fastbird::TransformationTuple luaU_check(lua_State* L, int index);
-	static fastbird::TransformationTuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::TransformationTuple& val);
-};

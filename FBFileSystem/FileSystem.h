@@ -70,7 +70,9 @@ namespace fastbird{
 		//---------------------------------------------------------------------------
 		/** If ext doesn't have \a dot(.), it will be added. */
 		static std::string ReplaceExtension(const char* path, const char* ext);
-		/** If \a dot(.) is not in the \a path, empty string will be returned. */
+		/** If \a dot(.) is not in the \a path, empty string will be returned. 
+		If the extension is found, '.' is included in the returned string.
+		*/
 		static const char* GetExtension(const char* path);	
 		static std::string ConcatPath(const char* path1, const char* path2);
 	};
