@@ -33,10 +33,10 @@ namespace fastbird
 	class IPlatformVertexBuffer
 	{
 	public:		
-		virtual bool IsReady() const = 0;		
-		virtual void Bind() = 0;
-		virtual MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) = 0;
-		virtual void Unmap() = 0;	
+		virtual void Bind() const = 0;
+		virtual bool IsReady() const = 0;				
+		virtual MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) = 0;
+		virtual void Unmap(UINT subResource) = 0;
 
 	protected:
 		~IPlatformVertexBuffer() {}

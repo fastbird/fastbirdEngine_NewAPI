@@ -27,68 +27,49 @@
 
 #include "stdafx.h"
 #include "IndexBufferD3D11.h"
+#include "D3D11Types.h"
+#include "RendererD3D11.h"
+#include "IUnknownDeleter.h"
 #include "FBRenderer/RendererEnums.h"
-#include "ResourceBinder.h"
+using namespace fastbird;
 
-namespace fastbird
+IndexBufferD3D11::IndexBufferD3D11()
 {
-	IndexBufferD3D11* IndexBufferD3D11::CreateInstance(unsigned int numIndices, INDEXBUFFER_FORMAT format)
-	{
-		IndexBufferD3D11* pIndexBuffer = FB_NEW(IndexBufferD3D11)(numIndices, format);
-		return pIndexBuffer;
-	}
 
-	IndexBufferD3D11::IndexBufferD3D11(unsigned numIndices, INDEXBUFFER_FORMAT format)
-		: m_pIndexBuffer(0)
-		, mFormat(format), mOffset(0), mNumIndices(numIndices)
-	{
-		switch(format)
-		{
-		case INDEXBUFFER_FORMAT_16BIT:
-			mSize = numIndices * 2;
-			mFormatD3D11 = DXGI_FORMAT_R16_UINT;
-			break;
-		case INDEXBUFFER_FORMAT_32BIT:
-			mSize = numIndices * 4;
-			mFormatD3D11 = DXGI_FORMAT_R32_UINT;
-			break;
+}
 
-		}
-		
-	}
+//---------------------------------------------------------------------------
+// IPlatformIndexBuffer
+//---------------------------------------------------------------------------
+bool IndexBufferD3D11::IsReady() const{
+	return mIndexBuffer != 0;
+}
 
-	IndexBufferD3D11::~IndexBufferD3D11()
-	{
-		SAFE_RELEASE(m_pIndexBuffer);
-	}
+void IndexBufferD3D11::Bind(unsigned offset){
+	RendererD3D11::GetInstance().SetIndexBuffer(this, offset);
+}
 
-	bool IndexBufferD3D11::IsReady() const
-	{
-		return m_pIndexBuffer != 0;
-	}
+MapData IndexBufferD3D11::Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag){
+	return RendererD3D11::GetInstance().MapBuffer(mIndexBuffer.get(), subResource, type, flag);
+}
 
-	void IndexBufferD3D11::Bind()
-	{
-		assert(m_pIndexBuffer);
-		if (!m_pIndexBuffer)
-			return;
+void IndexBufferD3D11::Unmap(UINT subResource){
+	RendererD3D11::GetInstance().UnmapBuffer(mIndexBuffer.get(), subResource);
+}
 
-		ResourceBinder::Bind(this);
-	}
+//---------------------------------------------------------------------------
+void IndexBufferD3D11::SetFormatD3D11(DXGI_FORMAT format){
+	mFormat = format;
+}
 
-	ID3D11Buffer* IndexBufferD3D11::GetHardwareBuffer() const
-	{
-		return m_pIndexBuffer;
-	}
+DXGI_FORMAT IndexBufferD3D11::GetFormatD3D11() const{
+	return mFormat;
+}
 
-	void IndexBufferD3D11::SetHardwareBuffer(ID3D11Buffer* pIndexBuffer)
-	{
-		SAFE_RELEASE(m_pIndexBuffer);
-		m_pIndexBuffer = pIndexBuffer;
-	}
+void IndexBufferD3D11::SetHardwareBuffer(ID3D11Buffer* pIndexBuffer){
+	mIndexBuffer = ID3D11BufferPtr(pIndexBuffer, IUnknownDeleter());
+}
 
-
-
-
-
+ID3D11Buffer* IndexBufferD3D11::GetHardwareBuffer() const{
+	return mIndexBuffer.get();
 }

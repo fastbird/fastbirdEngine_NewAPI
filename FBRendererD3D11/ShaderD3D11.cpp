@@ -25,199 +25,305 @@
  -----------------------------------------------------------------------------
 */
 
-#include "Engine/StdAfx.h"
-#include <Engine/ShaderD3D11.h>
-#include <Engine/GlobalEnv.h>
-#include <Engine/IEngine.h>
-#include <Engine/RendererD3D11.h>
+#include "stdafx.h"
+#include "ShaderD3D11.h"
+#include "IUnknownDeleter.h"
+#include "D3D11Types.h"
+#include "RendererD3D11.h"
+#include "FBCommonHeaders/Helpers.h"
+#include "FBStringLib/StringLib.h"
 
 using namespace fastbird;
-
-ShaderD3D11* ShaderD3D11::CreateInstance(const char* name)
+class ShaderD3D11::Impl
 {
-	ShaderD3D11* pShader = FB_NEW(ShaderD3D11)(name);
-	return pShader;
-}
+public:
+	ShaderD3D11* mSelf;
+	ID3D11VertexShaderPtr mVertexShader;
+	ID3D11GeometryShaderPtr mGeometryShader;
+	ID3D11HullShaderPtr mHullShader;
+	ID3D11DomainShaderPtr mDomainShader;
+	ID3D11PixelShaderPtr mPixelShader;
+	bool mCompileFailed;
+	BinaryData mVSBytecode;
+	size_t mBytecodeSize;
+	INCLUDE_FILES mIncludeFiles;
 
-void ShaderD3D11::Delete()
-{
-	FB_DELETE(this);
-}
-
-ShaderD3D11::ShaderD3D11( const char* name )
-	: m_pVertexShader(0), m_pGeometryShader(0), m_pHullShader(0)
-	, m_pDomainShader(0), m_pPixelShader(0)
-	, mVSBytecode(0)
-	, mBytecodeSize(0)
-	, mValid(false)
-	, Shader(name)
-{
-
-}
-
-ShaderD3D11::~ShaderD3D11()
-{
-	SAFE_RELEASE(m_pVertexShader);
-	SAFE_RELEASE(m_pGeometryShader);
-	SAFE_RELEASE(m_pHullShader);
-	SAFE_RELEASE(m_pDomainShader);
-	SAFE_RELEASE(m_pPixelShader);
-	if (mVSBytecode)
+	//---------------------------------------------------------------------------
+	Impl(ShaderD3D11* self)
+		: mSelf(self)
+		, mCompileFailed(false)		
+		, mBytecodeSize(0)
 	{
-		FB_SAFE_ARRDEL(mVSBytecode);
 	}
-}
 
-void ShaderD3D11::FinishSmartPtr(){
-	assert(NumRefs() == 0);
-	FB_DELETE(this);
-}
-
-void ShaderD3D11::SetVertexShader(ID3D11VertexShader* pVertexShader)
-{
-	SAFE_RELEASE(m_pVertexShader);
-	m_pVertexShader = pVertexShader;
-	mValid = true;
-}
-
-void ShaderD3D11::SetVertexShaderBytecode(ID3DBlob* pVertexShaderBytecode)
-{
-	if (mVSBytecode)
-	{
-		FB_SAFE_ARRDEL(mVSBytecode);
+	void Bind(){
+		RendererD3D11::GetInstance().SetShaders(mSelf);
 	}
-	if (pVertexShaderBytecode)
-	{
-		mBytecodeSize = pVertexShaderBytecode->GetBufferSize();
-		mVSBytecode = FB_ARRNEW(char, mBytecodeSize);
-		memcpy(mVSBytecode, pVertexShaderBytecode->GetBufferPointer(), mBytecodeSize);
+
+	/** Bind vertex shader only.*/
+	void BindVS(){
+		RendererD3D11::GetInstance().SetVSShader(mSelf);
 	}
-}
 
-void ShaderD3D11::SetVertexShaderBytecode(void* bytecode, size_t size)
-{
-	if (mVSBytecode)
-	{
-		FB_SAFE_ARRDEL(mVSBytecode);
+	/** Bind hull shader only.*/
+	void BindHS(){
+		RendererD3D11::GetInstance().SetHSShader(mSelf);
 	}
-	if (bytecode)
-	{
-		mBytecodeSize = size;
-		mVSBytecode = FB_ARRNEW(char, mBytecodeSize);
-		memcpy(mVSBytecode, bytecode, mBytecodeSize);
+
+	/** Bind domain shader only.*/
+	void BindDS(){
+		RendererD3D11::GetInstance().SetDSShader(mSelf);
 	}
-}
 
-void ShaderD3D11::SetGeometryShader(ID3D11GeometryShader* pGeometryShader)
-{
-	SAFE_RELEASE(m_pGeometryShader);
-	m_pGeometryShader = pGeometryShader;
-	mValid = true;
-}
+	/** Bind geometry shader only.*/
+	void BindGS(){
+		RendererD3D11::GetInstance().SetGSShader(mSelf);
+	}
 
-void ShaderD3D11::SetHullShader(ID3D11HullShader* pHullShader)
-{
-	SAFE_RELEASE(m_pHullShader);
-	m_pHullShader = pHullShader;
-	mValid = true;
-}
+	/** Bind pixel shader only.	*/
+	void BindPS(){
+		RendererD3D11::GetInstance().SetPSShader(mSelf);
+	}	
 
-void ShaderD3D11::SetDomainShader(ID3D11DomainShader* pDomainShader)
-{
-	SAFE_RELEASE(m_pDomainShader);
-	m_pDomainShader = pDomainShader;
-	mValid = true;
-}
+	bool GetCompileFailed() const{
+		return mCompileFailed;
+	}
 
-void ShaderD3D11::SetPixelShader(ID3D11PixelShader* pPixelShader)
-{
-	SAFE_RELEASE(m_pPixelShader);
-	m_pPixelShader = pPixelShader;
-	mValid = true;
-}
-
-//----------------------------------------------------------------------------
-void ShaderD3D11::Bind()
-{
-	gFBEnv->pEngine->GetRenderer()->SetShaders(this);
-}
-
-void ShaderD3D11::BindVS()
-{
-	gFBEnv->pEngine->GetRenderer()->SetVSShader(this);
-}
-void ShaderD3D11::BindGS()
-{
-	gFBEnv->pEngine->GetRenderer()->SetGSShader(this);
-}
-void ShaderD3D11::BindPS()
-{
-	gFBEnv->pEngine->GetRenderer()->SetPSShader(this);
-}
-void ShaderD3D11::BindDS()
-{
-	gFBEnv->pEngine->GetRenderer()->SetDSShader(this);
-}
-void ShaderD3D11::BindHS()
-{
-	gFBEnv->pEngine->GetRenderer()->SetHSShader(this);
-}
-
-//----------------------------------------------------------------------------
-void* ShaderD3D11::GetVSByteCode(unsigned& size) const
-{
-	if (mVSBytecode)
-	{
+	void* GetVSByteCode(unsigned& size) const{
 		size = mBytecodeSize;
-		return mVSBytecode;
+		return mVSBytecode.get();
 	}
 
-	size = 0;
-	return 0;
-}
+	void SetDebugName(const char* name){
+		char buf[256];
+		if (mVertexShader)
+		{
+			sprintf_s(buf, "%s VS", name);
+			mVertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
+			mVertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
+		}
 
-bool ShaderD3D11::IsValid() const
+		if (mGeometryShader)
+		{
+			sprintf_s(buf, "%s GS", name);
+			mGeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
+			mGeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
+		}
+
+		if (mHullShader)
+		{
+			sprintf_s(buf, "%s HS", name);
+			mHullShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
+			mHullShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
+		}
+
+		if (mDomainShader)
+		{
+			sprintf_s(buf, "%s DS", name);
+			mDomainShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
+			mDomainShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
+		}
+
+		if (mPixelShader)
+		{
+			sprintf_s(buf, "%s PS", name);
+			mPixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
+			mPixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
+		}
+	}
+
+	bool CheckIncludes(const char* inc){		
+		if (ValidCStringLength(inc)){
+			std::string testing(inc);
+			ToLowerCase(testing);
+			return mIncludeFiles.find(testing) != mIncludeFiles.end();
+		}
+		return false;
+	}
+
+	//---------------------------------------------------------------------------
+	// Own
+	//---------------------------------------------------------------------------
+	void SetVertexShader(ID3D11VertexShader* pVertexShader){
+		mVertexShader = ID3D11VertexShaderPtr(pVertexShader, IUnknownDeleter());
+	}
+
+	void SetVertexShaderBytecode(ID3DBlob* pVertexShaderBytecode){
+		if (pVertexShaderBytecode)
+		{
+			mBytecodeSize = pVertexShaderBytecode->GetBufferSize();
+			mVSBytecode = BinaryData(new char[mBytecodeSize], [](char* obj){ delete[] obj; });
+			memcpy(mVSBytecode.get(), pVertexShaderBytecode->GetBufferPointer(), mBytecodeSize);
+		}
+		else{
+			mVSBytecode.reset();
+		}
+	}
+
+	void SetVertexShaderBytecode(void* bytecode, size_t size){
+		if (bytecode && size > 0){
+			mBytecodeSize = size;
+			mVSBytecode = BinaryData(new char[mBytecodeSize], [](char* obj){ delete[] obj; });
+			memcpy(mVSBytecode.get(), bytecode, mBytecodeSize);
+		}
+		else{
+			mVSBytecode.reset();
+		}
+	}
+
+	void SetGeometryShader(ID3D11GeometryShader* pGeometryShader){
+		mGeometryShader = ID3D11GeometryShaderPtr(pGeometryShader, IUnknownDeleter());
+	}
+
+	void SetHullShader(ID3D11HullShader* pHullShader){
+		mHullShader = ID3D11HullShaderPtr(pHullShader, IUnknownDeleter());
+	}
+
+	void SetDomainShader(ID3D11DomainShader* pDomainShader){
+		mDomainShader = ID3D11DomainShaderPtr(pDomainShader, IUnknownDeleter());
+	}
+
+	void SetPixelShader(ID3D11PixelShader* pPixelShader){
+		mPixelShader = ID3D11PixelShaderPtr(pPixelShader, IUnknownDeleter());
+	}
+	
+	ID3D11VertexShader* GetVertexShader() const{
+		return mVertexShader.get();
+	}
+
+	ID3D11GeometryShader* GetGeometryShader() const{
+		return mGeometryShader.get();
+	}
+
+	ID3D11HullShader* GetHullShader() const{
+		return mHullShader.get();
+	}
+
+	ID3D11DomainShader* GetDomainShader() const{
+		return mDomainShader.get();
+	}
+
+	ID3D11PixelShader* GetPixelShader() const{
+		return mPixelShader.get();
+	}
+
+	void SetIncludeFiles(const INCLUDE_FILES& ifs){
+		mIncludeFiles = ifs;
+	}
+
+	void SetCompileFailed(bool failed){
+		mCompileFailed = failed;
+	}
+
+};
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(ShaderD3D11);
+
+ShaderD3D11::ShaderD3D11()
+	: mImpl(new Impl(this))
 {
-	return mValid;
 }
 
-//----------------------------------------------------------------------------
-void ShaderD3D11::SetDebugName(const char* name)
-{
-	char buf[256];
-	if (m_pVertexShader)
-	{
-		sprintf_s(buf, "%s VS", name);
-		m_pVertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
-		m_pVertexShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
-	}
-
-	if (m_pGeometryShader)
-	{
-		sprintf_s(buf, "%s GS", name);
-		m_pGeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
-		m_pGeometryShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
-	}
-
-	if (m_pHullShader)
-	{
-		sprintf_s(buf, "%s HS", name);
-		m_pHullShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
-		m_pHullShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
-	}
-
-	if (m_pDomainShader)
-	{
-		sprintf_s(buf, "%s DS", name);
-		m_pDomainShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
-		m_pDomainShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
-	}
-
-	if (m_pPixelShader)
-	{
-		sprintf_s(buf, "%s PS", name);
-		m_pPixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
-		m_pPixelShader->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(buf), buf);
-	}
-		
+//---------------------------------------------------------------------------
+// IPlatformShader
+//---------------------------------------------------------------------------
+void ShaderD3D11::Bind() {
+	mImpl->Bind();
 }
+
+void ShaderD3D11::BindVS() {
+	mImpl->BindVS();
+}
+
+void ShaderD3D11::BindHS() {
+	mImpl->BindHS();
+}
+
+void ShaderD3D11::BindDS() {
+	mImpl->BindDS();
+}
+
+void ShaderD3D11::BindGS() {
+	mImpl->BindGS();
+}
+
+void ShaderD3D11::BindPS() {
+	mImpl->BindPS();
+}
+
+bool ShaderD3D11::GetCompileFailed() const {
+	return mImpl->GetCompileFailed();
+}
+
+void* ShaderD3D11::GetVSByteCode(unsigned& size) const {
+	return mImpl->GetVSByteCode(size);
+}
+
+void ShaderD3D11::SetDebugName(const char* name) {
+	mImpl->SetDebugName(name);
+}
+
+bool ShaderD3D11::CheckIncludes(const char* inc) {
+	return mImpl->CheckIncludes(inc);
+}
+
+//---------------------------------------------------------------------------
+// Own
+//---------------------------------------------------------------------------
+void ShaderD3D11::SetVertexShader(ID3D11VertexShader* pVertexShader) {
+	mImpl->SetVertexShader(pVertexShader);
+}
+
+void ShaderD3D11::SetVertexShaderBytecode(ID3DBlob* pVertexShaderBytecode) {
+	mImpl->SetVertexShaderBytecode(pVertexShaderBytecode);
+}
+
+void ShaderD3D11::SetVertexShaderBytecode(void* bytecode, size_t size) {
+	mImpl->SetVertexShaderBytecode(bytecode, size);
+}
+
+void ShaderD3D11::SetGeometryShader(ID3D11GeometryShader* pGeometryShader) {
+	mImpl->SetGeometryShader(pGeometryShader);
+}
+
+void ShaderD3D11::SetHullShader(ID3D11HullShader* pHullShader) {
+	mImpl->SetHullShader(pHullShader);
+}
+
+void ShaderD3D11::SetDomainShader(ID3D11DomainShader* pDomainShader) {
+	mImpl->SetDomainShader(pDomainShader);
+}
+
+void ShaderD3D11::SetPixelShader(ID3D11PixelShader* pPixelShader) {
+	mImpl->SetPixelShader(pPixelShader);
+}
+
+ID3D11VertexShader* ShaderD3D11::GetVertexShader() const {
+	return mImpl->GetVertexShader();
+}
+
+ID3D11GeometryShader* ShaderD3D11::GetGeometryShader() const {
+	return mImpl->GetGeometryShader();
+}
+
+ID3D11HullShader* ShaderD3D11::GetHullShader() const {
+	return mImpl->GetHullShader();
+}
+
+ID3D11DomainShader* ShaderD3D11::GetDomainShader() const {
+	return mImpl->GetDomainShader();
+}
+
+ID3D11PixelShader* ShaderD3D11::GetPixelShader() const {
+	return mImpl->GetPixelShader();
+}
+
+void ShaderD3D11::SetIncludeFiles(const INCLUDE_FILES& ifs) {
+	mImpl->SetIncludeFiles(ifs);
+}
+
+void ShaderD3D11::SetCompileFailed(bool failed) {
+	mImpl->SetCompileFailed(failed);
+}
+

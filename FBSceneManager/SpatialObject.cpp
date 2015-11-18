@@ -211,7 +211,7 @@ void SpatialObject::SetLocation(const Transformation& t){
 }
 
 bool SpatialObject::GetTransformChanged() const{
-	mImpl->GetTransformChanged();
+	return mImpl->GetTransformChanged();
 }
 
 void SpatialObject::ClearTransformChanged(){

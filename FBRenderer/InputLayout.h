@@ -28,6 +28,14 @@
 #pragma once
 #include "IPlatformInputLayout.h"
 namespace fastbird{
-	typedef IPlatformInputLayoutPtr InputLayoutPtr;
-	typedef IPlatformInputLayoutWeakPtr InputLayoutWeakPtr;
+	DECLARE_SMART_PTR(InputLayout);
+	class InputLayout{
+		DECLARE_PIMPL_NON_COPYABLE(InputLayout);
+		InputLayout();
+
+	public:
+		static InputLayoutPtr Create();
+		void Bind();
+		void SetPlatformInputLayout(IPlatformInputLayoutPtr layout);
+	};
 }

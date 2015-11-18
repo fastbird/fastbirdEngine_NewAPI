@@ -45,6 +45,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBTimer", "FBTimer\FBTimer.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBDevCopyrightMarker", "FBDevCopyrightMarker\FBDevCopyrightMarker.vcxproj", "{E089C309-467D-4B3F-88AF-6921968E9703}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBVideoPlayer", "FBVideoPlayer\FBVideoPlayer.vcxproj", "{086F3AFE-4515-4327-9B8A-C083B6EC8A05}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FBAudioPlayer", "FBAudioPlayer\FBAudioPlayer.vcxproj", "{35BD3327-2FA4-4A92-8790-87ABB17E720B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -127,6 +131,14 @@ Global
 		{E089C309-467D-4B3F-88AF-6921968E9703}.Debug|Win32.Build.0 = Debug|Win32
 		{E089C309-467D-4B3F-88AF-6921968E9703}.Release|Win32.ActiveCfg = Release|Win32
 		{E089C309-467D-4B3F-88AF-6921968E9703}.Release|Win32.Build.0 = Release|Win32
+		{086F3AFE-4515-4327-9B8A-C083B6EC8A05}.Debug|Win32.ActiveCfg = Debug|Win32
+		{086F3AFE-4515-4327-9B8A-C083B6EC8A05}.Debug|Win32.Build.0 = Debug|Win32
+		{086F3AFE-4515-4327-9B8A-C083B6EC8A05}.Release|Win32.ActiveCfg = Release|Win32
+		{086F3AFE-4515-4327-9B8A-C083B6EC8A05}.Release|Win32.Build.0 = Release|Win32
+		{35BD3327-2FA4-4A92-8790-87ABB17E720B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{35BD3327-2FA4-4A92-8790-87ABB17E720B}.Debug|Win32.Build.0 = Debug|Win32
+		{35BD3327-2FA4-4A92-8790-87ABB17E720B}.Release|Win32.ActiveCfg = Release|Win32
+		{35BD3327-2FA4-4A92-8790-87ABB17E720B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

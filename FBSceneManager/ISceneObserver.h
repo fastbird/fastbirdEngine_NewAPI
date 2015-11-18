@@ -27,6 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
+#include "FBRenderer/RenderParam.h"
 namespace fastbird
 {
 	DECLARE_SMART_PTR(Scene);
@@ -36,8 +37,8 @@ namespace fastbird
 		enum{
 			Timing
 		};
-		virtual void OnAfterMakeVisibleSet(Scene* scene){}
-		virtual void OnBeforeRenderingOpaques(Scene* scene){}
-		virtual void OnBeforeRenderingTransparents(Scene* scene){}
+		virtual void OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){}
+		virtual void OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){}
+		virtual void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){}
 	};
 }

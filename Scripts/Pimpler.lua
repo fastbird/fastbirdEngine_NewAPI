@@ -1,7 +1,19 @@
-filepath = '../FBRenderer/GeometryRenderer.cpp'
-className = 'GeometryRenderer'
+filepath = arg[1]
+print('filepath = ' .. filepath)
+function FindFileName(path)
+	local dotStart = string.find(path, '.cpp')	
+	for i=dotStart, 1, -1 do
+		if path:sub(i, i) == '\\' then
+			return string.sub(filepath, i+1, dotStart - 1)
+		end
+	end
+end
+className = FindFileName(filepath)
+print('className = ' .. className)
+-- //#!PimplStart
+-- //#!PimplEnd
 function CaptureFunctionName(line)
-	return string.match(line, "(%w[%w%d]+)%(")
+	return string.match(line, "([%w_][%w%d_]+)%(")
 end
 
 function ReplaceToMethod(line, functionName)
@@ -16,7 +28,7 @@ function CaptureParamList(line, functionName)
 	--print('params = '.. params)	
 	
 	local first = true
-	for param in string.gmatch(params, "(%w[%w%d]*)[,%)]") do
+	for param in string.gmatch(params, "([%w_][%w%d_]*)[,%)]") do
 		if first then
 			list = list .. param
 			first = false
@@ -28,7 +40,7 @@ function CaptureParamList(line, functionName)
 end
 
 function NeedToReturn(line)
-	for returnType in string.gmatch(line, "%w[%w%d]*%**") do		
+	for returnType in string.gmatch(line, "[%w_][%w%d_]*%**") do		
 		if (returnType == 'void') then
 			return false;
 		end
@@ -37,7 +49,6 @@ function NeedToReturn(line)
 end
 
 if filepath then
-	print('filepath = ' .. filepath)
 	io.input(filepath)
 	
 	local lines ={}
@@ -53,22 +64,29 @@ if filepath then
 			specialLine = true
 		end
 		if started then
-			local functionName = CaptureFunctionName(line)
-			if functionName then
-				line = ReplaceToMethod(line, functionName)
-				--print('Funtion Name = ' .. functionName);
-				local paramList = CaptureParamList(line, functionName)
-				--print('param list = ' .. paramList)				
-				--print('')
-				local needToReturn = NeedToReturn(line)
-				local new
-				if needToReturn then
-					new = string.gsub(line, ";", string.format(" {\n\treturn mImpl->%s(%s);\n}\n\n", functionName, paramList))
-				else
-					new = string.gsub(line, ";", string.format(" {\n\tmImpl->%s(%s);\n}\n\n", functionName, paramList))
+			local commentStart = string.find(line, '//')
+			if commentStart==nil or commentStart > 4   then
+				local functionName = CaptureFunctionName(line)
+				if functionName then
+					line = ReplaceToMethod(line, functionName)
+					--print('Funtion Name = ' .. functionName);
+					local paramList = CaptureParamList(line, functionName)
+					--print('param list = ' .. paramList)				
+					--print('')
+					local needToReturn = NeedToReturn(line)
+					local new
+					if needToReturn then
+						new = string.gsub(line, ";", string.format(" {\n\treturn mImpl->%s(%s);\n}\n\n", functionName, paramList))
+					else
+						new = string.gsub(line, ";", string.format(" {\n\tmImpl->%s(%s);\n}\n\n", functionName, paramList))
+					end
+					lines[#lines+1] = new;
+					successful = true
 				end
-				lines[#lines+1] = new;
-				successful = true
+			else
+				if not specialLine then
+					lines[#lines+1] = line .. '\n';
+				end
 			end
 		else
 			if not specialLine then
@@ -85,3 +103,4 @@ if filepath then
 	end
 	io.output()
 end
+io.read()

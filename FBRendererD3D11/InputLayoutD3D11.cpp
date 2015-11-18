@@ -27,45 +27,34 @@
 
 #include "stdafx.h"
 #include "InputLayoutD3D11.h"
-#include "ResourceBinder.h"
+#include "IUnknownDeleter.h"
+#include "RendererD3D11.h"
 
 using namespace fastbird;
 
 //----------------------------------------------------------------------------
-InputLayoutD3D11* InputLayoutD3D11::CreateInstance()
-{
-	return FB_NEW(InputLayoutD3D11);
-}
-
-//----------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(InputLayoutD3D11);
 InputLayoutD3D11::InputLayoutD3D11()
-	: m_pInputLayout(0)
+	: mInputLayout(0)
 {
-
 }
 
-//----------------------------------------------------------------------------
-InputLayoutD3D11::~InputLayoutD3D11()
-{
-	SAFE_RELEASE(m_pInputLayout);
+void InputLayoutD3D11::Bind() {
+	RendererD3D11::GetInstance().SetInputLayout(this);
 }
 
-//----------------------------------------------------------------------------
-void InputLayoutD3D11::SetHardwareInputLayout(ID3D11InputLayout* pLayout)
-{
-	m_pInputLayout = pLayout;
-}
-
-//----------------------------------------------------------------------------
-void InputLayoutD3D11::Bind()
-{
-	ResourceBinder::SetInputLayout(this);	
-}
-
-void InputLayoutD3D11::SetDebugName(const char* name)
-{
-	if (m_pInputLayout){
-		m_pInputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
-		m_pInputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(name), name);
+void InputLayoutD3D11::SetDebugName(const char* name) {
+	if (mInputLayout){
+		mInputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
+		mInputLayout->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(name), name);
 	}
+}
+
+//----------------------------------------------------------------------------
+void InputLayoutD3D11::SetHardwareInputLayout(ID3D11InputLayout* pLayout) {
+	mInputLayout = ID3D11InputLayoutPtr(pLayout, IUnknownDeleter());
+}
+
+ID3D11InputLayout* InputLayoutD3D11::GetHardwareInputLayout() const{
+	return mInputLayout.get();
 }

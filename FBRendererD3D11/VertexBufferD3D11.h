@@ -30,24 +30,28 @@
 #define _VertexBuffer_header_included_
 
 #include "FBRenderer/IPlatformVertexBuffer.h"
+#include "D3D11Types.h"
 namespace fastbird
 {
 	DECLARE_SMART_PTR(VertexBufferD3D11);
 	class VertexBufferD3D11 : public IPlatformVertexBuffer
 	{
-		DECLARE_PIMPL_NON_COPYABLE(VertexBufferD3D11);
-		VertexBufferD3D11();
-		ID3D11Buffer* mVertexBuffer;		
+		DECLARE_NON_COPYABLE(VertexBufferD3D11);
+		VertexBufferD3D11(ID3D11Buffer* buffer, unsigned stride);
+
+		ID3D11BufferPtr mVertexBuffer;
+		unsigned mStride;
 
 	public:
-		static VertexBufferD3D11Ptr Create();
-		virtual ~VertexBufferD3D11();
+		static VertexBufferD3D11Ptr Create(ID3D11Buffer* buffer, unsigned stride);
 
-		virtual void Bind();
-		virtual bool IsReady() const;
-		virtual MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag);
-		virtual void Unmap();
-		void SetHardwareBuffer(ID3D11Buffer* buffer);
+		// IPlatformVertexBuffer
+		void Bind() const;
+		bool IsReady() const;	
+		MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag);
+		void Unmap(UINT subResource);
+
+		// OWN
 		ID3D11Buffer* GetHardwareBuffer() const;
 		
 	};

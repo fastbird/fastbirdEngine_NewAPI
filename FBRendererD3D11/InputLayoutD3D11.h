@@ -28,32 +28,32 @@
 #pragma once
 
 #include "FBRenderer/IPlatformInputLayout.h"
+#include "D3D11Types.h"
 
 namespace fastbird
 {
 	DECLARE_SMART_PTR(InputLayoutD3D11);
 	class InputLayoutD3D11 : public IPlatformInputLayout
 	{
+		DECLARE_NON_COPYABLE(InputLayoutD3D11);
+
+		ID3D11InputLayoutPtr mInputLayout;
+
+		InputLayoutD3D11();
+
 	public:
 		static InputLayoutD3D11Ptr Create();
 
 		//--------------------------------------------------------------------
-		// IInputLayout Interfaces
+		// IPlatformInputLayout Interfaces
 		//--------------------------------------------------------------------
-		virtual void Bind();
+		void Bind();
+		void SetDebugName(const char*);
 
 		//--------------------------------------------------------------------
 		// Own Interfaces
 		//--------------------------------------------------------------------
 		void SetHardwareInputLayout(ID3D11InputLayout* pLayout);
-		ID3D11InputLayout* GetHardwareInputLayout() const { return m_pInputLayout; }
-		virtual void SetDebugName(const char*);
-
-	protected:
-		InputLayoutD3D11();
-		virtual ~InputLayoutD3D11();
-
-	private:
-		ID3D11InputLayout* m_pInputLayout;
+		ID3D11InputLayout* GetHardwareInputLayout() const;
 	};
 }

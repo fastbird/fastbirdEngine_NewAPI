@@ -27,34 +27,30 @@
 
 #include "stdafx.h"
 #include "RenderStatesD3D11.h"
-#include "ResourceBinder.h"
+#include "IUnknownDeleter.h"
+#include "RendererD3D11.h"
 
 using namespace fastbird;
 
 //----------------------------------------------------------------------------
 // RASTERIZER STATE
 //-------------------------------------------------------------------------
-//----------------------------------------------------------------------------
+RasterizerStateD3D11Ptr RasterizerStateD3D11::Create(ID3D11RasterizerState* rasterizerState){
+	return RasterizerStateD3D11Ptr(new RasterizerStateD3D11(rasterizerState), [](RasterizerStateD3D11* obj){ delete obj; });
+}
+
 RasterizerStateD3D11::RasterizerStateD3D11(ID3D11RasterizerState* rasterizerState)
-	: mRasterizerState(rasterizerState)
+	: mRasterizerState(rasterizerState, IUnknownDeleter())
 {
 }
 
 //----------------------------------------------------------------------------
-RasterizerStateD3D11::~RasterizerStateD3D11()
-{
-	SAFE_RELEASE(mRasterizerState);
+void RasterizerStateD3D11::Bind() {
+	RendererD3D11::GetInstance().SetRasterizerState(this);
 }
 
 //----------------------------------------------------------------------------
-void RasterizerStateD3D11::Bind()
-{
-	ResourceBinder::Bind(this);
-}
-
-//----------------------------------------------------------------------------
-void RasterizerStateD3D11::SetDebugName(const char* name)
-{
+void RasterizerStateD3D11::SetDebugName(const char* name) {
 	if (mRasterizerState)
 	{
 		mRasterizerState->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
@@ -63,38 +59,27 @@ void RasterizerStateD3D11::SetDebugName(const char* name)
 }
 
 //----------------------------------------------------------------------------
-void RasterizerStateD3D11::SetHardwareRasterizerState()
-{
-	SAFE_RELEASE(mRasterizerState);
-	mRasterizerState = pRasterizerState;
+ID3D11RasterizerState* RasterizerStateD3D11::GetHardwareRasterizerState() const {
+	return mRasterizerState.get();
 }
 
 
 //----------------------------------------------------------------------------
 // BLEND STATE
 //----------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------
+BlendStateD3D11Ptr BlendStateD3D11::Create(ID3D11BlendState* blendState){
+	return BlendStateD3D11Ptr(new BlendStateD3D11(blendState), [](BlendStateD3D11* obj){ delete obj; });
+}
 BlendStateD3D11::BlendStateD3D11(ID3D11BlendState* blendState)
-	:mBlendState(blendState)
+	:mBlendState(blendState, IUnknownDeleter())
 {
 }
 
-//----------------------------------------------------------------------------
-BlendStateD3D11::~BlendStateD3D11()
-{
-	SAFE_RELEASE(mBlendState);
+void BlendStateD3D11::Bind() {
+	RendererD3D11::GetInstance().SetBlendState(this);
 }
 
-//----------------------------------------------------------------------------
-void BlendStateD3D11::Bind()
-{
-	ResourceBinder::Bind(this);	
-}
-
-//----------------------------------------------------------------------------
-void BlendStateD3D11::SetDebugName(const char* name)
-{
+void BlendStateD3D11::SetDebugName(const char* name) {
 	if (mBlendState)
 	{
 		mBlendState->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
@@ -102,62 +87,61 @@ void BlendStateD3D11::SetDebugName(const char* name)
 	}
 }
 
+ID3D11BlendState* BlendStateD3D11::GetHardwareBlendState() const{
+	return mBlendState.get();
+}
+
 
 //----------------------------------------------------------------------------
 // DEPTH STENCIL STATE
 //----------------------------------------------------------------------------
-
-//----------------------------------------------------------------------------
+DepthStencilStateD3D11Ptr DepthStencilStateD3D11::Create(ID3D11DepthStencilState* state){
+	return DepthStencilStateD3D11Ptr(new DepthStencilStateD3D11(state), [](DepthStencilStateD3D11* obj){ delete obj; });
+}
 DepthStencilStateD3D11::DepthStencilStateD3D11(ID3D11DepthStencilState* depthStencilState)
-	:mDepthStencilState(depthStencilState)
+	:mDepthStencilState(depthStencilState, IUnknownDeleter())
 {
 }
 
-//----------------------------------------------------------------------------
-DepthStencilStateD3D11::~DepthStencilStateD3D11()
-{
-	SAFE_RELEASE(mDepthStencilState);
+void DepthStencilStateD3D11::Bind(unsigned stencilRef) {
+	RendererD3D11::GetInstance().SetDepthStencilState(this, stencilRef);
 }
 
-//----------------------------------------------------------------------------
-void DepthStencilStateD3D11::Bind(unsigned stencilRef)
-{
-	ResourceBinder::Bind(this);	
-}
-
-//----------------------------------------------------------------------------
-void DepthStencilStateD3D11::SetDebugName(const char* name)
-{
+void DepthStencilStateD3D11::SetDebugName(const char* name) {
 	if (mDepthStencilState) {
 		mDepthStencilState->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
 		mDepthStencilState->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(name), name);
 	}
 }
 
+ID3D11DepthStencilState* DepthStencilStateD3D11::GetHardwareDSState() const{
+	return mDepthStencilState.get();
+}
+
 //----------------------------------------------------------------------------
 // Sampler STATE
 //----------------------------------------------------------------------------
+SamplerStateD3D11Ptr SamplerStateD3D11::Create(ID3D11SamplerState* state){
+	return SamplerStateD3D11Ptr(new SamplerStateD3D11(state), [](SamplerStateD3D11* obj){ delete obj; });
+}
 
 SamplerStateD3D11::SamplerStateD3D11(ID3D11SamplerState* samplerState)
-	:mSamplerState(samplerState)
+	:mSamplerState(samplerState, IUnknownDeleter())
 {
-
-}
-SamplerStateD3D11::~SamplerStateD3D11()
-{
-	SAFE_RELEASE(mSamplerState);
 }
 
-void SamplerStateD3D11::Bind(BINDING_SHADER shader, int slot)
-{
-	ResourceBinder::Bind(this);	
+void SamplerStateD3D11::Bind(BINDING_SHADER shader, int slot) {
+	RendererD3D11::GetInstance().SetSamplerState(this, shader, slot);
 }
 
-void SamplerStateD3D11::SetDebugName(const char* name)
-{
+void SamplerStateD3D11::SetDebugName(const char* name) {
 	if (mSamplerState)
 	{
 		mSamplerState->SetPrivateData(WKPDID_D3DDebugObjectName, 0, 0);
 		mSamplerState->SetPrivateData(WKPDID_D3DDebugObjectName, strlen(name), name);
 	}
+}
+
+ID3D11SamplerState* SamplerStateD3D11::GetHardwareSamplerState() const {
+	return mSamplerState.get();
 }

@@ -36,10 +36,10 @@ using namespace fastbird;
 class Animation::Impl{
 public:
 	AnimationDataPtr mAnimationData;
-	AnimationData::Action* mCurPlayingAction;
-	AnimationData::Action* mNextAction;
-	float mPrevPlayingTime;
-	float mPlayingTime;
+	const AnimationData::Action* mCurPlayingAction;
+	const AnimationData::Action* mNextAction;
+	TIME_PRECISION mPrevPlayingTime;
+	TIME_PRECISION mPlayingTime;
 	bool mCycled; // true when looped.
 	bool mReverse;
 	bool mNextReverse;
@@ -140,7 +140,7 @@ public:
 			if (mPrevPlayingTime == mPlayingTime)
 				return;
 
-			float curTime = mPlayingTime;
+			TIME_PRECISION curTime = mPlayingTime;
 			if (mReverse)
 				mPlayingTime -= dt;
 			else
@@ -148,13 +148,13 @@ public:
 
 			mLastUpdatedFrame = gpTimer->GetFrame();
 			// evaluate
-			float normTime = curTime / mCurPlayingAction->mLength;
+			TIME_PRECISION normTime = curTime / mCurPlayingAction->mLength;
 			bool cycled = mCycled;
 			mCycled = false;
 			if (mAnimationData->HasPosAnimation())
 			{
 				const Vec3 *p1 = 0, *p2 = 0;
-				float interpol = 0;
+				TIME_PRECISION interpol = 0;
 				mAnimationData->PickPos(curTime, cycled, &p1, &p2, interpol);
 				if (p1 && p2)
 				{
@@ -166,7 +166,7 @@ public:
 			if (mAnimationData->HasRotAnimation())
 			{
 				const Quat *r1 = 0, *r2 = 0;
-				float interpol = 0;
+				TIME_PRECISION interpol = 0;
 				mAnimationData->PickRot(curTime, cycled, &r1, &r2, interpol);
 				if (r1 && r2)
 				{

@@ -173,8 +173,8 @@ public:
 		auto& renderer = Renderer::GetInstance();
 		renderer.SetCurrentRenderTarget(mSelf.lock());
 
-		if (mRenderTargetTexture)
-			mRenderTargetTexture->Unbind();
+		Renderer::GetInstance().UnbindRenderTarget(mRenderTargetTexture);
+		
 		TexturePtr rt[] = { mRenderTargetTexture };
 		size_t rtViewIndex[] = { face };
 		renderer.SetRenderTarget(rt, rtViewIndex, 1, mDepthStencilTexture, face);

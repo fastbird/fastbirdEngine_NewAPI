@@ -36,6 +36,7 @@
 #include "InputLayout.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
+#include "Material.h"
 #include "FBSceneManager/Camera.h"
 #include "FBSceneManager/SceneManager.h"
 #include "FBSceneManager/MeshObject.h"
@@ -46,7 +47,7 @@ class DebugHud::Impl{
 public:
 	struct TextData
 	{
-		TextData(const Vec2I& pos, WCHAR* text, const Color& color, float size, float secs)
+		TextData(const Vec2I& pos, WCHAR* text, const Color& color, Real size, Real secs)
 			: mPos(pos), mText(text), mColor(color), mSecs(secs), mSize(size), mDuration(secs)
 			, mWidth(10)
 		{
@@ -55,10 +56,10 @@ public:
 		Vec2I mPos;
 		std::wstring mText;
 		Color mColor;
-		float mSecs;
-		float mDuration;
-		float mSize;
-		float mWidth;
+		Real mSecs;
+		Real mDuration;
+		Real mSize;
+		Real mWidth;
 	};
 
 	struct Line
@@ -80,7 +81,7 @@ public:
 	struct Sphere
 	{
 		Vec3 mPos;
-		float mRadius;
+		Real mRadius;
 		Color mColor;
 	};
 
@@ -89,7 +90,7 @@ public:
 		Vec3 mPos;
 		Vec3 mExtent;
 		Color mColor;
-		float mAlpha;
+		Real mAlpha;
 	};
 
 	struct Triangle
@@ -98,7 +99,7 @@ public:
 		Vec3 b;
 		Vec3 c;
 		Color mColor;
-		float mAlpha;
+		Real mAlpha;
 	};
 	struct LINE_VERTEX
 	{
@@ -109,9 +110,9 @@ public:
 		Vec3 v;
 		unsigned color;
 	};	
-	// 12 : float3, 4 : ubyte4
+	// 12 : Real3, 4 : ubyte4
 	static const unsigned LINE_STRIDE = 16;	
-	// 12 : float3, 16 : color
+	// 12 : Real3, 16 : color
 	static const unsigned MAX_LINE_VERTEX = 500;
 	typedef std::queue<TextData> MessageQueue;
 	MessageQueue mTexts;
@@ -165,14 +166,14 @@ public:
 
 	void SetRenderTargetSize(const Vec2I& size){
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-			(float)size.x,
-			(float)size.y,
+			(Real)size.x,
+			(Real)size.y,
 			0.f, 1.0f);
 	}
 
 	//----------------------------------------------------------------------------
-	void DrawTextForDuration(float secs, const Vec2I& pos, WCHAR* text,
-		const Color& color, float size)
+	void DrawTextForDuration(Real secs, const Vec2I& pos, WCHAR* text,
+		const Color& color, Real size)
 	{
 		auto it = mTextsForDur.find(pos);
 		if (it == mTextsForDur.end()){
@@ -196,12 +197,12 @@ public:
 
 	//----------------------------------------------------------------------------
 	void DrawText(const Vec2I& pos, WCHAR* text,
-		const Color& color, float size)
+		const Color& color, Real size)
 	{
 		mTexts.push(TextData(pos, text, color, size, 0.f));
 	}
 
-	void Draw3DText(const Vec3& pos, WCHAR* text, const Color& color, float size)
+	void Draw3DText(const Vec3& pos, WCHAR* text, const Color& color, Real size)
 	{
 		auto& renderer = Renderer::GetInstance();
 		auto cam = renderer.GetCamera();
@@ -252,16 +253,16 @@ public:
 		const Color& color0, const Color& color1)
 	{
 		Line line;
-		line.mStart = Vec3((float)start.x, (float)start.y, 0.f);
+		line.mStart = Vec3((Real)start.x, (Real)start.y, 0.f);
 		line.mColor = color0;
 
-		line.mEnd = Vec3((float)end.x, (float)end.y, 0.f);
+		line.mEnd = Vec3((Real)end.x, (Real)end.y, 0.f);
 		line.mColore = color1;
 
 		mScreenLines.push_back(line);
 	}
 
-	void DrawSphere(const Vec3& pos, float radius, const Color& color)
+	void DrawSphere(const Vec3& pos, Real radius, const Color& color)
 	{
 		mSpheres.push_back(Sphere());
 		auto& s = mSpheres.back();
@@ -269,7 +270,7 @@ public:
 		s.mRadius = radius;
 		s.mColor = color;
 	}
-	void DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, float alpha)
+	void DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha)
 	{
 		mBoxes.push_back(Box());
 		auto& b = mBoxes.back();
@@ -278,7 +279,7 @@ public:
 		b.mColor = color;
 		b.mAlpha = alpha;
 	}
-	void DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, float alpha)
+	void DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha)
 	{
 		mTriangles.push_back(Triangle());
 		auto& t = mTriangles.back();
@@ -302,7 +303,7 @@ public:
 			renderer.GetCamera()->GetMatrix(Camera::ViewProj);
 
 		//Profiler profile("void Render()");
-		renderer.BeginEvent("Debug Hud");
+		RenderEventMarker marker("Debug Hud");
 
 		// object constant buffer
 		mRenderStates->Bind();
@@ -316,7 +317,7 @@ public:
 			unsigned processedLines = 0;
 			while (lineCount > processedLines)
 			{
-				MapData mapped = mVertexBuffer->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+				MapData mapped = mVertexBuffer->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 				if (mapped.pData)
 				{
 					unsigned totalVertexCount = lineCount * 2;
@@ -327,7 +328,7 @@ public:
 						memcpy((char*)mapped.pData + base, &mWorldLines[processedLines], LINE_STRIDE * 2);
 						processedLines++;
 					}
-					mVertexBuffer->Unmap();
+					mVertexBuffer->Unmap(0);
 					mVertexBuffer->Bind();
 					renderer.Draw(numVertex, 0);
 				}
@@ -335,10 +336,10 @@ public:
 			mWorldLines.clear();
 		}
 
-		const auto& size = renderer.GetMainRTSize();
+		const auto& size = renderer.GetMainRenderTargetSize();
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-			(float)size.x,
-			(float)size.y,
+			(Real)size.x,
+			(Real)size.y,
 			0.f, 1.0f);
 		mObjectConstants.gWorld.MakeIdentity();
 		renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
@@ -347,7 +348,7 @@ public:
 		{
 			while (lineCount)
 			{
-				MapData mapped = mVertexBuffer->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+				MapData mapped = mVertexBuffer->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 				if (mapped.pData)
 				{
 					unsigned totalVertexCount = lineCount * 2;
@@ -358,7 +359,7 @@ public:
 						memcpy((char*)mapped.pData + base, &mScreenLines[numVertex / 2], LINE_STRIDE * 2);
 						lineCount--;
 					}
-					mVertexBuffer->Unmap();
+					mVertexBuffer->Unmap(0);
 					mVertexBuffer->Bind();
 					renderer.Draw(numVertex, 0);
 				}
@@ -373,7 +374,7 @@ public:
 		mQuads.clear();
 
 		auto pFont = renderer.GetFont(20.f);
-		float curFontHeight = 20.f;
+		Real curFontHeight = 20.f;
 
 		pFont->PrepareRenderResources();
 		pFont->SetRenderStates(false, false);
@@ -384,7 +385,7 @@ public:
 				pFont = renderer.GetFont(textData.mSize);
 				curFontHeight = textData.mSize;
 			}
-			pFont->Write((float)textData.mPos.x, (float)textData.mPos.y, 0.5f, textData.mColor.Get4Byte(),
+			pFont->Write((Real)textData.mPos.x, (Real)textData.mPos.y, 0.5f, textData.mColor.Get4Byte(),
 				(const char*)textData.mText.c_str(), -1, Font::FONT_ALIGN_LEFT);
 			mTexts.pop();
 		}
@@ -396,7 +397,7 @@ public:
 			auto itDur = mTextsForDur.begin();
 			for (; itDur != mTextsForDur.end(); ++itDur)
 			{
-				float weight = 1.0f;
+				Real weight = 1.0f;
 				auto& textList = itDur->second;
 				auto it = textList.rbegin();
 				for (; it != textList.rend(); ++it){
@@ -406,7 +407,7 @@ public:
 				}
 			}
 			itDur = mTextsForDur.begin();
-			float accHeight = 0.f;
+			Real accHeight = 0.f;
 			for (; itDur != mTextsForDur.end(); ++itDur)
 			{
 				int count = 0;
@@ -433,11 +434,11 @@ public:
 							curFontHeight = it->mSize;
 						}
 						Color color = it->mColor;
-						float proportion = 1.0f - (it->mSecs / it->mDuration);
+						Real proportion = 1.0f - (it->mSecs / it->mDuration);
 						color.a() = 1.0f - (proportion*proportion);
 						renderer.DrawQuad(Vec2I(drawPos.x - 4, drawPos.y - (int)it->mSize - 2), Vec2I((int)it->mWidth + 8, (int)it->mSize + 4), Color(0, 0, 0, color.a()*0.7f));
 						pFont->PrepareRenderResources();
-						pFont->Write((float)drawPos.x, (float)drawPos.y, 0.5f, color.Get4Byte(),
+						pFont->Write((Real)drawPos.x, (Real)drawPos.y, 0.5f, color.Get4Byte(),
 							(const char*)it->mText.c_str(), -1, Font::FONT_ALIGN_LEFT);
 						accHeight += pFont->GetHeight() + 4.f;
 
@@ -451,7 +452,7 @@ public:
 
 		if (mSphereMesh)
 		{
-			renderer.BeginEvent("Debug Hud - Spheres");			
+			RenderEventMarker marker("Debug Hud - Spheres");			
 			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			for (auto& sphere : mSpheres)
 			{
@@ -460,8 +461,8 @@ public:
 				t.SetTranslation(sphere.mPos);
 				t.GetHomogeneous(mObjectConstants.gWorld);
 				// only world are available. other matrix will be calculated in the shader
-				//mObjectConstants.gWorldView = gFBEnv->renderer.GetCamera()->GetViewMat() * mObjectConstants.gWorld;
-				//mObjectConstants.gWorldViewProj = gFBEnv->renderer.GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
+				//mObjectConstants.gWorldView = renderer.GetCamera()->GetViewMat() * mObjectConstants.gWorld;
+				//mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
 				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 				mSphereMesh->GetMaterial()->SetMaterialParameters(0, sphere.mColor.GetVec4());
 				mSphereMesh->GetMaterial()->Bind(true);
@@ -472,8 +473,9 @@ public:
 
 		if (mBoxMesh)
 		{
-			D3DEventMarker mark("Render - Boxes()");
-			gFBEnv->renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			
+			RenderEventMarker mark("DebugHud - Boxes");
+			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			for (auto& box : mBoxes)
 			{
 				Transformation t;
@@ -481,7 +483,7 @@ public:
 				t.SetTranslation(box.mPos);
 				t.GetHomogeneous(mObjectConstants.gWorld);
 
-				gFBEnv->renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
+				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 				Vec4 color = box.mColor.GetVec4();
 				color.w = box.mAlpha;
 				mBoxMesh->GetMaterial()->SetMaterialParameters(0, color);
@@ -497,26 +499,24 @@ public:
 			{
 				Vec4 color = tri.mColor.GetVec4();
 				color.w = tri.mAlpha;
-				gFBEnv->renderer.DrawTriangleNow(tri.a, tri.b, tri.c, color, mTriMaterial);
+				renderer.DrawTriangle(tri.a, tri.b, tri.c, color, mTriMaterial);
 			}
 		}
 		mTriangles.clear();
 	}
 
-	void OnBeforeRenderingTransparents(Scene* scene)
+	void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
-		if (!gFBEnv->pConsole->GetEngineCommand()->r_debugDraw)
+		if (!Renderer::GetInstance().GetOptions()->r_debugDraw)
 			return;
-		if (gFBEnv->mRenderPass != RENDER_PASS::PASS_NORMAL)
+		if (renderParam.mRenderPass != RENDER_PASS::PASS_NORMAL)
 			return;
 		unsigned lineCount = mWorldLinesBeforeAlphaPass.size();
 		if (lineCount == 0)
 			return;
 
-		D3DEventMarker mark("OnBeforeRenderingTransparents()");
-		PreRender();
-
-		IRenderer* renderer = gFBEnv->pEngine->GetRenderer();
+		RenderEventMarker mark("DebugHud - OnBeforeRenderingTransparents()");
+		auto& renderer = Renderer::GetInstance();
 		// object constant buffer
 		mInputLayout->Bind();
 		mLineShader->Bind();
@@ -526,7 +526,7 @@ public:
 		{
 			while (lineCount)
 			{
-				MapData mapped = mVertexBuffer->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+				MapData mapped = mVertexBuffer->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 				if (mapped.pData)
 				{
 					unsigned totalVertexCount = lineCount * 2;
@@ -537,7 +537,7 @@ public:
 						memcpy((char*)mapped.pData + base, &mWorldLinesBeforeAlphaPass[numVertex / 2], LINE_STRIDE * 2);
 						lineCount--;
 					}
-					mVertexBuffer->Unmap();
+					mVertexBuffer->Unmap(0);
 					mVertexBuffer->Bind();
 					renderer.Draw(numVertex, 0);
 				}
@@ -566,8 +566,8 @@ void DebugHud::SetRenderTargetSize(const Vec2I& size){
 }
 
 //----------------------------------------------------------------------------
-void DebugHud::DrawTextForDuration(float secs, const Vec2I& pos, WCHAR* text, 
-		const Color& color, float size)
+void DebugHud::DrawTextForDuration(Real secs, const Vec2I& pos, WCHAR* text, 
+		const Color& color, Real size)
 {
 	mImpl->DrawTextForDuration(secs, pos, text, color, size);
 }
@@ -578,12 +578,12 @@ void DebugHud::ClearDurationTexts() {
 
 //----------------------------------------------------------------------------
 void DebugHud::DrawText(const Vec2I& pos, WCHAR* text, 
-	const Color& color, float size)
+	const Color& color, Real size)
 {
 	mImpl->DrawText(pos, text, color, size);
 }
 
-void DebugHud::Draw3DText(const Vec3& pos, WCHAR* text, const Color& color, float size)
+void DebugHud::Draw3DText(const Vec3& pos, WCHAR* text, const Color& color, Real size)
 {
 	mImpl->Draw3DText(pos, text, color, size);
 }
@@ -608,35 +608,29 @@ void DebugHud::DrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end, const
 void DebugHud::DrawLine(const Vec2I& start, const Vec2I& end, 
 	const Color& color0, const Color& color1)
 {
-	mImpl->mDrawLine(start, end, color0, color1);
+	mImpl->DrawLine(start, end, color0, color1);
 }
 
-void DebugHud::DrawSphere(const Vec3& pos, float radius, const Color& color)
+void DebugHud::DrawSphere(const Vec3& pos, Real radius, const Color& color)
 {
-	mImpl->DrawSphere(start, radius, color);
+	mImpl->DrawSphere(pos, radius, color);
 }
-void DebugHud::DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, float alpha)
+void DebugHud::DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha)
 {
 	mImpl->DrawBox(boxMin, boxMax, color, alpha);
 }
-void DebugHud::DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, float alpha)
+void DebugHud::DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha)
 {
 	mImpl->DrawTriangle(a, b, c, color, alpha);
 }
 
-//----------------------------------------------------------------------------
-void DebugHud::PreRender()
+void DebugHud::OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
 {
-	mImpl->PreRender();	
-}
-
-void DebugHud::OnBeforeRenderingTransparents(Scene* scene)
-{
-	mImpl->OnBeforeRenderingTransparents(scene);
+	mImpl->OnBeforeRenderingTransparents(scene, renderParam, renderParamOut);
 }
 
 //----------------------------------------------------------------------------
-void DebugHud::Render()
+void DebugHud::Render(const RenderParam& renderParam, RenderParamOut* renderParamOut)
 {
-	mImpl->Render();
+	mImpl->Render(renderParam, renderParamOut);
 }

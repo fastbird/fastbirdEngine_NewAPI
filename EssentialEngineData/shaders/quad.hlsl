@@ -65,7 +65,7 @@ v2p quad_VertexShader( in a2v IN )
 {
     v2p OUT;
 
-	OUT.pos = mul(gWorld, IN.pos);
+	OUT.pos = IN.pos;
 	OUT.color = IN.color;
 #ifdef DIFFUSE_TEXTURE	
 	OUT.uv = IN.uv;

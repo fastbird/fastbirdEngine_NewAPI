@@ -75,10 +75,9 @@
     <ClCompile Include="DLLMain.cpp" />
     <ClCompile Include="IndexBufferD3D11.cpp" />
     <ClCompile Include="InputLayoutD3D11.cpp" />
+    <ClCompile Include="IUnknownDeleter.cpp" />
     <ClCompile Include="RendererD3D11.cpp" />
     <ClCompile Include="RenderStatesD3D11.cpp" />
-    <ClCompile Include="ResourceBinder.cpp" />
-    <ClCompile Include="ResourceMapper.cpp" />
     <ClCompile Include="ShaderD3D11.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -94,10 +93,9 @@
     <ClInclude Include="DLLMain.h" />
     <ClInclude Include="IndexBufferD3D11.h" />
     <ClInclude Include="InputLayoutD3D11.h" />
+    <ClInclude Include="IUnknownDeleter.h" />
     <ClInclude Include="RendererD3D11.h" />
     <ClInclude Include="RenderStatesD3D11.h" />
-    <ClInclude Include="ResourceBinder.h" />
-    <ClInclude Include="ResourceMapper.h" />
     <ClInclude Include="ShaderD3D11.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureD3D11.h" />

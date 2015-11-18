@@ -80,7 +80,7 @@ namespace fastbird{
 
 		bool IsReady() const;
 		void Bind(BINDING_SHADER shader, int slot);
-		void Unbind();		
+		void Unbind();
 		MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag);
 		void Unmap(UINT subResource);
 		void CopyToStaging(TexturePtr dst, UINT dstSubresource, UINT dstX, UINT dstY, UINT dstZ,

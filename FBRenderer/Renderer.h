@@ -38,6 +38,7 @@
 #include "RenderStates.h"
 #include "TextureBinding.h"
 #include "SystemTextures.h"
+#include "RenderEventMarker.h"
 #include "FBSceneManager/ISceneObserver.h"
 #include "FBInputManager/IInputConsumer.h"
 #include "FBMathLib/Math.h"
@@ -47,8 +48,8 @@ struct lua_State;
 namespace fastbird{	
 	class RenderOptions;
 	typedef unsigned RenderTargetId;
+	DECLARE_SMART_PTR(IVideoPlayer);
 	DECLARE_SMART_PTR(Camera);
-	DECLARE_SMART_PTR(VideoPlayer);
 	DECLARE_SMART_PTR(PointLightManager);
 	DECLARE_SMART_PTR(Font);
 	DECLARE_SMART_PTR(DirectionalLight);
@@ -141,6 +142,7 @@ namespace fastbird{
 		setting mUsePool in param as true.*/
 		void KeepRenderTargetInPool(RenderTargetPtr rt);
 		/** Load texture file asynchronously */
+		TexturePtr CreateTexture(const char* file);
 		TexturePtr CreateTexture(const char* file, bool async);		
 		TexturePtr CreateTexture(void* data, int width, int height, PIXEL_FORMAT format,
 			BUFFER_USAGE usage, int  buffer_cpu_access, int texture_type);
@@ -148,23 +150,14 @@ namespace fastbird{
 			unsigned numVertices, BUFFER_USAGE usage, BUFFER_CPU_ACCESS_FLAG accessFlag);
 		IndexBufferPtr CreateIndexBuffer(void* data, unsigned int numIndices,
 			INDEXBUFFER_FORMAT format);
-		ShaderPtr CreateShader(const char* filepath, int shaders,
-			const SHADER_DEFINES& defines = SHADER_DEFINES(), ShaderPtr pReloadingShader = 0);
+		ShaderPtr CreateShader(const char* filepath, int shaders);
+		ShaderPtr CreateShader(const char* filepath, int shaders, const SHADER_DEFINES& defines);
+		bool ReapplyShaderDefines(Shader* shader);
 		MaterialPtr CreateMaterial(const char* file);
 		MaterialPtr GetMissingMaterial();
 		// use this if you are sure there is instance of the descs.
 		InputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& descs, ShaderPtr shader);
-		InputLayoutPtr GetInputLayout(const INPUT_ELEMENT_DESCS& descs);
-		// use these if you are not sure.
-		InputLayoutPtr GetInputLayout(const INPUT_ELEMENT_DESCS& descs,
-			MaterialPtr material);
-		InputLayoutPtr GetInputLayout(const INPUT_ELEMENT_DESCS& descs,
-			ShaderPtr shader);
-		// auxiliary
-		InputLayoutPtr GetInputLayout(DEFAULT_INPUTS::Enum e,
-			MaterialPtr material);
-		InputLayoutPtr GetInputLayout(DEFAULT_INPUTS::Enum e,
-			ShaderPtr shader);
+		InputLayoutPtr GetInputLayout(DEFAULT_INPUTS::Enum e, ShaderPtr shader);
 		RasterizerStatePtr CreateRasterizerState(const RASTERIZER_DESC& desc);
 		BlendStatePtr CreateBlendState(const BLEND_DESC& desc);
 		DepthStencilStatePtr CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc);
@@ -187,6 +180,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		void SetRenderTarget(TexturePtr pRenderTargets[], size_t rtViewIndex[], int num,
 			TexturePtr pDepthStencil, size_t dsViewIndex);		
+		void UnbindRenderTarget(TexturePtr renderTargetTexture);
 		void SetViewports(const Viewport viewports[], int num);
 		void SetScissorRects(Rect rects[], int num);
 		void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
@@ -197,6 +191,7 @@ namespace fastbird{
 		*/
 		void SetTextures(TexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot);
 		void SetSystemTexture(SystemTextures::Enum type, TexturePtr texture);
+		void UnbindTexture(BINDING_SHADER shader, int slot);
 		// pre defined
 		void BindDepthTexture(bool set);		
 		void SetDepthWriteShader();
@@ -298,16 +293,6 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// GPU Manipulation
 		//-------------------------------------------------------------------
-		void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation);
-		void Draw(unsigned int vertexCount, unsigned int startVertexLocation);
-		void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs = true);
-		void DrawQuadLine(const DrawQuadLineParam& param);
-		void DrawQuadWithTexture(const DrawQuadWithTextureParam& param);
-		void DrawQuadWithTextureUV(const DrawQuadWithTextureUVParam& param);
-		void DrawBillboardWorldQuad(const DrawBillboardWorldQuadParam& param);
-		void DrawFullscreenQuad(IPlatformShader* pixelShader, bool farside);
-		void DrawTriangle(const DrawTriangleParam& param);
-
 		void SetClearColor(HWindowId id, const Color& color);
 		void SetClearDepthStencil(HWindowId id, Real z, UINT8 stencil);
 		void Clear(Real r, Real g, Real b, Real a, Real z, UINT8 stencil);
@@ -320,13 +305,13 @@ namespace fastbird{
 		
 
 		//-------------------------------------------------------------------
-		// Renderer State
+		// FBRenderer State
 		//-------------------------------------------------------------------
-		void SetWireframe(bool enable);
-		bool GetWireframe() const;
+		void SetForcedWireFrame(bool enable);
+		bool GetForcedWireFrame() const;
 		RenderTargetPtr GetMainRenderTarget() const;
 		ScenePtr GetMainScene() const; // move to SceneManager
-		const Vec2I& GetMainRTSize() const;
+		const Vec2I& GetMainRenderTargetSize() const;
 		void SetCurrentRenderTarget(RenderTargetPtr renderTarget);
 		RenderTargetPtr GetCurrentRenderTarget() const;
 		bool IsMainRenderTarget() const;
@@ -345,8 +330,8 @@ namespace fastbird{
 		void SetDebugRenderTarget(unsigned idx, const char* textureName);
 		void SetFadeAlpha(Real alpha);
 		PointLightManagerPtr GetPointLightMan() const;
-		void RegisterVideoPlayer(VideoPlayerPtr player);
-		void UnregisterVideoPlayer(VideoPlayerPtr player);
+		void RegisterVideoPlayer(IVideoPlayerPtr player);
+		void UnregisterVideoPlayer(IVideoPlayerPtr player);
 		void GetSampleOffsets_GaussBlur5x5(DWORD texWidth, DWORD texHeight, Vec4** avTexCoordOffset, Vec4** avSampleWeight, Real fMultiplier);
 		void GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Vec4* avTexCoordOffset);
 		bool IsLuminanceOnCpu() const;
@@ -355,11 +340,14 @@ namespace fastbird{
 		// Queries
 		//-------------------------------------------------------------------
 		unsigned GetMultiSampleCount() const;
+		bool GetFilmicToneMapping() const;
+		bool GetLuminanaceOnCPU() const;
 		RenderTargetPtr GetRenderTarget(HWindowId id) const;
 		void SetCamera(CameraPtr pCamera);
 		CameraPtr GetCamera() const; // this is for current carmera.
 		CameraPtr GetMainCamera() const;
-		HWindow GetMainWindowHandle();
+		HWindow GetMainWindowHandle() const;
+		HWindowId GetMainWindowHandleId();
 		HWindow GetWindowHandle(RenderTargetId rtId);
 		Vec2I ToSreenPos(HWindowId id, const Vec3& ndcPos) const;
 		Vec2 ToNdcPos(HWindowId id, const Vec2I& screenPos) const;
@@ -372,40 +360,49 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// Drawing
 		//-------------------------------------------------------------------
+		void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation);
+		void Draw(unsigned int vertexCount, unsigned int startVertexLocation);				
 		void DrawFullscreenQuad(ShaderPtr pixelShader, bool farside);
-		void DrawText(const Vec2I& pos, WCHAR* text, const Color& color, Real size = 20);
-		void DrawText(const Vec2I& pos, const char* text, const Color& color, Real size = 20);
-		void Draw3DText(const Vec3& worldpos, WCHAR* text, const Color& color, Real size = 20);
-		void Draw3DText(const Vec3& worldpos, const char* text, const Color& color, Real size = 20);
-		void DrawTextForDuration(Real secs, const Vec2I& pos, WCHAR* text,
-			const Color& color, Real size = 20);
-		void DrawTextForDuration(Real secs, const Vec2I& pos, const char* text,
-			const Color& color, Real size = 20);
-		void ClearDurationTexts();
-		void DrawLine(const Vec3& start, const Vec3& end,
-			const Color& color0, const Color& color1);
-		void DrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end,
-			const Color& color0, const Color& color1);
-		void DrawLine(const Vec2I& start, const Vec2I& end,
-			const Color& color, const Color& color1);
-		void DrawQuadLater(const Vec2I& pos, const Vec2I& size, const Color& color);
-		// with depth culling
-		void DrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, Real thickness,
-			const char* texture, bool textureFlow);
-		void DrawSphere(const Vec3& pos, Real radius, const Color& color);
-		void DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha);
-		void DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha);
-		void DrawTriangleNow(const Vec3& a, const Vec3& b, const Vec3& c, const Vec4& color, MaterialPtr mat);
-		void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs = true);
-		void DrawQuadLine(const Vec2I& pos, const Vec2I& size, const Color& color);
+		void DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Vec4& color, MaterialPtr mat);
+		void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color);
+		void DrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color, bool updateRs);
 		void DrawQuadWithTexture(const Vec2I& pos, const Vec2I& size, const Color& color, TexturePtr texture, MaterialPtr materialOverride = 0);
 		void DrawQuadWithTextureUV(const Vec2I& pos, const Vec2I& size, const Vec2& uvStart, const Vec2& uvEnd,
 			const Color& color, TexturePtr texture, MaterialPtr materialOverride = 0);
 		void DrawBillboardWorldQuad(const Vec3& pos, const Vec2& size, const Vec2& offset,
 			DWORD color, MaterialPtr pMat);
-		
-		void RenderGeoms();
-		void RenderDebugHud();
+		void QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color);
+		void QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color, Real size);
+		void QueueDrawText(const Vec2I& pos, const char* text, const Color& color);
+		void QueueDrawText(const Vec2I& pos, const char* text, const Color& color, Real size);
+		void QueueDraw3DText(const Vec3& worldpos, WCHAR* text, const Color& color);
+		void QueueDraw3DText(const Vec3& worldpos, WCHAR* text, const Color& color, Real size);
+		void QueueDraw3DText(const Vec3& worldpos, const char* text, const Color& color);
+		void QueueDraw3DText(const Vec3& worldpos, const char* text, const Color& color, Real size);
+		void QueueDrawTextForDuration(Real secs, const Vec2I& pos, WCHAR* text, const Color& color);
+		void QueueDrawTextForDuration(Real secs, const Vec2I& pos, WCHAR* text,
+			const Color& color, Real size);
+		void QueueDrawTextForDuration(Real secs, const Vec2I& pos, const char* text, const Color& color);
+		void QueueDrawTextForDuration(Real secs, const Vec2I& pos, const char* text,
+			const Color& color, Real size);
+		void ClearDurationTexts();
+		void QueueDrawLine(const Vec3& start, const Vec3& end,
+			const Color& color0, const Color& color1);		
+		void QueueDrawLine(const Vec2I& start, const Vec2I& end,
+			const Color& color0, const Color& color1);
+		void QueueDrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end,
+			const Color& color0, const Color& color1);
+		void QueueDrawQuad(const Vec2I& pos, const Vec2I& size, const Color& color);
+		/**Rendered before the transparent object being rendered.*/
+		void QueueDrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, Real thickness,
+			const char* texture, bool textureFlow);
+		/**Rendered before the transparent object being rendered.*/
+		void QueueDrawSphere(const Vec3& pos, Real radius, const Color& color);
+		/**Rendered before the transparent object being rendered.*/
+		void QueueDrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha);
+		/**Rendered before the transparent object being rendered.*/
+		void QueueDrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha);		
+		void QueueDrawQuadLine(const Vec2I& pos, const Vec2I& size, const Color& color);
 
 		//-------------------------------------------------------------------
 		// Internal
@@ -413,16 +410,17 @@ namespace fastbird{
 		void GatherPointLightData(const BoundingVolume* aabb, const Transformation& transform, POINT_LIGHT_CONSTANTS* plConst);
 		void RefreshPointLight();
 		bool NeedToRefreshPointLight() const;
+		void RenderDebugHud();
 
 		//-------------------------------------------------------------------
 		// ISceneObserver
 		//-------------------------------------------------------------------
-		void OnAfterMakeVisibleSet(Scene* scene);
-		void OnBeforeRenderingOpaques(Scene* scene);
-		void OnBeforeRenderingTransparents(Scene* scene);
+		void OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
 
 		//-------------------------------------------------------------------
-		// ISceneObserver
+		// IInputConsumer
 		//-------------------------------------------------------------------
 		void ConsumeInput(IInputInjectorPtr injector); /// inject to main camera
 	};

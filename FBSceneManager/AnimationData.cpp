@@ -142,11 +142,11 @@ public:
 		return mName.c_str(); 
 	}
 
-	void PickPos(float time, bool cycled, const Vec3** prev, const Vec3** next, float& interpol){
+	void PickPos(TIME_PRECISION time, bool cycled, const Vec3** prev, const Vec3** next, TIME_PRECISION& interpol){
 		int i = 0;
 		*prev = &mPos.begin()->second;
 		*next = *prev;
-		float prevTime = mPos.begin()->first;
+		TIME_PRECISION prevTime = mPos.begin()->first;
 		for (const auto& it : mPos)
 		{
 			if (it.first <= time)
@@ -157,8 +157,8 @@ public:
 			if (it.first >= time)
 			{
 				*next = &it.second;
-				float length = it.first - prevTime;
-				if (length != 0.f)
+				TIME_PRECISION length = it.first - prevTime;
+				if (length != 0.)
 					interpol = (time - prevTime) / length;
 				return;
 			}
@@ -166,11 +166,11 @@ public:
 		}
 	}
 
-	void PickRot(float time, bool cycled, const Quat** prev, const Quat** next, float& interpol){
+	void PickRot(TIME_PRECISION time, bool cycled, const Quat** prev, const Quat** next, TIME_PRECISION& interpol){
 		int i = 0;
 		*prev = &mRot.begin()->second;
 		*next = *prev;
-		float prevTime = mRot.begin()->first;
+		TIME_PRECISION prevTime = mRot.begin()->first;
 		for (const auto& it : mRot)
 		{
 			if (it.first <= time)
@@ -181,7 +181,7 @@ public:
 			if (it.first >= time)
 			{
 				*next = &it.second;
-				float length = it.first - prevTime;
+				TIME_PRECISION length = it.first - prevTime;
 				if (length != 0.f)
 					interpol = (time - prevTime) / length;
 				return;
@@ -406,11 +406,11 @@ const char* AnimationData::GetName() const{
 	return mImpl->GetName();
 }
 
-void AnimationData::PickPos(float time, bool cycled, const Vec3** prev, const Vec3** next, float& interpol){
+void AnimationData::PickPos(TIME_PRECISION time, bool cycled, const Vec3** prev, const Vec3** next, TIME_PRECISION& interpol){
 	mImpl->PickPos(time, cycled, prev, next, interpol);
 }
 
-void AnimationData::PickRot(float time, bool cycled, const Quat** prev, const Quat** next, float& interpol){
+void AnimationData::PickRot(TIME_PRECISION time, bool cycled, const Quat** prev, const Quat** next, TIME_PRECISION& interpol){
 	mImpl->PickRot(time, cycled, prev, next, interpol);
 }
 

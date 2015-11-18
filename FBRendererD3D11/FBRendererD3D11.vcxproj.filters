@@ -9,9 +9,8 @@
     <ClCompile Include="IndexBufferD3D11.cpp" />
     <ClCompile Include="InputLayoutD3D11.cpp" />
     <ClCompile Include="DLLMain.cpp" />
-    <ClCompile Include="ResourceBinder.cpp" />
     <ClCompile Include="RenderStatesD3D11.cpp" />
-    <ClCompile Include="ResourceMapper.cpp" />
+    <ClCompile Include="IUnknownDeleter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RendererD3D11.h" />
@@ -24,9 +23,8 @@
     <ClInclude Include="IndexBufferD3D11.h" />
     <ClInclude Include="InputLayoutD3D11.h" />
     <ClInclude Include="DLLMain.h" />
-    <ClInclude Include="ResourceBinder.h" />
     <ClInclude Include="RenderStatesD3D11.h" />
-    <ClInclude Include="ResourceMapper.h" />
     <ClInclude Include="D3D11Types.h" />
+    <ClInclude Include="IUnknownDeleter.h" />
   </ItemGroup>
 </Project>

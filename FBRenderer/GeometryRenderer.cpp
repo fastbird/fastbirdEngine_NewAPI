@@ -61,7 +61,7 @@ public:
 		Vec3 mEnd;
 		unsigned mColore;
 
-		float mThickness;
+		Real mThickness;
 		std::string mStrTexture;
 		TexturePtr mTexture;
 		bool mTextureFlow;
@@ -70,7 +70,7 @@ public:
 	struct Sphere
 	{
 		Vec3 mPos;
-		float mRadius;
+		Real mRadius;
 		Color mColor;
 	};
 
@@ -79,7 +79,7 @@ public:
 		Vec3 mPos;
 		Vec3 mExtent;
 		Color mColor;
-		float mAlpha;
+		Real mAlpha;
 	};
 
 	struct Triangle
@@ -88,7 +88,7 @@ public:
 		Vec3 b;
 		Vec3 c;
 		Color mColor;
-		float mAlpha;
+		Real mAlpha;
 	};
 	struct LINE_VERTEX
 	{
@@ -159,7 +159,7 @@ public:
 		mDepthStencilState = renderer.CreateDepthStencilState(ddesc);
 		RASTERIZER_DESC desc;
 		mRasterizerState = renderer.CreateRasterizerState(desc);
-		auto sceneMgr = SceneManager::GetInstance();
+		auto& sceneMgr = SceneManager::GetInstance();
 		mSphereMesh =  sceneMgr.CreateMeshObject("es/objects/Sphere.dae");
 		mBoxMesh = sceneMgr.CreateMeshObject("es/objects/DebugBox.dae");	
 		mThickLines.reserve(1000);
@@ -168,8 +168,8 @@ public:
 	//----------------------------------------------------------------------------
 	void SetRenderTargetSize(const Vec2I& size){
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
-			(float)size.x,
-			(float)size.y,
+			(Real)size.x,
+			(Real)size.y,
 			0.f, 1.0f);
 	}
 
@@ -200,7 +200,7 @@ public:
 		mWorldLinesBeforeAlphaPass.push_back(line);
 	}
 
-	void DrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, float thickness,
+	void DrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, Real thickness,
 		const char* texture, bool textureFlow)
 	{
 		ThickLine line;
@@ -220,7 +220,7 @@ public:
 		mThickLines.push_back(line);
 	}
 
-	void DrawSphere(const Vec3& pos, float radius, const Color& color)
+	void DrawSphere(const Vec3& pos, Real radius, const Color& color)
 	{
 		mSpheres.push_back(Sphere());
 		auto& s = mSpheres.back();
@@ -228,7 +228,7 @@ public:
 		s.mRadius = radius;
 		s.mColor = color;
 	}
-	void DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, float alpha)
+	void DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha)
 	{
 		mBoxes.push_back(Box());
 		auto& b = mBoxes.back();
@@ -237,7 +237,7 @@ public:
 		b.mColor = color;
 		b.mAlpha = alpha;
 	}
-	void DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, float alpha)
+	void DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha)
 	{
 		mTriangles.push_back(Triangle());
 		auto& t = mTriangles.back();
@@ -260,7 +260,7 @@ public:
 		if (lineCount == 0)
 			return;
 
-		renderer.BeginEvent("Geometry Render: OnBeforeTransparents");		
+		RenderEventMarker marker("Geometry Render: OnBeforeTransparents");
 		// object constant buffer
 		if (lineCount > 0)
 		{
@@ -270,7 +270,7 @@ public:
 			renderer.UpdateObjectConstantsBuffer(&mObjectConstants_WorldLine);
 			while (lineCount)
 			{
-				MapData mapped = mVertexBuffer->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+				MapData mapped = mVertexBuffer->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 				if (mapped.pData)
 				{
 					unsigned totalVertexCount = lineCount * 2;
@@ -281,7 +281,7 @@ public:
 						memcpy((char*)mapped.pData + base, &mWorldLinesBeforeAlphaPass[numVertex / 2], LINE_STRIDE * 2);
 						lineCount--;
 					}
-					mVertexBuffer->Unmap();
+					mVertexBuffer->Unmap(0);
 					mVertexBuffer->Bind();
 					renderer.Draw(numVertex, 0);
 				}
@@ -299,7 +299,7 @@ public:
 		if (renderParam.mRenderPass != RENDER_PASS::PASS_NORMAL)
 			return;
 
-		renderer.BeginEvent("Geometry Render");
+		RenderEventMarker marker("Geometry Render");
 
 		mObjectConstants_WorldLine.gWorldViewProj = renderer.GetCamera()->GetMatrix(Camera::ViewProj);
 		
@@ -317,7 +317,7 @@ public:
 			unsigned processedLines = 0;
 			while (lineCount > processedLines)
 			{
-				MapData mapped = mVertexBuffer->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+				MapData mapped = mVertexBuffer->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 				if (mapped.pData)
 				{
 					unsigned totalVertexCount = lineCount * 2;
@@ -328,7 +328,7 @@ public:
 						memcpy((char*)mapped.pData + base, &mWorldLines[processedLines], LINE_STRIDE * 2);
 						processedLines++;
 					}
-					mVertexBuffer->Unmap();
+					mVertexBuffer->Unmap(0);
 					mVertexBuffer->Bind();
 					renderer.Draw(numVertex, 0);
 				}
@@ -361,7 +361,7 @@ public:
 			unsigned processedLines = 0;
 			while (lineCount > processedLines)
 			{
-				MapData mapped = mVertexBufferThickLine->Map(MAP_TYPE_WRITE_DISCARD, 0, MAP_FLAG_NONE);
+				MapData mapped = mVertexBufferThickLine->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 				if (mapped.pData)
 				{
 					const auto& curProcessingLine = mThickLines[processedLines];
@@ -401,7 +401,7 @@ public:
 						if (curProcessingLine.mStrTexture != curTexture || curProcessingLine.mTextureFlow != curTextureFlow)
 							break;
 
-						float thickness = mThickLines[processedLines].mThickness;
+						Real thickness = mThickLines[processedLines].mThickness;
 
 						Color colorStart(curProcessingLine.mColor);
 						Color colorEnd(curProcessingLine.mColore);
@@ -421,7 +421,7 @@ public:
 						memcpy((char*)mapped.pData + base, vertices, THICK_LINE_STRIDE * 6);
 						processedLines++;
 					}
-					mVertexBufferThickLine->Unmap();
+					mVertexBufferThickLine->Unmap(0);
 					mVertexBufferThickLine->Bind();
 					renderer.Draw(numVertex, 0);
 				}
@@ -432,7 +432,7 @@ public:
 
 		if (mSphereMesh)
 		{
-			renderer.BeginEvent("DebugHud::Render - Spheres()");
+			RenderEventMarker marker("DebugHud::Render - Spheres()");
 			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			for (auto& sphere : mSpheres)
 			{
@@ -453,7 +453,7 @@ public:
 
 		if (mBoxMesh)
 		{
-			renderer.BeginEvent("DebugHud::Render - Boxes()");
+			RenderEventMarker marker("DebugHud::Render - Boxes()");
 			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			for (auto& box : mBoxes)
 			{
@@ -478,7 +478,7 @@ public:
 			{
 				Vec4 color = tri.mColor.GetVec4();
 				color.w = tri.mAlpha;
-				renderer.DrawTriangleNow(tri.a, tri.b, tri.c, color, mTriMaterial);
+				renderer.DrawTriangle(tri.a, tri.b, tri.c, color, mTriMaterial);
 			}
 		}
 		mTriangles.clear();
@@ -512,19 +512,19 @@ void GeometryRenderer::DrawLineBeforeAlphaPass(const Vec3& start, const Vec3& en
 	mImpl->DrawLineBeforeAlphaPass(start, end, color0, color1);
 }
 
-void GeometryRenderer::DrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, float thickness, const char* texture, bool textureFlow) {
+void GeometryRenderer::DrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, Real thickness, const char* texture, bool textureFlow) {
 	mImpl->DrawTexturedThickLine(start, end, color0, color1, thickness, texture, textureFlow);
 }
 
-void GeometryRenderer::DrawSphere(const Vec3& pos, float radius, const Color& color) {
+void GeometryRenderer::DrawSphere(const Vec3& pos, Real radius, const Color& color) {
 	mImpl->DrawSphere(pos, radius, color);
 }
 
-void GeometryRenderer::DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, float alpha) {
+void GeometryRenderer::DrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha) {
 	mImpl->DrawBox(boxMin, boxMax, color, alpha);
 }
 
-void GeometryRenderer::DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, float alpha) {
+void GeometryRenderer::DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha) {
 	mImpl->DrawTriangle(a, b, c, color, alpha);
 }
 

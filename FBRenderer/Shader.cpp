@@ -35,6 +35,7 @@
 using namespace fastbird;
 
 static std::vector<ShaderWeakPtr> sAllShaders;
+
 ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformTexture) {
 	for (auto it = sAllShaders.begin(); it != sAllShaders.end();){
 		auto shader = it->lock();
@@ -48,27 +49,67 @@ ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformTexture) {
 			it = sAllShaders.erase(it);
 		}
 	}
+	return 0;
 }
 
 class Shader::Impl{
 public:
+	// Do not acess member by this pointer
+	static Impl* sLastBindedFullSetShader;
+	Shader* mSelf;
 	IPlatformShaderPtr mPlatformShader;
 	SHADER_DEFINES mDefines;
 	std::set<std::string> mIncludeFiles;
+	std::string mPath;
+	int mBindingShaders;
 	
 	//---------------------------------------------------------------------------
-	Impl()
+	Impl(Shader* shader) 
+		: mBindingShaders(0)
+		, mSelf(shader)
 	{
 	}
 
 	void Bind(){
-		if (mPlatformShader)
+		if (mPlatformShader && sLastBindedFullSetShader != this){
 			mPlatformShader->Bind();
+			sLastBindedFullSetShader = this;
+		}
 	}
-	bool IsValid() const{
-		if (mPlatformShader)
-			return mPlatformShader->IsValid();
-		return false;
+
+	void BindVS(){
+		if (mPlatformShader){
+			sLastBindedFullSetShader = 0;
+			mPlatformShader->BindVS();
+		}
+	}
+
+	void BindGS(){
+		if (mPlatformShader){
+			sLastBindedFullSetShader = 0;
+			mPlatformShader->BindGS();
+		}
+	}
+
+	void BindPS(){
+		if (mPlatformShader){
+			sLastBindedFullSetShader = 0;
+			mPlatformShader->BindPS();
+		}
+	}
+
+	void BindDS(){
+		if (mPlatformShader){
+			sLastBindedFullSetShader = 0;
+			mPlatformShader->BindDS();
+		}
+	}
+
+	void BindHS(){
+		if (mPlatformShader){
+			sLastBindedFullSetShader = 0;
+			mPlatformShader->BindHS();
+		}
 	}
 
 	bool GetCompileFailed() const{
@@ -86,29 +127,35 @@ public:
 		return 0;
 	}
 
-	const char* GetName() const { 
-		return mPlatformShader->GetName();
+	void SetPath(const char* path){
+		if (path)
+			mPath = path;
+		else
+			mPath.clear();
 	}
+
+	void SetBindingShaders(int bindingShaders){
+		mBindingShaders = bindingShaders;
+	}
+
+	int GetBindingShaders() const{
+		return mBindingShaders;
+	}
+
+	const char* GetPath() const{
+		return mPath.c_str();
+	}
+
 	void SetShaderDefines(const SHADER_DEFINES& defines){
 		mDefines = defines;
 		std::sort(mDefines.begin(), mDefines.end());
-		if (mPlatformShader)
-			mPlatformShader->SetShaderDefines(defines);
 	}
 	const SHADER_DEFINES& GetShaderDefines() const { 
 		return mDefines; 
 	}
 
 	void ApplyShaderDefines(){
-		if (mPlatformShader)
-			mPlatformShader->ApplyShaderDefines();
-	}
-
-	int GetBindingShaders() const{
-		if (mPlatformShader){
-			return mPlatformShader->GetBindingShaders();
-		}
-		return 0;
+		Renderer::GetInstance().ReapplyShaderDefines(mSelf);
 	}
 
 	void SetDebugName(const char* debugName){
@@ -147,7 +194,7 @@ void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefi
 	{
 		auto shader = it->lock();
 		if (shader && shader->mImpl->mPlatformShader){
-			if (strcmp(path.c_str(), shader->GetName()) == 0 || shader->mImpl->mPlatformShader->CheckIncludes(path))
+			if (strcmp(path.c_str(), shader->GetPath()) == 0 || shader->mImpl->mPlatformShader->CheckIncludes(path.c_str()))
 			{
 				if (!shaderDefines.empty() || shader->GetShaderDefines() == shaderDefines){
 					auto failed = renderer.ReloadShader(shader);
@@ -167,7 +214,7 @@ ShaderPtr Shader::Create(){
 }
 
 Shader::Shader()
-	: mImpl(new Impl)
+	: mImpl(new Impl(this))
 {	
 }
 
@@ -185,8 +232,24 @@ void Shader::Bind(){
 	mImpl->Bind();
 }
 
-bool Shader::IsValid() const{
-	return mImpl->IsValid();
+void Shader::BindVS(){
+	mImpl->BindVS();
+}
+
+void Shader::BindHS(){
+	mImpl->BindHS();
+}
+
+void Shader::BindDS(){
+	mImpl->BindDS();
+}
+
+void Shader::BindGS(){
+	mImpl->BindGS();
+}
+
+void Shader::BindPS(){
+	mImpl->BindPS();
 }
 
 bool Shader::GetCompileFailed() const{
@@ -197,8 +260,20 @@ void* Shader::GetVSByteCode(unsigned& size) const{
 	return mImpl->GetVSByteCode(size);
 }
 
-const char* Shader::GetName() const{
-	return mImpl->GetName();
+void Shader::SetPath(const char* path){
+	mImpl->SetPath(path);
+}
+
+void Shader::SetBindingShaders(int bindingShaders){
+	mImpl->SetBindingShaders(bindingShaders);
+}
+
+int Shader::GetBindingShaders() const{
+	return mImpl->GetBindingShaders();
+}
+
+const char* Shader::GetPath() const{
+	return mImpl->GetPath();
 }
 
 void Shader::SetShaderDefines(const SHADER_DEFINES& defines){
@@ -212,10 +287,6 @@ const SHADER_DEFINES& Shader::GetShaderDefines() const{
 
 void Shader::ApplyShaderDefines(){
 	mImpl->ApplyShaderDefines();
-}
-
-int Shader::GetBindingShaders() const{
-	return mImpl->GetBindingShaders();
 }
 
 void Shader::SetDebugName(const char* debugName){

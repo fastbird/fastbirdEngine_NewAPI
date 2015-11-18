@@ -32,11 +32,179 @@
 
 namespace fastbird{
 
+class RasterizerState::Impl{
+public:
+	IPlatformRasterizerStatePtr mPlatformRasterizerState;
+	
+	//---------------------------------------------------------------------------
+	void SetPlatformState(IPlatformRasterizerStatePtr state){
+		mPlatformRasterizerState = state;
+	}
+
+	void Bind(){
+		if (!Renderer::GetInstance().GetForcedWireFrame())
+			mPlatformRasterizerState->Bind();
+	}
+
+	void SetDebugName(const char* name){
+		mPlatformRasterizerState->SetDebugName(name);
+	}
+};
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(RasterizerState);
+RasterizerState::RasterizerState()
+	: mImpl(new Impl)
+{
+}
+
+void RasterizerState::SetPlatformState(IPlatformRasterizerStatePtr state){
+	mImpl->SetPlatformState(state);
+}
+
+void RasterizerState::Bind(){
+	mImpl->Bind();
+}
+
+void RasterizerState::SetDebugName(const char* name){
+	mImpl->SetDebugName(name);
+}
+
+//---------------------------------------------------------------------------
+class BlendState::Impl{
+public:
+	IPlatformBlendStatePtr mPlatformBlendState;
+	static bool Lock;
+
+	//---------------------------------------------------------------------------
+	void SetPlatformState(IPlatformBlendStatePtr state){
+		mPlatformBlendState = state;
+	}
+
+	void Bind(){
+		if (!Lock)
+			mPlatformBlendState->Bind();
+	}
+
+	void SetDebugName(const char* name){
+		mPlatformBlendState->SetDebugName(name);
+	}
+};
+bool BlendState::Impl::Lock = false;
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(BlendState);
+BlendState::BlendState()
+	: mImpl(new Impl)
+{
+}
+
+void BlendState::SetLock(bool lock){
+	Impl::Lock = lock;
+}
+
+void BlendState::SetPlatformState(IPlatformBlendStatePtr state){
+	mImpl->SetPlatformState(state);
+}
+
+void BlendState::Bind(){
+	mImpl->Bind();
+}
+
+void BlendState::SetDebugName(const char* name){
+	mImpl->SetDebugName(name);
+}
+
+//---------------------------------------------------------------------------
+class DepthStencilState::Impl{
+public:
+	IPlatformDepthStencilStatePtr mPlatformDepthStencilState;
+	static bool Lock;
+
+	//---------------------------------------------------------------------------
+	void SetPlatformState(IPlatformDepthStencilStatePtr state){
+		mPlatformDepthStencilState = state;
+	}
+
+	void Bind(unsigned stencilRef){
+		if (!Lock)
+			mPlatformDepthStencilState->Bind(stencilRef);
+	}
+
+	void SetDebugName(const char* name){
+		mPlatformDepthStencilState->SetDebugName(name);
+	}
+};
+bool DepthStencilState::Impl::Lock = false;
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(DepthStencilState);
+DepthStencilState::DepthStencilState()
+	: mImpl(new Impl)
+{
+}
+
+void DepthStencilState::SetLock(bool lock){
+	Impl::Lock = lock;
+}
+
+void DepthStencilState::SetPlatformState(IPlatformDepthStencilStatePtr state){
+	mImpl->SetPlatformState(state);
+}
+
+void DepthStencilState::Bind(unsigned stencilRef){
+	mImpl->Bind(stencilRef);
+}
+
+void DepthStencilState::SetDebugName(const char* name){
+	mImpl->SetDebugName(name);
+}
+
+//---------------------------------------------------------------------------
+class SamplerState::Impl{
+public:
+	IPlatformSamplerStatePtr mPlatformSamplerState;	
+
+	//---------------------------------------------------------------------------
+	void SetPlatformState(IPlatformSamplerStatePtr state){
+		mPlatformSamplerState = state;
+	}
+
+	void Bind(BINDING_SHADER shader, int slot){
+		mPlatformSamplerState->Bind(shader, slot);
+	}
+
+	void SetDebugName(const char* name){
+		mPlatformSamplerState->SetDebugName(name);
+	}
+};
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(SamplerState);
+SamplerState::SamplerState()
+	: mImpl(new Impl)
+{
+}
+
+void SamplerState::SetPlatformState(IPlatformSamplerStatePtr state){
+	mImpl->SetPlatformState(state);
+}
+
+void SamplerState::Bind(BINDING_SHADER shader, int slot){
+	mImpl->Bind(shader, slot);
+}
+
+void SamplerState::SetDebugName(const char* name){
+	mImpl->SetDebugName(name);
+}
+
+
+//---------------------------------------------------------------------------
 class RenderStates::Impl{
 public:
-	IPlatformRasterizerStatePtr mRasterizerState;
-	IPlatformBlendStatePtr mBlendState;
-	IPlatformDepthStencilStatePtr mDepthStencilState;
+	RasterizerStatePtr mRasterizerState;
+	BlendStatePtr mBlendState;
+	DepthStencilStatePtr mDepthStencilState;
 
 	CowPtr<RASTERIZER_DESC> mRDesc;
 	CowPtr<BLEND_DESC> mBDesc;

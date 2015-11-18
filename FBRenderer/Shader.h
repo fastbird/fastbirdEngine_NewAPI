@@ -44,16 +44,32 @@ namespace fastbird
 		static void ReloadShader(const char* name);
 		static void ReloadShader(const char* name, const SHADER_DEFINES& shaderDefines);
 
-		~Shader();		
+		~Shader();
+		 
+		/**Bind all type of platform shaders
+		Empty shader will be removed from the pipeline.
+		*/
 		void Bind();
-		bool IsValid() const;
+		/** Bind vertex shader only.*/
+		void BindVS();
+		/** Bind hull shader only.*/
+		void BindHS();
+		/** Bind domain shader only.*/
+		void BindDS();
+		/** Bind geometry shader only.*/
+		void BindGS();
+		/** Bind pixel shader only.*/
+		void BindPS();		
+
 		bool GetCompileFailed() const;
 		void* GetVSByteCode(unsigned& size) const;
-		const char* GetName() const;
+		void SetPath(const char* path);
+		void SetBindingShaders(int bindingShaders);
+		int GetBindingShaders() const;
+		const char* GetPath() const;
 		void SetShaderDefines(const SHADER_DEFINES& defines);
 		const SHADER_DEFINES& GetShaderDefines() const;
 		void ApplyShaderDefines();
-		int GetBindingShaders() const;
 		void SetDebugName(const char* debugName);
 		bool CheckIncludes(const char* shaderHeaderFile) const;
 		void SetPlatformShader(IPlatformShaderPtr shader);

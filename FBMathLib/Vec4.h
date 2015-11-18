@@ -62,7 +62,8 @@ namespace fastbird
 		
 		//-------------------------------------------------------------------------
 		Real Dot(const Vec4& other) const;			
-		void SetXYZ(const Vec3& v);		
+		void SetXYZ(const Vec3& v);
+		Vec3 GetXYZ() const;
 		Vec3 ToVec3() const;
 	};
 }

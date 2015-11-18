@@ -177,7 +177,7 @@ public:
 		if (distToCam > 250 && radius < 5.0f)
 			return;
 
-		renderer.BeginEvent("MeshObject");		
+		RenderEventMarker marker("MeshObject");
 
 		mObjectConstants.gWorldView = renderer.GetCamera()->GetMatrix(Camera::View) * mObjectConstants.gWorld;
 		mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetMatrix(Camera::ViewProj) * mObjectConstants.gWorld;
@@ -365,7 +365,7 @@ public:
 			if (renderOption->r_gameId && self->GetGameId() != -1){
 				char buf[255];
 				sprintf_s(buf, "%u", self->GetGameId());
-				renderer.Draw3DText(self->GetPosition(), buf, Color::White);
+				renderer.QueueDraw3DText(self->GetPosition(), buf, Color::White);
 			}
 		}
 	}
@@ -1090,10 +1090,10 @@ public:
 			VertexBufferPtr buffers[numBuffers] = { it->mVBPos };
 			unsigned int strides[numBuffers] = { it->mVBPos->GetStride() };
 			unsigned int offsets[numBuffers] = { 0 };
-			renderer.SetVertexBuffer(0, numBuffers, buffers, strides, offsets);
+			renderer.SetVertexBuffers(0, numBuffers, buffers, strides, offsets);
 			if (it->mIndexBuffer)
 			{
-				renderer.SetIndexBuffer(it->mIndexBuffer);
+				it->mIndexBuffer->Bind();
 				renderer.DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
 			}
 			else
@@ -1112,10 +1112,10 @@ public:
 				it->mVBColor ? it->mVBColor->GetStride() : 0,
 				it->mVBTangent ? it->mVBTangent->GetStride() : 0 };
 			unsigned int offsets[numBuffers] = { 0, 0, 0, 0, 0 };
-			renderer.SetVertexBuffer(0, numBuffers, buffers, strides, offsets);
+			renderer.SetVertexBuffers(0, numBuffers, buffers, strides, offsets);
 			if (it->mIndexBuffer)
 			{
-				renderer.SetIndexBuffer(it->mIndexBuffer);
+				it->mIndexBuffer->Bind();				
 				renderer.DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
 			}
 			else

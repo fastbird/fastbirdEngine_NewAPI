@@ -69,8 +69,8 @@ namespace fastbird{
 		bool HasScaleAnimation() const;
 		void SetName(const char* name);
 		const char* GetName() const;
-		void PickPos(float time, bool cycled, const Vec3** prev, const Vec3** next, float& interpol);
-		void PickRot(float time, bool cycled, const Quat** prev, const Quat** next, float& interpol);
+		void PickPos(TIME_PRECISION time, bool cycled, const Vec3** prev, const Vec3** next, TIME_PRECISION& interpol);
+		void PickRot(TIME_PRECISION time, bool cycled, const Quat** prev, const Quat** next, TIME_PRECISION& interpol);
 		void ToLocal(const Transformation& tolocal);
 		bool ParseAction(const char* filename);
 		const Action* GetAction(const char* name) const;

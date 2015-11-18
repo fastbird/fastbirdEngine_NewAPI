@@ -29,91 +29,64 @@
 #include "IPlatformRenderStates.h"
 #include "RendererStructs.h"
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
-	typedef IPlatformRasterizerStatePtr RasterizerStatePtr;
-	typedef IPlatformRasterizerStateWeakPtr RasterizerStateWeakPtr;
-	typedef IPlatformBlendStatePtr BlendStatePtr;
-	typedef IPlatformBlendStateWeakPtr BlendStateWeakPtr;
-	typedef IPlatformDepthStencilStatePtr DepthStencilStatePtr;
-	typedef IPlatformDepthStencilStateWeakPtr DepthStencilStateWeakPtr;
-	typedef IPlatformSamplerStatePtr SamplerStatePtr;
-	typedef IPlatformSamplerStateWeakPtr SamplerStateWeakPtr;
-	////---------------------------------------------------------------------------
-	//DECLARE_SMART_PTR(RasterizerState);
-	//class FB_DLL_PUBLIC RasterizerState{
-	//	DECLARE_PIMPL_NON_COPYABLE(RasterizerState);
-	//	RasterizerState();
+namespace fastbird{	
+	//---------------------------------------------------------------------------
+	DECLARE_SMART_PTR(RasterizerState);
+	class FB_DLL_PUBLIC RasterizerState{
+		DECLARE_PIMPL_NON_COPYABLE(RasterizerState);
+		RasterizerState();
 
-	//public:
-	//	static RasterizerStatePtr Create();
-	//	~RasterizerState();
+	public:
+		static RasterizerStatePtr Create();		
 
-	//	void SetPlatformState(IRasterizerStatePtr state);
-	//	IRasterizerStatePtr GetPlatformState() const;
-	//	void SetDescription(const RASTERIZER_DESC& desc);
-	//	const RASTERIZER_DESC& GetDescription() const;
-	//	void ApplyDescription();
+		void SetPlatformState(IPlatformRasterizerStatePtr state);
+		void Bind();
+		void SetDebugName(const char* name);
+	};
 
-	//	void Bind();
-	//	void SetDebugName(const char* name);
-	//};
+	//---------------------------------------------------------------------------
+	DECLARE_SMART_PTR(BlendState);
+	class FB_DLL_PUBLIC BlendState{
+		DECLARE_PIMPL_NON_COPYABLE(BlendState);
+		BlendState();
 
-	////---------------------------------------------------------------------------
-	//DECLARE_SMART_PTR(BlendState);
-	//class FB_DLL_PUBLIC BlendState{
-	//	DECLARE_PIMPL_NON_COPYABLE(BlendState);
+	public:
+		static BlendStatePtr Create();
+		static void SetLock(bool lock);
 
-	//public:
-	//	static BlendStatePtr Create();
-	//	~BlendState();
+		void SetPlatformState(IPlatformBlendStatePtr state);
+		void Bind();
+		void SetDebugName(const char* name);
+	};
 
-	//	void SetPlatformState(IBlendStatePtr state);
-	//	IBlendStatePtr GetPlatformState() const;
-	//	void SetDescription(const BLEND_DESC& desc);
-	//	const BLEND_DESC& GetDescription() const;
-	//	void ApplyDescription();
+	//---------------------------------------------------------------------------
+	DECLARE_SMART_PTR(DepthStencilState);
+	class FB_DLL_PUBLIC DepthStencilState{
+		DECLARE_PIMPL_NON_COPYABLE(DepthStencilState);
+		DepthStencilState();
 
-	//	void Bind();
-	//	void SetDebugName(const char* name);
-	//};
+	public:
+		static DepthStencilStatePtr Create();
+		static void SetLock(bool lock);
 
-	////---------------------------------------------------------------------------
-	//DECLARE_SMART_PTR(DepthStencilState);
-	//class FB_DLL_PUBLIC DepthStencilState{
-	//	DECLARE_PIMPL_NON_COPYABLE(DepthStencilState);
+		void SetPlatformState(IPlatformDepthStencilStatePtr state);
+		void Bind(unsigned stencilRef);
+		void SetDebugName(const char* name);
+	};
 
-	//public:
-	//	static DepthStencilStatePtr Create();
-	//	~DepthStencilState();
+	//---------------------------------------------------------------------------
+	DECLARE_SMART_PTR(SamplerState);
+	class FB_DLL_PUBLIC SamplerState{
+		DECLARE_PIMPL_NON_COPYABLE(SamplerState);
+		SamplerState();
 
-	//	void SetPlatformState(IDepthStencilStatePtr state);
-	//	IDepthStencilStatePtr GetPlatformState() const;
-	//	void SetDescription(const DEPTH_STENCIL_DESC& desc);
-	//	const DEPTH_STENCIL_DESC& GetDescription() const;
-	//	void ApplyDescription();
+	public:
+		static SamplerStatePtr Create();
 
-	//	void Bind();
-	//	void SetDebugName(const char* name);
-	//};
-
-	////---------------------------------------------------------------------------
-	//DECLARE_SMART_PTR(SamplerState);
-	//class FB_DLL_PUBLIC SamplerState{
-	//	DECLARE_PIMPL_NON_COPYABLE(SamplerState);
-
-	//public:
-	//	static SamplerStatePtr Create();
-	//	~SamplerState();
-
-	//	void SetPlatformState(ISamplerStatePtr state);
-	//	ISamplerStatePtr GetPlatformState() const;
-	//	void SetDescription(const SAMPLER_DESC& desc);
-	//	const SAMPLER_DESC& GetDescription() const;
-	//	void ApplyDescription();
-
-	//	void Bind();
-	//	void SetDebugName(const char* name);
-	//};
+		void SetPlatformState(IPlatformSamplerStatePtr state);
+		void Bind(BINDING_SHADER shader, int slot);
+		void SetDebugName(const char* name);
+	};
 
 	//---------------------------------------------------------------------------
 	DECLARE_SMART_PTR(RenderStates);

@@ -158,6 +158,10 @@ void Vec4::SetXYZ(const Vec3& v)
 	z = v.z;
 }
 
+Vec3 Vec4::GetXYZ() const{
+	return Vec3(x, y, z);
+}
+
 Vec3 Vec4::ToVec3() const
 {
 	return Vec3(x, y, z);

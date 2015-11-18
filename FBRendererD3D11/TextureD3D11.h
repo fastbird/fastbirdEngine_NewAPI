@@ -33,14 +33,11 @@ namespace fastbird
 	DECLARE_SMART_PTR(TextureD3D11);
 	class TextureD3D11 : public IPlatformTexture
 	{
-
 		DECLARE_PIMPL(TextureD3D11);
-		TextureD3D11();
-		friend class RendererD3D11;
+		TextureD3D11();		
 
 	public:
 		static TextureD3D11Ptr Create();
-		~TextureD3D11();
 
 		//--------------------------------------------------------------------
 		// IPlatformTexture
@@ -48,20 +45,18 @@ namespace fastbird
 		Vec2ITuple GetSize() const;
 		PIXEL_FORMAT GetPixelFormat() const;
 		bool IsReady() const;
-		void Bind(BINDING_SHADER shader, int slot) const;
-		void Unbind() const;
+		void Bind(BINDING_SHADER shader, int slot) const;		
 		MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const;
 		void Unmap(UINT subResource) const;
 		void CopyToStaging(IPlatformTexture* dst, UINT dstSubresource,
 			UINT dstX, UINT dstY, UINT dstZ, UINT srcSubresource, Box3D* srcBox) const;
 		void SaveToFile(const char* filename) const;
 		void GenerateMips();
-		void SetDebugName(const char*);		
+		void SetDebugName(const char* name);
 		
 		//--------------------------------------------------------------------
 		// Own
-		//--------------------------------------------------------------------
-		IPlatformTexturePtr Clone() const;
+		//--------------------------------------------------------------------		
 		ID3D11Texture2D* GetHardwareTexture() const;
 		ID3D11ShaderResourceView* GetHardwareResourceView();
 		// pTexture will be owned by this instance.
@@ -82,12 +77,14 @@ namespace fastbird
 		void ClearDepthStencilViews();
 		ID3D11DepthStencilView* GetDepthStencilView(int idx) const;
 		size_t NumDSViews() const;
-		void OnReloaded();
 		void SetSize(const Vec2I& size);
 		void SetLoadInfoTextureFormat(DXGI_FORMAT format);
-		D3DX11_IMAGE_LOAD_INFO* GetLoadInfoPtr() const;
-		ID3D11ShaderResourceView** GetSRViewSyncPtr() const;
-		HRESULT* GetHRPtr() const;
-		unsigned GetTextureId();
+		D3DX11_IMAGE_LOAD_INFO* GetLoadInfoPtr();
+		ID3D11ShaderResourceView** GetSRViewSyncPtr();
+		HRESULT* GetHRPtr();
+		unsigned GetTextureId() const;
+		void SetPath(const char* path);
+		const char* GetPath() const;
+		ID3D11Texture2D* GetHardwareTexture();
 	};
 }

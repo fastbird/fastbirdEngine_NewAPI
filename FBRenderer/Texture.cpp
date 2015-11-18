@@ -30,11 +30,12 @@
 #include "Renderer.h"
 #include "IPlatformTexture.h"
 #include "FBCommonHeaders/CowPtr.h"
+#include "FBCommonHeaders/VectorMap.h"
 
 namespace fastbird{
-static std::vector<TextureWeakPtr> mAllTextures;
+static std::vector<TextureWeakPtr> sAllTextures;
 TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformShader) {
-	for (auto it = mAllTextures.begin(); it != mAllTextures.end();){
+	for (auto it = sAllTextures.begin(); it != sAllTextures.end();){
 		auto texture = it->lock();
 		if (texture){
 			++it;
@@ -43,14 +44,38 @@ TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformShader) {
 			}
 		}
 		else{
-			it = mAllTextures.erase(it);
+			it = sAllTextures.erase(it);
 		}
 	}
+	return 0;
 }
 
 size_t Texture::sNextTextureID = 0;
+static VectorMap< BINDING_SHADER, VectorMap<int, TextureWeakPtr> > sBindedTextures;
+void SetBindedTexture(BINDING_SHADER shader, int startSlot, TexturePtr pTextures[], int num){
+	auto& shaderCategory = sBindedTextures[shader];
+	int count = 0;
+	for (int i = startSlot; i < startSlot + num; ++i){
+		shaderCategory[i] = pTextures[count++];
+	}
+}
+
+std::vector< std::pair<BINDING_SHADER, int> > FindSlotInfo(TexturePtr texture){
+	std::vector< std::pair<BINDING_SHADER, int> > result;
+	for (int shader = 0; shader < BINDING_SHADER_COUNT; ++shader){
+		auto& shaderCategory = sBindedTextures[(BINDING_SHADER)shader];
+		for (auto it = shaderCategory.begin(); it != shaderCategory.end(); ++it){
+			if (it->second.lock() == texture){
+				result.push_back(std::make_pair((BINDING_SHADER)shader, it->first));
+			}
+		}
+	}
+	return result;
+}
+
 class Texture::Impl{
 public:
+	TextureWeakPtr mSelf;
 	unsigned mTextureID;
 	IPlatformTexturePtr mPlatformTexture;	
 	std::string mFilePath;
@@ -106,11 +131,15 @@ public:
 	}
 
 	void Bind(BINDING_SHADER shader, int slot) const{
+		sBindedTextures[shader][slot] = mSelf.lock();
 		mPlatformTexture->Bind(shader, slot);
 	}
 
-	void Unbind() const{
-		mPlatformTexture->Unbind();
+	void Unbind(){
+		auto slots = FindSlotInfo(mSelf.lock());
+		for (auto& it : slots){
+			Renderer::GetInstance().UnbindTexture(it.first, it.second);
+		}
 	}
 
 	MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const{
@@ -147,7 +176,8 @@ public:
 //---------------------------------------------------------------------------
 TexturePtr Texture::Create(){
 	auto p = TexturePtr(FB_NEW(Texture), [](Texture* obj){ FB_DELETE(obj); });
-	mAllTextures.push_back(p);
+	sAllTextures.push_back(p);
+	p->mImpl->mSelf = p;
 	return p;
 }
 
@@ -156,10 +186,10 @@ Texture::Texture()
 }
 
 Texture::~Texture(){
-	auto itEnd = mAllTextures.end();
-	for (auto it = mAllTextures.begin(); it != itEnd; it++){
+	auto itEnd = sAllTextures.end();
+	for (auto it = sAllTextures.begin(); it != itEnd; it++){
 		if (it->expired()){
-			mAllTextures.erase(it);
+			sAllTextures.erase(it);
 			return;
 		}
 	}
@@ -217,10 +247,6 @@ bool Texture::IsReady() const{
 
 void Texture::Bind(BINDING_SHADER shader, int slot){
 	mImpl->Bind(shader, slot);
-}
-
-void Texture::Unbind(){
-	mImpl->Unbind();
 }
 
 MapData Texture::Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag)

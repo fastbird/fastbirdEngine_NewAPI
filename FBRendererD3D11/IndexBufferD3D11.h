@@ -29,6 +29,7 @@
 #ifndef _IndexBuffer_header_included_
 #define _IndexBuffer_header_included_
 
+#include "D3D11Types.h"
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/IPlatformIndexBuffer.h"
 
@@ -37,41 +38,30 @@ namespace fastbird
 	DECLARE_SMART_PTR(IndexBufferD3D11);
 	class IndexBufferD3D11 : public IPlatformIndexBuffer
 	{
-		DECLARE_PIMPL_NON_COPYABLE(IndexBufferD3D11);
+		DECLARE_NON_COPYABLE(IndexBufferD3D11);
+		
+		ID3D11BufferPtr mIndexBuffer;
+		DXGI_FORMAT mFormat;
+
 		IndexBufferD3D11();
 
 	public:
-
 		static IndexBufferD3D11Ptr Create();
 		
-		virtual bool IsReady() const;
-		virtual void Bind();
-		virtual INDEXBUFFER_FORMAT GetFormat() const { return mFormat; }
-		DXGI_FORMAT GetFormatD3D11() const { return mFormatD3D11; }
-		unsigned GetSize() const { return mSize; }
-		unsigned inline GetNumIndices() const { return mNumIndices; }
-		
-		unsigned GetOffset() const { return mOffset; }
-		void SetOffset(unsigned offset) { mOffset = offset; }
+		//---------------------------------------------------------------------------
+		// IPlatformIndexBuffer
+		//---------------------------------------------------------------------------
+		bool IsReady() const;
+		void Bind(unsigned offset);
+		MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag);
+		void Unmap(UINT subResource);
 
-		IndexBufferD3D11(unsigned numIndices, INDEXBUFFER_FORMAT format);
-		virtual ~IndexBufferD3D11();
-
-	private:
-		friend class RendererD3D11;
-		static IndexBufferD3D11* CreateInstance(unsigned numIndices, INDEXBUFFER_FORMAT format);
-		ID3D11Buffer* GetHardwareBuffer() const;
+		//---------------------------------------------------------------------------
+		void SetFormatD3D11(DXGI_FORMAT format);
+		DXGI_FORMAT GetFormatD3D11() const;		
 		void SetHardwareBuffer(ID3D11Buffer* pIndexBuffer);
-
-
-	private:
-		ID3D11Buffer* m_pIndexBuffer;
-		unsigned mSize;
-		unsigned mNumIndices;
-		unsigned mOffset;
-		INDEXBUFFER_FORMAT mFormat;
-		DXGI_FORMAT mFormatD3D11;
-
+		ID3D11Buffer* GetHardwareBuffer() const;
+		
 	};
 }
 

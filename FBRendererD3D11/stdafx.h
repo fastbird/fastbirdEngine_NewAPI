@@ -40,6 +40,7 @@ Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 #else
 #pragma comment(lib, "d3dx11d.lib")
 #endif
+#pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "zlib.lib")
 #define NOMINMAX
 #include <memory>
@@ -48,6 +49,7 @@ Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 #include <DXGI.h>
 #include <D3Dcompiler.h>
 #include <map>
+#include <d3d9.h>
 #include "zlib.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBMathLib/Math.h"

@@ -28,23 +28,24 @@
 #pragma once
 #include "FBRenderer/IPlatformRenderStates.h"
 #include "FBRenderer/RendererEnums.h"
+#include "D3D11Types.h"
 
 namespace fastbird
 {
 	DECLARE_SMART_PTR(RasterizerStateD3D11);
 	class RasterizerStateD3D11 : public IPlatformRasterizerState
 	{
-		DECLARE_PIMPL_NON_COPYABLE(RasterizerStateD3D11);
+		DECLARE_NON_COPYABLE(RasterizerStateD3D11);
+
+		ID3D11RasterizerStatePtr mRasterizerState;
+
 		explicit RasterizerStateD3D11(ID3D11RasterizerState* rasterizerState);
 
 	public:
-		static RasterizerStateD3D11Ptr Create(ID3D11RasterizerState* rasterizerState);
-		~RasterizerStateD3D11();
-
-	public:
+		static RasterizerStateD3D11Ptr Create(ID3D11RasterizerState* rasterizerState);		
 
 		//--------------------------------------------------------------------
-		// IRasterizerState Interfacec
+		// IPlatformRasterizerState Interfacec
 		//--------------------------------------------------------------------
 		virtual void Bind();
 		virtual void SetDebugName(const char* name);
@@ -52,26 +53,24 @@ namespace fastbird
 		//--------------------------------------------------------------------
 		// OWN Interfacec
 		//--------------------------------------------------------------------		
-		ID3D11RasterizerState* GetHardwareRasterizerState() const { return mRasterizerState; }
-
-	private:
-		ID3D11RasterizerState* mRasterizerState;
+		ID3D11RasterizerState* GetHardwareRasterizerState() const;
 	};
 
 	//-------------------------------------------------------------------------
 	DECLARE_SMART_PTR(BlendStateD3D11);
 	class BlendStateD3D11 : public IPlatformBlendState
 	{
-		DECLARE_PIMPL_NON_COPYABLE(BlendStateD3D11);
+		DECLARE_NON_COPYABLE(BlendStateD3D11);
+
+		ID3D11BlendStatePtr mBlendState;
+
 		explicit BlendStateD3D11(ID3D11BlendState* blendState);
 
 	public:
 		static BlendStateD3D11Ptr Create(ID3D11BlendState* blendState);
-		~BlendStateD3D11();
 
-	public:
 		//--------------------------------------------------------------------
-		// IBlendState Interfacec
+		// IPlatformBlendState Interfacec
 		//--------------------------------------------------------------------
 		virtual void Bind();
 		virtual void SetDebugName(const char* name);
@@ -79,18 +78,26 @@ namespace fastbird
 		//--------------------------------------------------------------------
 		// OWN Interfacec
 		//--------------------------------------------------------------------		
-		ID3D11BlendState* GetHardwareBlendState() const { return mBlendState; }
+		ID3D11BlendState* GetHardwareBlendState() const;
+		// Array of blend factors, one for each RGBA component.This requires 
+		// a blend state object that specifies the D3D11_BLEND_BLEND_FACTOR option.
 		float* GetBlendFactor() const { return 0; }
-		DWORD GetBlendMask() const { return 0xffffffff;}
-
-	private:
-		ID3D11BlendState* mBlendState;
+		// 32-bit sample coverage. The default value is 0xffffffff.
+		// A sample mask determines which samples get updated in all the active render targets.
+		// The mapping of bits in a sample mask to samples in a multisample render target is 
+		// the responsibility of an individual application.
+		// A sample mask is always applied; it is independent of whether multisampling is enabled, 
+		// and does not depend on whether an application uses multisample render targets.
+		DWORD GetSampleMask() const { return 0xffffffff;}
 	};
 
 	DECLARE_SMART_PTR(DepthStencilStateD3D11);
 	class DepthStencilStateD3D11 : public IPlatformDepthStencilState
 	{
-		DECLARE_PIMPL_NON_COPYABLE(DepthStencilStateD3D11);
+		DECLARE_NON_COPYABLE(DepthStencilStateD3D11);
+
+		ID3D11DepthStencilStatePtr mDepthStencilState;
+
 		explicit DepthStencilStateD3D11(ID3D11DepthStencilState* depthStencilState);
 
 	public:
@@ -99,7 +106,7 @@ namespace fastbird
 
 	public:
 		//--------------------------------------------------------------------
-		// IDepthStencilState Interfacec
+		// IPlatformDepthStencilState Interfacec
 		//--------------------------------------------------------------------
 		virtual void Bind(unsigned stencilRef);
 		virtual void SetDebugName(const char* name);
@@ -107,35 +114,32 @@ namespace fastbird
 		//--------------------------------------------------------------------
 		// OWN Interfacec
 		//--------------------------------------------------------------------		
-		ID3D11DepthStencilState* GetHardwareDSState() const { return mDepthStencilState; }
-
-	private:
-		ID3D11DepthStencilState* mDepthStencilState;
+		ID3D11DepthStencilState* GetHardwareDSState() const;
 	};
 
 	DECLARE_SMART_PTR(SamplerStateD3D11);
 	class SamplerStateD3D11 : public IPlatformSamplerState
 	{
-		DECLARE_PIMPL_NON_COPYABLE(SamplerStateD3D11);
+		DECLARE_NON_COPYABLE(SamplerStateD3D11);
+
+		ID3D11SamplerStatePtr mSamplerState;
+
 		explicit SamplerStateD3D11(ID3D11SamplerState* samplerState);
+
 	public:
 		
 		static SamplerStateD3D11Ptr Create(ID3D11SamplerState* samplerState);
 		~SamplerStateD3D11();
 
-	public:
 		//--------------------------------------------------------------------
-		// ISamplerState Interfacec
+		// IPlatformSamplerState Interfacec
 		//--------------------------------------------------------------------
-		virtual void Bind(BINDING_SHADER shader, int slot);
-		virtual void SetDebugName(const char* name);
+		void Bind(BINDING_SHADER shader, int slot);
+		void SetDebugName(const char* name);
 
 		//--------------------------------------------------------------------
 		// OWN Interfacec
 		//--------------------------------------------------------------------		
-		ID3D11SamplerState* GetHardwareSamplerState() const { return mSamplerState; }
-
-	private:
-		ID3D11SamplerState* mSamplerState;
+		ID3D11SamplerState* GetHardwareSamplerState() const;
 	};
 }

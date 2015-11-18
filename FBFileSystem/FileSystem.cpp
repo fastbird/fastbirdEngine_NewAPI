@@ -165,7 +165,7 @@ BinaryData FileSystem::ReadBinaryFile(const char* path, std::streamoff& outLengt
 		outLength = is.tellg();
 		is.seekg(0, is.beg);
 
-		std::shared_ptr<char> buffer = std::shared_ptr<char>(new char[(unsigned int)outLength], [](char* obj){ delete[] obj; });
+		BinaryData buffer = BinaryData(new char[(unsigned int)outLength], [](char* obj){ delete[] obj; });
 		is.read(buffer.get(), outLength);
 		if (!is)
 		{

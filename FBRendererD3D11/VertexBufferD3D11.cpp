@@ -27,23 +27,25 @@
 
 #include "stdafx.h"
 #include "VertexBufferD3D11.h"
-#include "ResourceBinder.h"
-#include "ResourceMapper.h"
+#include "IUnknownDeleter.h"
+#include "RendererD3D11.h"
 
 namespace fastbird
 {
-	VertexBufferD3D11::VertexBufferD3D11(ID3D11Buffer* vertexBuffer)
-		: mVertexBuffer(vertexBuffer)
-	{
+	VertexBufferD3D11Ptr VertexBufferD3D11::Create(ID3D11Buffer* vertexBuffer, unsigned stride){
+		return VertexBufferD3D11Ptr(new VertexBufferD3D11(vertexBuffer, stride), [](VertexBufferD3D11* obj){ delete obj; });
 	}
 
-	VertexBufferD3D11::~VertexBufferD3D11()
+	VertexBufferD3D11::VertexBufferD3D11(ID3D11Buffer* vertexBuffer, unsigned stride)
+		: mVertexBuffer(vertexBuffer, IUnknownDeleter())
+		, mStride(stride)
 	{
-		SAFE_RELEASE(mVertexBuffer);
 	}
-
-	void VertexBufferD3D11::Bind(){
-		ResourceBinder::Bind(this);
+	
+	void VertexBufferD3D11::Bind() const{
+		unsigned int offset = 0;
+		IPlatformVertexBuffer const * buffers[] = { this };
+		RendererD3D11::GetInstance().SetVertexBuffers(0, 1, buffers, &mStride, &offset);
 	}
 
 	bool VertexBufferD3D11::IsReady() const
@@ -51,16 +53,15 @@ namespace fastbird
 		return mVertexBuffer != 0;
 	}
 
-	ID3D11Buffer* VertexBufferD3D11::GetHardwareBuffer() const
-	{
-		return mVertexBuffer;
+	MapData VertexBufferD3D11::Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag){
+		return RendererD3D11::GetInstance().MapBuffer(mVertexBuffer.get(), subResource, type, flag);
 	}
 
-	MapData VertexBufferD3D11::Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag){
-
+	void VertexBufferD3D11::Unmap(UINT subResource){
+		RendererD3D11::GetInstance().UnmapBuffer(mVertexBuffer.get(), subResource);
 	}
 
-	void VertexBufferD3D11::Unmap(){
-
+	ID3D11Buffer* VertexBufferD3D11::GetHardwareBuffer() const{
+		return mVertexBuffer.get();
 	}
 }

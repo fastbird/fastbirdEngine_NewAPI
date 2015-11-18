@@ -38,17 +38,17 @@
 #define FB_DECLARE_HANDLE(name) struct name##__; typedef struct name##__ *name
 
 
-namespace fastbird{
-	typedef double Real;
-	typedef unsigned char BYTE;
-	typedef unsigned char UINT8;
-	typedef unsigned short USHORT;
-	typedef unsigned int UINT;	
-	typedef unsigned long DWORD;
-	typedef unsigned __int64 UINT64;
-	typedef __int64 INT64;
-	typedef __int64 HWindowId;
+typedef unsigned char BYTE;
+typedef unsigned char UINT8;
+typedef unsigned short USHORT;
+typedef unsigned int UINT;
+typedef unsigned long DWORD;
+typedef unsigned __int64 UINT64;
+typedef __int64 INT64;
 
+namespace fastbird{
+	typedef double Real;		
+	typedef __int64 HWindowId;
 	typedef std::vector<std::string> StringVector;
 	typedef std::vector<std::wstring> WStringVector;
 	typedef std::shared_ptr < char > BinaryData;

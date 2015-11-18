@@ -27,7 +27,6 @@
 
 #pragma once
 #define FB_RENDERER_VERSION "1"
-#include "IPlatformRendererStructs.h"
 #include "FBCommonHeaders/Types.h"
 #include "IPlatformIndexBuffer.h"
 #include "ShaderDefines.h"
@@ -107,22 +106,18 @@ namespace fastbird{
 		virtual void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt) = 0;
 		virtual void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot) = 0;
 		virtual void UpdateShaderConstants(ShaderConstants::Enum type, void* data, int size) = 0;		
+		virtual void UnbindInputLayout() = 0;
+		virtual void UnbindShader(BINDING_SHADER shader) = 0;
+		virtual void UnbindTexture(BINDING_SHADER shader, int slot) = 0;
+		virtual void CopyToStaging(IPlatformTexture* dst, UINT dstSubresource, UINT dstx, UINT dsty, UINT dstz, 
+			IPlatformTexture* src, UINT srcSubresource, Box3D* pBox) = 0;
 
 
 		//-------------------------------------------------------------------
 		// Drawing
 		//-------------------------------------------------------------------
 		virtual void Draw(unsigned int vertexCount, unsigned int startVertexLocation) = 0;
-		virtual void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation) = 0;
-		virtual void DrawQuad(const DrawQuadParam& param) = 0;
-		virtual void DrawQuadLine(const DrawQuadLineParam& param) = 0;
-		virtual void DrawQuadWithTexture(const DrawQuadWithTextureParam& param) = 0;
-		virtual void DrawQuadWithTextureUV(const DrawQuadWithTextureUVParam& param) = 0;
-		virtual void DrawBillboardWorldQuad(const DrawBillboardWorldQuadParam& param) = 0;
-		virtual void DrawFullscreenQuad(IPlatformShader* pixelShader, bool farside) = 0;		
-		virtual void DrawTriangle(const DrawTriangleParam& param) = 0;
-		virtual void SetWireframe(bool enable) = 0;
-		virtual bool GetWireframe() const = 0;
+		virtual void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation) = 0;		
 		virtual void Clear(Real r, Real g, Real b, Real a, Real z, unsigned char stencil) = 0;
 		virtual void Clear(Real r, Real g, Real b, Real a) = 0;
 		virtual void ClearState() = 0;		

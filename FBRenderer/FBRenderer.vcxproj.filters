@@ -73,6 +73,9 @@
     <ClInclude Include="Console.h" />
     <ClInclude Include="CandidatesData.h" />
     <ClInclude Include="ShaderConstants.h" />
+    <ClInclude Include="IVideoPlayer.h" />
+    <ClInclude Include="ResourceTypes.h" />
+    <ClInclude Include="ResourceProvider.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -115,6 +118,8 @@
     <ClCompile Include="ConsoleDataType.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="CandidatesData.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
+    <ClCompile Include="ResourceProvider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

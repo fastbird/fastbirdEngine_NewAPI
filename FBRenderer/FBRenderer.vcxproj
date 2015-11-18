@@ -37,6 +37,7 @@
     <ClInclude Include="IPlatformTexture.h" />
     <ClInclude Include="IPlatformVertexBuffer.h" />
     <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="IVideoPlayer.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PointLightManager.h" />
@@ -51,6 +52,8 @@
     <ClInclude Include="RenderStrategyDefault.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderTargetParam.h" />
+    <ClInclude Include="ResourceProvider.h" />
+    <ClInclude Include="ResourceTypes.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderConstants.h" />
     <ClInclude Include="ShaderDefines.h" />
@@ -76,6 +79,7 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="InputElementDesc.cpp" />
+    <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="MaterialTest.cpp" />
     <ClCompile Include="PointLight.cpp" />
@@ -86,6 +90,7 @@
     <ClCompile Include="RenderStates.cpp" />
     <ClCompile Include="RenderStrategyDefault.cpp" />
     <ClCompile Include="RenderTarget.cpp" />
+    <ClCompile Include="ResourceProvider.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderDefines.cpp" />
     <ClCompile Include="Spatial.cpp" />

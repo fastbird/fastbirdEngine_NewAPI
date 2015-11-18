@@ -38,9 +38,9 @@ namespace fastbird{
 	public:
 		static VertexBufferPtr Create(unsigned stride, unsigned numVertices);
 
-		void Bind() const;
-		MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) const;
-		void Unmap() const;
+		void Bind();
+		MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const;
+		void Unmap(UINT subResource) const;
 		unsigned GetStride() const;
 		unsigned GetNumVertices() const;
 		void SetPlatformBuffer(IPlatformVertexBufferPtr buffer);

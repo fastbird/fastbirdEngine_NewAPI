@@ -101,25 +101,21 @@ namespace fastbird
 		void SetViewports(const Viewport viewports[], int num);
 		void SetScissorRects(const Rect rects[], int num);
 		void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
-			IPlatformVertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]);
+			IPlatformVertexBuffer const * pVertexBuffers[], unsigned int const strides[], unsigned int offsets[]);
 		void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt);		
 		void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot);
 
 		// Data
 		void UpdateShaderData(ShaderConstants::Enum type, void* data, int size);
+		void UnbindInputLayout();
+		void UnbindShader(BINDING_SHADER shader);
+		void UnbindTexture(BINDING_SHADER shader, int slot);
+		void CopyToStaging(IPlatformTexture* dst, UINT dstSubresource, UINT dstx, UINT dsty, UINT dstz,
+			IPlatformTexture* src, UINT srcSubresource, Box3D* pBox);
 
 		// Drawing
 		void Draw(unsigned int vertexCount, unsigned int startVertexLocation);
-		void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation);
-		void DrawQuad(const DrawQuadParam& param);
-		void DrawQuadLine(const DrawQuadLineParam& param);
-		void DrawQuadWithTexture(const DrawQuadWithTextureParam& param);
-		void DrawQuadWithTextureUV(const DrawQuadWithTextureUVParam& param);
-		void DrawBillboardWorldQuad(const DrawBillboardWorldQuadParam& param);
-		void DrawFullscreenQuad(IPlatformShader* pixelShader, bool farside);
-		void DrawTriangle(const DrawTriangleParam& param);
-		void SetWireframe(bool enable);
-		bool GetWireframe() const;
+		void DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation);				
 		void Clear(Real r, Real g, Real b, Real a, Real z, unsigned char stencil);
 		void Clear(Real r, Real g, Real b, Real a);
 		void ClearState();
@@ -135,40 +131,26 @@ namespace fastbird
 		// Platform Specific
 		//-------------------------------------------------------------------
 		// Resource Manipulations
-		MapData MapVertexBuffer(VertexBufferD3D11* pBuffer, UINT subResource, MAP_TYPE type, MAP_FLAG flag);
-		void UnmapVertexBuffer(VertexBufferD3D11* pBuffer, UINT subResource);
-		MapData MapTexture(TextureD3D11* pTexture, UINT subResource, MAP_TYPE type, MAP_FLAG flag);
-		void UnmapTexture(TextureD3D11* pTexture, UINT subResource);
-		void CopyToStaging(TextureD3D11* dst, UINT dstSubresource, UINT dstx, UINT dsty, UINT dstz, TextureD3D11* src, UINT srcSubresource, Box3D* pBox);
+		MapData MapBuffer(ID3D11Resource* pResource, UINT subResource, MAP_TYPE type, MAP_FLAG flag) const;
+		void UnmapBuffer(ID3D11Resource* pResource, UINT subResource) const;
 		void SaveTextureToFile(TextureD3D11* texture, const char* filename);		
 		void GenerateMips(TextureD3D11* pTexture);
 		
 		// Resource Bindings
-		void SetIndexBuffer(IndexBufferD3D11* pIndexBuffer);
+		void SetIndexBuffer(IndexBufferD3D11* pIndexBuffer, unsigned offset);
 		void SetTexture(TextureD3D11* pTexture, BINDING_SHADER shaderType, unsigned int slot);
-		void UnsetTexture(TextureD3D11* texture);
 		void SetShaders(ShaderD3D11* pShader);
 		void SetVSShader(ShaderD3D11* pShader);
-		void SetPSShader(ShaderD3D11* pShader);
-		void SetGSShader(ShaderD3D11* pShader);
-		void SetDSShader(ShaderD3D11* pShader);
 		void SetHSShader(ShaderD3D11* pShader);
+		void SetDSShader(ShaderD3D11* pShader);		
+		void SetGSShader(ShaderD3D11* pShader);
+		void SetPSShader(ShaderD3D11* pShader);	
+		
 		void SetInputLayout(InputLayoutD3D11* pInputLayout);		
 		void SetRasterizerState(RasterizerStateD3D11* pRasterizerState);
 		void SetBlendState(BlendStateD3D11* pBlendState);
 		void SetDepthStencilState(DepthStencilStateD3D11* pDepthStencilState, unsigned stencilRef);
 		void SetSamplerState(SamplerStateD3D11* pSamplerState, BINDING_SHADER shader, int slot);
-		
-	private:
-		bool Init(int threadPool);
-		void Deinit();
-		MapData MapBuffer(ID3D11Resource* pResource, UINT subResource, MAP_TYPE type, MAP_FLAG flag);
-		bool ResizeSwapChain(HWindowId hwndId, const Vec2I& resol);
-		bool CreateRenderTargetFor(IDXGISwapChain* swapChain, const Vec2I& size,
-			IPlatformTexturePtr& outColorTexture, IPlatformTexturePtr& outDepthTexture);
-		bool FindClosestMatchingMode(const DXGI_MODE_DESC* finding, DXGI_MODE_DESC* best, HMONITOR monitor);		
-		void GetOutputInformationFor(IDXGIAdapter1* adapter);
-
 	};
 }
 

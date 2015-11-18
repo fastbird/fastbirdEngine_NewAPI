@@ -62,16 +62,16 @@ public:
 		return mPlatformBuffer->IsReady();
 	}
 
-	void Bind() const {
+	void Bind(){
 		mPlatformBuffer->Bind();
 	}
 
-	MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) const{
-		return mPlatformBuffer->Map(type, subResource, flag);
+	MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const{
+		return mPlatformBuffer->Map(subResource, type, flag);
 	}
 
-	void Unmap() const{
-		mPlatformBuffer->Unmap();
+	void Unmap(UINT subResource) const{
+		mPlatformBuffer->Unmap(subResource);
 	}
 };
 
@@ -85,16 +85,16 @@ VertexBuffer::VertexBuffer(unsigned stride, unsigned numVertices)
 {
 }
 
-void VertexBuffer::Bind() const{
+void VertexBuffer::Bind(){
 	mImpl->Bind();
 }
 
-MapData VertexBuffer::Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) const{
-	return mImpl->Map(type, subResource, flag);
+MapData VertexBuffer::Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const{
+	return mImpl->Map(subResource, type, flag);
 }
 
-void VertexBuffer::Unmap() const{
-	mImpl->Unmap();
+void VertexBuffer::Unmap(UINT subResource) const{
+	mImpl->Unmap(subResource);
 }
 
 unsigned VertexBuffer::GetStride() const{
