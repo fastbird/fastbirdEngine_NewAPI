@@ -32,6 +32,7 @@
 #include "FBMathLib/Math.h"
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
+#include "FBDebugLib/Logger.h"
 #include "TinyXmlLib/tinyxml2.h"
 using namespace fastbird;
 class AnimationData::Impl{

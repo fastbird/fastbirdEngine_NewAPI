@@ -70,6 +70,7 @@ namespace fastbird{
 		static void SetLock(bool lock);
 
 		void SetPlatformState(IPlatformDepthStencilStatePtr state);
+		void Bind();
 		void Bind(unsigned stencilRef);
 		void SetDebugName(const char* name);
 	};

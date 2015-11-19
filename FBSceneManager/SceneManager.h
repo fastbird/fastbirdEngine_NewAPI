@@ -27,16 +27,16 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
-	DECLARE_SMART_PTR(MeshObject);
+namespace fastbird{	
 	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(SceneManager);
 	class FB_DLL_PUBLIC SceneManager{
 		DECLARE_PIMPL_NON_COPYABLE(SceneManager);
-		SceneManager();
-		~SceneManager();
-		static SceneManager* sSceneManager;
+		SceneManager();		
+		
 	public:
-		static SceneManager* CreateSceneManager();
+		/** You have the ownership of returned scene. */
+		static SceneManagerPtr CreateSceneManager();
 		/** Returns the SceneManager as a reference.
 		This function does not check the validity whether the SceneManager is created or not.
 		It will cause a crash if you call this function without calling CreateSceneManager();
@@ -44,16 +44,7 @@ namespace fastbird{
 		static SceneManager& GetInstance();
 		static void DeleteSceneManager();
 
+		/** You have the ownership of returned scene. */
 		ScenePtr CreateScene(const char* name);
-		/** Creates a MeshObject with .dae file.
-		This function creates a MeshObject from the .dae file and returned the cloned version of it.
-		The original create version(archetype) will be preserved. Whenever you requested the same
-		.dae file for another mesh object, the new mesh will be cloned from the archetype.
-		*/
-		MeshObjectPtr CreateMeshObject(const char* daeFilePath);
-		/** Get an archetype mesh already loaded.
-		*/
-		MeshObjectConstPtr GetMeshArcheType(const char* name);
-
 	};
 }

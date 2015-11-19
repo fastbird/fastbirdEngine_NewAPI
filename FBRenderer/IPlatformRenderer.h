@@ -85,7 +85,7 @@ namespace fastbird{
 		virtual IPlatformIndexBufferPtr CreateIndexBuffer(void* data, unsigned int numIndices,
 			INDEXBUFFER_FORMAT format) = 0;
 		virtual IPlatformShaderPtr CreateShader(const char* path, int shaders,
-			const SHADER_DEFINES& defines);
+			const SHADER_DEFINES& defines) = 0;
 		virtual IPlatformInputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& descs,
 			void* shaderByteCode, unsigned size) = 0;
 		virtual IPlatformBlendStatePtr CreateBlendState(const BLEND_DESC& desc) = 0;
@@ -102,10 +102,14 @@ namespace fastbird{
 		virtual void SetViewports(const Viewport viewports[], int num) = 0;
 		virtual void SetScissorRects(const Rect rects[], int num) = 0;
 		virtual void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
-			IPlatformVertexBufferPtr pVertexBuffers[], unsigned int strides[], unsigned int offsets[]) = 0;
+			IPlatformVertexBuffer const * pVertexBuffers[], unsigned int const strides[], unsigned int offsets[]) = 0;
 		virtual void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt) = 0;
 		virtual void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot) = 0;
-		virtual void UpdateShaderConstants(ShaderConstants::Enum type, void* data, int size) = 0;		
+		virtual void UpdateShaderConstants(ShaderConstants::Enum type, const void* data, int size) = 0;		
+		virtual void* MapMaterialParameterBuffer() const = 0;
+		virtual void UnmapMaterialParameterBuffer() const = 0;
+		virtual void* MapBigBuffer() const = 0;
+		virtual void UnmapBigBuffer() const = 0;
 		virtual void UnbindInputLayout() = 0;
 		virtual void UnbindShader(BINDING_SHADER shader) = 0;
 		virtual void UnbindTexture(BINDING_SHADER shader, int slot) = 0;
@@ -131,6 +135,6 @@ namespace fastbird{
 		virtual void TakeScreenshot(const char* filename) = 0;
 
 	protected:
-		~IPlatformRenderer();
+		~IPlatformRenderer() {}
 	};
 }

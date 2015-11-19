@@ -27,51 +27,54 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "FBMathLib/Math.h"
-namespace fastbird
-{
-	DECLARE_SMART_PTR(DirectionalLight);
-	//------------------------------------------------------------------------
-	class FB_DLL_PUBLIC DirectionalLight
-	{
-		DECLARE_PIMPL_NON_COPYABLE(DirectionalLight);
+namespace fastbird{
+	class Transformation;
+	class Vec3;
+	class Quat;
+	DECLARE_SMART_PTR(AnimationData);
+	/** Represents an unique animation set.
+	*/
+	class FB_DLL_PUBLIC AnimationData{
+		DECLARE_PIMPL_NON_COPYABLE(AnimationData);
+		AnimationData();
 
 	public:
-		DirectionalLight();
-		~DirectionalLight();
+		static AnimationDataPtr Create();
+		~AnimationData();
 
-		const Vec3& GetPosition();
-		const Vec3& GetDiffuse();
-		const Vec3& GetSpecular();
-		Real GetIntensity() const;
-		Real GetAttenuation() const;
-		Real GetExponent() const;
+		enum PosComp
+		{
+			X,
+			Y,
+			Z
+		};
+		struct Action
+		{			
+			std::string mName;
+			float mStartTime;
+			float mEndTime;
+			float mLength;
+			bool mLoop;
+			const Vec3* mPosStartEnd[2];
+			const Quat* mRotStartEnd[2];
 
-		void AddTheta(Real radian);
-		void AddPhi(Real radian);
+			Action();
+		};
 
-		void SetPosition(const Vec3& pos);
-		void SetDiffuse(const Vec3& diffuse);
-		void SetSpecular(const Vec3& specular);
-		void SetIntensity(Real intensity);
-		void SetAttenuation(Real attenuation){}
-		void SetExponent(Real exponent) {}
+		void AddPosition(float time, float v, PosComp comp);
+		void AddScale(float time, float v, PosComp comp);
+		void AddRotEuler(float time, float v, PosComp comp);
+		bool HasPosAnimation() const;
+		bool HasRotAnimation() const;
+		bool HasScaleAnimation() const;
+		void SetName(const char* name);
+		const char* GetName() const;
+		void PickPos(TIME_PRECISION time, bool cycled, const Vec3** prev, const Vec3** next, TIME_PRECISION& interpol);
+		void PickRot(TIME_PRECISION time, bool cycled, const Quat** prev, const Quat** next, TIME_PRECISION& interpol);
+		void ToLocal(const Transformation& tolocal);
+		bool ParseAction(const char* filename);
+		const Action* GetAction(const char* name) const;
 
-		void PrepareInterpolation(Real destTheta, Real destPhi, Real destIntensity, const Vec3& destDiffuse, Real time);
-		void AddInterpolTime(Real time);
-		const Vec3& GetInterpolDir(unsigned target) const;
-		Real GetInterpolIntensity(unsigned target) const;
-		const Vec3& GetInterpolDiffuse(unsigned target) const;
-		Real GetTheta() const;
-		Real GetPhi() const;
 
-		void Update(Real dt);
-
-		void PreRender();
-		void Render();
-		void PostRender();
-
-		void CopyLight(DirectionalLight* other);
-		
 	};
 }

@@ -54,5 +54,6 @@ namespace fastbird{
 		else if (name == b.name){
 			return value < b.value;
 		}
+		return false;
 	}
 }

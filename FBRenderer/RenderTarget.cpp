@@ -120,6 +120,7 @@ public:
 		if (scene){
 			scene->AddObserver(ISceneObserver::Timing, Renderer::GetInstancePtr());
 		}
+		mStrategy->SetScene(scene);
 		return prevScene.lock();
 	}
 
@@ -183,15 +184,18 @@ public:
 			mDepthClear, mStencilClear);
 		auto scene = mScene.lock();
 		if (scene){
-			auto light = scene->GetLight(0);
+			auto light = scene->GetDirectionalLight(0);
 			renderer.SetDirectionalLight(light, 0);
-			light = scene->GetLight(1);
+			light = scene->GetDirectionalLight(1);
 			renderer.SetDirectionalLight(light, 1);
 		}
 
 		renderer.SetCamera(mCamera);
 		if (mCamera)
 			mCamera->ProcessInputData();
+		
+		mStrategy->SetScene(scene);
+		mStrategy->UpdateLightCamera();
 
 		if (mEnvTexture)
 			renderer.SetEnvironmentTextureOverride(mEnvTexture);
@@ -334,8 +338,8 @@ public:
 		mFormat = pTexture->GetFormat();
 		mViewport.mTopLeftX = 0;
 		mViewport.mTopLeftY = 0;
-		mViewport.mWidth = (Real)mSize.x;
-		mViewport.mHeight = (Real)mSize.y;
+		mViewport.mWidth = (float)mSize.x;
+		mViewport.mHeight = (float)mSize.y;
 		mViewport.mMinDepth = 0.f;
 		mViewport.mMaxDepth = 1.0f;
 		mCamera->SetWidth((Real)mSize.x);
@@ -535,10 +539,10 @@ void RenderTarget::TriggerDrawEvent()
 }
 
 bool RenderTarget::SetSmallSilouetteBuffer(){
-	mImpl->SetSmallSilouetteBuffer();
+	return mImpl->SetSmallSilouetteBuffer();
 }
 
 bool RenderTarget::SetBigSilouetteBuffer(){
-	mImpl->SetBigSilouetteBuffer();
+	return mImpl->SetBigSilouetteBuffer();
 }
 }

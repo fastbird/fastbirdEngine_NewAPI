@@ -28,8 +28,8 @@
 #include "stdafx.h"
 #include "SpatialObject.h"
 #include "FBMathLib/BoundingVolume.h"
-#include "Animation.h"
-#include "AnimationData.h"
+#include "FBAnimation/Animation.h"
+#include "FBAnimation/AnimationData.h"
 using namespace fastbird;
 
 class SpatialObject::Impl{

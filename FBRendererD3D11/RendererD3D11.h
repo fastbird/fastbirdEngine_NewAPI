@@ -57,7 +57,7 @@ namespace fastbird
 		virtual ~RendererD3D11();
 
 	public:
-		static IPlatformRendererPtr Create();
+		static IPlatformRenderer* Create();
 		static void Destroy();
 		static RendererD3D11& GetInstance();			
 
@@ -103,10 +103,12 @@ namespace fastbird
 		void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,
 			IPlatformVertexBuffer const * pVertexBuffers[], unsigned int const strides[], unsigned int offsets[]);
 		void SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt);		
-		void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot);
-
-		// Data
-		void UpdateShaderData(ShaderConstants::Enum type, void* data, int size);
+		void SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot);		
+		void UpdateShaderConstants(ShaderConstants::Enum type, const void* data, int size);
+		void* MapMaterialParameterBuffer() const;
+		void UnmapMaterialParameterBuffer() const;
+		void* MapBigBuffer() const;
+		void UnmapBigBuffer() const;
 		void UnbindInputLayout();
 		void UnbindShader(BINDING_SHADER shader);
 		void UnbindTexture(BINDING_SHADER shader, int slot);

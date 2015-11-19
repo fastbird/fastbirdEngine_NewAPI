@@ -29,7 +29,7 @@
 #include "PointLightManager.h"
 #include "PointLight.h"
 #include "FBCommonHeaders/Helpers.h"
-#include "../EssentialEngineData/shaders/Constants.h"
+#include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;
 
 class PointLightManager::Impl{
@@ -123,3 +123,32 @@ public:
 		return mPointLights.size();
 	}
 };
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(PointLightManager);
+
+PointLightManager::PointLightManager()
+	:mImpl(new Impl)
+{
+}
+
+PointLightPtr PointLightManager::CreatePointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion) {
+	return mImpl->CreatePointLight(pos, range, color, intensity, lifeTime, manualDeletion);
+}
+
+void PointLightManager::DeletePointLight(PointLightPtr pointLight) {
+	mImpl->DeletePointLight(pointLight);
+}
+
+void PointLightManager::Update(Real dt) {
+	mImpl->Update(dt);
+}
+
+void PointLightManager::GatherPointLightData(const BoundingVolume* aabb, const Transformation& transform, POINT_LIGHT_CONSTANTS* plConst) {
+	mImpl->GatherPointLightData(aabb, transform, plConst);
+}
+
+unsigned PointLightManager::GetNumPointLights() const {
+	return mImpl->GetNumPointLights();
+}
+

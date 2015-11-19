@@ -152,6 +152,10 @@ void DepthStencilState::SetPlatformState(IPlatformDepthStencilStatePtr state){
 	mImpl->SetPlatformState(state);
 }
 
+void DepthStencilState::Bind(){
+	mImpl->Bind(0);
+}
+
 void DepthStencilState::Bind(unsigned stencilRef){
 	mImpl->Bind(stencilRef);
 }
@@ -295,6 +299,10 @@ public:
 			mDepthStencilState->Bind(stencilRef);
 	}
 };
+
+const RASTERIZER_DESC RenderStates::Impl::DefaultRDesc;
+const BLEND_DESC RenderStates::Impl::DefaultBDesc;
+const DEPTH_STENCIL_DESC RenderStates::Impl::DefaultDDesc;
 
 //---------------------------------------------------------------------------
 IMPLEMENT_STATIC_CREATE(RenderStates);

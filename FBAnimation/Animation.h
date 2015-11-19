@@ -26,14 +26,14 @@
 */
 
 #pragma once
-#include "FBCommonHeaders/Types.h"
+#include "FBCommonHeaders/platform.h"
 namespace fastbird{
 	class Transformation;
 	DECLARE_SMART_PTR(AnimationData);
 	DECLARE_SMART_PTR(Animation);
 	/** Represents an animation instance using the AnimationData.
 	*/
-	class Animation{
+	class FB_DLL_PUBLIC Animation{
 		DECLARE_PIMPL_CLONEABLE(Animation);
 		Animation();
 

@@ -26,19 +26,26 @@
 */
 
 #pragma once
-#include "FBCommonHeaders/platform.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(MeshObject);
-	DECLARE_SMART_PTR(RenderableFactory);
-	class FB_DLL_PUBLIC RenderableFactory{
-		DECLARE_PIMPL_NON_COPYABLE(RenderableFactory);
-		RenderableFactory();
-		
+	DECLARE_SMART_PTR(SceneObjectFactory);
+	class SceneObjectFactory{
+		DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);
+		SceneObjectFactory();
+
 	public:
-		static RenderableFactoryPtr Create();
-		static RenderableFactoryPtr GetInstance();
-		virtual ~RenderableFactory();
-		virtual MeshObjectPtr CreateMesh(const char* path);
+		static SceneObjectFactoryPtr Create();
+		~SceneObjectFactory();
+
+		/** Creates a MeshObject with .dae file.
+		This function creates a MeshObject from the .dae file and returned the cloned version of it.
+		The original create version(archetype) will be preserved. Whenever you requested the same
+		.dae file for another mesh object, the new mesh will be cloned from the archetype.
+		*/
+		MeshObjectPtr CreateMeshObject(const char* daeFilePath);
+		/** Get an archetype mesh already loaded.
+		*/
+		MeshObjectConstPtr GetMeshArcheType(const char* name);
 	};
 }

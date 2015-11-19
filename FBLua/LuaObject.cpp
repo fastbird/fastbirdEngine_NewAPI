@@ -644,6 +644,10 @@ LuaObject LuaObject::GetTableAt(int index) const
 	return LuaObject();
 }
 
+std::string LuaObject::GetString() const{
+	return GetString(std::string());
+}
+
 //----------------------------------------------------------------
 std::string LuaObject::GetString(std::string& def) const
 {
@@ -677,7 +681,9 @@ std::string LuaObject::GetString(bool& success) const
 	return ret;
 }
 
-
+float LuaObject::GetFloat() const{
+	return GetFloat(0.f);
+}
 
 float	LuaObject::GetFloat(float def) const
 {
@@ -688,6 +694,10 @@ float	LuaObject::GetFloat(float def) const
 	float f = (float)lua_tonumber(mL, -1);
 	lua_pop(mL, 1);
 	return f;
+}
+
+double LuaObject::GetDouble() const{
+	return GetDouble(0.);
 }
 
 double LuaObject::GetDouble(double def) const{
@@ -713,6 +723,10 @@ float LuaObject::GetFloat(bool& success) const
 	lua_pop(mL, 1);
 	success = true;
 	return f;
+}
+
+int LuaObject::GetInt() const{
+	return GetInt(0);
 }
 
 int LuaObject::GetInt(int def) const
@@ -743,6 +757,10 @@ int LuaObject::GetInt(bool& success) const
 	return i;
 }
 
+unsigned LuaObject::GetUnsigned() const{
+	return GetUnsigned(0);
+}
+
 unsigned LuaObject::GetUnsigned(unsigned def) const
 {
 	if (!IsNumber())
@@ -769,6 +787,10 @@ unsigned LuaObject::GetUnsigned(bool& success) const
 	lua_pop(mL, 1);
 	success = true;
 	return u;
+}
+
+unsigned LuaObject::GetUnsignedFromString() const{
+	return GetUnsignedFromString(0);
 }
 
 unsigned LuaObject::GetUnsignedFromString(unsigned def) const
@@ -805,6 +827,10 @@ unsigned LuaObject::GetUnsignedFromString(bool& success) const
 	return StringConverter::ParseUnsignedInt(ret.c_str());
 }
 
+bool LuaObject::GetBoolWithDef() const{
+	return GetBoolWithDef(0);
+}
+
 bool LuaObject::GetBoolWithDef(bool def) const
 {
 	if (!IsBool())
@@ -833,6 +859,10 @@ bool LuaObject::GetBool(bool& success) const
 	return b;
 }
 
+Vec3Tuple LuaObject::GetVec3() const{
+	return GetVec3(Vec3Tuple(0.f, 0.f, 0.f));
+}
+
 Vec3Tuple LuaObject::GetVec3(const Vec3Tuple& def) const
 {
 	if (!IsTable())
@@ -851,7 +881,7 @@ Vec3Tuple LuaObject::GetVec3(bool& success) const
 	if (!IsTable())
 	{
 		success = false;
-		return Vec3Tuple(0., 0., 0.);
+		return Vec3Tuple(0.f, 0.f, 0.f);
 	}
 	LUA_STACK_WATCHER watcher(mL, "Vec3 LuaObject::GetVec3(bool& success) const");
 	PushToStack();
@@ -859,6 +889,10 @@ Vec3Tuple LuaObject::GetVec3(bool& success) const
 	lua_pop(mL, 1);
 	success = true;
 	return ret;
+}
+
+Vec4Tuple LuaObject::GetVec4() const{
+	return GetVec4(Vec4Tuple(0.f, 0.f, 0.f, 0.f));
 }
 
 Vec4Tuple LuaObject::GetVec4(const Vec4Tuple& def) const
@@ -879,7 +913,7 @@ Vec4Tuple LuaObject::GetVec4(bool& success) const
 	if (!IsTable())
 	{
 		success = false;
-		return Vec4Tuple(0., 0., 0., 0.);
+		return Vec4Tuple(0.f, 0.f, 0.f, 0.f);
 	}
 	LUA_STACK_WATCHER watcher(mL, "Vec4 LuaObject::GetVec4(bool& success) const");
 	PushToStack();
@@ -887,6 +921,10 @@ Vec4Tuple LuaObject::GetVec4(bool& success) const
 	lua_pop(mL, 1);
 	success = true;
 	return ret;
+}
+
+Vec3ITuple LuaObject::GetVec3I() const{
+	return GetVec3I(Vec3ITuple(0, 0, 0));
 }
 
 Vec3ITuple LuaObject::GetVec3I(const Vec3ITuple& def) const
@@ -917,6 +955,10 @@ Vec3ITuple LuaObject::GetVec3I(bool& success) const
 	return ret;
 }
 
+Vec2Tuple LuaObject::GetVec2() const{
+	return GetVec2(Vec2Tuple(0.f, 0.f));
+}
+
 Vec2Tuple LuaObject::GetVec2(const Vec2Tuple& def) const
 {
 	if (!IsTable())
@@ -935,7 +977,7 @@ Vec2Tuple LuaObject::GetVec2(bool& success) const
 	if (!IsTable())
 	{
 		success = false;
-		return Vec2Tuple(0., 0.);
+		return Vec2Tuple(0.f, 0.f);
 	}
 	LUA_STACK_WATCHER watcher(mL, "Vec2 LuaObject::GetVec2(bool& success) const");
 	PushToStack();
@@ -944,6 +986,11 @@ Vec2Tuple LuaObject::GetVec2(bool& success) const
 	success = true;
 	return ret;
 }
+
+Vec2ITuple LuaObject::GetVec2I() const{
+	return GetVec2I(Vec2ITuple(0, 0));
+}
+
 
 Vec2ITuple LuaObject::GetVec2I(const Vec2ITuple& def) const
 {
@@ -975,6 +1022,10 @@ Vec2ITuple LuaObject::GetVec2I(bool& success) const
 	return ret;
 }
 
+QuatTuple LuaObject::GetQuat()const{
+	return GetQuat(QuatTuple(0.f, 0.f, 0.f, 0.f));
+}
+
 QuatTuple LuaObject::GetQuat(const QuatTuple& def) const
 {
 	if (!IsTable())
@@ -986,6 +1037,18 @@ QuatTuple LuaObject::GetQuat(const QuatTuple& def) const
 	QuatTuple ret = luaU_check<QuatTuple>(mL, -1);
 	lua_pop(mL, 1);
 	return ret;
+}
+
+TransformationTuple LuaObject::GetTransformation() const{
+	return GetTransformation(TransformationTuple(
+		1.f, 0.f, 0.f,
+		0.f, 1.f, 0.f,
+		0.f, 0.f, 1.f,
+		1.f, 0.f, 0.f, 0.f,
+		0.f, 0.f, 0.f,
+		1.f, 1.f, 1.f,
+		true, true, true
+		));
 }
 
 TransformationTuple LuaObject::GetTransformation(const TransformationTuple& def) const{
@@ -1023,12 +1086,12 @@ TransformationTuple LuaObject::GetTransformation(bool& success) const
 	{
 		success = false;
 		return TransformationTuple(
-			1., 0., 0.,
-			0., 1., 0.,
-			0., 0., 1.,
-			1., 0., 0., 0.,
-			0., 0., 0.,
-			1., 1., 1.,
+			1.f, 0.f, 0.f,
+			0.f, 1.f, 0.f,
+			0.f, 0.f, 1.f,
+			1.f, 0.f, 0.f, 0.f,
+			0.f, 0.f, 0.f,
+			1.f, 1.f, 1.f,
 			true, true, true
 			);
 	}

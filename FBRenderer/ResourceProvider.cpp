@@ -1,8 +1,36 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "stdafx.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
 #include "Renderer.h"
 #include "Texture.h"
+#include "Shader.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBStringLib/StringLib.h"
 using namespace fastbird;
@@ -18,37 +46,35 @@ public:
 	VectorMap<int, RasterizerStatePtr> mRasterizerStates;
 	VectorMap<int, BlendStatePtr> mBlendStates;
 	VectorMap<int, DepthStencilStatePtr> mDepthStencilStates;
-	VectorMap<int, SamplerStatePtr> mSamplerStates;
+	VectorMap<int, SamplerStatePtr> mSamplerStates;	
 
 	//---------------------------------------------------------------------------
-	std::vector<TexturePtr> CreateTexture(int ResourceType_Textures){
+	std::vector<TexturePtr> CreateTexture(int ResourceTypes_Textures){
 		std::vector<TexturePtr> ret;
 		auto& renderer = Renderer::GetInstance();
-		switch (ResourceType_Textures){		
+		switch (ResourceTypes_Textures){		
 		case ResourceTypes::Textures::Noise:
 		{
 			auto texture = renderer.CreateTexture("es/textures/pnoise.dds");
 			if (!texture){
-				Logger::Log(FB_ERROR_LOG_ARG, "Failed to create noise texture.");
+				Logger::Log(FB_ERROR_LOG_ARG, "Failed to create noise texture.");				
 			}
 			else{
 				ret.push_back(texture);
 			}
 			return ret;
-			break;
 		}
 		case ResourceTypes::Textures::GGXGenTarget:
 		{
 			auto texture = renderer.CreateTexture(0, 512, 128, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
 				BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			if (!texture){
-				Logger::Log(FB_ERROR_LOG_ARG, "Failed to create ggx gen target.");
+				Logger::Log(FB_ERROR_LOG_ARG, "Failed to create ggx gen target.");				
 			}
 			else{
-				ret.push_back(texture);
-				return ret;
+				ret.push_back(texture);				
 			}
-			break;
+			return ret;
 		}	
 		case ResourceTypes::Textures::ToneMap:
 		{
@@ -70,7 +96,6 @@ public:
 				}
 			}
 			return ret;
-			break;
 		}
 		case ResourceTypes::Textures::LuminanceMap:
 		{
@@ -85,41 +110,48 @@ public:
 				}
 			}
 			return ret;
-			break;
 		}
 		default:
 		{
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider cannot create the texture(%d)", ResourceType_Textures).c_str());
-			break;
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider cannot create the texture(%d)", ResourceTypes_Textures).c_str());
+			return ret;
 		}
 		
 		}
 	}
 
-	TexturePtr GetTexture(int ResourceType_Textures){
-		GetTexture(ResourceType_Textures, 0);
+	TexturePtr GetTexture(int ResourceTypes_Textures){
+		return GetTexture(ResourceTypes_Textures, 0);
 	}
 
-	TexturePtr GetTexture(int ResourceType_Textures, int index){
-		auto it = mTextures.Find(ResourceType_Textures);
+	TexturePtr GetTexture(int ResourceTypes_Textures, int index){
+		auto it = mTextures.Find(ResourceTypes_Textures);
 		if (it == mTextures.end() || index >= (int)it->second.size()){
-			auto textures = CreateTexture(ResourceType_Textures);
-			mTextures[ResourceType_Textures] = textures;
-			if (index < textures.size()){
+			auto textures = CreateTexture(ResourceTypes_Textures);
+			mTextures[ResourceTypes_Textures] = textures;
+			if (index < (int)textures.size()){
 				return textures[index];
 			}
 		}
 		else{
-			if (index < it->second.size())
+			if (index < (int)it->second.size())
 				return it->second[index];
 		}
 		return 0;
 	}
 
-	ShaderPtr CreateShader(int ResourceType_Shaders){
+	void SwapTexture(int ResourceTypes_Textures, int one, int two){
+		auto texture1 = GetTexture(ResourceTypes_Textures, one);
+		auto texture2 = GetTexture(ResourceTypes_Textures, two);
+		if (texture1 && texture2){
+			std::swap(mTextures[ResourceTypes_Textures][one], mTextures[ResourceTypes_Textures][two]);
+		}
+	}
+
+	ShaderPtr CreateShader(int ResourceTypes_Shaders){
 		auto& renderer = Renderer::GetInstance();
 		SHADER_DEFINES shaderDefines;
-		switch (ResourceType_Shaders){
+		switch (ResourceTypes_Shaders){
 		case ResourceTypes::Shaders::FullscreenQuadNearVS:
 		{
 			return renderer.CreateShader("es/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS);
@@ -145,6 +177,10 @@ public:
 		case ResourceTypes::Shaders::DepthWriteVSPS:
 		{
 			return renderer.CreateShader("es/shaders/depth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+		}
+		case ResourceTypes::Shaders::DepthOnlyVSPS:
+		{
+			return renderer.CreateShader("es/shaders/DepthOnly.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::CloudDepthWriteVSPS:
 		{
@@ -241,23 +277,29 @@ public:
 		}
 	}
 
-	ShaderPtr GetShader(int ResourceType_Shaders){
-		auto it = mShaders.Find(ResourceType_Shaders);
+	ShaderPtr GetShader(int ResourceTypes_Shaders){
+		auto it = mShaders.Find(ResourceTypes_Shaders);
 		if (it == mShaders.end()){
-			auto shader = CreateShader(ResourceType_Shaders);
+			auto shader = CreateShader(ResourceTypes_Shaders);
 			if (!shader){
-				Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Failed to create the shader (%d)", ResourceType_Shaders).c_str());
+				Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Failed to create the shader (%d)", ResourceTypes_Shaders).c_str());
 				return 0;
 			}
-			mShaders[ResourceType_Shaders] = shader;
+			mShaders[ResourceTypes_Shaders] = shader;
 			return shader;
 		}
 		return it->second;
 	}
 
-	MaterialPtr CreateMaterial(int ResourceType_Materials){
+	void BindShader(int ResourceTypes_Shaders){
+		auto shader = GetShader(ResourceTypes_Shaders);
+		if (shader)
+			shader->Bind();
+	}
+
+	MaterialPtr CreateMaterial(int ResourceTypes_Materials){
 		auto& renderer = Renderer::GetInstance();
-		switch (ResourceType_Materials){
+		switch (ResourceTypes_Materials){
 		case ResourceTypes::Materials::Missing:{
 			return renderer.CreateMaterial("es/materials/missing.material");
 		}
@@ -276,25 +318,25 @@ public:
 		}
 	}
 
-	MaterialPtr GetMaterial(int ResourceType_Materials){
-		auto it = mMaterials.Find(ResourceType_Materials);
+	MaterialPtr GetMaterial(int ResourceTypes_Materials){
+		auto it = mMaterials.Find(ResourceTypes_Materials);
 		if (it == mMaterials.end()){
-			auto material = CreateMaterial(ResourceType_Materials);
+			auto material = CreateMaterial(ResourceTypes_Materials);
 			if (!material){
-				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a material(%d)", ResourceType_Materials);
+				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a material(%d)", ResourceTypes_Materials);
 				return 0;
 			}
-			mMaterials[ResourceType_Materials] = material;
+			mMaterials[ResourceTypes_Materials] = material;
 			return material;
 		}
 
 		return it->second;
 	}
 
-	RasterizerStatePtr CreateRasterizerState(int ResourceType_RasterizerStates){
+	RasterizerStatePtr CreateRasterizerState(int ResourceTypes_RasterizerStates){
 		auto& renderer = Renderer::GetInstance();
 		RASTERIZER_DESC desc;
-		switch (ResourceType_RasterizerStates){
+		switch (ResourceTypes_RasterizerStates){
 		case ResourceTypes::RasterizerStates::Default:
 		{
 			return renderer.CreateRasterizerState(desc);
@@ -324,30 +366,30 @@ public:
 			return renderer.CreateRasterizerState(desc);
 		}
 		default:
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown rasterizer states (%d)", ResourceType_RasterizerStates).c_str());
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown rasterizer states (%d)", ResourceTypes_RasterizerStates).c_str());
 			return 0;
 		}
 	}
 
-	RasterizerStatePtr GetRasterizerState(int ResourceType_RasterizerStates){
-		auto it = mRasterizerStates.Find(ResourceType_RasterizerStates);
+	RasterizerStatePtr GetRasterizerState(int ResourceTypes_RasterizerStates){
+		auto it = mRasterizerStates.Find(ResourceTypes_RasterizerStates);
 		if (it == mRasterizerStates.end()){
-			auto rasterizerState = CreateRasterizerState(ResourceType_RasterizerStates);
+			auto rasterizerState = CreateRasterizerState(ResourceTypes_RasterizerStates);
 			if (!rasterizerState){
-				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a rasterizer state(%d)", ResourceType_RasterizerStates);
+				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a rasterizer state(%d)", ResourceTypes_RasterizerStates);
 				return 0;
 			}
-			mRasterizerStates[ResourceType_RasterizerStates] = rasterizerState;
+			mRasterizerStates[ResourceTypes_RasterizerStates] = rasterizerState;
 			return rasterizerState;
 		}
 
 		return it->second;
 	}
 
-	BlendStatePtr CreateBlendState(int ResourceType_BlendStates){
+	BlendStatePtr CreateBlendState(int ResourceTypes_BlendStates){
 		auto& renderer = Renderer::GetInstance();
 		BLEND_DESC desc;
-		switch (ResourceType_BlendStates){
+		switch (ResourceTypes_BlendStates){
 		case ResourceTypes::BlendStates::Default:{
 			return renderer.CreateBlendState(desc);
 		}
@@ -451,30 +493,30 @@ public:
 			return renderer.CreateBlendState(desc);
 		}
 		default:
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown blend states (%d)", ResourceType_BlendStates).c_str());
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown blend states (%d)", ResourceTypes_BlendStates).c_str());
 			return 0;
 		}
 	}
 
-	BlendStatePtr GetBlendState(int ResourceType_BlendStates){
-		auto it = mBlendStates.Find(ResourceType_BlendStates);
+	BlendStatePtr GetBlendState(int ResourceTypes_BlendStates){
+		auto it = mBlendStates.Find(ResourceTypes_BlendStates);
 		if (it == mBlendStates.end()){
-			auto state = CreateBlendState(ResourceType_BlendStates);
+			auto state = CreateBlendState(ResourceTypes_BlendStates);
 			if (!state){
-				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a rasterizer state(%d)", ResourceType_BlendStates);
+				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a rasterizer state(%d)", ResourceTypes_BlendStates);
 				return 0;
 			}
-			mBlendStates[ResourceType_BlendStates] = state;
+			mBlendStates[ResourceTypes_BlendStates] = state;
 			return state;
 		}
 
 		return it->second;
 	}
 
-	DepthStencilStatePtr CreateDepthStencilState(int ResourceType_DepthStencilStates){
+	DepthStencilStatePtr CreateDepthStencilState(int ResourceTypes_DepthStencilStates){
 		auto& renderer = Renderer::GetInstance();
 		DEPTH_STENCIL_DESC desc;
-		switch (ResourceType_DepthStencilStates){
+		switch (ResourceTypes_DepthStencilStates){
 		case ResourceTypes::DepthStencilStates::Default:{
 			return renderer.CreateDepthStencilState(desc);
 		}
@@ -493,30 +535,30 @@ public:
 			return renderer.CreateDepthStencilState(desc);
 		}
 		default:
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown depth stencil states (%d)", ResourceType_DepthStencilStates).c_str());
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown depth stencil states (%d)", ResourceTypes_DepthStencilStates).c_str());
 			return 0;
 		}
 	}
 
-	DepthStencilStatePtr GetDepthStencilState(int ResourceType_DepthStencilStates){
-		auto it = mDepthStencilStates.Find(ResourceType_DepthStencilStates);
+	DepthStencilStatePtr GetDepthStencilState(int ResourceTypes_DepthStencilStates){
+		auto it = mDepthStencilStates.Find(ResourceTypes_DepthStencilStates);
 		if (it == mDepthStencilStates.end()){
-			auto state = CreateDepthStencilState(ResourceType_DepthStencilStates);
+			auto state = CreateDepthStencilState(ResourceTypes_DepthStencilStates);
 			if (!state){
-				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a depth stencil state(%d)", ResourceType_DepthStencilStates);
+				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a depth stencil state(%d)", ResourceTypes_DepthStencilStates);
 				return 0;
 			}
-			mDepthStencilStates[ResourceType_DepthStencilStates] = state;
+			mDepthStencilStates[ResourceTypes_DepthStencilStates] = state;
 			return state;
 		}
 
 		return it->second;
 	}
 
-	SamplerStatePtr CreateSamplerState(int ResourceType_SamplerStates){
+	SamplerStatePtr CreateSamplerState(int ResourceTypes_SamplerStates){
 		auto& renderer = Renderer::GetInstance();
 		SAMPLER_DESC desc;
-		switch (ResourceType_SamplerStates){
+		switch (ResourceTypes_SamplerStates){
 		case ResourceTypes::SamplerStates::Point:
 		{
 			desc.Filter = TEXTURE_FILTER_MIN_MAG_MIP_POINT;
@@ -580,24 +622,45 @@ public:
 			return renderer.CreateSamplerState(desc);
 		}
 		default:
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown sampler states (%d)", ResourceType_SamplerStates).c_str());
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Resource Provider - Unknown sampler states (%d)", ResourceTypes_SamplerStates).c_str());
 			return 0;
 		}
 	}
 
-	SamplerStatePtr GetSamplerState(int ResourceType_SamplerStates){
-		auto it = mSamplerStates.Find(ResourceType_SamplerStates);
+	SamplerStatePtr GetSamplerState(int ResourceTypes_SamplerStates){
+		auto it = mSamplerStates.Find(ResourceTypes_SamplerStates);
 		if (it == mSamplerStates.end()){
-			auto state = CreateSamplerState(ResourceType_SamplerStates);
+			auto state = CreateSamplerState(ResourceTypes_SamplerStates);
 			if (!state){
-				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a depth stencil state(%d)", ResourceType_SamplerStates);
+				Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Failed to create a depth stencil state(%d)", ResourceTypes_SamplerStates);
 				return 0;
 			}
-			mSamplerStates[ResourceType_SamplerStates] = state;
+			mSamplerStates[ResourceTypes_SamplerStates] = state;
 			return state;
 		}
 
 		return it->second;
+	}
+
+	void BindRasterizerState(int ResourceTypes_RasterizerStates){
+		auto state = GetRasterizerState(ResourceTypes_RasterizerStates);
+		if (state){
+			state->Bind();
+		}
+	}
+
+	void BindBlendState(int ResourceTypes_BlendStates){
+		auto state = GetBlendState(ResourceTypes_BlendStates);
+		if (state){
+			state->Bind();
+		}
+	}
+
+	void BindDepthStencilState(int ResourceTypes_DepthStencilStates){
+		auto state = GetDepthStencilState(ResourceTypes_DepthStencilStates);
+		if (state){
+			state->Bind();
+		}
 	}
 
 	int GetNumToneMaps() const{
@@ -608,3 +671,77 @@ public:
 		return NumLuminanceMaps;
 	}
 };
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(ResourceProvider);
+
+ResourceProvider::ResourceProvider()
+	:mImpl(new Impl)
+{
+
+}
+
+ResourceProvider::~ResourceProvider(){
+
+}
+
+TexturePtr ResourceProvider::GetTexture(int ResourceTypes_Textures) {
+	return mImpl->GetTexture(ResourceTypes_Textures);
+}
+
+TexturePtr ResourceProvider::GetTexture(int ResourceTypes_Textures, int index) {
+	return mImpl->GetTexture(ResourceTypes_Textures, index);
+}
+
+void ResourceProvider::SwapTexture(int ResourceTypes_Textures, int one, int two) {
+	mImpl->SwapTexture(ResourceTypes_Textures, one, two);
+}
+
+ShaderPtr ResourceProvider::GetShader(int ResourceTypes_Shaders) {
+	return mImpl->GetShader(ResourceTypes_Shaders);
+}
+
+void ResourceProvider::BindShader(int ResourceTypes_Shaders){
+	return mImpl->BindShader(ResourceTypes_Shaders);
+}
+
+MaterialPtr ResourceProvider::GetMaterial(int ResourceTypes_Materials) {
+	return mImpl->GetMaterial(ResourceTypes_Materials);
+}
+
+RasterizerStatePtr ResourceProvider::GetRasterizerState(int ResourceTypes_RasterizerStates) {
+	return mImpl->GetRasterizerState(ResourceTypes_RasterizerStates);
+}
+
+BlendStatePtr ResourceProvider::GetBlendState(int ResourceTypes_BlendStates) {
+	return mImpl->GetBlendState(ResourceTypes_BlendStates);
+}
+
+DepthStencilStatePtr ResourceProvider::GetDepthStencilState(int ResourceTypes_DepthStencilStates) {
+	return mImpl->GetDepthStencilState(ResourceTypes_DepthStencilStates);
+}
+
+SamplerStatePtr ResourceProvider::GetSamplerState(int ResourceTypes_SamplerStates) {
+	return mImpl->GetSamplerState(ResourceTypes_SamplerStates);
+}
+
+void ResourceProvider::BindRasterizerState(int ResourceTypes_RasterizerStates){
+	mImpl->BindRasterizerState(ResourceTypes_RasterizerStates);
+}
+
+void ResourceProvider::BindBlendState(int ResourceTypes_BlendStates){
+	mImpl->BindBlendState(ResourceTypes_BlendStates);
+}
+
+void ResourceProvider::BindDepthStencilState(int ResourceTypes_DepthStencilStates){
+	mImpl->BindDepthStencilState(ResourceTypes_DepthStencilStates);
+}
+
+int ResourceProvider::GetNumToneMaps() const {
+	return mImpl->GetNumToneMaps();
+}
+
+int ResourceProvider::GetNumLuminanceMaps() const {
+	return mImpl->GetNumLuminanceMaps();
+}
+

@@ -33,6 +33,8 @@
 #include "FBRenderer/RendererEnums.h"
 using namespace fastbird;
 
+IMPLEMENT_STATIC_CREATE(IndexBufferD3D11);
+
 IndexBufferD3D11::IndexBufferD3D11()
 {
 

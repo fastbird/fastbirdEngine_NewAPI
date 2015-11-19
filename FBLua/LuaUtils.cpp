@@ -527,7 +527,7 @@ void PushNumbers(lua_State* L, int& n, const std::tuple<Args...>& t)
 template <class T>
 void PullNumbersElem(lua_State* L, int index, int& n, T& value){
 	lua_rawgeti(L, index, n++);
-	value = lua_tonumber(L, -1);
+	value = (T)lua_tonumber(L, -1);
 	lua_pop(L, 1);
 }
 template <>

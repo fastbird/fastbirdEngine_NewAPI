@@ -30,13 +30,13 @@
 #include "Shader.h"
 #include "InputLayout.h"
 #include "RenderStates.h"
-#include "ColorRamp.h"
 #include "Renderer.h"
 #include "Texture.h"
 #include "RenderTarget.h"
 #include "EssentialEngineData/shaders/Constants.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBCommonHeaders/CowPtr.h"
+#include "FBMathLib/ColorRamp.h"
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
 #include "TinyXmlLib/tinyxml2.h"
@@ -50,8 +50,10 @@ public:
 		TextureSignature(TEXTURE_TYPE type, const char* filepath, const ColorRamp* cr)
 			:mType(type), mColorRamp(cr)
 		{
-			if (filepath)
+			if (filepath){
 				mFilepath = filepath;
+				ToLowerCase(mFilepath);
+			}
 		}
 		TEXTURE_TYPE mType;
 		std::string mFilepath;
@@ -786,25 +788,25 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	const Vec4& GetAmbientColor() const
+	const Vec4f& GetAmbientColor() const
 	{
 		return mMaterialData->mMaterialConstants.gAmbientColor;
 	}
 
 	//----------------------------------------------------------------------------
-	const Vec4& GetDiffuseColor() const
+	const Vec4f& GetDiffuseColor() const
 	{
 		return mMaterialData->mMaterialConstants.gDiffuseColor;
 	}
 
 	//----------------------------------------------------------------------------
-	const Vec4& GetSpecularColor() const
+	const Vec4f& GetSpecularColor() const
 	{
 		return mMaterialData->mMaterialConstants.gSpecularColor;
 	}
 
 	//----------------------------------------------------------------------------
-	const Vec4& GetEmissiveColor() const
+	const Vec4f& GetEmissiveColor() const
 	{
 		return mMaterialData->mMaterialConstants.gEmissiveColor;
 	}
@@ -833,13 +835,13 @@ public:
 		mMaterialData->mMaterialParameters[index] = value;
 	}
 
-	const Vec4& GetMaterialParameter(unsigned index) const
+	const Vec4f& GetMaterialParameter(unsigned index) const
 	{
 		auto& params = mMaterialData->mMaterialParameters;
 		auto it = params.Find(index);
 		if (it == params.end())
 		{
-			return Vec4::ZERO;
+			return Vec4f::ZERO;
 		}
 		return it->second;
 	}
@@ -876,7 +878,7 @@ public:
 		auto shader = mShaderData->mShader;
 		if (shader)
 		{
-			if (strcmp(shaderFile, shader->GetName()) == 0 || shader->CheckIncludes(shaderFile))
+			if (strcmp(shaderFile, shader->GetPath()) == 0 || shader->CheckIncludes(shaderFile))
 			{
 				return true;
 			}
@@ -955,14 +957,15 @@ public:
 		if (!materialParams.empty())
 		{
 			auto& renderer = Renderer::GetInstance();
-			Vec4* pDest = (Vec4*)renderer.MapMaterialParameterBuffer();
+			Vec4f* pDest = (Vec4f*)renderer.MapMaterialParameterBuffer();
 			if (pDest)
 			{
 				auto it = materialParams.begin(), itEnd = materialParams.end();
 				for (; it != itEnd; it++)
 				{
-					Vec4* pCurDest = pDest + it->first;
-					memcpy(pCurDest, &(it->second), sizeof(Vec4));
+					Vec4f* pCurDest = pDest + it->first;
+					const auto& src = it->second;
+					*pCurDest = src;
 				}
 				renderer.UnmapMaterialParameterBuffer();
 			}
@@ -1113,7 +1116,9 @@ public:
 				pSignature->mType != outTextureInTheSlot->GetType())
 				return false;
 
-			if (pSignature->mFilepath != outTextureInTheSlot->GetName())
+			std::string targetPath = outTextureInTheSlot->GetFilePath();
+			ToLowerCase(targetPath);
+			if (pSignature->mFilepath != targetPath)
 				return false;
 
 			if (pSignature->mColorRamp)
@@ -1262,19 +1267,19 @@ const SHADER_DEFINES& Material::GetShaderDefines() const {
 	return mImpl->GetShaderDefines();
 }
 
-const Vec4& Material::GetAmbientColor() const {
+const Vec4f& Material::GetAmbientColor() const {
 	return mImpl->GetAmbientColor();
 }
 
-const Vec4& Material::GetDiffuseColor() const {
+const Vec4f& Material::GetDiffuseColor() const {
 	return mImpl->GetDiffuseColor();
 }
 
-const Vec4& Material::GetSpecularColor() const {
+const Vec4f& Material::GetSpecularColor() const {
 	return mImpl->GetSpecularColor();
 }
 
-const Vec4& Material::GetEmissiveColor() const {
+const Vec4f& Material::GetEmissiveColor() const {
 	return mImpl->GetEmissiveColor();
 }
 
@@ -1286,7 +1291,7 @@ void* Material::GetShaderByteCode(unsigned& size) const {
 	return mImpl->GetShaderByteCode(size);
 }
 
-const Vec4& Material::GetMaterialParameter(unsigned index) const {
+const Vec4f& Material::GetMaterialParameter(unsigned index) const {
 	return mImpl->GetMaterialParameter(index);
 }
 
@@ -1316,6 +1321,14 @@ bool Material::IsUsingMaterialParameter(unsigned index) {
 
 bool Material::IsRelatedShader(const char* shaderFile) {
 	return mImpl->IsRelatedShader(shaderFile);
+}
+
+void Material::Bind(){
+	mImpl->Bind(true, 0);
+}
+
+void Material::Bind(bool inputLayout){
+	mImpl->Bind(inputLayout, 0);
 }
 
 void Material::Bind(bool inputLayout, unsigned stencilRef) {

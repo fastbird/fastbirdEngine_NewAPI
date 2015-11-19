@@ -29,7 +29,7 @@
 #ifndef _fastbird_RenderStructs_header_included_
 #define _fastbird_RenderStructs_header_included_
 #include "RendererEnums.h"
-#include "Color.h"
+#include "FBMathLib/Color.h"
 #include "FBMathLib/Math.h"
 
 namespace fastbird
@@ -236,11 +236,11 @@ namespace fastbird
 		void UpdateFrameRate(TIME_PRECISION dt)
 		{
 			FrameRateDisplayUpdateTime += dt;
-			dt = std::max((TIME_PRECISION)0.0000001, dt);
-			FrameRate = (FrameRate + 1.0 / (Real)dt) / 2.0;
-			if (FrameRateDisplayUpdateTime>0.5)
+			dt = std::max((TIME_PRECISION)0.0000001f, dt);
+			FrameRate = (FrameRate + 1.0f / (Real)dt) / 2.0f;
+			if (FrameRateDisplayUpdateTime>0.5f)
 			{
-				FrameRateDisplayUpdateTime = 0.;
+				FrameRateDisplayUpdateTime = 0.f;
 				FrameRateDisplay = FrameRate;
 			}
 

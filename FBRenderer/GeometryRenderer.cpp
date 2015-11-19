@@ -36,11 +36,12 @@
 #include "Renderer.h"
 #include "RenderParam.h"
 #include "RenderOptions.h"
+#include "ResourceProvider.h"
+#include "ResourceTypes.h"
 #include "FBSceneManager/SceneManager.h"
-#include "FBSceneManager/MeshObject.h"
 #include "FBSceneManager/Camera.h"
 #include "FBSceneManager/Scene.h"
-#include "../EssentialEngineData/shaders/Constants.h"
+#include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;
 
 class GeometryRenderer::Impl{
@@ -99,7 +100,7 @@ public:
 		Vec3 v;
 		unsigned color;
 	};
-	static const unsigned LINE_STRIDE;
+	static const unsigned LINE_STRIDE=16;
 
 	struct THICK_LINE_VERTEX
 	{
@@ -112,9 +113,8 @@ public:
 		Vec4 uv;
 		Vec3 next;
 	};
-	static const unsigned THICK_LINE_STRIDE;
-
-	static const unsigned MAX_LINE_VERTEX;
+	static const unsigned THICK_LINE_STRIDE=44;
+	static const unsigned MAX_LINE_VERTEX=500;
 	std::vector<Line> mWorldLines;
 	std::vector<Line> mWorldLinesBeforeAlphaPass;
 	std::vector<ThickLine> mThickLines;
@@ -137,9 +137,6 @@ public:
 	DepthStencilStatePtr mDepthStencilState;
 	RasterizerStatePtr mRasterizerState;
 
-	MeshObjectPtr mSphereMesh;
-	MeshObjectPtr mBoxMesh;
-
 	//---------------------------------------------------------------------------
 	Impl(){
 		mObjectConstants.gWorld.MakeIdentity();
@@ -160,8 +157,6 @@ public:
 		RASTERIZER_DESC desc;
 		mRasterizerState = renderer.CreateRasterizerState(desc);
 		auto& sceneMgr = SceneManager::GetInstance();
-		mSphereMesh =  sceneMgr.CreateMeshObject("es/objects/Sphere.dae");
-		mBoxMesh = sceneMgr.CreateMeshObject("es/objects/DebugBox.dae");	
 		mThickLines.reserve(1000);
 	}
 
@@ -306,7 +301,8 @@ public:
 		// object constant buffer
 		mRasterizerState->Bind();
 		mDepthStencilState->Bind(0);
-		renderer.SetAlphaBlendState();
+		auto provider = renderer.GetResourceProvider();
+		provider->BindBlendState(ResourceTypes::BlendStates::AlphaBlend);
 		mInputLayout->Bind();
 		mLineShader->Bind();
 		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_LINELIST);
@@ -429,48 +425,6 @@ public:
 			mThickLines.clear();
 			mThickLineMaterial->Unbind();
 		}
-
-		if (mSphereMesh)
-		{
-			RenderEventMarker marker("DebugHud::Render - Spheres()");
-			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			for (auto& sphere : mSpheres)
-			{
-				Transformation t;
-				t.SetScale(Vec3(sphere.mRadius, sphere.mRadius, sphere.mRadius));
-				t.SetTranslation(sphere.mPos);
-				t.GetHomogeneous(mObjectConstants.gWorld);
-				// only world are available. other matrix will be calculated in the shader
-				mObjectConstants.gWorldView = renderer.GetCamera()->GetMatrix(Camera::View) * mObjectConstants.gWorld;
-				mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetMatrix(Camera::Proj) * mObjectConstants.gWorldView;
-				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
-				mSphereMesh->GetMaterial()->SetMaterialParameters(0, sphere.mColor.GetVec4());
-				mSphereMesh->GetMaterial()->Bind(true);
-				mSphereMesh->RenderSimple();
-			}
-		}
-		mSpheres.clear();
-
-		if (mBoxMesh)
-		{
-			RenderEventMarker marker("DebugHud::Render - Boxes()");
-			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			for (auto& box : mBoxes)
-			{
-				Transformation t;
-				t.SetScale(box.mExtent);
-				t.SetTranslation(box.mPos);
-				t.GetHomogeneous(mObjectConstants.gWorld);
-
-				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
-				Vec4 color = box.mColor.GetVec4();
-				color.w = box.mAlpha;
-				mBoxMesh->GetMaterial()->SetMaterialParameters(0, color);
-				mBoxMesh->GetMaterial()->Bind(true);
-				mBoxMesh->RenderSimple();
-			}
-		}
-		mBoxes.clear();
 
 		if (mTriMaterial)
 		{

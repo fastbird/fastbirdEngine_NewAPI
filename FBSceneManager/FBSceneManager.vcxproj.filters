@@ -8,15 +8,10 @@
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SceneObjectFlag.h" />
     <ClInclude Include="SpatialObject.h" />
-    <ClInclude Include="MeshObject.h" />
     <ClInclude Include="SceneObjectType.h" />
-    <ClInclude Include="FBCollisionShape.h" />
-    <ClInclude Include="CollisionInfo.h" />
-    <ClInclude Include="AnimationData.h" />
-    <ClInclude Include="Animation.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ICameraObserver.h" />
-    <ClInclude Include="SkySphere.h" />
+    <ClInclude Include="DirectionalLight.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -24,10 +19,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SpatialObject.cpp" />
-    <ClCompile Include="FBCollisionShape.cpp" />
-    <ClCompile Include="MeshObject.cpp" />
-    <ClCompile Include="AnimationData.cpp" />
-    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DirectionalLight.cpp" />
   </ItemGroup>
 </Project>

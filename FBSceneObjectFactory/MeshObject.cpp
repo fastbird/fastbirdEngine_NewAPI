@@ -27,10 +27,11 @@
 
 #include "stdafx.h"
 #include "MeshObject.h"
-#include "Animation.h"
-#include "AnimationData.h"
-#include "SceneManager.h"
-#include "Camera.h"
+#include "FBAnimation/Animation.h"
+#include "FBAnimation/AnimationData.h"
+#include "FBDebugLib/Logger.h"
+#include "FBSceneManager/SceneManager.h"
+#include "FBSceneManager/Camera.h"
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/RenderOptions.h"
 #include "FBRenderer/RenderStates.h"
@@ -38,8 +39,10 @@
 #include "FBRenderer/IndexBuffer.h"
 #include "FBRenderer/Material.h"
 #include "FBRenderer/RenderTarget.h"
+#include "FBRenderer/ResourceProvider.h"
+#include "FBRenderer/ResourceTypes.h"
 #include "FBStringLib/StringLib.h"
-#include "../EssentialEngineData/shaders/Constants.h"
+#include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;
 
 class MeshObject::Impl{
@@ -97,7 +100,7 @@ public:
 		mTopology = PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 		mObjectConstants.gWorld.MakeIdentity();
 		auto& renderer = Renderer::GetInstance();
-		SetMaterial(renderer.GetMissingMaterial(), 0);
+		SetMaterial(renderer.GetResourceProvider()->GetMaterial(ResourceTypes::Materials::Missing), 0);
 		for (int i = 0; i < BUFFER_TYPE_NUM; ++i)
 		{
 			mUseDynamicVB[i] = false;

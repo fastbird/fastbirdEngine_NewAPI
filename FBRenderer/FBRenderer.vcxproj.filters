@@ -20,9 +20,6 @@
     <ClInclude Include="GaussianDistribution.h">
       <Filter>Enum&amp;Structures</Filter>
     </ClInclude>
-    <ClInclude Include="Color.h">
-      <Filter>Enum&amp;Structures</Filter>
-    </ClInclude>
     <ClInclude Include="InputElementDesc.h">
       <Filter>Enum&amp;Structures</Filter>
     </ClInclude>
@@ -46,11 +43,9 @@
     </ClInclude>
     <ClInclude Include="RenderOptions.h" />
     <ClInclude Include="StarDef.h" />
-    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="RenderTargetParam.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="TextTags.h" />
-    <ClInclude Include="ColorRamp.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="IPlatformRenderer.h" />
     <ClInclude Include="IPlatformRendererStructs.h">
@@ -76,6 +71,8 @@
     <ClInclude Include="IVideoPlayer.h" />
     <ClInclude Include="ResourceTypes.h" />
     <ClInclude Include="ResourceProvider.h" />
+    <ClInclude Include="NullPlatformRenderer.h" />
+    <ClInclude Include="RenderPass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -89,9 +86,6 @@
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="RenderStrategyDefault.cpp" />
-    <ClCompile Include="Color.cpp">
-      <Filter>Enum&amp;Structures</Filter>
-    </ClCompile>
     <ClCompile Include="RendererEnums.cpp">
       <Filter>Enum&amp;Structures</Filter>
     </ClCompile>
@@ -102,24 +96,23 @@
       <Filter>Enum&amp;Structures</Filter>
     </ClCompile>
     <ClCompile Include="StarDef.cpp" />
-    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="InputElementDesc.cpp">
       <Filter>Enum&amp;Structures</Filter>
     </ClCompile>
     <ClCompile Include="Font.cpp" />
-    <ClCompile Include="ColorRamp.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="TextureBinding.cpp" />
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="DebugHud.cpp" />
-    <ClCompile Include="MaterialTest.cpp" />
     <ClCompile Include="GeometryRenderer.cpp" />
     <ClCompile Include="ConsoleDataType.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="CandidatesData.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="ResourceProvider.cpp" />
+    <ClCompile Include="NullPlatformRenderer.cpp" />
+    <ClCompile Include="GaussianDistribution.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

@@ -26,6 +26,7 @@
 */
 
 #pragma once
+#include <algorithm>
 /**
 \file FBHelpers.h
 Convenent macros for manipulating stl containers.

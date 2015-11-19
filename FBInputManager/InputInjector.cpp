@@ -150,7 +150,7 @@ void InputInjector::GetMouseNPos(Real &x, Real &y) const{ // normalized pos(0.0~
 Vec2Tuple InputInjector::GetMouseNPos() const{
 	if (mImpl->mMouse)
 		return mImpl->mMouse->GetNPos();
-	return std::make_tuple(0., 0.);
+	return std::make_tuple(0.f, 0.f);
 }
 
 bool InputInjector::IsMouseMoved() const{

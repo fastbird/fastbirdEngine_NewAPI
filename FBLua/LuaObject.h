@@ -34,7 +34,7 @@ namespace fastbird
 {
 	class FB_DLL_PUBLIC LuaObject;
 	//-----------------------------------------------------------------------------
-	class LuaTableIterator
+	class FB_DLL_PUBLIC LuaTableIterator
 	{
 		lua_State* mL;
 	public:
@@ -46,7 +46,7 @@ namespace fastbird
 	};
 
 	//-----------------------------------------------------------------------------
-	class LuaSequenceIterator
+	class FB_DLL_PUBLIC LuaSequenceIterator
 	{
 		lua_State* mL;
 		size_t mLen;
@@ -156,28 +156,35 @@ namespace fastbird
 		double GetNumberAt(int index) const;
 		unsigned GetUnsignedAt(int index) const;
 		LuaObject GetTableAt(int index) const;
-		std::string GetString(std::string& def = std::string()) const;
-		float GetFloat(float def = 0.f) const;
-		double GetDouble(double def = 0.) const;
-		int GetInt(int def = 0) const;
-		unsigned GetUnsigned(unsigned def = 0) const;
-		unsigned GetUnsignedFromString(unsigned def = 0) const;
-		bool GetBoolWithDef(bool def = false) const;
-		Vec3Tuple GetVec3(const Vec3Tuple& def = Vec3Tuple(0., 0., 0.)) const;
-		Vec4Tuple GetVec4(const Vec4Tuple& def = Vec4Tuple(0., 0., 0., 0.)) const;
-		Vec3ITuple GetVec3I(const Vec3ITuple& def = Vec3ITuple(0, 0, 0)) const;
-		Vec2Tuple GetVec2(const Vec2Tuple& def = Vec2Tuple(0., 0.)) const;
-		Vec2ITuple GetVec2I(const Vec2ITuple& def = Vec2ITuple(0, 0)) const;
-		QuatTuple GetQuat(const QuatTuple& def = QuatTuple(0., 0., 0., 0.))const;
-		TransformationTuple GetTransformation(const TransformationTuple& def = TransformationTuple(
-			1., 0., 0.,
-			0., 1., 0.,
-			0., 0., 1.,
-			1., 0., 0., 0.,
-			0., 0., 0.,
-			1., 1., 1.,
-			true, true, true
-			)) const;
+		std::string GetString() const;
+		std::string GetString(std::string& def) const;
+		float GetFloat() const;
+		float GetFloat(float def) const;
+		double GetDouble() const;
+		double GetDouble(double def) const;
+		int GetInt() const;
+		int GetInt(int def) const;
+		unsigned GetUnsigned() const;
+		unsigned GetUnsigned(unsigned def) const;
+		unsigned GetUnsignedFromString() const;
+		unsigned GetUnsignedFromString(unsigned def) const;
+		bool GetBoolWithDef() const;
+		bool GetBoolWithDef(bool def) const;
+
+		Vec3Tuple GetVec3() const;
+		Vec3Tuple GetVec3(const Vec3Tuple& def) const;
+		Vec4Tuple GetVec4() const;
+		Vec4Tuple GetVec4(const Vec4Tuple& def) const;
+		Vec3ITuple GetVec3I() const;
+		Vec3ITuple GetVec3I(const Vec3ITuple& def) const;
+		Vec2Tuple GetVec2() const;
+		Vec2Tuple GetVec2(const Vec2Tuple& def) const;
+		Vec2ITuple GetVec2I() const;
+		Vec2ITuple GetVec2I(const Vec2ITuple& def) const;
+		QuatTuple GetQuat() const;
+		QuatTuple GetQuat(const QuatTuple& def)const;
+		TransformationTuple GetTransformation() const;
+		TransformationTuple GetTransformation(const TransformationTuple& def) const;
 
 		std::string GetString(bool& success) const;
 		float GetFloat(bool& success) const;

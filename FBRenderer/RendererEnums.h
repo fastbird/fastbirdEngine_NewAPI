@@ -402,34 +402,9 @@ namespace fastbird
 		"STENCIL_OP_DECR",
 	};
 	STENCIL_OP StencilOpFromString(const char* str);
-	
-	enum RENDER_PASS
-	{
-		PASS_NORMAL = 0,
-		PASS_GODRAY_OCC_PRE, // for GodRay - occlusion pre pass
-		PASS_GLOW,
-		PASS_DEPTH, // write depth to render target
-		PASS_DEPTH_ONLY, // write depth only to the depth buffer.
-		PASS_SHADOW,
-		PASS_SILOUETTE,
-		PASS_LAST = PASS_SILOUETTE /// You can define your own from PASS_LAST+1
-	};
 
+}
+#include "RenderPass.h"
+namespace fastbird{
 	RENDER_PASS RenderPassFromString(const char* str);
-
-	namespace SAMPLERS
-	{
-		enum Enum{
-			POINT,
-			LINEAR,
-			ANISOTROPIC,
-			SHADOW,
-			POINT_WRAP,
-			LINEAR_WRAP,
-			BLACK_BORDER,
-			POINT_BLACK_BORDER,
-
-			NUM
-		};
-	}
 }

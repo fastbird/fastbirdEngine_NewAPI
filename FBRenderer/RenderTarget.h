@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/platform.h"
 #include "RendererEnums.h"
 #include "RendererStructs.h"
-#include "Color.h"
+#include "FBMathLib/Color.h"
 #include "FBCommonHeaders/Observable.h"
 #include "IRenderTargetObserver.h"
 namespace fastbird
@@ -50,7 +50,6 @@ namespace fastbird
 	DECLARE_SMART_PTR(RenderTarget);
 	class FB_DLL_PUBLIC RenderTarget : public Observable<IRenderTargetObserver>
 	{
-		static RenderTargetId NextRenderTargetId;
 		static const int FB_NUM_BLOOM_TEXTURES = 3;
 		static const int FB_NUM_STAR_TEXTURES = 12;
 		

@@ -69,4 +69,18 @@ namespace fastbird
 		Vec3 GetTranslation() const;
 		Mat33 To33() const;
 	};
+
+#if defined(FB_DOUBLE_PRECISION)
+	class Mat44f{
+	public:
+		float m[4][4];
+
+		Mat44f();
+		Mat44f(const Mat44& other);
+		Mat44f& operator = (const Mat44& other);
+		void MakeIdentity();
+	};
+#else
+	typedef Mat44 Mat44f;
+#endif
 }

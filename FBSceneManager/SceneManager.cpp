@@ -28,51 +28,58 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include "Scene.h"
-#include "SkySphere.h"
-
+#include "FBTimer/Timer.h"
 using namespace fastbird;
-
-SceneManager* SceneManager::sSceneManager = 0;
-SceneManager* SceneManager::CreateSceneManager(){
-	if (sSceneManager)
-		return sSceneManager;
-	sSceneManager = new SceneManager;
-	return sSceneManager;
-}
-SceneManager& SceneManager::GetInstance(){
-	return *sSceneManager;
-}
-void SceneManager::DeleteSceneManager(){
-	delete sSceneManager;
-	sSceneManager = 0;
-}
 
 //---------------------------------------------------------------------------
 class SceneManager::Impl{
 public:
+	SceneManagerWeakPtr mSelf;
 	std::map<std::string, SceneWeakPtr> mScenes;
 
-	Impl(){
-		SkySphere::CreateSharedEnvRT();
+	//---------------------------------------------------------------------------
+
+	ScenePtr CreateScene(const char* name){
+		if (!ValidCStringLength(name)){
+			Logger::Log(FB_ERROR_LOG_ARG, "invalid arg");
+			return 0;
+		}
+
+		auto it = mScenes.find(name);
+		if (it != mScenes.end()){
+			auto scene = it->second.lock();
+			if (scene)
+				return scene;
+		}
+		auto scene = Scene::Create(name);
+		mScenes[name] = scene;
+		return scene;
 	}
-	~Impl(){
-		SkySphere::DeleteSharedEnvRT();
-	}
+
 };
 
+Timer* fastbird::gpTimer = 0;
 //---------------------------------------------------------------------------
+SceneManagerWeakPtr sSceneManager;
+SceneManagerPtr SceneManager::CreateSceneManager(){
+	if (sSceneManager.expired()){
+		auto sceneManager = SceneManagerPtr(new SceneManager, [](SceneManager* obj){ delete obj; });
+		sceneManager->mImpl->mSelf = sceneManager;
+		sSceneManager = sceneManager;
+		gpTimer = Timer::GetMainTimer().get();
+	}
+	return sSceneManager.lock();
+}
+
+SceneManager& SceneManager::GetInstance(){
+	return *sSceneManager.lock();
+}
+
+SceneManager::SceneManager()
+	: mImpl(new Impl){
+
+}
+
 ScenePtr SceneManager::CreateScene(const char* name){
-	if (!name || !strlen(name)){
-		Logger::Log(FB_ERROR_LOG_ARG, "invalid arg");
-		return 0;
-	}
-	auto it = mImpl->mScenes.find(name);
-	if (it != mImpl->mScenes.end()){
-		auto scene = it->second.lock();
-		if (scene)
-			return scene;
-	}
-	auto scene = Scene::Create(name);
-	mImpl->mScenes[name] = scene;
-	return scene;
+	return 	mImpl->CreateScene(name);
 }

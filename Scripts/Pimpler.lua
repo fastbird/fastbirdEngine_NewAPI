@@ -1,3 +1,28 @@
+------------------------------------------------------------------------------
+-- This source file is part of fastbird engine
+-- For the latest info, see http://www.jungwan.net/
+-- 
+-- Copyright (c) 2013-2015 Jungwan Byun
+-- 
+-- Permission is hereby granted, free of charge, to any person obtaining a copy
+-- of this software and associated documentation files (the "Software"), to deal
+-- in the Software without restriction, including without limitation the rights
+-- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+-- copies of the Software, and to permit persons to whom the Software is
+-- furnished to do so, subject to the following conditions:
+--
+-- The above copyright notice and this permission notice shall be included in
+-- all copies or substantial portions of the Software.
+-- 
+-- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+-- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+-- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+-- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+-- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+-- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+-- THE SOFTWARE.
+------------------------------------------------------------------------------
+
 filepath = arg[1]
 print('filepath = ' .. filepath)
 function FindFileName(path)
@@ -15,6 +40,20 @@ print('className = ' .. className)
 function CaptureFunctionName(line)
 	return string.match(line, "([%w_][%w%d_]+)%(")
 end
+local WholeLines;
+function RemoveLineFeed(line)
+	while not string.find(line, ';') do
+		local nextLine = WholeLines()
+		if not nextLine then break end
+		line = line .. nextLine
+	end
+	return line
+end
+
+function RemoveDefaultArg(line)
+	line = string.gsub(line, "%s*=%s*[%w%d_]+", '')
+	return line
+end
 
 function ReplaceToMethod(line, functionName)
 	return string.gsub(line, functionName, string.format("%s::%s", className, functionName))
@@ -28,7 +67,7 @@ function CaptureParamList(line, functionName)
 	--print('params = '.. params)	
 	
 	local first = true
-	for param in string.gmatch(params, "([%w_][%w%d_]*)[,%)]") do
+	for param in string.gmatch(params, "([%w_][%w%d_]*)[,%)%[]") do
 		if first then
 			list = list .. param
 			first = false
@@ -54,7 +93,8 @@ if filepath then
 	local lines ={}
 	local started = false
 	local successful = false
-	for line in io.lines() do
+	WholeLines = io.lines()
+	for line in WholeLines do
 		local specialLine= false
 		if string.find(line, '//#!PimplStart') then
 			started = true			
@@ -68,6 +108,8 @@ if filepath then
 			if commentStart==nil or commentStart > 4   then
 				local functionName = CaptureFunctionName(line)
 				if functionName then
+					line = RemoveLineFeed(line)
+					line = RemoveDefaultArg(line)
 					line = ReplaceToMethod(line, functionName)
 					--print('Funtion Name = ' .. functionName);
 					local paramList = CaptureParamList(line, functionName)

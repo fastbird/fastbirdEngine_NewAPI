@@ -35,6 +35,6 @@ fastbird::IPlatformRenderer* CreateRenderEngine(){
 	return fastbird::RendererD3D11::Create();
 }
 
-void DeleteRenderEngine(fastbird::IPlatformRenderer* renderer){
-	fastbird::RendererD3D11::Delete();
+void DeleteRenderEngine(){
+	fastbird::RendererD3D11::Destroy();
 }

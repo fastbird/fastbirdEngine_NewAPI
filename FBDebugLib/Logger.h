@@ -57,6 +57,10 @@ namespace fastbird{
 
 		/** Output to the log file created by \b CreateLogFile(). */		
 		static void Log(const char* str, ...);		
+		/** Check whether the log message is same with the previous frame
+		You can prevent logging the same message every frame by passing \a frame arg.
+		*/
+		static void Log(FRAME_PRECISION curFrame, TIME_PRECISION curTime, const char* str, ...);
 
 		/** Output to the log file specified as a parameter. */
 		static void Log(std::ofstream& file, const char* str);
@@ -70,3 +74,4 @@ namespace fastbird{
 #define FB_DEFAULT_LOG_ARG_NO_LINE "%s: %s", __FUNCTION__
 #define FB_ERROR_LOG_ARG "%s: (error)%s\n", __FUNCTION__
 #define FB_ERROR_LOG_ARG_NO_LINE "%s: (error)%s", __FUNCTION__
+#define FB_FRAME_TIME gpTimer->GetFrame(), gpTimer->GetTime()

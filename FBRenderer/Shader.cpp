@@ -36,20 +36,22 @@ using namespace fastbird;
 
 static std::vector<ShaderWeakPtr> sAllShaders;
 
-ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformTexture) {
-	for (auto it = sAllShaders.begin(); it != sAllShaders.end();){
-		auto shader = it->lock();
-		if (shader){
-			++it;
-			if (shader->GetPlatformShader() == platformTexture){
-				return shader;
+namespace fastbird{
+	ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformTexture) {
+		for (auto it = sAllShaders.begin(); it != sAllShaders.end();){
+			auto shader = it->lock();
+			if (shader){
+				++it;
+				if (shader->GetPlatformShader() == platformTexture){
+					return shader;
+				}
+			}
+			else{
+				it = sAllShaders.erase(it);
 			}
 		}
-		else{
-			it = sAllShaders.erase(it);
-		}
+		return 0;
 	}
-	return 0;
 }
 
 class Shader::Impl{
@@ -176,6 +178,8 @@ public:
 	}
 };
 
+Shader::Impl* Shader::Impl:: sLastBindedFullSetShader = 0;
+
 //----------------------------------------------------------------------------
 void Shader::ReloadShader(const char* name)
 {
@@ -185,7 +189,7 @@ void Shader::ReloadShader(const char* name)
 //----------------------------------------------------------------------------
 void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefines)
 {
-	Profiler profile("Reloading Shaders");
+	/*Profiler profile("Reloading Shaders");
 	std::string path = filepath;
 	ToLowerCase(path);
 	auto& renderer = Renderer::GetInstance();
@@ -204,7 +208,7 @@ void Shader::ReloadShader(const char* filepath, const SHADER_DEFINES& shaderDefi
 				}
 			}
 		}
-	}
+	}*/
 }
 
 ShaderPtr Shader::Create(){

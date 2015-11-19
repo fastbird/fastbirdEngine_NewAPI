@@ -14,6 +14,8 @@
     <ClCompile Include="BoundingVolume.cpp" />
     <ClCompile Include="BVaabb.cpp" />
     <ClCompile Include="BVSphere.cpp" />
+    <ClCompile Include="Color.cpp" />
+    <ClCompile Include="ColorRamp.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="GeomUtils.cpp" />
     <ClCompile Include="Mat33.cpp" />
@@ -37,6 +39,8 @@
     <ClInclude Include="BoundingVolume.h" />
     <ClInclude Include="BVaabb.h" />
     <ClInclude Include="BVSphere.h" />
+    <ClInclude Include="Color.h" />
+    <ClInclude Include="ColorRamp.h" />
     <ClInclude Include="Math.h" />
     <ClInclude Include="GeomUtils.h" />
     <ClInclude Include="Mat33.h" />

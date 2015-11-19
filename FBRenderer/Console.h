@@ -39,8 +39,7 @@ namespace fastbird{
 
 	public:
 		static ConsolePtr Create();
-		static ConsolePtr GetInstance();
-		~Console();
+		static ConsolePtr GetInstance();		
 
 		void SetRenderTargetSize(const Vec2I& size);
 		void RegisterCommand(ConsoleCommand* pCom);

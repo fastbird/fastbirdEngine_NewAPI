@@ -36,6 +36,8 @@
 #include "TextureAtlas.h"
 #include "RenderOptions.h"
 #include "Shader.h"
+#include "ResourceProvider.h"
+#include "ResourceTypes.h"
 #include "FBTimer/Profiler.h"
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
@@ -206,12 +208,11 @@ public:
 		mShader = renderer.CreateShader("es/shaders/font.hlsl", 
 			BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
 		mInputLayout = renderer.GetInputLayout(
-			DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD_BLENDINDICES, mShader);
-		mInputLayout->SetDebugName("Font input layout");
+			DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD_BLENDINDICES, mShader);		
 
 		mInitialized = r == 0;
-
-		mTextureMaterial = renderer.GetMaterial(DEFAULT_MATERIALS::QUAD_TEXTURE);
+		auto provider = renderer.GetResourceProvider();
+		mTextureMaterial = provider->GetMaterial(ResourceTypes::Materials::QuadTextured);
 
 		BLEND_DESC desc;
 		desc.RenderTarget[0].BlendEnable = true;
@@ -221,7 +222,7 @@ public:
 		desc.RenderTarget[0].RenderTargetWriteMask = COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE;
 		mTextureMaterial->SetBlendState(desc);
 		
-		mRenderTargetSize = renderer.GetMainRTSize();
+		mRenderTargetSize = renderer.GetMainRenderTargetSize();
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
 			(Real)mRenderTargetSize.x,
 			(Real)mRenderTargetSize.y,
@@ -515,13 +516,11 @@ public:
 
 		auto& renderer = Renderer::GetInstance();
 
-		MapData data = renderer.MapVertexBuffer(mVertexBuffer, 0,
-			MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
+		MapData data = mVertexBuffer->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 		FontVertex* pDest = (FontVertex*)data.pData;
 		memcpy(pDest + mVertexLocation, pVertices + mVertexLocation,
 			vertexCount * sizeof(FontVertex));
-
-		renderer.UnmapVertexBuffer(mVertexBuffer, 0);
+		mVertexBuffer->Unmap(0);		
 		mVertexBuffer->Bind();
 		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		renderer.Draw(vertexCount, mVertexLocation);
@@ -752,7 +751,7 @@ public:
 		if (!mInitialized)
 			return;
 		auto& renderer = Renderer::GetInstance();
-		renderer.SetAlphaBlendState();
+		renderer.GetResourceProvider()->BindBlendState(ResourceTypes::BlendStates::AlphaBlend);
 		mShader->Bind();
 		mInputLayout->Bind();
 	}
@@ -888,7 +887,7 @@ public:
 	void RestoreRenderTargetSize()
 	{
 		auto& renderer = Renderer::GetInstance();
-		const auto& rtSize = renderer.GetMainRTSize();
+		const auto& rtSize = renderer.GetMainRenderTargetSize();
 		mRenderTargetSize = rtSize;
 		mObjectConstants.gWorldViewProj = MakeOrthogonalMatrix(0, 0,
 			(Real)mRenderTargetSize.x,

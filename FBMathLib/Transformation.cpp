@@ -628,7 +628,7 @@ void Transformation::Inverse (Transformation& rkInverse) const
 }
 
 //----------------------------------------------------------------------------
-void Transformation::GetHomogeneous(const Mat44& rkHMatrix) const
+void Transformation::GetHomogeneous(Mat44& rkHMatrix) const
 {
     if (mRSSeperated)
     {
@@ -668,6 +668,13 @@ void Transformation::GetHomogeneous(const Mat44& rkHMatrix) const
     rkHMatrix[2][3] = mT[2];
     rkHMatrix[3][3] = 1.0f;
 }
+#if defined(FB_DOUBLE_PRECISION)
+void Transformation::GetHomogeneous(Mat44f& hm) const{
+	Mat44 homo;
+	GetHomogeneous(homo);
+	hm = homo;
+}
+#endif
 
 Vec3 Transformation::GetRight() const
 {

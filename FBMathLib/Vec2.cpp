@@ -270,4 +270,20 @@ namespace fastbird
 	Vec2 operator*(const Vec2I& left, Real right){
 		return Vec2(left.x * right, left.y * right);
 	}
+
+#if defined(FB_DOUBLE_PRECISION)
+	Vec2f::Vec2f(){
+
+	}
+	Vec2f::Vec2f(Real x_, Real y_)
+		: x((float)x_)
+		, y((float)y_)
+	{
+	}
+	Vec2f& Vec2f::operator=(const Vec2& other){
+		x = (float)other.x;
+		y = (float)other.y;
+		return *this;
+	}
+#endif
 }

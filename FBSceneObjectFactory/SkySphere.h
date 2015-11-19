@@ -26,10 +26,12 @@
 */
 
 #pragma once
-#include "FBCommonHeaders/Types.h"
+#include "FBCommonHeaders/platform.h"
+#include "FBSceneManager/SceneObject.h"
+#include "FBRenderer/IRenderable.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(SkySphere);
-	class SkySphere{
+	class FB_DLL_PUBLIC SkySphere : public SceneObject, public IRenderable{
 		DECLARE_PIMPL_NON_COPYABLE(SkySphere);
 		SkySphere();
 
@@ -39,5 +41,28 @@ namespace fastbird{
 		static void DeleteSharedEnvRT();
 
 		~SkySphere();
+
+		// IRenderable
+		virtual void SetMaterial(const char* name, int pass) = 0;
+		virtual void SetMaterial(MaterialPtr pMat, int pass) = 0;
+		virtual MaterialPtr GetMaterial(int pass = 0) const = 0;
+		virtual bool IsTransparent() const = 0;
+		virtual void SetVertexBuffer(VertexBufferPtr pVertexBuffer) = 0;
+		virtual void SetIndexBuffer(IndexBufferPtr pIndexBuffer) = 0;
+		// override the input layout defined in material
+		virtual void SetInputLayout(InputLayoutPtr i) = 0;
+		virtual void PreRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
+		virtual void Render(const RenderParam& param, RenderParamOut* paramOut) = 0;
+		virtual void PostRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
+		virtual void SetEnableHighlight(bool enable) {}
+		virtual AnimationPtr GetAnimation() const { return 0; }
+
+		// ISkySphere
+		virtual void UpdateEnvironmentMap(const Vec3& origin);
+		virtual void SetInterpolationData(unsigned index, const Vec4& data);
+		virtual void PrepareInterpolation(float time, SkySpherePtr startFrom);
+		virtual void SetUseAlphaBlend(bool use);
+		virtual void SetAlpha(float alpha);
+		virtual float GetAlpha() const;
 	};
 }

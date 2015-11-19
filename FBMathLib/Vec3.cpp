@@ -426,6 +426,27 @@ namespace fastbird
 			edge.y > v.y ? 0.0f : 1.0f,
 			edge.z > v.z ? 0.0f : 1.0f);
 	}
+
+#if defined(FB_DOUBLE_PRECISION)
+	Vec3f::Vec3f(){
+
+	}
+
+	Vec3f::Vec3f(Real x_, Real y_, Real z_)
+		: x((float)x_)
+		, y((float)y_)
+		, z((float)z_)
+	{
+
+	}
+
+	Vec3f& Vec3f::operator = (const Vec3& other){
+		x = (float)other.x;
+		y = (float)other.y;
+		z = (float)other.z;
+		return *this;
+	}
+#endif
 }
 
 

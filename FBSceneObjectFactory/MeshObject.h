@@ -27,9 +27,9 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-#include "SpatialObject.h"
 #include "FBCollisionShape.h"
 #include "CollisionInfo.h"
+#include "FBSceneManager/SpatialObject.h"
 #include "FBRenderer/IRenderable.h"
 #include "FBRenderer/RenderParam.h"
 #include "FBRenderer/RendererEnums.h"

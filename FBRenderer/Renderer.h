@@ -43,11 +43,12 @@
 #include "FBInputManager/IInputConsumer.h"
 #include "FBMathLib/Math.h"
 #include "FBTimer/Timer.h"
-#include "../EssentialEngineData/shaders/Constants.h"
+#include "EssentialEngineData/shaders/Constants.h"
 struct lua_State;
 namespace fastbird{	
 	class RenderOptions;
 	typedef unsigned RenderTargetId;
+	DECLARE_SMART_PTR(ResourceProvider);
 	DECLARE_SMART_PTR(IVideoPlayer);
 	DECLARE_SMART_PTR(Camera);
 	DECLARE_SMART_PTR(PointLightManager);
@@ -106,10 +107,6 @@ namespace fastbird{
 
 		static const HWindowId INVALID_HWND_ID = (HWindowId)-1;
 		static const HWindow INVALID_HWND;
-		static const int FB_NUM_TONEMAP_TEXTURES = 4;
-		static const int FB_NUM_TONEMAP_TEXTURES_NEW = 5;
-		static const int FB_NUM_LUMINANCE_TEXTURES = 3;
-		static const int FB_MAX_SAMPLES = 16;      // Maximum number of texture grabs
 
 		/** Set lua state.
 		Renderer load configuration file using lua. You need to set it before you call Renderer::PrepareRenderEngine()
@@ -124,7 +121,7 @@ namespace fastbird{
 		 \endcode
 		 because the Renderer you got is already initialized the render engine.		 
 		*/
-		void PrepareRenderEngine(const char* rendererPlugInName);
+		bool PrepareRenderEngine(const char* rendererPlugInName);
 
 		//-------------------------------------------------------------------
 		// Canvas & System
@@ -153,8 +150,7 @@ namespace fastbird{
 		ShaderPtr CreateShader(const char* filepath, int shaders);
 		ShaderPtr CreateShader(const char* filepath, int shaders, const SHADER_DEFINES& defines);
 		bool ReapplyShaderDefines(Shader* shader);
-		MaterialPtr CreateMaterial(const char* file);
-		MaterialPtr GetMissingMaterial();
+		MaterialPtr CreateMaterial(const char* file);		
 		// use this if you are sure there is instance of the descs.
 		InputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& descs, ShaderPtr shader);
 		InputLayoutPtr GetInputLayout(DEFAULT_INPUTS::Enum e, ShaderPtr shader);
@@ -167,13 +163,12 @@ namespace fastbird{
 		TexturePtr GetTemporalDepthBuffer(const Vec2I& size);
 		PointLightPtr CreatePointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime,
 			bool manualDeletion);
-		MaterialPtr GetMaterial(DEFAULT_MATERIALS::Enum type);
 
 		//-------------------------------------------------------------------
 		// Hot reloading
 		//-------------------------------------------------------------------
-		bool ReloadShader(ShaderPtr shader);
-		bool ReloadTexture(ShaderPtr shader);
+		/*bool ReloadShader(ShaderPtr shader);
+		bool ReloadTexture(ShaderPtr shader);*/
 
 		//-------------------------------------------------------------------
 		// Resource Bindings
@@ -201,27 +196,7 @@ namespace fastbird{
 		void SetPositionInputLayout();
 
 		void SetSystemTextureBindings(SystemTextures::Enum type, const TextureBindings& bindings);
-		const TextureBindings& GetSystemTextureBindings(SystemTextures::Enum type) const;
-
-		ShaderPtr GetGodRayPS();
-		ShaderPtr GetGlowShader();
-		void SetShadowMapShader();
-		ShaderPtr GetSilouetteShader();
-		ShaderPtr GetCopyPS();
-		ShaderPtr GetCopyPSMS();
-		TexturePtr GetToneMap(unsigned idx);
-		ShaderPtr GetSampleLumInitialShader();
-		ShaderPtr GetSampleLumIterativeShader();
-		ShaderPtr GetSampleLumFinalShader();
-		void SwapLuminanceMap();
-		TexturePtr GetLuminanceMap(unsigned idx);
-		ShaderPtr GetCalcAdapedLumShader();
-		ShaderPtr GetBrightPassPS();
-		ShaderPtr GetBlur5x5PS();
-		ShaderPtr GetBloomPS();
-		ShaderPtr GetStarGlareShader();
-		ShaderPtr GetMergeTexturePS();
-		ShaderPtr GetToneMappingPS();
+		const TextureBindings& GetSystemTextureBindings(SystemTextures::Enum type) const;				
 
 		//-------------------------------------------------------------------
 		// Device RenderStates
@@ -229,54 +204,16 @@ namespace fastbird{
 		void RestoreRenderStates();
 		void RestoreRasterizerState();
 		void RestoreBlendState();
-		void RestoreDepthStencilState();
-		void LockDepthStencilState();
-		void UnlockDepthStencilState();
-		void LockBlendState();
-		void UnlockBlendState();
-		// blend
-		void SetAlphaBlendState();
-		void SetAdditiveBlendState();
-		void SetMaxBlendState();
-		void SetRedAlphaMask();
-		void SetGreenAlphaMask();
-		void SetGreenMask();
-		void SetBlueMask();
-		void SetNoColorWriteState();
-		void SetGreenAlphaMaskMax();
-		void SetGreenAlphaMaskAddAddBlend();
-		void SetRedAlphaMaskAddMinusBlend();
-		void SetGreenAlphaMaskAddMinusBlend();
-		void SetRedAlphaMaskAddAddBlend();
-		// depth
-		void SetNoDepthWriteLessEqual();
-		void SetLessEqualDepth();
-		void SetNoDepthStencil();
-		void SetDepthOnlyShader();
-		// raster
-		void SetFrontFaceCullRS();
-		void SetOneBiasedDepthRS();
+		void RestoreDepthStencilState();				
 		// sampler
-		void SetSamplerState(SAMPLERS::Enum s, BINDING_SHADER shader, int slot);
-
-		//-------------------------------------------------------------------
-		// Resource Manipulation
-		//-------------------------------------------------------------------
-		MapData MapVertexBuffer(VertexBufferPtr pBuffer, UINT subResource,
-			MAP_TYPE type, MAP_FLAG flag);
-		void UnmapVertexBuffer(VertexBufferPtr pBuffer, unsigned int subResource);
-		MapData MapTexture(TexturePtr pTexture, UINT subResource,
-			MAP_TYPE type, MAP_FLAG flag);
-		void UnmapTexture(TexturePtr pTexture, UINT subResource);
-		void CopyToStaging(TexturePtr dst, UINT dstSubresource, UINT dstx, UINT dsty, UINT dstz,
-			TexturePtr src, UINT srcSubresource, Box3D* pBox);
-		void SaveTextureToFile(TexturePtr texture, const char* filename);
-
+		void SetSamplerState(int ResourceTypes_SamplerStates, BINDING_SHADER shader, int slot);
 
 		//-------------------------------------------------------------------
 		// GPU constants
 		//-------------------------------------------------------------------
-		void UpdateObjectConstantsBuffer(const void* pData, bool record = false);
+		/// record == false
+		void UpdateObjectConstantsBuffer(const void* pData);
+		void UpdateObjectConstantsBuffer(const void* pData, bool record);
 		void UpdatePointLightConstantsBuffer(const void* pData);
 		void UpdateFrameConstantsBuffer();
 		void UpdateMaterialConstantsBuffer(const void* pData);
@@ -307,6 +244,9 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// FBRenderer State
 		//-------------------------------------------------------------------
+		ResourceProviderPtr GetResourceProvider() const;
+		/// \param provider cannot be null
+		void SetResourceProvider(ResourceProviderPtr provider);
 		void SetForcedWireFrame(bool enable);
 		bool GetForcedWireFrame() const;
 		RenderTargetPtr GetMainRenderTarget() const;
@@ -314,6 +254,7 @@ namespace fastbird{
 		const Vec2I& GetMainRenderTargetSize() const;
 		void SetCurrentRenderTarget(RenderTargetPtr renderTarget);
 		RenderTargetPtr GetCurrentRenderTarget() const;
+		void SetCurrentScene(ScenePtr scene);
 		bool IsMainRenderTarget() const;
 		const Vec2I& GetRenderTargetSize(HWindowId id = INVALID_HWND_ID) const;
 		const Vec2I& GetRenderTargetSize(HWindow hwnd = 0) const;
@@ -332,9 +273,15 @@ namespace fastbird{
 		PointLightManagerPtr GetPointLightMan() const;
 		void RegisterVideoPlayer(IVideoPlayerPtr player);
 		void UnregisterVideoPlayer(IVideoPlayerPtr player);
-		void GetSampleOffsets_GaussBlur5x5(DWORD texWidth, DWORD texHeight, Vec4** avTexCoordOffset, Vec4** avSampleWeight, Real fMultiplier);
-		void GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Vec4* avTexCoordOffset);
+		bool GetSampleOffsets_Bloom(DWORD dwTexSize,
+			float afTexCoordOffset[15],
+			Vec4* avColorWeight,
+			float fDeviation, float fMultiplier);
+		void GetSampleOffsets_GaussBlur5x5(DWORD texWidth, DWORD texHeight, Vec4f** avTexCoordOffset, Vec4f** avSampleWeight, float fMultiplier);
+		void GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Vec4f* avSampleOffsets);
 		bool IsLuminanceOnCpu() const;
+		void SetLockDepthStencilState(bool lock);
+		void SetLockBlendState(bool lock);
 
 		//-------------------------------------------------------------------
 		// Queries

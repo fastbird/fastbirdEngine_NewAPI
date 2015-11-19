@@ -249,6 +249,10 @@ void Texture::Bind(BINDING_SHADER shader, int slot){
 	mImpl->Bind(shader, slot);
 }
 
+void Texture::Unbind(){
+	mImpl->Unbind();
+}
+
 MapData Texture::Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag)
 {
 	return mImpl->Map(subResource, type, flag);	

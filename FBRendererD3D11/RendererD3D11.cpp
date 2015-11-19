@@ -157,8 +157,8 @@ public:
 		};
 		int numFeatureLevels = _ARRAYSIZE(featureLevels);
 
-		ID3D11Device* device;
-		ID3D11DeviceContext* immediateContext;
+		ID3D11Device* device = 0;
+		ID3D11DeviceContext* immediateContext = 0;
 		for (int driverTypeIndex = 0; driverTypeIndex < numDriverTypes; driverTypeIndex++)
 		{
 			mDriverType = driverTypes[driverTypeIndex];
@@ -532,10 +532,10 @@ public:
 		}
 	}
 
-	void ChangeFullscreenMode(HWindowId id, HWindow window, int mode){
+	bool ChangeFullscreenMode(HWindowId id, HWindow window, int mode){
 		auto it = mSwapChains.Find(id);
 		if (it == mSwapChains.end())
-			return;
+			return false;
 
 		auto swapChain = it->second.get();
 		if (mode == 0){
@@ -559,6 +559,7 @@ public:
 			}
 
 		}
+		return true;
 	}
 
 	unsigned GetMultiSampleCount() const{
@@ -1462,7 +1463,7 @@ public:
 	}
 
 	// Data
-	void UpdateShaderData(ShaderConstants::Enum type, void* data, int size){
+	void UpdateShaderConstants(ShaderConstants::Enum type, const void* data, int size){
 		D3D11_MAPPED_SUBRESOURCE mappedResource;
 		auto buffer = mShaderConstants[type];
 		mImmediateContext->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -1470,6 +1471,26 @@ public:
 			memcpy(mappedResource.pData, data, size);
 			mImmediateContext->Unmap(buffer, 0);
 		}
+	}
+
+	void* MapMaterialParameterBuffer() const{
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		mImmediateContext->Map(mShaderConstants[ShaderConstants::MaterialParam], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		return mappedResource.pData;
+	}
+
+	void UnmapMaterialParameterBuffer() const{
+		mImmediateContext->Unmap(mShaderConstants[ShaderConstants::MaterialParam], 0);
+	}
+
+	void* MapBigBuffer() const{
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		mImmediateContext->Map(mShaderConstants[ShaderConstants::BigData], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		return mappedResource.pData;
+	}
+
+	void UnmapBigBuffer() const{
+		mImmediateContext->Unmap(mShaderConstants[ShaderConstants::BigData], 0);
 	}
 
 	void UnbindInputLayout(){
@@ -2029,3 +2050,289 @@ public:
 		}
 	}	
 };
+
+//---------------------------------------------------------------------------
+static RendererD3D11* sRenderer = 0;
+IPlatformRenderer* RendererD3D11::Create(){
+	if (sRenderer)
+		return sRenderer;
+	sRenderer = new RendererD3D11();
+	return sRenderer;
+}
+void RendererD3D11::Destroy(){
+	delete sRenderer;
+	sRenderer = 0;
+}
+
+RendererD3D11& RendererD3D11::GetInstance(){
+	if (!sRenderer)
+	{
+		Logger::Log(FB_ERROR_LOG_ARG, "RendererD3D11 is destroyed abnormally. Program will crash..");
+	}
+
+	return *sRenderer;
+}
+
+RendererD3D11::RendererD3D11()
+	: mImpl(new Impl)
+{
+
+}
+
+RendererD3D11::~RendererD3D11(){
+
+}
+
+//-------------------------------------------------------------------
+// IPlatformRenderer interface
+//-------------------------------------------------------------------		
+// Device features
+Vec2ITuple RendererD3D11::FindClosestSize(HWindowId id, const Vec2ITuple& input) {
+	return mImpl->FindClosestSize(id, input);
+}
+
+bool RendererD3D11::GetResolutionList(unsigned& outNum, Vec2ITuple* list) {
+	return mImpl->GetResolutionList(outNum, list);
+}
+
+bool RendererD3D11::InitCanvas(HWindowId id, HWindow window, int width, int height, int fullscreen,	IPlatformTexturePtr& outColorTexture, IPlatformTexturePtr& outDepthTexture) {
+	return mImpl->InitCanvas(id, window, width, height, fullscreen, outColorTexture, outDepthTexture);
+}
+
+void RendererD3D11::DeinitCanvas(HWindowId id, HWindow window) {
+	mImpl->DeinitCanvas(id, window);
+}
+
+bool RendererD3D11::ChangeResolution(HWindowId id, HWindow window, const Vec2ITuple& resol,	IPlatformTexturePtr& outColorTexture, IPlatformTexturePtr& outDepthTexture) {
+	return mImpl->ChangeResolution(id, window, resol, outColorTexture, outDepthTexture);
+}
+
+bool RendererD3D11::ChangeFullscreenMode(HWindowId id, HWindow window, int mode) {
+	return mImpl->ChangeFullscreenMode(id, window, mode);
+}
+
+unsigned RendererD3D11::GetMultiSampleCount() const {
+	return mImpl->GetMultiSampleCount();
+}
+
+// Resource creation
+void RendererD3D11::SetShaderCacheOption(bool useShaderCache, bool generateCache) {
+	mImpl->SetShaderCacheOption(useShaderCache, generateCache);
+}
+
+IPlatformTexturePtr RendererD3D11::CreateTexture(const char* path, bool async) {
+	return mImpl->CreateTexture(path, async);
+}
+
+IPlatformTexturePtr RendererD3D11::CreateTexture(void* data, int width, int height,	PIXEL_FORMAT format, BUFFER_USAGE usage, int  buffer_cpu_access,	int texture_type) {
+	return mImpl->CreateTexture(data, width, height, format, usage, buffer_cpu_access, texture_type);
+}
+
+IPlatformVertexBufferPtr RendererD3D11::CreateVertexBuffer(void* data, unsigned stride,	unsigned numVertices, BUFFER_USAGE usage, BUFFER_CPU_ACCESS_FLAG accessFlag) {
+	return mImpl->CreateVertexBuffer(data, stride, numVertices, usage, accessFlag);
+}
+
+IPlatformIndexBufferPtr RendererD3D11::CreateIndexBuffer(void* data, unsigned int numIndices,	INDEXBUFFER_FORMAT format) {
+	return mImpl->CreateIndexBuffer(data, numIndices, format);
+}
+
+IPlatformShaderPtr RendererD3D11::CreateShader(const char* path, int shaders,	const SHADER_DEFINES& defines) {
+	return mImpl->CreateShader(path, shaders, defines);
+}
+
+IPlatformInputLayoutPtr RendererD3D11::CreateInputLayout(const INPUT_ELEMENT_DESCS& descs,	void* shaderByteCode, unsigned size) {
+	return mImpl->CreateInputLayout(descs, shaderByteCode, size);
+}
+
+IPlatformBlendStatePtr RendererD3D11::CreateBlendState(const BLEND_DESC& desc) {
+	return mImpl->CreateBlendState(desc);
+}
+
+IPlatformDepthStencilStatePtr RendererD3D11::CreateDepthStencilState(const DEPTH_STENCIL_DESC& desc) {
+	return mImpl->CreateDepthStencilState(desc);
+}
+
+IPlatformRasterizerStatePtr RendererD3D11::CreateRasterizerState(const RASTERIZER_DESC& desc) {
+	return mImpl->CreateRasterizerState(desc);
+}
+
+IPlatformSamplerStatePtr RendererD3D11::CreateSamplerState(const SAMPLER_DESC& desc) {
+	return mImpl->CreateSamplerState(desc);
+}
+
+unsigned RendererD3D11::GetNumLoadingTexture() const {
+	return mImpl->GetNumLoadingTexture();
+}
+
+// Resource Binding
+void RendererD3D11::SetRenderTarget(IPlatformTexturePtr pRenderTargets[], size_t rtViewIndex[], int num,	IPlatformTexturePtr pDepthStencil, size_t dsViewIndex) {
+	mImpl->SetRenderTarget(pRenderTargets, rtViewIndex, num, pDepthStencil, dsViewIndex);
+}
+
+void RendererD3D11::SetViewports(const Viewport viewports[], int num) {
+	mImpl->SetViewports(viewports, num);
+}
+
+void RendererD3D11::SetScissorRects(const Rect rects[], int num) {
+	mImpl->SetScissorRects(rects, num);
+}
+
+void RendererD3D11::SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers,	IPlatformVertexBuffer const * pVertexBuffers[], unsigned int const strides[], unsigned int offsets[]) {
+	mImpl->SetVertexBuffers(startSlot, numBuffers, pVertexBuffers, strides, offsets);
+}
+
+void RendererD3D11::SetPrimitiveTopology(PRIMITIVE_TOPOLOGY pt) {
+	mImpl->SetPrimitiveTopology(pt);
+}
+
+void RendererD3D11::SetTextures(IPlatformTexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot) {
+	mImpl->SetTextures(pTextures, num, shaderType, startSlot);
+}
+
+void RendererD3D11::UpdateShaderConstants(ShaderConstants::Enum type, const void* data, int size) {
+	mImpl->UpdateShaderConstants(type, data, size);
+}
+
+void* RendererD3D11::MapMaterialParameterBuffer() const {
+	return mImpl->MapMaterialParameterBuffer();
+}
+
+void RendererD3D11::UnmapMaterialParameterBuffer() const {
+	mImpl->UnmapMaterialParameterBuffer();
+}
+
+void* RendererD3D11::MapBigBuffer() const {
+	return mImpl->MapBigBuffer();
+}
+
+void RendererD3D11::UnmapBigBuffer() const {
+	return mImpl->UnmapBigBuffer();
+}
+
+void RendererD3D11::UnbindInputLayout() {
+	mImpl->UnbindInputLayout();
+}
+
+void RendererD3D11::UnbindShader(BINDING_SHADER shader) {
+	mImpl->UnbindShader(shader);
+}
+
+void RendererD3D11::UnbindTexture(BINDING_SHADER shader, int slot) {
+	mImpl->UnbindTexture(shader, slot);
+}
+
+void RendererD3D11::CopyToStaging(IPlatformTexture* dst, UINT dstSubresource, UINT dstx, UINT dsty, UINT dstz,	IPlatformTexture* src, UINT srcSubresource, Box3D* pBox) {
+	mImpl->CopyToStaging(dst, dstSubresource, dstx, dsty, dstz, src, srcSubresource, pBox);
+}
+
+// Drawing
+void RendererD3D11::Draw(unsigned int vertexCount, unsigned int startVertexLocation) {
+	mImpl->Draw(vertexCount, startVertexLocation);
+}
+
+void RendererD3D11::DrawIndexed(unsigned indexCount, unsigned startIndexLocation, unsigned startVertexLocation) {
+	mImpl->DrawIndexed(indexCount, startIndexLocation, startVertexLocation);
+}
+
+void RendererD3D11::Clear(Real r, Real g, Real b, Real a, Real z, unsigned char stencil) {
+	mImpl->Clear(r, g, b, a, z, stencil);
+}
+
+void RendererD3D11::Clear(Real r, Real g, Real b, Real a) {
+	mImpl->Clear(r, g, b, a);
+}
+
+void RendererD3D11::ClearState() {
+	mImpl->ClearState();
+}
+
+void RendererD3D11::Present() {
+	mImpl->Present();
+}
+
+// Debugging & Profiling
+void RendererD3D11::BeginEvent(const char* name) {
+	mImpl->BeginEvent(name);
+}
+
+void RendererD3D11::EndEvent() {
+	mImpl->EndEvent();
+}
+
+void RendererD3D11::TakeScreenshot(const char* filename) {
+	mImpl->TakeScreenshot(filename);
+}
+
+//-------------------------------------------------------------------
+// Platform Specific
+//-------------------------------------------------------------------
+// Resource Manipulations
+MapData RendererD3D11::MapBuffer(ID3D11Resource* pResource, UINT subResource, MAP_TYPE type, MAP_FLAG flag) const {
+	return mImpl->MapBuffer(pResource, subResource, type, flag);
+}
+
+void RendererD3D11::UnmapBuffer(ID3D11Resource* pResource, UINT subResource) const {
+	mImpl->UnmapBuffer(pResource, subResource);
+}
+
+void RendererD3D11::SaveTextureToFile(TextureD3D11* texture, const char* filename) {
+	mImpl->SaveTextureToFile(texture, filename);
+}
+
+void RendererD3D11::GenerateMips(TextureD3D11* pTexture) {
+	mImpl->GenerateMips(pTexture);
+}
+
+// Resource Bindings
+void RendererD3D11::SetIndexBuffer(IndexBufferD3D11* pIndexBuffer, unsigned offset) {
+	mImpl->SetIndexBuffer(pIndexBuffer, offset);
+}
+
+void RendererD3D11::SetTexture(TextureD3D11* pTexture, BINDING_SHADER shaderType, unsigned int slot) {
+	mImpl->SetTexture(pTexture, shaderType, slot);
+}
+
+void RendererD3D11::SetShaders(ShaderD3D11* pShader) {
+	mImpl->SetShaders(pShader);
+}
+
+void RendererD3D11::SetVSShader(ShaderD3D11* pShader) {
+	mImpl->SetVSShader(pShader);
+}
+
+void RendererD3D11::SetHSShader(ShaderD3D11* pShader) {
+	mImpl->SetHSShader(pShader);
+}
+
+void RendererD3D11::SetDSShader(ShaderD3D11* pShader) {
+	mImpl->SetDSShader(pShader);
+}
+
+void RendererD3D11::SetGSShader(ShaderD3D11* pShader) {
+	mImpl->SetGSShader(pShader);
+}
+
+void RendererD3D11::SetPSShader(ShaderD3D11* pShader) {
+	mImpl->SetPSShader(pShader);
+}
+
+void RendererD3D11::SetInputLayout(InputLayoutD3D11* pInputLayout) {
+	mImpl->SetInputLayout(pInputLayout);
+}
+
+void RendererD3D11::SetRasterizerState(RasterizerStateD3D11* pRasterizerState) {
+	mImpl->SetRasterizerState(pRasterizerState);
+}
+
+void RendererD3D11::SetBlendState(BlendStateD3D11* pBlendState) {
+	mImpl->SetBlendState(pBlendState);
+}
+
+void RendererD3D11::SetDepthStencilState(DepthStencilStateD3D11* pDepthStencilState, unsigned stencilRef) {
+	mImpl->SetDepthStencilState(pDepthStencilState, stencilRef);
+}
+
+void RendererD3D11::SetSamplerState(SamplerStateD3D11* pSamplerState, BINDING_SHADER shader, int slot) {
+	mImpl->SetSamplerState(pSamplerState, shader, slot);
+}
+

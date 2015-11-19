@@ -118,8 +118,8 @@ public:
 		, mRDragStarted(false)
 		, mRDragEnd(false)
 		, mNoClickOnce(false)
-		, mSensitivity(0.03)
-		, mWheelSensitivity(0.005){
+		, mSensitivity(0.03f)
+		, mWheelSensitivity(0.005f){
 
 		mLButtonDoubleClicked = false;
 		mButtonsDown = 0;
@@ -632,7 +632,7 @@ public:
 	void CursorToCenter(){
 		if (IsMainWindowForeground()){			
 			auto size = GetForegroundRenderTargetSize();
-			size = std::make_tuple( Round(std::get<0>(size) / 2) , Round(std::get<1>(size) / 2) );
+			size = std::make_tuple( Round(std::get<0>(size) / 2.f) , Round(std::get<1>(size) / 2.f) );
 			SetCurrentMousePos(std::get<0>(size), std::get<1>(size));
 			mAbsX = std::get<0>(size);
 			mAbsY = std::get<1>(size);

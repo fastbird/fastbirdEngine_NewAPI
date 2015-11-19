@@ -40,6 +40,7 @@ namespace fastbird{
 	public:
 		virtual void SetScene(ScenePtr scene) = 0;
 		virtual void SetRenderTarget(RenderTargetPtr renderTarget) = 0;
+		virtual void UpdateLightCamera() = 0;
 		virtual void Render(size_t face) = 0;
 		virtual bool IsHDR() const = 0;
 		virtual bool IsGlowSupported() = 0;		

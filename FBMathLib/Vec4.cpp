@@ -30,7 +30,6 @@
 #include "Math.h"
 namespace fastbird
 {
-
 const Vec4 Vec4::UNIT_X(1.f, 0, 0, 0);
 const Vec4 Vec4::UNIT_Y(0, 1.f, 0, 0);
 const Vec4 Vec4::UNIT_Z(0, 0, 1.f, 0);
@@ -46,6 +45,14 @@ Vec4::Vec4(const Vec3& xyz, Real _w)
 	: x(xyz.x), y(xyz.y), z(xyz.z), w(_w)
 {
 }
+
+#if defined(FB_DOUBLE_PRECISION)
+Vec4::Vec4(const Vec4f& other):
+	x(other.x), y(other.y), z(other.z), w(other.w){
+
+}
+#endif
+
 Vec4::Vec4(const Vec3& xyz)
 	:x(xyz.x), y(xyz.y), z(xyz.z), w(1.f)
 {}
@@ -77,7 +84,7 @@ Vec4::Vec4(const char* s)
 
 			}
 		}
-	}			
+	}
 }
 
 Vec4::Vec4(const Vec4Tuple& t)
@@ -167,4 +174,55 @@ Vec3 Vec4::ToVec3() const
 	return Vec3(x, y, z);
 }
 
+#if defined(FB_DOUBLE_PRECISION)
+const Vec4f Vec4f::ZERO(0, 0, 0, 0);
+Vec4f::Vec4f(){
+
+}
+Vec4f::Vec4f(Real x_, Real y_, Real z_, Real w_)
+	: x((float)x_)
+	, y((float)y_)
+	, z((float)z_)
+	, w((float)w_)
+{
+
+}
+
+Vec4f::Vec4f(const Vec4& other){
+	x = (float)other.x;
+	y = (float)other.y;
+	z = (float)other.z;
+	w = (float)other.w;
+}
+
+Vec4f::Vec4f(const Vec3& other, Real w){
+	x = (float)other.x;
+	y = (float)other.y;
+	z = (float)other.z;
+	w = (float)w;
+}
+
+Vec4f& Vec4f::operator = (const Vec4& other){
+	x = (float)other.x;
+	y = (float)other.y;
+	z = (float)other.z;
+	w = (float)other.w;
+	return *this;
+}
+
+Vec4f& Vec4f::operator/=(float s){
+	x /= s;
+	y /= s;
+	z /= s;
+	w /= s;
+	return *this;
+}
+Vec4f& Vec4f::operator*=(float s) {
+	x *= s;
+	y *= s;
+	z *= s;
+	w *= s;
+	return *this;
+}
+#endif
 }

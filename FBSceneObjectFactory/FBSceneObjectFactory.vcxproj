@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{5F32EA1B-6CA3-41B6-B918-FA4F1470C360}</ProjectGuid>
-    <RootNamespace>FBRenderableFactory</RootNamespace>
+    <ProjectGuid>{FE014A80-D3A5-4C84-A085-B7F48F0C9DBD}</ProjectGuid>
+    <RootNamespace>FBSceneObjectFactory</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -45,7 +45,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FB_DLL_PROJECT;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPP;FB_DLL_PROJECT;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -60,7 +60,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FB_DLL_PROJECT;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPP;FB_DLL_PROJECT;_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -70,20 +70,37 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CollisionInfo.h" />
+    <ClInclude Include="FBCollisionShape.h" />
     <ClInclude Include="MeshObject.h" />
-    <ClInclude Include="RenderableFactory.h" />
+    <ClInclude Include="SceneObjectFactory.h" />
+    <ClInclude Include="SceneObjectType.h" />
+    <ClInclude Include="SkySphere.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="RenderableFactory.cpp" />
+    <ClCompile Include="FBCollisionShape.cpp" />
+    <ClCompile Include="MeshObject.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="stdafx.cpp">
+      <FileType>Document</FileType>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FBMathLib\FBMathLib.vcxproj">
-      <Project>{2df8e079-28e5-4e7d-9c6a-ff87c1329eb5}</Project>
+    <ProjectReference Include="..\FBAnimation\FBAnimation.vcxproj">
+      <Project>{6614b11e-13db-40f6-b9de-b3d47419d872}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
+      <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBRenderer\FBRenderer.vcxproj">
+      <Project>{fd658a50-2d36-4bb4-8eda-635bf71b4cdb}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBSceneManager\FBSceneManager.vcxproj">
+      <Project>{e1f08226-828d-4354-8128-2ae1b91fbd4f}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -30,7 +30,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Math.h"
 #include "FBMathLib/BoundingVolume.h"
-namespace fastbird{
+namespace fastbird{	
 	DECLARE_SMART_PTR(Animation);
 	DECLARE_SMART_PTR(SpatialObject);
 	class FB_DLL_PUBLIC SpatialObject : public SceneObject{
@@ -40,7 +40,7 @@ namespace fastbird{
 		SpatialObject();
 		~SpatialObject();
 
-	public:
+	public:		
 		void SetRadius(Real r);
 		Real GetRadius() const;
 		void SetDistToCam(Real dist);

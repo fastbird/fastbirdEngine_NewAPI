@@ -41,7 +41,7 @@ Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 #pragma comment(lib, "d3dx11d.lib")
 #endif
 #pragma comment(lib, "d3d9.lib")
-#pragma comment(lib, "zlib.lib")
+#pragma comment(lib, "zdll.lib")
 #define NOMINMAX
 #include <memory>
 #include <iostream>

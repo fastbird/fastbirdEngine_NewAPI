@@ -46,16 +46,16 @@ public:
 		return mPlatformBuffer->IsReady();
 	}
 
-	void Bind() const{
-		mPlatformBuffer->Bind();
+	void Bind(unsigned offset) const{
+		mPlatformBuffer->Bind(offset);
 	}
 
-	MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) const{
-		return mPlatformBuffer->Map(type, subResource, flag);
+	MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const{
+		return mPlatformBuffer->Map(subResource, type, flag);
 	}
 
-	void Unmap() const{
-		mPlatformBuffer->Unmap();
+	void Unmap(UINT subResource) const{
+		mPlatformBuffer->Unmap(subResource);
 	}
 
 	unsigned GetNumIndices() const{
@@ -88,16 +88,16 @@ bool IndexBuffer::IsReady() const{
 	return mImpl->IsReady();
 }
 
-void IndexBuffer::Bind() const{
-	mImpl->Bind();
+void IndexBuffer::Bind(unsigned offset) const{
+	mImpl->Bind(offset);
 }
 
-MapData IndexBuffer::Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) const{
-	return mImpl->Map(type, subResource, flag);
+MapData IndexBuffer::Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const{
+	return mImpl->Map(subResource, type, flag);
 }
 
-void IndexBuffer::Unmap() const{
-	mImpl->Unmap();
+void IndexBuffer::Unmap(UINT subResource) const{
+	mImpl->Unmap(subResource);
 }
 
 unsigned IndexBuffer::GetNumIndices() const{

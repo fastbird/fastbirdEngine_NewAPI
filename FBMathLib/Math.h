@@ -100,8 +100,8 @@ namespace fastbird
 	template <class T>
 	T Lerp(const T& a, const T& b, Real lp)
 	{
-		lp = std::min(lp, 1.0);
-		lp = std::max(0.0, lp);
+		lp = std::min(lp, (Real)1.0);
+		lp = std::max((Real)0.0, lp);
 		return a * (1.0f-lp) + b * lp;
 	}
 

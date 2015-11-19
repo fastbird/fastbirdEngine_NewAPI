@@ -34,10 +34,10 @@ namespace fastbird
 	class GaussianDist
 	{
 	public:
-		Vec4 mGaussianDistOffsetX[15];
-		Vec4 mGaussianDistWeightX[15];
-		Vec4 mGaussianDistOffsetY[15];
-		Vec4 mGaussianDistWeightY[15];
+		Vec4f mGaussianDistOffsetX[15];
+		Vec4f mGaussianDistWeightX[15];
+		Vec4f mGaussianDistOffsetY[15];
+		Vec4f mGaussianDistWeightY[15];
 
 		void Calc(unsigned width, unsigned height, float devi, float multiplier);
 	};

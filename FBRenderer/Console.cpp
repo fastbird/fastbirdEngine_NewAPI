@@ -935,8 +935,10 @@ public:
 	}
 };
 
-static ConsoleWeakPtr sConsole;
+const float Console::Impl::sFontSize = 22.f;
+
 //---------------------------------------------------------------------------
+static ConsoleWeakPtr sConsole;
 ConsolePtr Console::Create(){
 	if (sConsole.expired()){
 		auto console = ConsolePtr(new Console, [](Console* obj){ delete obj; });
@@ -957,3 +959,73 @@ ConsolePtr Console::Create(){
 ConsolePtr Console::GetInstance(){
 	return sConsole.lock();
 }
+
+Console::Console()
+	: mImpl(new Impl)
+{
+
+}
+
+void Console::SetRenderTargetSize(const Vec2I& size) {
+	mImpl->SetRenderTargetSize(size);
+}
+
+void Console::RegisterCommand(ConsoleCommand* pCom) {
+	mImpl->RegisterCommand(pCom);
+}
+
+void Console::UnregisterCommand(ConsoleCommand* pCom) {
+	mImpl->UnregisterCommand(pCom);
+}
+
+void Console::RegisterVariable(CVar* cvar) {
+	mImpl->RegisterVariable(cvar);
+}
+
+void Console::UnregisterVariable(CVar* cvar) {
+	mImpl->UnregisterVariable(cvar);
+}
+
+void Console::AddCandidatesTo(const char* parent, const StringVector& candidates) {
+	mImpl->AddCandidatesTo(parent, candidates);
+}
+
+void Console::Log(const char* szFmt, ...) {
+	mImpl->Log(szFmt);
+}
+
+void Console::ProcessCommand(const char* command, bool history) {
+	mImpl->ProcessCommand(command, history);
+}
+
+void Console::QueueProcessCommand(const char* command, bool history) {
+	mImpl->QueueProcessCommand(command, history);
+}
+
+void Console::ToggleOpen() {
+	mImpl->ToggleOpen();
+}
+
+void Console::Update() {
+	mImpl->Update();
+}
+
+void Console::Render() {
+	mImpl->Render();
+}
+
+void Console::RegisterStdout(StdOutRedirect* p) {
+	mImpl->RegisterStdout(p);
+}
+
+void Console::Clear() {
+	mImpl->Clear();
+}
+
+//---------------------------------------------------------------------------
+// IInputConsumer
+//---------------------------------------------------------------------------
+void Console::ConsumeInput(IInputInjectorPtr injector) {
+	mImpl->ConsumeInput(injector);
+}
+

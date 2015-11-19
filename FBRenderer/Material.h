@@ -59,7 +59,7 @@ namespace fastbird{
 
 	public:
 		
-		typedef VectorMap<unsigned, Vec4> Parameters;
+		typedef VectorMap<unsigned, Vec4f> Parameters;
 		typedef std::vector< TexturePtr > Textures;
 		typedef VectorMap<TextureBinding, TexturePtr> TexturesByBinding;
 		typedef VectorMap<TexturePtr, TextureBinding> BindingsByTexture;
@@ -98,13 +98,13 @@ namespace fastbird{
 		void ApplyShaderDefines();
 		void SetMaterialParameters(unsigned index, const Vec4& value);
 		const SHADER_DEFINES& GetShaderDefines() const;
-		const Vec4& GetAmbientColor() const;
-		const Vec4& GetDiffuseColor() const;
-		const Vec4& GetSpecularColor() const;
-		const Vec4& GetEmissiveColor() const;
+		const Vec4f& GetAmbientColor() const;
+		const Vec4f& GetDiffuseColor() const;
+		const Vec4f& GetSpecularColor() const;
+		const Vec4f& GetEmissiveColor() const;
 		const char* GetShaderFile() const;
 		void* GetShaderByteCode(unsigned& size) const;
-		const Vec4& GetMaterialParameter(unsigned index) const;
+		const Vec4f& GetMaterialParameter(unsigned index) const;
 		const Parameters& GetMaterialParameters() const;
 		const MATERIAL_CONSTANTS& GetMaterialConstants() const;
 		const Textures& GetTextures() const;
@@ -113,7 +113,11 @@ namespace fastbird{
 
 		bool IsUsingMaterialParameter(unsigned index);
 		bool IsRelatedShader(const char* shaderFile);
-		void Bind(bool inputLayout, unsigned stencilRef = 0);
+		/// inputLayout: true, stencilRef: 0
+		void Bind();
+		/// stencilRef: 0
+		void Bind(bool inputLayout); 
+		void Bind(bool inputLayout, unsigned stencilRef);
 		void Unbind();
 		MaterialPtr GetSubPassMaterial(RENDER_PASS p) const;
 		bool BindSubPass(RENDER_PASS p, bool includeInputLayout);

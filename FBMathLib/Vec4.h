@@ -31,6 +31,9 @@
 
 namespace fastbird
 {
+#if defined(FB_DOUBLE_PRECISION)
+	class Vec4f;
+#endif
 	class Vec4
 	{
 	public:
@@ -45,6 +48,9 @@ namespace fastbird
 		Vec4();		
 		Vec4(Real _x, Real _y, Real _z, Real _w);
 		Vec4(const Vec3& xyz, Real _w);
+#if defined(FB_DOUBLE_PRECISION)
+		Vec4(const Vec4f& other);
+#endif
 		explicit Vec4(const Vec3& xyz);
 		explicit Vec4(const char* s);
 		explicit Vec4(const Vec4Tuple& t);
@@ -66,6 +72,24 @@ namespace fastbird
 		Vec3 GetXYZ() const;
 		Vec3 ToVec3() const;
 	};
+
+#if defined(FB_DOUBLE_PRECISION)
+	class Vec4f{
+	public:
+		float x, y, z, w;
+
+		static const Vec4f ZERO;
+		Vec4f();
+		Vec4f(Real x_, Real y_, Real z_, Real w_);
+		Vec4f(const Vec4& other);
+		Vec4f(const Vec3& other, Real w);
+		Vec4f& operator=(const Vec4& other);
+		Vec4f& operator/=(float s);
+		Vec4f& operator*=(float s);
+	};
+#else
+	typedef Vec4 Vec4f;
+#endif
 }
 
 //// luawapper util

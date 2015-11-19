@@ -236,7 +236,7 @@ Vec3 BVaabb::GetRandomPosInVolume(const Vec3* nearLocal) const
 	auto pos = Random(mAABB.GetMin(), mAABB.GetMax());
 	if (nearLocal)
 	{
-		pos = Lerp(pos, *nearLocal, Random(0.5, 1.0));
+		pos = Lerp(pos, *nearLocal, (Real)Random(0.5, 1.0));
 	}
 	Vec3 dir = (pos - mAABB.GetCenter()).NormalizeCopy();
 	Ray3 ray(pos, -dir);

@@ -45,6 +45,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		void SetScene(ScenePtr scene);
 		void SetRenderTarget(RenderTargetPtr renderTarget);
+		void UpdateLightCamera();
 		void Render(size_t face);
 		bool IsHDR() const;
 		bool IsGlowSupported();

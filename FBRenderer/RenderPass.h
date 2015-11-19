@@ -25,5 +25,17 @@
  -----------------------------------------------------------------------------
 */
 
-#include "stdafx.h"
-#include "RenderableFactory.h"
+#pragma once
+namespace fastbird{
+	enum RENDER_PASS
+	{
+		PASS_NORMAL = 0,
+		PASS_GODRAY_OCC_PRE, // for GodRay - occlusion pre pass
+		PASS_GLOW,
+		PASS_DEPTH, // write depth to render target
+		PASS_DEPTH_ONLY, // write depth only to the depth buffer.
+		PASS_SHADOW,
+		PASS_SILOUETTE,
+		PASS_LAST = PASS_SILOUETTE /// You can define your own from PASS_LAST+1
+	};
+}

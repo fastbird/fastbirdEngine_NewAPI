@@ -28,6 +28,7 @@
 #include "stdafx.h"
 #include "Camera.h"
 #include "SpatialObject.h"
+#include "SceneManager.h"
 #include "FBMathLib/BoundingVolume.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBInputManager/KeyCodes.h"
@@ -151,17 +152,21 @@ public:
 		mViewPropertyChanged = true;
 	}
 
-	void SetTransform(const Vec3& pos, const Quat& rot)
+	void SetTransformation(const Vec3& pos, const Quat& rot)
 	{
 		mTransformation.SetTranslation(pos);
 		mTransformation.SetRotation(rot);
 		mViewPropertyChanged = true;
 	}
 
-	void SetTransform(const Transformation& t)
+	void SetTransformation(const Transformation& t)
 	{
 		mTransformation = t;
 		mViewPropertyChanged = true;
+	}
+
+	const Transformation& GetTransformation() const{
+		return mTransformation;
 	}
 
 	const Vec3 GetDirection() const
@@ -193,7 +198,7 @@ public:
 		if (mUserParams.Changed() || mPrevTargetPos != target->GetPosition())
 		{
 			mInternalParams.dist += mUserParams.dDist;
-			mInternalParams.dist = std::max(2.0, mInternalParams.dist);
+			mInternalParams.dist = std::max((Real)2.0f, (Real)mInternalParams.dist);
 			if (mInternalParams.dist > 300.0)
 				mInternalParams.dist = 300.0;
 
@@ -232,7 +237,7 @@ public:
 				right.y, forward.y, up.y,
 				right.z, forward.z, up.z);
 			Vec3 pos = target->GetPosition() + toCam * mInternalParams.dist;
-			SetTransform(pos, Quat(rot));
+			SetTransformation(pos, Quat(rot));
 			mUserParams.Clear();
 			mPrevTargetPos = target->GetPosition();
 		}
@@ -456,7 +461,7 @@ public:
 					shift = 0.1f;
 				Real wheelSens = injector->GetWheelSensitivity();
 				Real numLinesSens = wheelSens * (Real)injector->GetNumLinesWheelScroll();
-				numLinesSens *= std::max(1.0, mInternalParams.dist * 0.05);				
+				numLinesSens *= std::max((Real)1.0f, (Real)(mInternalParams.dist * 0.05f));
 				mUserParams.dDist += -wheel * numLinesSens * shift;
 				injector->Invalidate(FBInputDevice::DeviceMouse);
 			}
@@ -536,12 +541,16 @@ void Camera::SetDirrectionAndRight(const Vec3& dir, const Vec3& right){
 	mImpl->SetDirAndRight(dir, right);	
 }
 
-void Camera::SetTransform(const Vec3& pos, const Quat& rot){
-	mImpl->SetTransform(pos, rot);
+void Camera::SetTransformation(const Vec3& pos, const Quat& rot){
+	mImpl->SetTransformation(pos, rot);
 }
 
-void Camera::SetTransform(const Transformation& t){
-	mImpl->SetTransform(t);
+void Camera::SetTransformation(const Transformation& t){
+	mImpl->SetTransformation(t);
+}
+
+const Transformation& Camera::GetTransformation() const{
+	return mImpl->GetTransformation();
 }
 
 const Vec3 Camera::GetDirection() const{

@@ -39,7 +39,6 @@
 #include "Material.h"
 #include "FBSceneManager/Camera.h"
 #include "FBSceneManager/SceneManager.h"
-#include "FBSceneManager/MeshObject.h"
 
 using namespace fastbird;
 
@@ -137,8 +136,8 @@ public:
 	MaterialPtr mTriMaterial;
 
 	RenderStatesPtr mRenderStates;
-	MeshObjectPtr mSphereMesh;
-	MeshObjectPtr mBoxMesh;
+	//MeshObjectPtr mSphereMesh;
+	//MeshObjectPtr mBoxMesh;
 	unsigned mLastPreRendered;
 
 	//---------------------------------------------------------------------------
@@ -160,8 +159,8 @@ public:
 		mRenderStates = RenderStates::Create();
 		mRenderStates->CreateDepthStencilState(ddesc);
 
-		mSphereMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugSphere.dae");
-		mBoxMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugBox.dae");
+		//mSphereMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugSphere.dae");
+		//mBoxMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugBox.dae");
 	}
 
 	void SetRenderTargetSize(const Vec2I& size){
@@ -450,28 +449,28 @@ public:
 			pFont->SetBackToOrigHeight();
 		}
 
-		if (mSphereMesh)
-		{
-			RenderEventMarker marker("Debug Hud - Spheres");			
-			renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-			for (auto& sphere : mSpheres)
-			{
-				Transformation t;
-				t.SetScale(Vec3(sphere.mRadius, sphere.mRadius, sphere.mRadius));
-				t.SetTranslation(sphere.mPos);
-				t.GetHomogeneous(mObjectConstants.gWorld);
-				// only world are available. other matrix will be calculated in the shader
-				//mObjectConstants.gWorldView = renderer.GetCamera()->GetViewMat() * mObjectConstants.gWorld;
-				//mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
-				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
-				mSphereMesh->GetMaterial()->SetMaterialParameters(0, sphere.mColor.GetVec4());
-				mSphereMesh->GetMaterial()->Bind(true);
-				mSphereMesh->RenderSimple();
-			}
-		}
-		mSpheres.clear();
+		//if (mSphereMesh)
+		//{
+		//	RenderEventMarker marker("Debug Hud - Spheres");			
+		//	renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//	for (auto& sphere : mSpheres)
+		//	{
+		//		Transformation t;
+		//		t.SetScale(Vec3(sphere.mRadius, sphere.mRadius, sphere.mRadius));
+		//		t.SetTranslation(sphere.mPos);
+		//		t.GetHomogeneous(mObjectConstants.gWorld);
+		//		// only world are available. other matrix will be calculated in the shader
+		//		//mObjectConstants.gWorldView = renderer.GetCamera()->GetViewMat() * mObjectConstants.gWorld;
+		//		//mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
+		//		renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
+		//		mSphereMesh->GetMaterial()->SetMaterialParameters(0, sphere.mColor.GetVec4());
+		//		mSphereMesh->GetMaterial()->Bind(true);
+		//		mSphereMesh->RenderSimple();
+		//	}
+		//}
+		//mSpheres.clear();
 
-		if (mBoxMesh)
+		/*if (mBoxMesh)
 		{
 			
 			RenderEventMarker mark("DebugHud - Boxes");
@@ -490,7 +489,8 @@ public:
 				mBoxMesh->GetMaterial()->Bind(true);
 				mBoxMesh->RenderSimple();
 			}
-		}
+		}*/
+
 		mBoxes.clear();
 
 		if (mTriMaterial)

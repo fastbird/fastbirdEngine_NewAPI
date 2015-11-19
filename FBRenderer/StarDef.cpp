@@ -34,12 +34,12 @@ namespace fastbird
 	STARDEF s_aLibStarDef[NUM_BASESTARLIBTYPES] =
 	{
 		//  star name               lines   passes  length  attn    rotate          bRotate
-		{ ("Disable"), 0, 0, 0.0, 0.0, Radian(00.0), false, },  // STLT_DISABLE
+		{ ("Disable"), 0, 0, 0.0f, 0.0f, Radian(00.0f), false, },  // STLT_DISABLE
 
-		{ ("Cross"), 4, 3, 1.0, 0.85, Radian(0.0), true, },  // STLT_CROSS
-		{ ("CrossFilter"), 4, 3, 1.0, 0.95, Radian(0.0), true, },  // STLT_CROSS
-		{ ("snowCross"), 6, 3, 1.0, 0.96, Radian(20.0), true, },  // STLT_SNOWCROSS
-		{ ("Vertical"), 2, 3, 1.0, 0.96, Radian(00.0), false, },  // STLT_VERTICAL
+		{ ("Cross"), 4, 3, 1.0f, 0.85f, Radian(0.0f), true, },  // STLT_CROSS
+		{ ("CrossFilter"), 4, 3, 1.0f, 0.95f, Radian(0.0f), true, },  // STLT_CROSS
+		{ ("snowCross"), 6, 3, 1.0f, 0.96f, Radian(20.0f), true, },  // STLT_SNOWCROSS
+		{ ("Vertical"), 2, 3, 1.0f, 0.96f, Radian(00.0f), false, },  // STLT_VERTICAL
 	};
 	int                      s_nLibStarDefs = sizeof(s_aLibStarDef) / sizeof(STARDEF);
 
@@ -181,7 +181,7 @@ namespace fastbird
 		if (m_pStarLine == NULL)
 			return false;
 
-		Real fInc = Radian(360.0 / (Real)m_nStarLines);
+		Real fInc = Radian(360.0f / (Real)m_nStarLines);
 		for (int i = 0; i < m_nStarLines; i++)
 		{
 			m_pStarLine[i].nPasses = nPasses;
@@ -216,7 +216,7 @@ namespace fastbird
 		if (m_pStarLine == NULL)
 			return false;
 
-		Real fInc = Radian(360.0 / (Real)m_nStarLines);
+		Real fInc = Radian(360.0f / (Real)m_nStarLines);
 		for (int i = 0; i < m_nStarLines; i++)
 		{
 			m_pStarLine[i].fSampleLength = fSampleLength;

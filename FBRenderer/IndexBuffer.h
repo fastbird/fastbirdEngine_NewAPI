@@ -39,9 +39,9 @@ namespace fastbird{
 		static IndexBufferPtr Create(unsigned numIndices, INDEXBUFFER_FORMAT format);
 
 		bool IsReady() const;
-		void Bind() const;
-		MapData Map(MAP_TYPE type, UINT subResource, MAP_FLAG flag) const;
-		void Unmap() const;
+		void Bind(unsigned offset) const;
+		MapData Map(UINT subResource, MAP_TYPE type, MAP_FLAG flag) const;
+		void Unmap(UINT subResource) const;
 		unsigned GetNumIndices() const;
 		INDEXBUFFER_FORMAT GetFormat() const;
 		void SetPlatformBuffer(IPlatformIndexBufferPtr buffer);

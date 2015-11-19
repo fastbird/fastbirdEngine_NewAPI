@@ -93,6 +93,19 @@ namespace fastbird
 	Vec2 operator * (const Vec2I& left, const Vec2& right);
 	Vec2 operator * (const Vec2& left, const Vec2I& right);
 	Vec2 operator*(const Vec2I& left, Real right);
+
+#if defined(FB_DOUBLE_PRECISION)
+	class Vec2f{
+	public:
+		float x, y;
+
+		Vec2f();
+		Vec2f(Real x_, Real y_);
+		Vec2f& operator=(const Vec2& other);
+	};
+#else
+	typedef Vec2 Vec2f;
+#endif
 }
 
 //// luawapper util

@@ -29,6 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "SceneObjectFlag.h"
 namespace fastbird{
+	class IRenderable;
 	DECLARE_SMART_PTR(Scene);
 	DECLARE_SMART_PTR(SceneObject);
 	class FB_DLL_PUBLIC SceneObject{
@@ -39,9 +40,10 @@ namespace fastbird{
 		~SceneObject();
 
 	public:
-
 		void SetName(const char* name);
 		const char* GetName() const;
+		void SetRenderable(IRenderable* renderable);
+		IRenderable* GetRenderable() const;
 		void OnAttachedToScene(ScenePtr pScene);
 		void OnDetachedFromScene(ScenePtr pScene);
 		/**
@@ -52,9 +54,13 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// Object Flags
 		//-------------------------------------------------------------------
+		/// Combination of SceneObjectFlag::Enum
 		void SetObjFlag(unsigned flag);
+		/// Combination of SceneObjectFlag::Enum
 		unsigned GetObjFlag() const;
+		/// Combination of SceneObjectFlag::Enum
 		void ModifyObjFlag(unsigned flag, bool enable);
+		/// Combination of SceneObjectFlag::Enum
 		bool HasObjFlag(unsigned flag);
 		void SetVisible(bool visible);
 		bool GetVisible() const;

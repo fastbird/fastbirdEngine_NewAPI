@@ -47,7 +47,9 @@ typedef unsigned __int64 UINT64;
 typedef __int64 INT64;
 
 namespace fastbird{
-	typedef double Real;		
+	//#define FB_DOUBLE_PRECISION
+	typedef float Real;
+
 	typedef __int64 HWindowId;
 	typedef std::vector<std::string> StringVector;
 	typedef std::vector<std::wstring> WStringVector;
@@ -55,7 +57,7 @@ namespace fastbird{
 	// unsigned int : safe for 828 'days' at 60 frames/sec
 	// unsigned long long : safe for 9749040289 'years' at 60 frames/sec
 	typedef unsigned int FRAME_PRECISION;
-	typedef Real TIME_PRECISION;
+	typedef float TIME_PRECISION;
 
 	FB_DECLARE_HANDLE(HWindow);
 	typedef std::lock_guard<std::mutex> MutexLock;

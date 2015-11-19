@@ -132,7 +132,10 @@ namespace fastbird
 		Transformation operator* (const Transformation& t) const;
 		
 		void Inverse (Transformation& t) const;
-		void GetHomogeneous (const Mat44& hm) const;
+		void GetHomogeneous (Mat44& hm) const;
+#if defined(FB_DOUBLE_PRECISION)
+		void GetHomogeneous(Mat44f& hm) const;
+#endif
 
 		Vec3 GetRight() const;
 		Vec3 GetForward() const;

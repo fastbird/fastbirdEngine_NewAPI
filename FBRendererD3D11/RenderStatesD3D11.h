@@ -101,10 +101,8 @@ namespace fastbird
 		explicit DepthStencilStateD3D11(ID3D11DepthStencilState* depthStencilState);
 
 	public:
-		static DepthStencilStateD3D11Ptr Create(ID3D11DepthStencilState* depthStencilState);
-		~DepthStencilStateD3D11();
+		static DepthStencilStateD3D11Ptr Create(ID3D11DepthStencilState* depthStencilState);		
 
-	public:
 		//--------------------------------------------------------------------
 		// IPlatformDepthStencilState Interfacec
 		//--------------------------------------------------------------------
@@ -129,7 +127,6 @@ namespace fastbird
 	public:
 		
 		static SamplerStateD3D11Ptr Create(ID3D11SamplerState* samplerState);
-		~SamplerStateD3D11();
 
 		//--------------------------------------------------------------------
 		// IPlatformSamplerState Interfacec

@@ -31,6 +31,7 @@
 #include "FBMathLib/Math.h"
 #include "FBStringLib/StringLib.h"
 #include "FBTimer/Timer.h"
+#include "FBDebugLib/Logger.h"
 using namespace fastbird;
 
 class Animation::Impl{

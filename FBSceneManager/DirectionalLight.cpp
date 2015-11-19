@@ -77,7 +77,7 @@ public:
 		mDirection = SphericalToCartesian(mTheta, mPhi);
 	}
 
-	void SetPosition(const Vec3& pos){
+	void SetDirection(const Vec3& pos){
 		mDirection = pos;
 		mDirection.Normalize();
 
@@ -197,17 +197,15 @@ public:
 };
 
 //----------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(DirectionalLight);
+
 DirectionalLight::DirectionalLight()
 	:mImpl(new Impl)
 {
 }
 
-//----------------------------------------------------------------------------
-DirectionalLight::~DirectionalLight()
-{
-}
 
-const Vec3& DirectionalLight::GetPosition(){
+const Vec3& DirectionalLight::GetDirection(){
 	return mImpl->mDirection;
 }
 
@@ -232,8 +230,8 @@ Real DirectionalLight::GetExponent() const{
 }
 
 //----------------------------------------------------------------------------
-void DirectionalLight::SetPosition(const Vec3& pos){
-	mImpl->SetPosition(pos);
+void DirectionalLight::SetDirection(const Vec3& pos){
+	mImpl->SetDirection(pos);
 }
 
 //----------------------------------------------------------------------------

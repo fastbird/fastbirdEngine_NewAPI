@@ -12,8 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CandidatesData.h" />
-    <ClInclude Include="Color.h" />
-    <ClInclude Include="ColorRamp.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="ConsoleDataType.h" />
     <ClInclude Include="DebugHud.h" />
@@ -36,9 +34,9 @@
     <ClInclude Include="IPlatformShader.h" />
     <ClInclude Include="IPlatformTexture.h" />
     <ClInclude Include="IPlatformVertexBuffer.h" />
-    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="IVideoPlayer.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="NullPlatformRenderer.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PointLightManager.h" />
     <ClInclude Include="Renderer.h" />
@@ -47,6 +45,7 @@
     <ClInclude Include="RenderEventMarker.h" />
     <ClInclude Include="RenderOptions.h" />
     <ClInclude Include="RenderParam.h" />
+    <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderStates.h" />
     <ClInclude Include="RenderSteps.h" />
     <ClInclude Include="RenderStrategyDefault.h" />
@@ -69,19 +68,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CandidatesData.cpp" />
-    <ClCompile Include="Color.cpp" />
-    <ClCompile Include="ColorRamp.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="ConsoleDataType.cpp" />
     <ClCompile Include="DebugHud.cpp" />
     <ClCompile Include="Font.cpp" />
+    <ClCompile Include="GaussianDistribution.cpp" />
     <ClCompile Include="GeometryRenderer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
-    <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="InputElementDesc.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="Material.cpp" />
-    <ClCompile Include="MaterialTest.cpp" />
+    <ClCompile Include="NullPlatformRenderer.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -123,8 +120,8 @@
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
       <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\FBRenderableFactory\FBRenderableFactory.vcxproj">
-      <Project>{5f32ea1b-6ca3-41b6-b918-fa4f1470c360}</Project>
+    <ProjectReference Include="..\FBSceneManager\FBSceneManager.vcxproj">
+      <Project>{e1f08226-828d-4354-8128-2ae1b91fbd4f}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBStringLib\FBStringLib.vcxproj">
       <Project>{97920097-3e86-410d-8d98-a2ecad02a35f}</Project>
@@ -134,6 +131,9 @@
     </ProjectReference>
     <ProjectReference Include="..\FBSystemLib\FBSystemLib.vcxproj">
       <Project>{2e1e0f10-b5ea-4eec-aab9-c0dcbf67b306}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBTimer\FBTimer.vcxproj">
+      <Project>{e828f5fb-d914-4891-8be0-737dd73f06ab}</Project>
     </ProjectReference>
     <ProjectReference Include="..\TinyXmlLib\TinyXmlLib.vcxproj">
       <Project>{23117a44-391e-4542-968f-c99c1bac52c0}</Project>

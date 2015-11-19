@@ -36,7 +36,7 @@ namespace fastbird
 const Color Color::White(1, 1, 1);
 const Color Color::Black(0, 0, 0);
 const Color Color::Red(1, 0, 0);
-const Color Color::BrightRed(1, 0.2, 0.2);
+const Color Color::BrightRed(1, 0.2f, 0.2f);
 const Color Color::DarkGray(0.15f, 0.15f, 0.15f);
 const Color Color::Gray(0.5f, 0.5f, 0.5f);
 const Color Color::Silver(0.8f, 0.8f, 0.8f);
@@ -86,7 +86,7 @@ Color::Color(const char* str)
 	}
 	else
 	{
-		mValue = StringMathConverter::ParseVec4(str, Vec4::ZERO);
+		mValue = Vec4(str);
 	}
 }
 

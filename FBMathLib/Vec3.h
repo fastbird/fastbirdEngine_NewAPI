@@ -108,69 +108,21 @@ namespace fastbird
 	Vec3 Sign(const Vec3& v);
 	Vec3 Floor(const Vec3& v);
 	Vec3 Step(const Vec3& edge, const Vec3& v);
+
+#if defined(FB_DOUBLE_PRECISION)
+	class Vec3f{
+	public:
+		float x, y, z;
+
+		Vec3f();
+		Vec3f(Real x_, Real y_, Real z_);
+		Vec3f& operator=(const Vec3& other);
+	};
+#else
+	typedef Vec3 Vec3f;
+#endif
 }
 
 // serialization
 std::istream& operator>>(std::istream& stream, fastbird::Vec3& v);
 std::ostream& operator<<(std::ostream& stream, const fastbird::Vec3& v);
-
-//
-//// luawapper util
-//template<>
-//struct luaU_Impl<fastbird::Vec3>
-//{
-//	static fastbird::Vec3 luaU_check(lua_State* L, int index)
-//	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Vec3 luaU_check(lua_State* L, int index)");
-//		luaL_checktype(L, index, LUA_TTABLE);
-//		fastbird::Vec3 ret;
-//		lua_rawgeti(L, index, 1);
-//		ret.x = (Real)luaL_checknumber(L, -1);		
-//		lua_pop(L, 1);
-//		lua_rawgeti(L, index, 2);
-//		ret.y = (Real)luaL_checknumber(L, -1);
-//		lua_pop(L, 1);
-//		lua_rawgeti(L, index, 3);
-//		ret.z = (Real)luaL_checknumber(L, -1);
-//		lua_pop(L, 1);
-//		return ret;
-//	}
-//
-//	static fastbird::Vec3 luaU_to(lua_State* L, int index)
-//	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Vec3 luaU_to(lua_State* L, int index)");
-//		fastbird::Vec3 ret;
-//		lua_rawgeti(L, index, 1);
-//		ret.x = (Real)lua_tonumber(L, -1);
-//		lua_pop(L, 1);
-//		lua_rawgeti(L, index, 2);
-//		ret.y = (Real)lua_tonumber(L, -1);
-//		lua_pop(L, 1);
-//		lua_rawgeti(L, index, 3);
-//		ret.z = (Real)lua_tonumber(L, -1);
-//		lua_pop(L, 1);
-//		return ret;
-//	}
-//
-//	static void luaU_push(lua_State* L, const fastbird::Vec3& val)
-//	{
-//		lua_createtable(L, 3, 0);
-//		lua_pushnumber(L, val.x);
-//		lua_rawseti(L, -2, 1);
-//		lua_pushnumber(L, val.y);
-//		lua_rawseti(L, -2, 2);
-//		lua_pushnumber(L, val.z);
-//		lua_rawseti(L, -2, 3);
-//	}
-//
-//	static void luaU_push(lua_State* L, fastbird::Vec3& val)
-//	{
-//		lua_createtable(L, 3, 0);
-//		lua_pushnumber(L, val.x);
-//		lua_rawseti(L, -2, 1);
-//		lua_pushnumber(L, val.y);
-//		lua_rawseti(L, -2, 2);
-//		lua_pushnumber(L, val.z);
-//		lua_rawseti(L, -2, 3);
-//	}
-//};

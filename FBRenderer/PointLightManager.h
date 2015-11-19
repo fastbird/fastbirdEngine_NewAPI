@@ -40,7 +40,6 @@ namespace fastbird
 
 	public:
 		static PointLightManagerPtr Create();
-		~PointLightManager();
 
 		PointLightPtr CreatePointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion);
 		void DeletePointLight(PointLightPtr pointLight);

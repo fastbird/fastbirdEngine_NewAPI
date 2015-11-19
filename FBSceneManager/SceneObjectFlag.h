@@ -34,7 +34,8 @@ namespace fastbird{
 			Ignore = 1 << 2,
 			NoDepthPath = 1 << 3, // todo: move to renderable flag
 			HighlightDedi = 1 << 4, // todo: move to renderable flag			
-			Last = HighlightDedi // Can define user flag from Last << 1
+			Transparent = 1 << 5,
+			Last = Transparent // Can define user flag from Last << 1
 		};
 	}
 }

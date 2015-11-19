@@ -34,10 +34,10 @@
 #include "FBMathLib/Vec4.h"
 
 #define cbuffer struct
-#define float4x4 Mat44
-#define float4 Vec4
-#define float3 Vec3
-#define float2 Vec2
+#define float4x4 Mat44f
+#define float4 Vec4f
+#define float3 Vec3f
+#define float2 Vec2f
 
 #else // !CPP
 

@@ -32,20 +32,70 @@
 #include "FBRenderer/RenderParam.h"
 #include "FBCommonHeaders/Observable.h"
 namespace fastbird{
+	class Vec3;
+	class Color;
+	class Ray3;
+	DECLARE_SMART_PTR(Camera);
+	DECLARE_SMART_PTR(SkySphere);
+	DECLARE_SMART_PTR(SpatialObject);
+	DECLARE_SMART_PTR(SceneObject);
 	DECLARE_SMART_PTR(DirectionalLight);
 	DECLARE_SMART_PTR(Scene);
 	class FB_DLL_PUBLIC Scene : public Observable<ISceneObserver>{
 		DECLARE_PIMPL_NON_COPYABLE(Scene);		
-		Scene();		
+		Scene(const char* name);		
 		
-	public:
-		static ScenePtr Create(const char* name);
-		~Scene();
-		void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
-		void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut);
-		void PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
+	public:		
+		typedef std::vector<SpatialObject*> SPATIAL_OBJECTS_RAW;
+		static ScenePtr Create(const char* name);		
+		
+		const char* GetName() const;
+		void PreRender(const RenderParam& prarm, RenderParamOut* paramOut);
+		void Render(const RenderParam& prarm, RenderParamOut* paramOut);
 
-		DirectionalLightPtr GetLight(unsigned idx);
+		/// Returns currently rendering pass which is RenderParam.mRenderPass when the Render() is called.
 		int GetRenderPass() const;
+
+		bool AttachObject(SceneObjectPtr pObject);
+		bool DetachObject(SceneObjectPtr pObject);
+
+		bool AttachObject(SpatialObjectPtr pSpatialObject);
+		bool DetachObject(SpatialObjectPtr pSpatialObject);
+		void SetSkipSpatialObjects(bool skip);
+		void ClearEverySpatialObject();
+		unsigned GetNumSpatialObjects() const;
+		/** You do not own the returned pointers of this function
+		do not keep any pointer. */
+		const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(CameraPtr cam);
+		void PrintSpatialObject();
+
+		void AttachSkySphere(SkySpherePtr p);
+		void AttachSkySphereBlend(SkySpherePtr p);
+		void DetachSkySphere();
+		void DetachSkySphereBlend();
+		void SwapSkySphereBlendAndDetach();
+		SkySpherePtr GetSkySphere();
+		SkySpherePtr GetSkySphereBlend() const;
+		void ToggleSkyRendering();
+		void SetSkyRendering(bool render);
+		bool GetSkyRendering();		
+
+		const Vec3& GetWindVector() const;
+
+		/** p is a MeshObject*/
+		void AddCloudVolume(SpatialObjectPtr p);
+		void ClearClouds();
+		void PreRenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
+		void RenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
+				
+		const Color& GetFogColor() const;
+		void SetFogColor(const Color& c);
+		void SetDrawClouds(bool e);
+
+		/** True if this scene is attached in the render target which is not related swap-chain.*/
+		void SetRttScene(bool set);
+		bool IsRttScene() const;
+
+		DirectionalLightPtr GetDirectionalLight(unsigned idx);				
 	};
 }

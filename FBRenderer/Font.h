@@ -32,7 +32,7 @@
 #include "RendererStructs.h"
 #include "FBMathLib/Vec2I.h"
 #include  "TextTags.h"
-#include "../EssentialEngineData/shaders/Constants.h"
+#include "EssentialEngineData/shaders/Constants.h"
 
 namespace fastbird{
 	DECLARE_SMART_PTR(Texture);
