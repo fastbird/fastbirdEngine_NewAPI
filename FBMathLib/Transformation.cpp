@@ -158,7 +158,7 @@ void Transformation::SetRotation (const Quat& r)
 	mRSSeperated = true;
 }
 
-void Transformation::SetDir(const Vec3& dir)
+void Transformation::SetDirection(const Vec3& dir)
 {
 	Vec3 forward = dir;
 	Vec3 right;
@@ -183,7 +183,7 @@ void Transformation::SetDir(const Vec3& dir)
 	SetRotation(rot);
 }
 
-void Transformation::SetDirAndRight(const Vec3& dir, const Vec3& right)
+void Transformation::SetDirectionAndRight(const Vec3& dir, const Vec3& right)
 {
 	Vec3 forward = dir;
 	Vec3 up = right.Cross(forward);
@@ -433,13 +433,13 @@ Ray3 Transformation::ApplyInverse(const Ray3& r) const
             Real fInvScale = 1.0f/GetUniformScale();
 			kDiff = r.GetOrigin() - mT;
 			newray.SetOrigin(fInvScale*(kDiff*mMat)); // transposed
-			newray.SetDir((r.GetDir() * mMat).NormalizeCopy());
+			newray.SetDirection((r.GetDir() * mMat).NormalizeCopy());
         }
         else
         {
 			kDiff = r.GetOrigin() - mT;
 			newray.SetOrigin( kDiff*mMat / mS);
-			newray.SetDir(r.GetDir() * mMat.Inverse());// transposed
+			newray.SetDirection(r.GetDir() * mMat.Inverse());// transposed
         }
     }
     else
@@ -448,7 +448,7 @@ Ray3 Transformation::ApplyInverse(const Ray3& r) const
         Mat33 kInverse = mMat.Inverse();
 		kDiff = r.GetOrigin() - mT;
 		newray.SetOrigin(kInverse*kDiff);
-		newray.SetDir((kInverse * r.GetDir()).NormalizeCopy()); // transposed
+		newray.SetDirection((kInverse * r.GetDir()).NormalizeCopy()); // transposed
     }
 
 	return newray;

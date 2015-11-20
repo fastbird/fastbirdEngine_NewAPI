@@ -74,7 +74,8 @@ namespace fastbird
 		//-------------------------------------------------------------------
 		RenderTargetId GetId() const;
 		bool CheckOptions(const RenderTargetParam& param);
-
+		
+		void SetRenderStrategy();
 		ScenePtr RegisterScene(ScenePtr scene);
 		ScenePtr GetScene() const;
 		CameraPtr ReplaceCamera(CameraPtr cam);

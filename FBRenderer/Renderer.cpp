@@ -166,8 +166,7 @@ public:
 	// 1/4
 	// x, y,    offset, weight;
 	VectorMap< std::pair<DWORD, DWORD>, std::pair<std::vector<Vec4f>, std::vector<Vec4f> > > mGauss5x5;	
-	InputLayoutPtr mPositionInputLayout;
-	SkySphereWeakPtr mNextEnvUpdateSkySphere;	
+	InputLayoutPtr mPositionInputLayout;	
 
 	struct DebugRenderTarget
 	{
@@ -1810,6 +1809,10 @@ public:
 	void UnbindInputLayout(){
 		GetPlatformRenderer().UnbindInputLayout();
 	}
+
+	void UnbindVertexBuffers(){
+		GetPlatformRenderer().SetVertexBuffers(0, 0, 0, 0, 0);
+	}
 	
 	void UnbindShader(BINDING_SHADER shader){
 		GetPlatformRenderer().UnbindShader(shader);
@@ -2362,7 +2365,7 @@ public:
 };
 
 static RendererWeakPtr sRenderer;
-RendererPtr Renderer::CreateRenderer(){
+RendererPtr Renderer::Create(){
 	if (sRenderer.expired()){
 		auto renderer = RendererPtr(FB_NEW(Renderer), [](Renderer* obj){ FB_DELETE(obj); });
 		renderer->mImpl->mSelf = renderer;
@@ -2371,9 +2374,9 @@ RendererPtr Renderer::CreateRenderer(){
 	return sRenderer.lock();
 }
 
-RendererPtr Renderer::CreateRenderer(const char* renderEngineName, lua_State* L){
+RendererPtr Renderer::Create(const char* renderEngineName, lua_State* L){
 	if (sRenderer.expired()){
-		auto renderer = CreateRenderer();
+		auto renderer = Create();
 		renderer->SetLuaState(L);
 		renderer->PrepareRenderEngine(renderEngineName);
 		return renderer;
@@ -2566,6 +2569,14 @@ void Renderer::SetSystemTexture(SystemTextures::Enum type, TexturePtr texture) {
 
 void Renderer::UnbindTexture(BINDING_SHADER shader, int slot) {
 	mImpl->UnbindTexture(shader, slot);
+}
+
+void Renderer::UnbindInputLayout(){
+	mImpl->UnbindInputLayout();
+}
+
+void Renderer::UnbindVertexBuffers(){
+	mImpl->UnbindVertexBuffers();
 }
 
 // pre defined

@@ -33,7 +33,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(Scene);
 	DECLARE_SMART_PTR(RenderTarget);	
 	DECLARE_SMART_PTR(IRenderStrategy);
-	class IRenderStrategy{
+	class FB_DLL_PUBLIC IRenderStrategy{
 	protected:
 		virtual ~IRenderStrategy(){}
 

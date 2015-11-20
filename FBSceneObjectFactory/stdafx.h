@@ -26,3 +26,7 @@
 */
 #pragma warning (disable : 4251)
 #include "FBCommonHeaders/platform.h"
+
+#include "FBDebugLib/Logger.h"
+#include "FBStringLib/StringLib.h"
+#include "FBMathLib/Math.h"

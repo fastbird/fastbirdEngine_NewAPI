@@ -55,7 +55,7 @@ namespace fastbird
 		const Vec3& GetDir() const { return mDir; }
 		const Vec3& GetOrigin() const { return mOrigin; }
 		void SetOrigin(const Vec3& v) { mOrigin = v; }
-		void SetDir(const Vec3& dir);
+		void SetDirection(const Vec3& dir);
 		Vec3 GetPoint(Real dist) const { return mOrigin + mDir * dist; }
 		void AddOffset(const Vec3& v) { mOrigin  += v;}		
 	};

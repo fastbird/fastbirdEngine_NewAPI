@@ -110,7 +110,9 @@ namespace fastbird{
 	DECLARE_PIMPL(className); \
 protected:\
 	className(const className&);\
-	className& operator= (const className&) = delete
+	className& operator= (const className&) = delete;\
+private:\
+
 
 #define DECLARE_SMART_PTR(className) \
 	class className;\

@@ -63,3 +63,10 @@ Convenent macros for manipulating stl containers.
 #define ValidCStringLength(szStr) szStr && strlen((szStr))
 
 #define ARRAYCOUNT(A)       (sizeof(A) / sizeof(A[0]))
+
+#define if_assert_pass(V) assert((V)); \
+if ((V))
+
+//assert((V));
+#define if_assert_fail(V)  \
+if (!(V))

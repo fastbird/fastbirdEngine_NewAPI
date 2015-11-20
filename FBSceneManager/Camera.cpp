@@ -142,13 +142,13 @@ public:
 
 	void SetDirection(const Vec3& dir)
 	{
-		mTransformation.SetDir(dir);		
+		mTransformation.SetDirection(dir);
 		mViewPropertyChanged = true;
 	}
 
-	void SetDirAndRight(const Vec3& dir, const Vec3& right)
+	void SetDirectionAndRight(const Vec3& dir, const Vec3& right)
 	{
-		mTransformation.SetDirAndRight(dir, right);
+		mTransformation.SetDirectionAndRight(dir, right);
 		mViewPropertyChanged = true;
 	}
 
@@ -538,7 +538,7 @@ void Camera::SetDirection(const Vec3& dir){
 }
 
 void Camera::SetDirrectionAndRight(const Vec3& dir, const Vec3& right){
-	mImpl->SetDirAndRight(dir, right);	
+	mImpl->SetDirectionAndRight(dir, right);
 }
 
 void Camera::SetTransformation(const Vec3& pos, const Quat& rot){

@@ -42,10 +42,9 @@ namespace fastbird{
 	class FB_DLL_PUBLIC IRenderable
 	{
 	public:
-		virtual void SetMaterial(const char* name, int pass) = 0;
+		virtual void SetMaterial(const char* filepath, int pass) = 0;
 		virtual void SetMaterial(MaterialPtr pMat, int pass) = 0;
-		virtual MaterialPtr GetMaterial(int pass = 0) const = 0;
-		virtual bool IsTransparent() const = 0;
+		virtual MaterialPtr GetMaterial(int pass = 0) const = 0;		
 		virtual void SetVertexBuffer(VertexBufferPtr pVertexBuffer) = 0;
 		virtual void SetIndexBuffer(IndexBufferPtr pIndexBuffer) = 0;
 		// override the input layout defined in material
@@ -53,8 +52,7 @@ namespace fastbird{
 		virtual void PreRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
 		virtual void Render(const RenderParam& param, RenderParamOut* paramOut) = 0;
 		virtual void PostRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
-		virtual void SetEnableHighlight(bool enable) {}
-		virtual AnimationPtr GetAnimation() const { return 0; }
+		virtual void SetEnableHighlight(bool enable) = 0;
 
 	protected:
 		virtual ~IRenderable() {}

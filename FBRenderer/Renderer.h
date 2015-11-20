@@ -75,20 +75,21 @@ namespace fastbird{
 		Renderer();		
 
 	public:
-		/** Create an empty Renderer. You have the owner ship of the pointer.
+		/** Create an empty Renderer. 
+		You have the owner ship of the pointer.
 		*/
-		static RendererPtr CreateRenderer();
+		static RendererPtr Create();
 
 		/** Create a Renderer with the platform specific render engine you specified in \a rendererPlugInName 
 		\param rendererPlugInName The renderer plug-in name. You can specify "FBRendererD3D11" for
 		the default renderer on Windows, and "FBRendererGL41" for Mac. \n
 		\param L Renderer need the lua_State* to read the configuration file. If you pass NULL, all setting will be default.
 		*/
-		static RendererPtr CreateRenderer(const char* rendererPlugInName, lua_State* L);
+		static RendererPtr Create(const char* rendererPlugInName, lua_State* L);
 
 		/** Returns the Renderer as a reference.
 		This function does not check the validity whether the Renderer is created or not.
-		It will cause a crash if you call this function without calling CreateRenderer()
+		It will cause a crash if you call this function without calling Renderer::Create()
 		If you need to check the validity use Renderer::DoesExists() function.
 		*/
 		static Renderer& GetInstance();
@@ -115,11 +116,11 @@ namespace fastbird{
 		void SetLuaState(lua_State* L);
 
 		/** Prepare the platform specific render engine
-		You don't call this function if you initiate the Renderer with the function
+		You don't need to call this function if you create Renderer with the following function.
 		 \code 
-		 static RendererPtr CreateRenderer(const char* rendererPlugInName); 
+		 static RendererPtr Create(const char* rendererPlugInName); 
 		 \endcode
-		 because the Renderer you got is already initialized the render engine.		 
+		 because the Renderer you got already have the render engine plugged in.
 		*/
 		bool PrepareRenderEngine(const char* rendererPlugInName);
 
@@ -187,6 +188,8 @@ namespace fastbird{
 		void SetTextures(TexturePtr pTextures[], int num, BINDING_SHADER shaderType, int startSlot);
 		void SetSystemTexture(SystemTextures::Enum type, TexturePtr texture);
 		void UnbindTexture(BINDING_SHADER shader, int slot);
+		void UnbindInputLayout();
+		void UnbindVertexBuffers();
 		// pre defined
 		void BindDepthTexture(bool set);		
 		void SetDepthWriteShader();
@@ -281,7 +284,7 @@ namespace fastbird{
 		void GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Vec4f* avSampleOffsets);
 		bool IsLuminanceOnCpu() const;
 		void SetLockDepthStencilState(bool lock);
-		void SetLockBlendState(bool lock);
+		void SetLockBlendState(bool lock);		
 
 		//-------------------------------------------------------------------
 		// Queries

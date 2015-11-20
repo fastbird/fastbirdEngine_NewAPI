@@ -74,7 +74,7 @@ namespace fastbird
 		void Render();
 		void PostRender();
 
-		void CopyLight(DirectionalLight* other);
+		void CopyLight(DirectionalLightPtr other);
 		
 	};
 }

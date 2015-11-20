@@ -266,7 +266,7 @@ public:
 			mButtonsDown |= MOUSE_BUTTON_MIDDLE;
 			mButtonsPressed |= MOUSE_BUTTON_MIDDLE;
 
-			//mLastDownTime = gFBEnv->pTimer->GetTime();
+			//mLastDownTime = gpTimer->GetTime();
 			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (mouseEvent.usButtonFlags & MOUSE_BUTTON_FLAG_BUTTON_4_DOWN)
@@ -274,7 +274,7 @@ public:
 			mButtonsDown |= MOUSE_BUTTON_4;
 			mButtonsPressed |= MOUSE_BUTTON_4;
 
-			//mLastDownTime = gFBEnv->pTimer->GetTime();
+			//mLastDownTime = gpTimer->GetTime();
 			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 		if (mouseEvent.usButtonFlags & MOUSE_BUTTON_FLAG_BUTTON_5_DOWN)
@@ -282,7 +282,7 @@ public:
 			mButtonsDown |= MOUSE_BUTTON_5;
 			mButtonsPressed |= MOUSE_BUTTON_5;
 
-			//mLastDownTime = gFBEnv->pTimer->GetTime();
+			//mLastDownTime = gpTimer->GetTime();
 			mLastDownPos = std::make_tuple(mAbsX, mAbsY);
 		}
 

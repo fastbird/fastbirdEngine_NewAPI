@@ -172,7 +172,7 @@ public:
 		}
 	}
 
-	void CopyLight(DirectionalLight* other)
+	void CopyLight(DirectionalLightPtr other)
 	{
 		if (!other)
 			return;
@@ -291,7 +291,7 @@ void DirectionalLight::Update(Real dt){
 	mImpl->Update(dt);
 }
 
-void DirectionalLight::CopyLight(DirectionalLight* other_)
+void DirectionalLight::CopyLight(DirectionalLightPtr other_)
 {
 	mImpl->CopyLight(other_);
 }

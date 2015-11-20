@@ -65,13 +65,6 @@ IMPLEMENT_STATIC_CREATE(RenderStrategyDefault);
 class RenderStrategyDefault::Impl{
 public:
 	static const int FB_MAX_SAMPLES = 16;
-	Impl()
-		:mGlowSet(false), mFrameLuminanceCalced(0), mLuminance(0.5f)
-		, mRenderingFace(0)
-	{
-
-	}
-
 	SceneWeakPtr mScene;
 	RenderTargetWeakPtr mRenderTarget;
 	Vec2I mSize; // Render target size.
@@ -100,6 +93,14 @@ public:
 	TexturePtr mBloomTexture[FB_NUM_BLOOM_TEXTURES];
 	TexturePtr mStarTextures[FB_NUM_STAR_TEXTURES];
 	size_t mRenderingFace;
+
+	//-------------------------------------------------------------------
+	Impl()
+		:mGlowSet(false), mFrameLuminanceCalced(0), mLuminance(0.5f)
+		, mRenderingFace(0)
+	{
+
+	}
 
 	//-------------------------------------------------------------------
 	// IRenderStrategy
@@ -211,89 +212,90 @@ public:
 			scene->Render(renderParam, 0);
 			ShadowTarget(false);
 		}
-	{
-		RenderEventMarker marker("Depth Pass");
-		memset(&renderParam, 0, sizeof(RenderParam));
-		memset(&renderParamOut, 0, sizeof(RenderParamOut));
-		renderParam.mRenderPass = PASS_DEPTH;
-		DepthTarget(true, true);
-		renderParam.mCamera = renderer.GetCamera().get();
-		renderParam.mLightCamera = mLightCamera.get();
-		scene->Render(renderParam, 0);
-		DepthTarget(false, false);
-		DepthTexture(true);
-	}
-	{
-		RenderEventMarker marker("Cloud Volume Pass");
-		memset(&renderParam, 0, sizeof(RenderParam));
-		memset(&renderParamOut, 0, sizeof(RenderParamOut));
-		renderParam.mRenderPass = PASS_DEPTH;
-		CloudVolumeTarget(true);
-		auto provider = renderer.GetResourceProvider();
-		renderer.SetLockDepthStencilState(true);
-		provider->BindBlendState(ResourceTypes::BlendStates::BlueMask);		
-		renderParam.mCamera = renderer.GetCamera().get();
-		renderParam.mLightCamera = mLightCamera.get();
-		scene->Render(renderParam, 0);
-		renderer.SetLockDepthStencilState(false);
-		DepthWriteShaderCloud();
-		provider->BindRasterizerState(ResourceTypes::RasterizerStates::CullFrontFace);		
-		provider->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthWrite_LessEqual);
-		provider->BindBlendState(ResourceTypes::BlendStates::GreenAlphaMaskAddMinus);				
-		scene->PreRenderCloudVolumes(renderParam, 0);
-		scene->RenderCloudVolumes(renderParam, 0);
-		renderer.RestoreRasterizerState();
-		provider->BindBlendState(ResourceTypes::BlendStates::RedAlphaMaskAddAdd);
-		scene->RenderCloudVolumes(renderParam, 0);
-		renderer.RestoreRasterizerState();
-		renderer.RestoreBlendState();
-		renderer.RestoreDepthStencilState();
-		CloudVolumeTarget(false);
-	}
-	{
-		RenderEventMarker marker("GodRay Pre-occlusion Pass");
-		memset(&renderParam, 0, sizeof(RenderParam));
-		memset(&renderParamOut, 0, sizeof(RenderParamOut));
-		GodRayTarget(true);
-		renderParam.mRenderPass = PASS_GODRAY_OCC_PRE;
-		renderParam.mCamera = renderer.GetCamera().get();
-		renderParam.mLightCamera = mLightCamera.get();
-		scene->Render(renderParam, 0);
-		GodRay();
-	}
-	{
-		RenderEventMarker marker("Main Render Pass");
-		memset(&renderParam, 0, sizeof(RenderParam));
-		memset(&renderParamOut, 0, sizeof(RenderParamOut));
-		renderParam.mRenderPass = PASS_NORMAL;
-		HDRTarget(true);
-		renderer.Clear(0., 0., 0., 1.);
-		DepthTexture(true);
-		CloudVolumeTexture(true);
-		ShadowMap(true);
-		renderParam.mCamera = renderer.GetCamera().get();
-		renderParam.mLightCamera = mLightCamera.get();
-		scene->Render(renderParam, &renderParamOut);
-		if (renderParamOut.mSilouetteRendered)
-			Silouette();
-	}
+		{
+			RenderEventMarker marker("Depth Pass");
+			memset(&renderParam, 0, sizeof(RenderParam));
+			memset(&renderParamOut, 0, sizeof(RenderParamOut));
+			renderParam.mRenderPass = PASS_DEPTH;
+			DepthTarget(true, true);
+			renderParam.mCamera = renderer.GetCamera().get();
+			renderParam.mLightCamera = mLightCamera.get();
+			scene->Render(renderParam, 0);
+			DepthTarget(false, false);
+			DepthTexture(true);
+		}
+		{
+			RenderEventMarker marker("Cloud Volume Pass");
+			memset(&renderParam, 0, sizeof(RenderParam));
+			memset(&renderParamOut, 0, sizeof(RenderParamOut));
+			renderParam.mRenderPass = PASS_DEPTH;
+			CloudVolumeTarget(true);
+			auto provider = renderer.GetResourceProvider();
+			renderer.SetLockDepthStencilState(true);
+			provider->BindBlendState(ResourceTypes::BlendStates::BlueMask);		
+			renderParam.mCamera = renderer.GetCamera().get();
+			renderParam.mLightCamera = mLightCamera.get();
+			scene->Render(renderParam, 0);
+			renderer.SetLockDepthStencilState(false);
+			DepthWriteShaderCloud();
+			provider->BindRasterizerState(ResourceTypes::RasterizerStates::CullFrontFace);		
+			provider->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthWrite_LessEqual);
+			provider->BindBlendState(ResourceTypes::BlendStates::GreenAlphaMaskAddMinus);				
+			scene->PreRenderCloudVolumes(renderParam, 0);
+			scene->RenderCloudVolumes(renderParam, 0);
+			renderer.RestoreRasterizerState();
+			provider->BindBlendState(ResourceTypes::BlendStates::RedAlphaMaskAddAdd);
+			scene->RenderCloudVolumes(renderParam, 0);
+			renderer.RestoreRasterizerState();
+			renderer.RestoreBlendState();
+			renderer.RestoreDepthStencilState();
+			CloudVolumeTarget(false);
+		}
+		{
+			RenderEventMarker marker("GodRay Pre-occlusion Pass");
+			memset(&renderParam, 0, sizeof(RenderParam));
+			memset(&renderParamOut, 0, sizeof(RenderParamOut));
+			GodRayTarget(true);
+			renderParam.mRenderPass = PASS_GODRAY_OCC_PRE;
+			renderParam.mCamera = renderer.GetCamera().get();
+			renderParam.mLightCamera = mLightCamera.get();
+			scene->Render(renderParam, 0);
+			GodRay();
+		}
+		{
+			RenderEventMarker marker("Main Render Pass");
+			memset(&renderParam, 0, sizeof(RenderParam));
+			memset(&renderParamOut, 0, sizeof(RenderParamOut));
+			renderParam.mRenderPass = PASS_NORMAL;
+			HDRTarget(true);
+			renderer.Clear(0., 0., 0., 1.);
+			DepthTexture(true);
+			CloudVolumeTexture(true);
+			ShadowMap(true);
+			renderParam.mCamera = renderer.GetCamera().get();
+			renderParam.mLightCamera = mLightCamera.get();
+			scene->Render(renderParam, &renderParamOut);
+			if (renderParamOut.mSilouetteRendered)
+				Silouette();
+		}
 
-	{
-		RenderEventMarker marker("Blend Glow and God Ray");
-		BlendGlow();
-		BlendGodRay();
-		HDRTarget(false);
-	}
-	{
-		RenderEventMarker marker("HDR and Bloom");
-		MeasureLuminanceOfHDRTarget();
-		BrightPass();
-		BrightPassToStarSource();
-		StarSourceToBloomSource();
-		Bloom();
-		RenderStarGlare();
-		ToneMapping();
-	}
+		{
+			RenderEventMarker marker("Blend Glow and God Ray");
+			BlendGlow();
+			BlendGodRay();
+			HDRTarget(false);
+		}
+		{
+			RenderEventMarker marker("HDR and Bloom");
+			MeasureLuminanceOfHDRTarget();
+			BrightPass();
+			BrightPassToStarSource();
+			StarSourceToBloomSource();
+			Bloom();
+			RenderStarGlare();
+			ToneMapping();
+		}
+		renderTarget->Unbind();
 	}
 
 

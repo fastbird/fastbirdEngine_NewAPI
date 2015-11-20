@@ -73,6 +73,7 @@
     <ClInclude Include="ResourceProvider.h" />
     <ClInclude Include="NullPlatformRenderer.h" />
     <ClInclude Include="RenderPass.h" />
+    <ClInclude Include="RenderStrategyMinimum.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -113,6 +114,7 @@
     <ClCompile Include="ResourceProvider.cpp" />
     <ClCompile Include="NullPlatformRenderer.cpp" />
     <ClCompile Include="GaussianDistribution.cpp" />
+    <ClCompile Include="RenderStrategyMinimum.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

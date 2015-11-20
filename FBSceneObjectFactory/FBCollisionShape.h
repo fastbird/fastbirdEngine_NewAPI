@@ -55,13 +55,12 @@ namespace fastbird
 	{
 		DECLARE_PIMPL(FBCollisionShape);
 		FBCollisionShape(FBColShape::Enum e, const Transformation& t, MeshObjectPtr colMesh);
+		~FBCollisionShape();
 
 	public:
 		static FBCollisionShapePtr Create(FBColShape::Enum e, const Transformation& t, MeshObjectPtr colMesh);
 		FBCollisionShape(const FBCollisionShape& other);
 		FBCollisionShape& operator=(const FBCollisionShape& other);
-		~FBCollisionShape();
-		
 
 		void SetCollisionMesh(MeshObjectPtr colMesh);
 		MeshObjectPtr GetCollisionMesh() const;

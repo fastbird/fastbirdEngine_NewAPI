@@ -54,3 +54,5 @@ Plugin: \b FBRendererD3D11
 
 #include "FBMemoryManagerLib/MemoryManager.h"
 #include "FBDebugLib/Logger.h"
+#include "FBStringLib/StringLib.h"
+#include "FBMathLib/Math.h"

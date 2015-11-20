@@ -40,6 +40,7 @@ public:
 	BoundingVolumePtr mBoundingVolumeWorld;
 	Real mDistToCam;
 	AnimationPtr mAnim;
+	Vec3 mPreviousPosition;
 	bool mTransformChanged;
 
 
@@ -47,11 +48,13 @@ public:
 	Impl()
 		: mBoundingVolume(BoundingVolume::Create())
 		, mBoundingVolumeWorld(BoundingVolume::Create())
+		, mPreviousPosition(0, 0, 0)
+		, mTransformChanged(true)
 	{
 	}
 
 	Impl(const Impl& other)
-		:Impl()
+		: Impl()
 	{
 		mLocation = other.mLocation;
 		if (other.mAnimatedLocation){
@@ -93,7 +96,31 @@ public:
 	}
 
 	void SetPosition(const Vec3& pos){
+		mPreviousPosition = mLocation.GetTranslation();
 		mLocation.SetTranslation(pos);
+		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + pos);
+		mTransformChanged = true;
+	}
+
+	void SetRotation(const Quat& rot){
+		mLocation.SetRotation(rot);
+		mTransformChanged = true;
+	}
+
+	void SetScale(const Vec3& scale){
+		mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
+		mLocation.SetScale(scale);
+		mTransformChanged = true;
+	}
+
+	void SetDirection(const Vec3& dir){
+		mLocation.SetDirection(dir);
+		mTransformChanged = true;
+	}
+
+	void SetDirectionAndRight(const Vec3& dir, const Vec3& right){
+		mLocation.SetDirectionAndRight(dir, right);
+		mTransformChanged = true;
 	}
 
 	BoundingVolumePtr GetBoundingVolume(){
@@ -110,6 +137,10 @@ public:
 
 	const Transformation& GetAnimatedLocation() const{
 		return mAnim ? *mAnimatedLocation : mLocation;
+	}
+
+	AnimationPtr GetAnimation() const{
+		return mAnim;
 	}
 
 	void SetLocation(const Transformation& t){
@@ -142,6 +173,26 @@ public:
 
 	bool IsPlayingAction() const{
 		return mAnim && mAnim->IsPlaying();
+	}
+
+	void NotifyTransformChanged(){
+		mTransformChanged = true;
+	}
+
+	void SetBoundingVolume(const BoundingVolume& src){
+		*mBoundingVolume = src;
+		*mBoundingVolumeWorld = *mBoundingVolume;
+		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
+		auto scale = mLocation.GetScale();
+		mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
+	}
+
+	void MergeBoundingVolume(const BoundingVolumePtr src){
+		mBoundingVolume->Merge(src);
+		*mBoundingVolumeWorld = *mBoundingVolume;
+		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
+		auto scale = mLocation.GetScale();
+		mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
 	}
 };
 
@@ -189,6 +240,22 @@ void SpatialObject::SetPosition(const Vec3& pos){
 	mImpl->SetPosition(pos);
 }
 
+void SpatialObject::SetRotation(const Quat& rot){
+	mImpl->SetRotation(rot);
+}
+
+void SpatialObject::SetScale(const Vec3& scale){
+	mImpl->SetScale(scale);
+}
+
+void SpatialObject::SetDirection(const Vec3& dir){
+	mImpl->SetDirection(dir);
+}
+
+void SpatialObject::SetDirectionAndRight(const Vec3& dir, const Vec3& right){
+	mImpl->SetDirectionAndRight(dir, right);
+}
+
 BoundingVolumePtr SpatialObject::GetBoundingVolume(){
 	return mImpl->GetBoundingVolume();
 }
@@ -204,6 +271,10 @@ const Transformation& SpatialObject::GetLocation() const{
 
 const Transformation& SpatialObject::GetAnimatedLocation() const{
 	return mImpl->GetAnimatedLocation();
+}
+
+AnimationPtr SpatialObject::GetAnimation() const{
+	return mImpl->GetAnimation();
 }
 
 void SpatialObject::SetLocation(const Transformation& t){
@@ -228,4 +299,16 @@ void SpatialObject::UpdateAnimation(TIME_PRECISION dt){
 
 bool SpatialObject::IsPlayingAction() const{
 	return mImpl->IsPlayingAction();
+}
+
+void SpatialObject::NotifyTransformChanged(){
+	return mImpl->NotifyTransformChanged();
+}
+
+void SpatialObject::SetBoundingVolume(const BoundingVolume& src){
+	mImpl->SetBoundingVolume(src);
+}
+
+void SpatialObject::MergeBoundingVolume(const BoundingVolumePtr src){
+	mImpl->MergeBoundingVolume(src);
 }

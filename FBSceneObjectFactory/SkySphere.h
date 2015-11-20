@@ -34,35 +34,32 @@ namespace fastbird{
 	class FB_DLL_PUBLIC SkySphere : public SceneObject, public IRenderable{
 		DECLARE_PIMPL_NON_COPYABLE(SkySphere);
 		SkySphere();
+		~SkySphere();
 
 	public:
 		static SkySpherePtr Create();
 		static void CreateSharedEnvRT();
-		static void DeleteSharedEnvRT();
-
-		~SkySphere();
+		static void DestroySharedEnvRT();
 
 		// IRenderable
-		virtual void SetMaterial(const char* name, int pass) = 0;
-		virtual void SetMaterial(MaterialPtr pMat, int pass) = 0;
-		virtual MaterialPtr GetMaterial(int pass = 0) const = 0;
-		virtual bool IsTransparent() const = 0;
-		virtual void SetVertexBuffer(VertexBufferPtr pVertexBuffer) = 0;
-		virtual void SetIndexBuffer(IndexBufferPtr pIndexBuffer) = 0;
+		void SetMaterial(const char* filepath, int pass);
+		void SetMaterial(MaterialPtr pMat, int pass);
+		MaterialPtr GetMaterial(int pass = 0) const;		
+		void SetVertexBuffer(VertexBufferPtr pVertexBuffer);
+		void SetIndexBuffer(IndexBufferPtr pIndexBuffer);
 		// override the input layout defined in material
-		virtual void SetInputLayout(InputLayoutPtr i) = 0;
-		virtual void PreRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
-		virtual void Render(const RenderParam& param, RenderParamOut* paramOut) = 0;
-		virtual void PostRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
-		virtual void SetEnableHighlight(bool enable) {}
-		virtual AnimationPtr GetAnimation() const { return 0; }
+		void SetInputLayout(InputLayoutPtr i);
+		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
+		void Render(const RenderParam& param, RenderParamOut* paramOut);
+		void PostRender(const RenderParam& param, RenderParamOut* paramOut);
+		void SetEnableHighlight(bool enable);		
 
 		// ISkySphere
-		virtual void UpdateEnvironmentMap(const Vec3& origin);
-		virtual void SetInterpolationData(unsigned index, const Vec4& data);
-		virtual void PrepareInterpolation(float time, SkySpherePtr startFrom);
-		virtual void SetUseAlphaBlend(bool use);
-		virtual void SetAlpha(float alpha);
-		virtual float GetAlpha() const;
+		void UpdateEnvironmentMap(const Vec3& origin);
+		void SetInterpolationData(unsigned index, const Vec4& data);
+		void PrepareInterpolation(float time, SkySpherePtr startFrom);
+		void SetUseAlphaBlend(bool use);
+		void SetAlpha(float alpha);
+		float GetAlpha() const;
 	};
 }

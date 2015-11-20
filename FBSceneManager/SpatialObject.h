@@ -48,15 +48,25 @@ namespace fastbird{
 		const Vec3& GetPosition() const;
 		const Vec3& GetScale() const;
 		void SetPosition(const Vec3& pos);
+		void SetRotation(const Quat& rot);
+		void SetScale(const Vec3& scale); // use uniform only.
+		void SetDirection(const Vec3& dir);
+		void SetDirectionAndRight(const Vec3& dir, const Vec3& right);
 		BoundingVolumePtr GetBoundingVolume();
 		BoundingVolumePtr GetBoundingVolumeWorld();
 		const Transformation& GetLocation() const;
 		const Transformation& GetAnimatedLocation() const;
+		AnimationPtr GetAnimation() const;
 		void SetLocation(const Transformation& t);
 		bool GetTransformChanged() const;
 		void ClearTransformChanged();
 		void SetAnimation(AnimationPtr anim);
 		void UpdateAnimation(TIME_PRECISION dt);
 		bool IsPlayingAction() const;
+		void NotifyTransformChanged();
+
+	protected:
+		void SetBoundingVolume(const BoundingVolume& src);
+		void MergeBoundingVolume(const BoundingVolumePtr src);
 	};
 }

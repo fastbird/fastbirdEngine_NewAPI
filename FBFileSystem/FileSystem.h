@@ -103,7 +103,9 @@ namespace fastbird{
 		//---------------------------------------------------------------------------
 		// File Path Manifulation
 		//---------------------------------------------------------------------------
-		/** If ext doesn't have \a dot(.), it will be added. */
+		/** Replaces the extension of the file
+		If \a ext is an empty string, extension will be removed.
+		If \a ext is not an empty string and doesn't have \a dot(.), it will be added. */
 		static std::string ReplaceExtension(const char* path, const char* ext);
 		/** If \a dot(.) is not in the \a path, empty string will be returned. 
 		If the extension is found, '.' is included in the returned string.

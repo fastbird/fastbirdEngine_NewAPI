@@ -27,6 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
+#include "ResourceTypes.h"
 
 namespace fastbird{
 	DECLARE_SMART_PTR(SamplerState);

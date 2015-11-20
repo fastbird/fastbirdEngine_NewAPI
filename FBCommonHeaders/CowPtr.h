@@ -101,6 +101,7 @@ namespace fastbird{
 			return mP.get();
 		}
 
+		// preferred to use this one to the above.
 		const T* const_get() const{
 			return mP.get();
 		}

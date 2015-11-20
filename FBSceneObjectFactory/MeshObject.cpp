@@ -27,6 +27,8 @@
 
 #include "stdafx.h"
 #include "MeshObject.h"
+#include "SceneObjectFactory.h"
+#include "FBCommonHeaders/CowPtr.h"
 #include "FBAnimation/Animation.h"
 #include "FBAnimation/AnimationData.h"
 #include "FBDebugLib/Logger.h"
@@ -40,7 +42,6 @@
 #include "FBRenderer/Material.h"
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/ResourceProvider.h"
-#include "FBRenderer/ResourceTypes.h"
 #include "FBStringLib/StringLib.h"
 #include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;
@@ -65,7 +66,15 @@ public:
 		std::vector<Vec3> mTangents;
 	};
 
-	MeshObjectWeakPtr mSelf;
+	struct ModelIntersection {
+		const ModelTriangle        *pTri;      // Pointer to mesh triangle that was intersected by ray
+		Vec3     position;   // Intersection point on the triangle
+		Real           alpha;      // Alpha and beta are two of the barycentric coordinates of the intersection 
+		Real           beta;       // ... the third barycentric coordinate can be calculated by: 1- (alpha + beta).
+		bool            valid;      // "valid" is set to true if an intersection was found
+	};
+
+	MeshObject* mSelf;
 	InputLayoutPtr mInputLayoutOverride;
 	PRIMITIVE_TOPOLOGY mTopology;
 	OBJECT_CONSTANTS mObjectConstants;
@@ -74,15 +83,12 @@ public:
 	// this vector will not be used.
 	std::vector<MaterialGroup> mMaterialGroups; // can call it as SubMeshes.
 
-	AUXILIARIES mAuxil;
-	AUXILIARIES* mAuxCloned;
+	CowPtr<AUXILIARIES> mAuxiliary;	
 	bool mModifying;
-	bool mRenderHighlight;
-	RasterizerStatePtr mHighlightRasterizeState;
+	bool mRenderHighlight;	
 
 	typedef std::vector< FBCollisionShapePtr > COLLISION_SHAPES;
-	COLLISION_SHAPES mCollisions;
-	COLLISION_SHAPES* mCollisionsCloned;
+	CowPtr<COLLISION_SHAPES> mCollisions;	
 	BoundingVolumePtr mAABB;
 	FRAME_PRECISION mLastPreRendered;
 
@@ -90,10 +96,9 @@ public:
 	bool mForceAlphaBlending;
 
 	//---------------------------------------------------------------------------
-	Impl()
-		: mAuxCloned(0)
+	Impl(MeshObject* self)
+		: mSelf(self)
 		, mRenderHighlight(false)
-		, mCollisionsCloned(0)
 		, mForceAlphaBlending(false)
 		, mLastPreRendered(0)
 	{
@@ -108,20 +113,44 @@ public:
 		mAABB = BoundingVolume::Create(BoundingVolume::BV_AABB);
 	}
 
-	~Impl()
+	Impl(MeshObject* self, const Impl& other)
+		: mSelf(self)
+		, mInputLayoutOverride(other.mInputLayoutOverride)
+		, mTopology(other.mTopology)
+		, mObjectConstants(other.mObjectConstants)
+		, mPointLightConstants(other.mPointLightConstants)
+		, mAuxiliary(other.mAuxiliary)
+		, mModifying(other.mModifying)
+		, mRenderHighlight(other.mRenderHighlight)
+		, mCollisions(other.mCollisions)
+		, mLastPreRendered(other.mLastPreRendered)
+		, mForceAlphaBlending(other.mForceAlphaBlending)
+		, mAABB(other.mAABB)
+
 	{
-		DeleteCollisionShapes();
+		unsigned idx = 0;
+		for (auto& it : other.mMaterialGroups){
+			auto& group = GetMaterialGroupFor(idx);
+			group.mMaterial = it.mMaterial;
+			group.mVBPos = it.mVBPos;
+			group.mVBNormal = it.mVBNormal;
+			group.mVBUV = it.mVBUV;
+			group.mVBColor = it.mVBColor;
+			group.mVBTangent = it.mVBTangent;
+			group.mIndexBuffer = it.mIndexBuffer;
+			group.mPositions = it.mPositions;
+		}
 	}
 
-	void SetMaterial(const char* name, int pass){
-		CreateMaterialGroupFor(0);
+	void SetMaterial(const char* filepath, int pass){
+		auto& group = GetMaterialGroupFor(0);
 		auto& renderer = Renderer::GetInstance();
-		mMaterialGroups[0].mMaterial = renderer.CreateMaterial(name);		
+		group.mMaterial = renderer.CreateMaterial(name);
 	}
 	
 	void SetMaterial(MaterialPtr pMat, int pass){
-		CreateMaterialGroupFor(0);
-		mMaterialGroups[0].mMaterial = pMat;
+		auto& group = GetMaterialGroupFor(0);
+		group.mMaterial = pMat;
 	}
 	
 	MaterialPtr GetMaterial(int pass) const{
@@ -129,6 +158,7 @@ public:
 		{
 			return mForceAlphaBlending ? mMaterialGroups[0].mForceAlphaMaterial : mMaterialGroups[0].mMaterial;
 		}
+		return 0;
 	}
 	
 	void SetVertexBuffer(VertexBufferPtr pVertexBuffer){		
@@ -145,32 +175,30 @@ public:
 		// Don't need to support it now.
 	}
 
-	void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut){
-		auto self = mSelf.lock();
-		if (self->HasObjFlag(SceneObjectFlag::Hide))
+	void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut){		
+		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
 			return;
 		auto currentFrame = gpTimer->GetFrame();
 		if (mLastPreRendered == currentFrame)
 			return;
 
 		mLastPreRendered = currentFrame;
-		auto& animatedLocation = self->GetAnimatedLocation();
+		auto& animatedLocation = mSelf->GetAnimatedLocation();
 		animatedLocation.GetHomogeneous(mObjectConstants.gWorld);
 		auto& renderer = Renderer::GetInstance();
-		renderer.GatherPointLightData(self->GetAABB().get(), animatedLocation, &mPointLightConstants);
+		renderer.GatherPointLightData(mSelf->GetAABB().get(), animatedLocation, &mPointLightConstants);
 	}
 	
 	void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut){
 		auto& renderer = Renderer::GetInstance();		
 		auto renderOption = renderer.GetOptions();
 		if (renderOption->r_noMesh)
-			return;
-		auto self = mSelf.lock();
-		if (self->HasObjFlag(SceneObjectFlag::Hide))
+			return;		
+		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
 			return;
 
-		auto radius = self->GetRadius();
-		auto distToCam = self->GetDistToCam();
+		auto radius = mSelf->GetRadius();
+		auto distToCam = mSelf->GetDistToCam();
 		if (distToCam > 70 && radius < 0.5f)
 			return;
 
@@ -191,9 +219,10 @@ public:
 
 		renderer.SetPrimitiveTopology(mTopology);
 
-		bool noDedicatedHighlight = !self->HasObjFlag(SceneObjectFlag::HighlightDedi);
-		bool renderDepthPath = !self->HasObjFlag(SceneObjectFlag::NoDepthPath);
+		bool noDedicatedHighlight = !mSelf->HasObjFlag(SceneObjectFlag::HighlightDedi);
+		bool renderDepthPath = !mSelf->HasObjFlag(SceneObjectFlag::NoDepthPath);
 		bool useDepthPassAndNormalHighlight = noDedicatedHighlight && renderDepthPath;
+		auto provider = renderer.GetResourceProvider();
 		if (renderParam.mRenderPass == RENDER_PASS::PASS_SHADOW && useDepthPassAndNormalHighlight)
 		{
 			for(auto& it : mMaterialGroups)
@@ -203,7 +232,7 @@ public:
 				if (!it.mMaterial->BindSubPass(RENDER_PASS::PASS_SHADOW, true))
 				{
 					renderer.SetPositionInputLayout();
-					renderer.SetShadowMapShader();
+					provider->BindShader(ResourceTypes::Shaders::ShadowMapVSPS);					
 				}
 				RenderMaterialGroup(&it, true);
 			}
@@ -284,10 +313,10 @@ public:
 					}
 					else{
 						renderer.RestoreDepthStencilState();
-						renderer.SetOneBiasedDepthRS();
-						renderer.SetNoColorWriteState();
-
-						renderer.SetDepthOnlyShader();
+						provider->BindRasterizerState(ResourceTypes::RasterizerStates::OneBiased);
+						provider->BindBlendState(ResourceTypes::BlendStates::NoColorWrite);
+						provider->BindShader(ResourceTypes::Shaders::DepthOnlyVSPS);
+						
 						// write only depth
 						for(auto& it:mMaterialGroups)
 						{
@@ -365,10 +394,10 @@ public:
 				rt->BindTargetOnly(true);
 			}
 			// debug
-			if (renderOption->r_gameId && self->GetGameId() != -1){
+			if (renderOption->r_gameId && mSelf->GetGameId() != -1){
 				char buf[255];
-				sprintf_s(buf, "%u", self->GetGameId());
-				renderer.QueueDraw3DText(self->GetPosition(), buf, Color::White);
+				sprintf_s(buf, "%u", mSelf->GetGameId());
+				renderer.QueueDraw3DText(mSelf->GetPosition(), buf, Color::White);
 			}
 		}
 	}
@@ -382,41 +411,8 @@ public:
 		mRenderHighlight = enable;
 	}
 
-	AnimationPtr GetAnimation() const { 
-		auto self = mSelf.lock();
-		return self->GetAnimation();
-	}
-
 	MeshObjectPtr Clone() const{
-		auto self = mSelf.lock();
-		MeshObjectPtr cloned = MeshObject::Create(*self);
-		return cloned;
-
-		/*cloned->mInputLayoutOverride = mInputLayoutOverride;
-		cloned->mName = mName;
-		cloned->mTopology = mTopology;
-		cloned->mObjectConstants = mObjectConstants;
-		FB_FOREACH(it, mMaterialGroups)
-		{
-			size_t idx = std::distance(mMaterialGroups.begin(), it);
-			if (idx >= cloned->mMaterialGroups.size())
-			{
-				cloned->mMaterialGroups.push_back(MaterialGroup());
-			}
-			MaterialGroup& mg = cloned->mMaterialGroups.back();
-			mg.mMaterial = it->mMaterial;
-			mg.mVBPos = it->mVBPos;
-			mg.mVBNormal = it->mVBNormal;
-			mg.mVBUV = it->mVBUV;
-			mg.mVBColor = it->mVBColor;
-			mg.mVBTangent = it->mVBTangent;
-			mg.mIndexBuffer = it->mIndexBuffer;
-			mg.mPositions = it->mPositions;
-		}
-		cloned->mAuxCloned = mAuxCloned ? mAuxCloned : (AUXILIARIES*)&mAuxil;
-		cloned->mCollisionsCloned = mCollisionsCloned ? mCollisionsCloned : (COLLISION_SHAPES*)&mCollisions;
-		cloned->mAABB = mAABB;
-		return cloned;*/
+		return MeshObject::Create(*mSelf);
 	}
 
 	void RenderSimple(){
@@ -448,123 +444,124 @@ public:
 	}
 
 	void AddTriangle(int matGroupIdx, const Vec3& pos0, const Vec3& pos1, const Vec3& pos2){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos0);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos1);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos2);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mPositions.push_back(pos0);
+		group.mPositions.push_back(pos1);
+		group.mPositions.push_back(pos2);
 	}
 
 	void AddQuad(int matGroupIdx, const Vec3 pos[4], const Vec3 normal[4]){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos[0]);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos[1]);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos[2]);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mPositions.push_back(pos[0]);
+		group.mPositions.push_back(pos[1]);
+		group.mPositions.push_back(pos[2]);
 
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos[2]);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos[1]);
-		mMaterialGroups[matGroupIdx].mPositions.push_back(pos[3]);
+		group.mPositions.push_back(pos[2]);
+		group.mPositions.push_back(pos[1]);
+		group.mPositions.push_back(pos[3]);
 
 
-		mMaterialGroups[matGroupIdx].mNormals.push_back(normal[0]);
-		mMaterialGroups[matGroupIdx].mNormals.push_back(normal[1]);
-		mMaterialGroups[matGroupIdx].mNormals.push_back(normal[2]);
+		group.mNormals.push_back(normal[0]);
+		group.mNormals.push_back(normal[1]);
+		group.mNormals.push_back(normal[2]);
 
-		mMaterialGroups[matGroupIdx].mNormals.push_back(normal[2]);
-		mMaterialGroups[matGroupIdx].mNormals.push_back(normal[1]);
-		mMaterialGroups[matGroupIdx].mNormals.push_back(normal[3]);
+		group.mNormals.push_back(normal[2]);
+		group.mNormals.push_back(normal[1]);
+		group.mNormals.push_back(normal[3]);
 	}
 
 	void AddQuad(int matGroupIdx, const Vec3 pos[4], const Vec3 normal[4], const Vec2 uv[4]){
+		auto& group = GetMaterialGroupFor(matGroupIdx);
 		AddQuad(matGroupIdx, pos, normal);
-		mMaterialGroups[matGroupIdx].mUVs.push_back(uv[0]);
-		mMaterialGroups[matGroupIdx].mUVs.push_back(uv[1]);
-		mMaterialGroups[matGroupIdx].mUVs.push_back(uv[2]);
+		group.mUVs.push_back(uv[0]);
+		group.mUVs.push_back(uv[1]);
+		group.mUVs.push_back(uv[2]);
 
-		mMaterialGroups[matGroupIdx].mUVs.push_back(uv[2]);
-		mMaterialGroups[matGroupIdx].mUVs.push_back(uv[1]);
-		mMaterialGroups[matGroupIdx].mUVs.push_back(uv[3]);
+		group.mUVs.push_back(uv[2]);
+		group.mUVs.push_back(uv[1]);
+		group.mUVs.push_back(uv[3]);
 	}
 
 	void SetPositions(int matGroupIdx, const Vec3* p, size_t numVertices){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mPositions.assign(p, p + numVertices);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mPositions.assign(p, p + numVertices);
 	}
 
 	void SetNormals(int matGroupIdx, const Vec3* n, size_t numNormals){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mNormals.assign(n, n + numNormals);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mNormals.assign(n, n + numNormals);
 	}
 
 	void SetUVs(int matGroupIdx, const Vec2* uvs, size_t numUVs){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mUVs.assign(uvs, uvs + numUVs);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mUVs.assign(uvs, uvs + numUVs);
 	}
 
 	void SetTriangles(int matGroupIdx, const ModelTriangle* tris, size_t numTri){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mTriangles.assign(tris, tris + numTri);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mTriangles.assign(tris, tris + numTri);
 	}
 
 	void SetColors(int matGroupIdx, const DWORD* colors, size_t numColors){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mColors.assign(colors, colors + numColors);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mColors.assign(colors, colors + numColors);
 	}
 
 	void SetTangents(int matGroupIdx, const Vec3* t, size_t numTangents){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mTangents.assign(t, t + numTangents);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mTangents.assign(t, t + numTangents);
 	}
 
 	void SetIndices(int matGroupIdx, const UINT* indices, size_t numIndices){
 		auto& renderer = Renderer::GetInstance();
-		CreateMaterialGroupFor(matGroupIdx);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
 		if (numIndices <= std::numeric_limits<USHORT>::max())
 		{
 			std::vector<USHORT> sIndices(indices, indices + numIndices);
-			mMaterialGroups[matGroupIdx].mIndexBuffer =
+			group.mIndexBuffer =
 				renderer.CreateIndexBuffer(&sIndices[0], numIndices, INDEXBUFFER_FORMAT_16BIT);
 		}
 		else
 		{
-			mMaterialGroups[matGroupIdx].mIndexBuffer =
+			group.mIndexBuffer =
 				renderer.CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_32BIT);
 		}
 	}
 
 	void SetIndices(int matGroupIdx, const USHORT* indices, size_t numIndices){
-		CreateMaterialGroupFor(matGroupIdx);
+		auto& group = GetMaterialGroupFor(matGroupIdx);
 		auto& renderer = Renderer::GetInstance();
-		mMaterialGroups[matGroupIdx].mIndexBuffer = renderer.CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_16BIT);
+		group.mIndexBuffer = renderer.CreateIndexBuffer((void*)indices, numIndices, INDEXBUFFER_FORMAT_16BIT);
 	}
 
 	void SetIndexBuffer(int matGroupIdx, IndexBufferPtr pIndexBuffer){
-		CreateMaterialGroupFor(matGroupIdx);
-		mMaterialGroups[matGroupIdx].mIndexBuffer = pIndexBuffer;
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mIndexBuffer = pIndexBuffer;
 	}
 
 	Vec3* GetPositions(int matGroupIdx, size_t& outNumPositions){
-		CreateMaterialGroupFor(matGroupIdx);
-		outNumPositions = mMaterialGroups[matGroupIdx].mPositions.size();
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		outNumPositions = group.mPositions.size();
 		if (outNumPositions)
-			return &(mMaterialGroups[matGroupIdx].mPositions[0]);
+			return &(group.mPositions[0]);
 		else
 			return 0;
 	}
 
 	Vec3* GetNormals(int matGroupIdx, size_t& outNumNormals){
-		CreateMaterialGroupFor(matGroupIdx);
-		outNumNormals = mMaterialGroups[matGroupIdx].mNormals.size();
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		outNumNormals = group.mNormals.size();
 		if (outNumNormals)
-			return &(mMaterialGroups[matGroupIdx].mNormals[0]);
+			return &(group.mNormals[0]);
 		else
 			return 0;
 	}
 
 	Vec2* GetUVs(int matGroupIdx, size_t& outNumUVs){
-		CreateMaterialGroupFor(matGroupIdx);
-		outNumUVs = mMaterialGroups[matGroupIdx].mUVs.size();
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		outNumUVs = group.mUVs.size();
 		if (outNumUVs)
-			return &(mMaterialGroups[matGroupIdx].mUVs[0]);
+			return &(group.mUVs[0]);
 		else
 			return 0;
 	}
@@ -684,18 +681,22 @@ public:
 
 
 		}
-		mAABB->EndComputeFromData();
-		auto self = mSelf.lock();
-		auto boundingVolume = self->GetBoundingVolume();
+		mAABB->EndComputeFromData();		
+		auto boundingVolume = mSelf->GetBoundingVolume();
 		boundingVolume->SetCenter(mAABB->GetCenter());
 		boundingVolume->SetRadius(mAABB->GetRadius());
-		auto boundingVolumeWorld = self->GetBoundingVolumeWorld();
-		boundingVolumeWorld->SetCenter(boundingVolume->GetCenter() + self->GetPosition());
-		const auto& s = self->GetScale();
+		auto boundingVolumeWorld = mSelf->GetBoundingVolumeWorld();
+		boundingVolumeWorld->SetCenter(boundingVolume->GetCenter() + mSelf->GetPosition());
+		const auto& s = mSelf->GetScale();
 		boundingVolumeWorld->SetRadius(boundingVolume->GetRadius() * std::max(std::max(s.x, s.y), s.z));;
 
 		if (!keepMeshData)
 			ClearMeshData();
+	}
+
+	void SetMaterialFor(int matGroupIdx, MaterialPtr material){
+		auto& group = GetMaterialGroupFor(matGroupIdx);
+		group.mMaterial = material;
 	}
 
 	void SetTopology(PRIMITIVE_TOPOLOGY topology){
@@ -706,51 +707,72 @@ public:
 		return mTopology;
 	}
 
-	const AUXILIARIES& GetAuxiliaries() const { 
-		return mAuxCloned ? *mAuxCloned : mAuxil; 
+	const AUXILIARIES* GetAuxiliaries() const { 
+		return mAuxiliary.const_get();
+	}
+
+	void AddAuxiliary(const AUXILIARY& aux){
+		if (!mAuxiliary){
+			mAuxiliary = new AUXILIARIES;
+		}
+		mAuxiliary->push_back(aux);
 	}
 
 	void SetAuxiliaries(const AUXILIARIES& aux) { 
-		mAuxil = aux; 
+		if (!mAuxiliary){
+			mAuxiliary = new AUXILIARIES;
+		}
+		*mAuxiliary = aux;
 	}
 
 	void AddCollisionShape(const COL_SHAPE& data){
+		if (!mCollisions){
+			mCollisions = new COLLISION_SHAPES;
+		}
 		FBCollisionShapePtr cs = FBCollisionShape::Create(data.first, data.second, 0);
-		mCollisions.push_back(cs);
+		mCollisions->push_back(cs);
 	}
 
-	void SetCollisionShapes(COLLISION_INFOS& colInfos){
+	void SetCollisionShapes(const COLLISION_INFOS& colInfos){
+		if (!mCollisions){
+			mCollisions = new COLLISION_SHAPES;
+		}
 		DeleteCollisionShapes();
 		for (const auto& var : colInfos)
 		{
-			mCollisions.push_back(FBCollisionShape::Create(var.mColShapeType, var.mTransform, var.mCollisionMesh));
+			mCollisions->push_back(FBCollisionShape::Create(var.mColShapeType, var.mTransform, var.mCollisionMesh));
 		}
 	}
 
 	
-	void SetCollisionMesh(MeshObjectPtr colMesh){
-		assert(!mCollisions.empty());
-		mCollisions.back()->SetCollisionMesh(colMesh);
+	void SetCollisionMesh(MeshObjectPtr colMesh){		
+		assert(!mCollisions->empty());
+		mCollisions->back()->SetCollisionMesh(colMesh);
 	}
 
 	unsigned GetNumCollisionShapes() const { 
-		return mCollisionsCloned ? mCollisionsCloned->size() : 0; 
+		if (!mCollisions)
+			return 0;
+		return mCollisions.const_get()->size();
 	}
 
 	bool HasCollisionShapes() const {
-		return mCollisionsCloned ? !mCollisionsCloned->empty() : false;
+		if (!mCollisions)
+			return false;
+		return !mCollisions.const_get()->empty();		
 	}
 
 	FBCollisionShapeConstPtr GetCollisionShape(unsigned idx) const { 
-		return mCollisionsCloned ? (*mCollisionsCloned)[idx] : 0; 
+		if (!mCollisions)
+			return 0;
+		return mCollisions.const_get()->operator[](idx);		
 	}
 
 	bool CheckNarrowCollision(BoundingVolumeConstPtr pBV) const{
 		unsigned num = GetNumCollisionShapes();
 		if (!num)
-			return true;
-		auto self = mSelf.lock();
-		auto& location = self->GetLocation();
+			return true;		
+		auto& location = mSelf->GetLocation();
 		for (unsigned i = 0; i < num; ++i)
 		{
 			FBCollisionShapeConstPtr cs = GetCollisionShape(i);
@@ -769,10 +791,9 @@ public:
 		if (!num)
 			return Ray3::IResult(false, 0.f);
 
-		auto self = mSelf.lock();
 		Real minDist = FLT_MAX;
 		bool collided = false;
-		auto& location = self->GetLocation();
+		auto& location = mSelf->GetLocation();
 		for (unsigned i = 0; i < num; ++i)
 		{
 			auto cs = GetCollisionShape(i);
@@ -797,11 +818,13 @@ public:
 		assert(index < num);
 		auto cs = GetCollisionShape(index);
 		assert(cs);		
-		return cs->GetRandomPosInVolume(nearWorld, mSelf.lock()->GetLocation());
+		return cs->GetRandomPosInVolume(nearWorld, mSelf->GetLocation());
 	}
 
 	void DeleteCollisionShapes(){
-		mCollisions.clear();
+		if (mCollisions){
+			mCollisions->clear();
+		}
 	}
 
 	void SetUseDynamicVB(BUFFER_TYPE type, bool useDynamicVB){
@@ -824,15 +847,15 @@ public:
 		switch (type)
 		{
 		case BUFFER_TYPE_POSITION:
-			return mg.mVBPos->Map(MAP_TYPE_WRITE, 0, MAP_FLAG_NONE);
+			return mg.mVBPos->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
 		case BUFFER_TYPE_NORMAL:
-			return mg.mVBNormal->Map(MAP_TYPE_WRITE_NO_OVERWRITE, 0, MAP_FLAG_NONE);
+			return mg.mVBNormal->Map(0, MAP_TYPE_WRITE_NO_OVERWRITE, MAP_FLAG_NONE);
 		case BUFFER_TYPE_UV:
-			return mg.mVBUV->Map(MAP_TYPE_WRITE, 0, MAP_FLAG_NONE);
+			return mg.mVBUV->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
 		case BUFFER_TYPE_COLOR:
-			return mg.mVBColor->Map(MAP_TYPE_WRITE, 0, MAP_FLAG_NONE);
+			return mg.mVBColor->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
 		case BUFFER_TYPE_TANGENT:
-			return mg.mVBTangent->Map(MAP_TYPE_WRITE, 0, MAP_FLAG_NONE);
+			return mg.mVBTangent->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
 		}
 		assert(0);
 
@@ -854,23 +877,22 @@ public:
 		switch (type)
 		{
 		case BUFFER_TYPE_POSITION:
-			return mg.mVBPos->Unmap();
+			return mg.mVBPos->Unmap(0);
 		case BUFFER_TYPE_NORMAL:
-			return mg.mVBNormal->Unmap();
+			return mg.mVBNormal->Unmap(0);
 		case BUFFER_TYPE_UV:
-			return mg.mVBUV->Unmap();
+			return mg.mVBUV->Unmap(0);
 		case BUFFER_TYPE_COLOR:
-			return mg.mVBColor->Unmap();
+			return mg.mVBColor->Unmap(0);
 		case BUFFER_TYPE_TANGENT:
-			return mg.mVBTangent->Unmap();
+			return mg.mVBTangent->Unmap(0);
 		}
 		assert(0);
 	}
 
 	bool RayCast(const Ray3& ray, Vec3& location, const ModelTriangle** outTri = 0) const{
-		auto& sceneMgr = SceneManager::GetInstance();
-		auto self = mSelf.lock();
-		auto mesh = sceneMgr.GetMeshArcheType(self->GetName());
+		auto& factory = SceneObjectFactory::GetInstance();		
+		auto mesh = factory.GetMeshArcheType(mSelf->GetName());
 		assert(mesh);
 		const Real maxRayDistance = 100000;
 		Real tMin = maxRayDistance;
@@ -1073,13 +1095,14 @@ public:
 		}
 	}
 
-	void CreateMaterialGroupFor(int matGroupIdx){
-		if ((int)mMaterialGroups.size() <= matGroupIdx)
-		{
-			mMaterialGroups.push_back(MaterialGroup());
+	MaterialGroup& GetMaterialGroupFor(int matGroupIdx){
+		while ((int)mMaterialGroups.size() <= matGroupIdx){
+			mMaterialGroups.push_back(MaterialGroup());			
 			auto& renderer = Renderer::GetInstance();
-			mMaterialGroups.back().mMaterial = renderer.GetMissingMaterial();
+			mMaterialGroups.back().mMaterial = renderer.GetResourceProvider()->GetMaterial(
+				ResourceTypes::Materials::Missing);
 		}
+		return mMaterialGroups[matGroupIdx];		
 	}
 	void RenderMaterialGroup(MaterialGroup* it, bool onlyPos){
 		assert(it);
@@ -1096,7 +1119,7 @@ public:
 			renderer.SetVertexBuffers(0, numBuffers, buffers, strides, offsets);
 			if (it->mIndexBuffer)
 			{
-				it->mIndexBuffer->Bind();
+				it->mIndexBuffer->Bind(0);
 				renderer.DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
 			}
 			else
@@ -1118,7 +1141,7 @@ public:
 			renderer.SetVertexBuffers(0, numBuffers, buffers, strides, offsets);
 			if (it->mIndexBuffer)
 			{
-				it->mIndexBuffer->Bind();				
+				it->mIndexBuffer->Bind(0);				
 				renderer.DrawIndexed(it->mIndexBuffer->GetNumIndices(), 0, 0);
 			}
 			else
@@ -1128,3 +1151,246 @@ public:
 		}
 	}
 };
+
+//---------------------------------------------------------------------------
+IMPLEMENT_STATIC_CREATE(MeshObject);
+MeshObjectPtr MeshObject::Create(const MeshObject& other){
+	return MeshObjectPtr(new MeshObject(other), [](MeshObject* obj){ delete obj; });
+}
+MeshObject::MeshObject()
+	: mImpl(new Impl(this))
+{
+
+}
+
+MeshObject::MeshObject(const MeshObject& other)
+	: SpatialObject(other)
+	, mImpl(new Impl(this, *other.mImpl))
+{
+
+}
+
+MeshObject::~MeshObject(){
+
+}
+
+void MeshObject::SetMaterial(const char* filepath, int pass) {
+	mImpl->SetMaterial(name, pass);
+}
+
+void MeshObject::SetMaterial(MaterialPtr pMat, int pass) {
+	mImpl->SetMaterial(pMat, pass);
+}
+
+MaterialPtr MeshObject::GetMaterial(int pass) const {
+	return mImpl->GetMaterial(pass);
+}
+
+void MeshObject::SetVertexBuffer(VertexBufferPtr pVertexBuffer) {
+	mImpl->SetVertexBuffer(pVertexBuffer);
+}
+
+void MeshObject::SetIndexBuffer(IndexBufferPtr pIndexBuffer) {
+	mImpl->SetIndexBuffer(pIndexBuffer);
+}
+
+void MeshObject::SetInputLayout(InputLayoutPtr i) {
+	mImpl->SetInputLayout(i);
+}
+
+void MeshObject::PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut) {
+	mImpl->PreRender(renderParam, renderParamOut);
+}
+
+void MeshObject::Render(const RenderParam& renderParam, RenderParamOut* renderParamOut) {
+	mImpl->Render(renderParam, renderParamOut);
+}
+
+void MeshObject::PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut) {
+	mImpl->PostRender(renderParam, renderParamOut);
+}
+
+void MeshObject::SetEnableHighlight(bool enable) {
+	mImpl->SetEnableHighlight(enable);
+}
+
+void MeshObject::RenderSimple() {
+	mImpl->RenderSimple();
+}
+
+void MeshObject::ClearMeshData() {
+	mImpl->ClearMeshData();
+}
+
+void MeshObject::StartModification() {
+	mImpl->StartModification();
+}
+
+void MeshObject::AddTriangle(int matGroupIdx, const Vec3& pos0, const Vec3& pos1, const Vec3& pos2) {
+	mImpl->AddTriangle(matGroupIdx, pos0, pos1, pos2);
+}
+
+void MeshObject::AddQuad(int matGroupIdx, const Vec3 pos[4], const Vec3 normal[4]) {
+	mImpl->AddQuad(matGroupIdx, pos, normal);
+}
+
+void MeshObject::AddQuad(int matGroupIdx, const Vec3 pos[4], const Vec3 normal[4], const Vec2 uv[4]) {
+	mImpl->AddQuad(matGroupIdx, pos, normal, uv);
+}
+
+void MeshObject::SetPositions(int matGroupIdx, const Vec3* p, size_t numVertices) {
+	mImpl->SetPositions(matGroupIdx, p, numVertices);
+}
+
+void MeshObject::SetNormals(int matGroupIdx, const Vec3* n, size_t numNormals) {
+	mImpl->SetNormals(matGroupIdx, n, numNormals);
+}
+
+void MeshObject::SetUVs(int matGroupIdx, const Vec2* uvs, size_t numUVs) {
+	mImpl->SetUVs(matGroupIdx, uvs, numUVs);
+}
+
+void MeshObject::SetTriangles(int matGroupIdx, const ModelTriangle* tris, size_t numTri) {
+	mImpl->SetTriangles(matGroupIdx, tris, numTri);
+}
+
+void MeshObject::SetColors(int matGroupIdx, const DWORD* colors, size_t numColors) {
+	mImpl->SetColors(matGroupIdx, colors, numColors);
+}
+
+void MeshObject::SetTangents(int matGroupIdx, const Vec3* t, size_t numTangents) {
+	mImpl->SetTangents(matGroupIdx, t, numTangents);
+}
+
+void MeshObject::SetIndices(int matGroupIdx, const UINT* indices, size_t numIndices) {
+	mImpl->SetIndices(matGroupIdx, indices, numIndices);
+}
+
+void MeshObject::SetIndices(int matGroupIdx, const USHORT* indices, size_t numIndices) {
+	mImpl->SetIndices(matGroupIdx, indices, numIndices);
+}
+
+void MeshObject::SetIndexBuffer(int matGroupIdx, IndexBufferPtr pIndexBuffer) {
+	mImpl->SetIndexBuffer(matGroupIdx, pIndexBuffer);
+}
+
+Vec3* MeshObject::GetPositions(int matGroupIdx, size_t& outNumPositions) {
+	return mImpl->GetPositions(matGroupIdx, outNumPositions);
+}
+
+Vec3* MeshObject::GetNormals(int matGroupIdx, size_t& outNumNormals) {
+	return mImpl->GetNormals(matGroupIdx, outNumNormals);
+}
+
+Vec2* MeshObject::GetUVs(int matGroupIdx, size_t& outNumUVs) {
+	return mImpl->GetUVs(matGroupIdx, outNumUVs);
+}
+
+void MeshObject::GenerateTangent(int matGroupIdx, UINT* indices, size_t num) {
+	mImpl->GenerateTangent(matGroupIdx, indices, num);
+}
+
+void MeshObject::EndModification(bool keepMeshData) {
+	mImpl->EndModification(keepMeshData);
+}
+
+void MeshObject::SetMaterialFor(int matGroupIdx, MaterialPtr material) {
+	mImpl->SetMaterialFor(matGroupIdx, material);
+}
+
+void MeshObject::SetTopology(PRIMITIVE_TOPOLOGY topology) {
+	mImpl->SetTopology(topology);
+}
+
+PRIMITIVE_TOPOLOGY MeshObject::GetTopology() {
+	return mImpl->GetTopology();
+}
+
+const AUXILIARIES* MeshObject::GetAuxiliaries() const {
+	return mImpl->GetAuxiliaries();
+}
+
+void MeshObject::AddAuxiliary(const AUXILIARY& aux) {
+	mImpl->AddAuxiliary(aux);
+}
+
+void MeshObject::SetAuxiliaries(const AUXILIARIES& auxes) {
+	mImpl->SetAuxiliaries(auxes);
+}
+
+void MeshObject::AddCollisionShape(const COL_SHAPE& data) {
+	mImpl->AddCollisionShape(data);
+}
+
+void MeshObject::SetCollisionShapes(const COLLISION_INFOS& colInfos) {
+	mImpl->SetCollisionShapes(colInfos);
+}
+
+void MeshObject::SetCollisionMesh(MeshObjectPtr colMesh) {
+	mImpl->SetCollisionMesh(colMesh);
+}
+
+unsigned MeshObject::GetNumCollisionShapes() const {
+	return mImpl->GetNumCollisionShapes();
+}
+
+bool MeshObject::HasCollisionShapes() const {
+	return mImpl->HasCollisionShapes();
+}
+
+FBCollisionShapeConstPtr MeshObject::GetCollisionShape(unsigned idx) const {
+	return mImpl->GetCollisionShape(idx);
+}
+
+bool MeshObject::CheckNarrowCollision(BoundingVolumeConstPtr pBV) const {
+	return mImpl->CheckNarrowCollision(pBV);
+}
+
+Ray3::IResult MeshObject::CheckNarrowCollisionRay(const Ray3& ray) const {
+	return mImpl->CheckNarrowCollisionRay(ray);
+}
+
+Vec3 MeshObject::GetRandomPosInVolume(const Vec3* nearWorld) const {
+	return mImpl->GetRandomPosInVolume(nearWorld);
+}
+
+void MeshObject::DeleteCollisionShapes() {
+	mImpl->DeleteCollisionShapes();
+}
+
+void MeshObject::SetUseDynamicVB(BUFFER_TYPE type, bool useDynamicVB) {
+	mImpl->SetUseDynamicVB(type, useDynamicVB);
+}
+
+MapData MeshObject::MapVB(BUFFER_TYPE type, size_t materialGroupIdx) {
+	return mImpl->MapVB(type, materialGroupIdx);
+}
+
+void MeshObject::UnmapVB(BUFFER_TYPE type, size_t materialGroupIdx) {
+	mImpl->UnmapVB(type, materialGroupIdx);
+}
+
+bool MeshObject::RayCast(const Ray3& ray, Vec3& location, const ModelTriangle** outTri) const {
+	return mImpl->RayCast(ray, location, outTri);
+}
+
+BoundingVolumeConstPtr MeshObject::GetAABB() const {
+	return mImpl->GetAABB();
+}
+
+void MeshObject::ClearVertexBuffers() {
+	mImpl->ClearVertexBuffers();
+}
+
+void MeshObject::SetAlpha(Real alpha) {
+	mImpl->SetAlpha(alpha);
+}
+
+void MeshObject::SetForceAlphaBlending(bool enable, Real alpha, Real forceGlow, bool disableDepth) {
+	mImpl->SetForceAlphaBlending(enable, alpha, forceGlow, disableDepth);
+}
+
+void MeshObject::SetAmbientColor(const Color& color) {
+	mImpl->SetAmbientColor(color);
+}
+

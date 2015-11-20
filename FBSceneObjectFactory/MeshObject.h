@@ -29,6 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBCollisionShape.h"
 #include "CollisionInfo.h"
+#include "MeshAuxiliary.h"
 #include "FBSceneManager/SpatialObject.h"
 #include "FBRenderer/IRenderable.h"
 #include "FBRenderer/RenderParam.h"
@@ -37,11 +38,11 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(MeshObject);
 	class FB_DLL_PUBLIC MeshObject : public SpatialObject, public IRenderable{
-		DECLARE_PIMPL(MeshObject);
+		DECLARE_PIMPL_CLONEABLE(MeshObject);		
+
+	protected:
 		MeshObject();
-		MeshObject(const MeshObject& other);
-		MeshObject& operator=(const MeshObject& other);
-		static MeshObjectPtr Create(const MeshObject& other);
+		~MeshObject();
 
 	public:
 
@@ -49,25 +50,22 @@ namespace fastbird{
 		Usullay when you want to load a .dae file, you use SceneManager::CreateMesh(filepath) function instead
 		calling this function directly. */
 		static MeshObjectPtr Create();
-		virtual ~MeshObject();
+		static MeshObjectPtr Create(const MeshObject& other);		
 
 		//---------------------------------------------------------------------------
 		// IRenderable Interfaces
 		//---------------------------------------------------------------------------
-		void SetMaterial(const char* name, int pass);
+		void SetMaterial(const char* filepath, int pass);
 		void SetMaterial(MaterialPtr pMat, int pass);
-		MaterialPtr GetMaterial(int pass = 0) const;
+		MaterialPtr GetMaterial(int pass = 0) const;		
 		void SetVertexBuffer(VertexBufferPtr pVertexBuffer);
 		void SetIndexBuffer(IndexBufferPtr pIndexBuffer);
 		// override the input layout defined in material
 		void SetInputLayout(InputLayoutPtr i);
-
 		void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		void PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
-
-		void SetEnableHighlight(bool enable) {}
-		AnimationPtr GetAnimation() const { return 0; }
+		void SetEnableHighlight(bool enable);
 
 
 		//---------------------------------------------------------------------------
@@ -86,14 +84,6 @@ namespace fastbird{
 			int           dominantAxis;     // dominant axis of the triangle plane
 		};
 
-		struct ModelIntersection {
-			const ModelTriangle        *pTri;      // Pointer to mesh triangle that was intersected by ray
-			Vec3     position;   // Intersection point on the triangle
-			Real           alpha;      // Alpha and beta are two of the barycentric coordinates of the intersection 
-			Real           beta;       // ... the third barycentric coordinate can be calculated by: 1- (alpha + beta).
-			bool            valid;      // "valid" is set to true if an intersection was found
-		};
-
 		enum BUFFER_TYPE
 		{
 			BUFFER_TYPE_POSITION,
@@ -104,8 +94,6 @@ namespace fastbird{
 
 			BUFFER_TYPE_NUM
 		};
-
-		typedef std::vector< std::pair<std::string, Transformation> > AUXILIARIES;
 
 		MeshObjectPtr Clone() const;
 		void RenderSimple();
@@ -129,14 +117,17 @@ namespace fastbird{
 		Vec2* GetUVs(int matGroupIdx, size_t& outNumUVs);
 		void GenerateTangent(int matGroupIdx, UINT* indices, size_t num);
 		void EndModification(bool keepMeshData);
-
+		void SetMaterialFor(int matGroupIdx, MaterialPtr material);
 		void SetTopology(PRIMITIVE_TOPOLOGY topology);
 		PRIMITIVE_TOPOLOGY GetTopology();		
 
-		const AUXILIARIES& GetAuxiliaries() const;
-		void SetAuxiliaries(const AUXILIARIES& aux);
+		/// Returns auxiliaries data
+		/// You do not own the returned pointer.
+		const AUXILIARIES* GetAuxiliaries() const;
+		void AddAuxiliary(const AUXILIARY& aux);
+		void SetAuxiliaries(const AUXILIARIES& auxes);
 		void AddCollisionShape(const COL_SHAPE& data);
-		void SetCollisionShapes(COLLISION_INFOS& colInfos);
+		void SetCollisionShapes(const COLLISION_INFOS& colInfos);
 		void SetCollisionMesh(MeshObjectPtr colMesh);
 		unsigned GetNumCollisionShapes() const;
 		bool HasCollisionShapes() const;
@@ -149,7 +140,6 @@ namespace fastbird{
 		MapData MapVB(BUFFER_TYPE type, size_t materialGroupIdx);
 		void UnmapVB(BUFFER_TYPE type, size_t materialGroupIdx);
 		bool RayCast(const Ray3& ray, Vec3& location, const ModelTriangle** outTri = 0) const;
-		void MakeMaterialIndependent();
 		BoundingVolumeConstPtr GetAABB() const;
 		void ClearVertexBuffers();
 		void SetAlpha(Real alpha);

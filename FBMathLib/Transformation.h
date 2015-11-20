@@ -85,8 +85,8 @@ namespace fastbird
 
 		void SetRotation (const Mat33& r);
 		void SetRotation (const Quat& r);
-		void SetDir(const Vec3& dir);
-		void SetDirAndRight(const Vec3& dir, const Vec3& right);
+		void SetDirection(const Vec3& dir);
+		void SetDirectionAndRight(const Vec3& dir, const Vec3& right);
 		void AddRotation (const Quat& addR);
 		const Quat& GetRotation() const{
 			assert(mRSSeperated);

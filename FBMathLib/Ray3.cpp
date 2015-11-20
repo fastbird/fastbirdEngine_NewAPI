@@ -40,7 +40,7 @@ Ray3::Ray3()
 Ray3::Ray3(const Vec3& origin, const Vec3& dir)
 	: mOrigin(origin)
 {
-	SetDir(dir);
+	SetDirection(dir);
 }
 
 Ray3::IResult Ray3::Intersects(const BoundingVolume* pBoundingVolume) const
@@ -103,7 +103,7 @@ Ray3::IResult Ray3::Intersects(const AABB& aabb, Vec3& normal) const
 }
 
 
-void Ray3::SetDir(const Vec3& dir)
+void Ray3::SetDirection(const Vec3& dir)
 { 
 	mDir = dir; 
 	mDirInv.x = mDir.x == 0.0f ? LARGE_Real : 1.0f / mDir.x;

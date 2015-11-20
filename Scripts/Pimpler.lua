@@ -41,6 +41,41 @@ function CaptureFunctionName(line)
 	return string.match(line, "([%w_][%w%d_]+)%(")
 end
 local WholeLines;
+
+function DeleteComments(line)
+	local lineCommentStart = string.find(line, '//')
+	local blockCommentStart = string.find(line, '/*', 1, true)
+	if lineCommentStart then
+		if not blockCommentStart or lineCommentStart < blockCommentStart then
+			line = string.sub(1, lineCommentStart-1)
+			return line
+		end
+	end
+	
+	if blockCommentStart then
+		local _, blockCommentEnd = string.find(line, '*/', 1, true)
+		if blockCommentEnd then
+			line = string.gsub(line, '/\\*.*\\*/', '')
+			return line
+		else
+			local notFound = true
+			while notFound do	
+				local nextLine = WholeLines()
+				if not nextLine then
+					print("cannot find a pair of /*")
+					return ''
+				end
+				line = line .. nextLine
+				local _, blockCommentEnd = string.find(nextLine, '*/', 1, true)
+				if blockCommentEnd then
+					line = string.gsub(line, '/\\*.*\\*/', '')
+					return line				
+				end				
+			end		
+		end
+	end	
+	return line
+end
 function RemoveLineFeed(line)
 	while not string.find(line, ';') do
 		local nextLine = WholeLines()
@@ -56,7 +91,8 @@ function RemoveDefaultArg(line)
 end
 
 function ReplaceToMethod(line, functionName)
-	return string.gsub(line, functionName, string.format("%s::%s", className, functionName))
+	local functionStart = functionName .. "%s*%("
+	return string.gsub(line, functionStart, string.format("%s::%s(", className, functionName))
 end
 
 function CaptureParamList(line, functionName)
@@ -104,6 +140,7 @@ if filepath then
 			specialLine = true
 		end
 		if started then
+			line = DeleteComments(line);
 			local commentStart = string.find(line, '//')
 			if commentStart==nil or commentStart > 4   then
 				local functionName = CaptureFunctionName(line)
@@ -136,9 +173,9 @@ if filepath then
 			end
 		end
 	end
-	io.input()
-	io.output(filepath)
+	io.input()	
 	if (successful) then
+		io.output(filepath)
 		for i=1, #lines do
 			io.write(lines[i])
 		end

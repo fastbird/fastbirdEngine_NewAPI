@@ -27,25 +27,48 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
+#include "MeshImportDesc.h"
 namespace fastbird{
+	DECLARE_SMART_PTR(TrailObject);
+	DECLARE_SMART_PTR(DustRenderer);
+	DECLARE_SMART_PTR(BillboardQuad);
+	DECLARE_SMART_PTR(SkySphere);
+	DECLARE_SMART_PTR(MeshGroup);
 	DECLARE_SMART_PTR(MeshObject);
 	DECLARE_SMART_PTR(SceneObjectFactory);
 	class SceneObjectFactory{
 		DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);
+
+	protected:
 		SceneObjectFactory();
+		~SceneObjectFactory();
 
 	public:
-		static SceneObjectFactoryPtr Create();
-		~SceneObjectFactory();
+		static SceneObjectFactoryPtr Create();		
+		static SceneObjectFactory& GetInstance();
+
+		/// Set false to skip loading meshes.
+		void SetEnableMeshLoad(bool enable);
 
 		/** Creates a MeshObject with .dae file.
 		This function creates a MeshObject from the .dae file and returned the cloned version of it.
 		The original create version(archetype) will be preserved. Whenever you requested the same
-		.dae file for another mesh object, the new mesh will be cloned from the archetype.
-		*/
+		.dae file for another mesh object, the new mesh will be cloned from the archetype. */
 		MeshObjectPtr CreateMeshObject(const char* daeFilePath);
-		/** Get an archetype mesh already loaded.
-		*/
+		MeshObjectPtr CreateMeshObject(const char* daeFilePath, const MeshImportDesc& desc);
+		/** Get an archetype mesh already loaded. */
 		MeshObjectConstPtr GetMeshArcheType(const char* name);
+
+		MeshGroupPtr CreateMeshGroup(const char* file);
+		MeshGroupPtr CreateMeshGroup(const char* file, const MeshImportDesc& desc);
+
+		SkySpherePtr CreateSkySphere();
+		BillboardQuadPtr CreateBillboardQuad();
+		DustRendererPtr CreateDustQuad();
+		TrailObjectPtr CreateTrailObject();
+
+		void UpdateEnvMapInNextFrame(SkySpherePtr sky);
+
+		void Update(TIME_PRECISION dt);
 	};
 }
