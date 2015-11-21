@@ -33,7 +33,7 @@
 namespace fastbird{	
 	DECLARE_SMART_PTR(Animation);
 	DECLARE_SMART_PTR(SpatialObject);
-	class FB_DLL_PUBLIC SpatialObject : public SceneObject{
+	class FB_DLL_SCENEMANAGER SpatialObject : public SceneObject{
 		DECLARE_PIMPL_CLONEABLE(SpatialObject);		
 
 	protected:
@@ -53,7 +53,7 @@ namespace fastbird{
 		void SetDirection(const Vec3& dir);
 		void SetDirectionAndRight(const Vec3& dir, const Vec3& right);
 		BoundingVolumePtr GetBoundingVolume();
-		BoundingVolumePtr GetBoundingVolumeWorld();
+		BoundingVolumePtr GetBoundingVolumeWorld();				
 		const Transformation& GetLocation() const;
 		const Transformation& GetAnimatedLocation() const;
 		AnimationPtr GetAnimation() const;

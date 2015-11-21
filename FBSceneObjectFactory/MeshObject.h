@@ -36,8 +36,10 @@
 #include "FBRenderer/RendererEnums.h"
 #include "FBRenderer/RendererStructs.h"
 namespace fastbird{
+	DECLARE_SMART_PTR(IndexBuffer);
+	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(MeshObject);
-	class FB_DLL_PUBLIC MeshObject : public SpatialObject, public IRenderable{
+	class FB_DLL_SCENEOBJECTFACTORY MeshObject : public SpatialObject, public IRenderable{
 		DECLARE_PIMPL_CLONEABLE(MeshObject);		
 
 	protected:
@@ -54,19 +56,10 @@ namespace fastbird{
 
 		//---------------------------------------------------------------------------
 		// IRenderable Interfaces
-		//---------------------------------------------------------------------------
-		void SetMaterial(const char* filepath, int pass);
-		void SetMaterial(MaterialPtr pMat, int pass);
-		MaterialPtr GetMaterial(int pass = 0) const;		
-		void SetVertexBuffer(VertexBufferPtr pVertexBuffer);
-		void SetIndexBuffer(IndexBufferPtr pIndexBuffer);
-		// override the input layout defined in material
-		void SetInputLayout(InputLayoutPtr i);
+		//---------------------------------------------------------------------------				
 		void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		void PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
-		void SetEnableHighlight(bool enable);
-
 
 		//---------------------------------------------------------------------------
 		// Own functions
@@ -96,9 +89,12 @@ namespace fastbird{
 		};
 
 		MeshObjectPtr Clone() const;
+		void SetMaterial(const char* filepath, int pass);
+		void SetMaterial(MaterialPtr pMat, int pass);
+		MaterialPtr GetMaterial(int pass = 0) const;
+		void SetEnableHighlight(bool enable);
 		void RenderSimple();
 		void ClearMeshData();
-
 		void StartModification();
 		void AddTriangle(int matGroupIdx, const Vec3& pos0, const Vec3& pos1, const Vec3& pos2);
 		void AddQuad(int matGroupIdx, const Vec3 pos[4], const Vec3 normal[4]);

@@ -50,7 +50,7 @@ namespace fastbird{
 	shared among cloned materials on CopyOnWrite manner. i.e. At the time you set new data
 	to the cloned material, the internal data of the material will be copied and be unique.
 	*/
-	class FB_DLL_PUBLIC Material{
+	class FB_DLL_RENDERER Material{
 		DECLARE_PIMPL(Material);
 		Material();
 		Material& Material::operator=(const Material& other) = delete;

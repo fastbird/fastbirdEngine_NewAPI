@@ -3,7 +3,7 @@
 #include "IRenderStrategy.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(RenderStrategyMinimum);
-	class FB_DLL_PUBLIC RenderStrategyMinimum : public IRenderStrategy{
+	class FB_DLL_RENDERER RenderStrategyMinimum : public IRenderStrategy{
 		DECLARE_PIMPL_NON_COPYABLE(RenderStrategyMinimum);
 		RenderStrategyMinimum();
 

@@ -46,7 +46,7 @@ namespace fastbird{
 	/** Collection of file manipulators.
 	\ingroup FBFileSystem
 	*/
-	class FB_DLL_PUBLIC FileSystem
+	class FB_DLL_FILESYSTEM FileSystem
 	{
 	public:
 		/**Start logging.

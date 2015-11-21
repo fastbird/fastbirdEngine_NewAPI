@@ -6,6 +6,7 @@
 #include "FBRenderer/ResourceProvider.h"
 #include "FBRenderer/Material.h"
 #include "FBRenderer/Texture.h"
+#include "FBRenderer/RenderStrategyMinimum.h"
 #include "FBSceneManager/Scene.h"
 #include "FBSceneManager/DirectionalLight.h"
 #include "FBSceneManager/Camera.h"
@@ -14,6 +15,7 @@
 using namespace fastbird;
 static RenderTargetPtr sRT;
 static ScenePtr sScene;
+static RenderStrategyMinimumPtr sRenderStrategy;
 static const int ENV_SIZE = 1024;
 class SkySphere::Impl{
 public:
@@ -35,6 +37,8 @@ public:
 	Vec4 mIrradConsts[NumConsts];
 	Vec4 mIrradCoeff[9];
 	unsigned mLastPreRendered;
+	// alphablend sky
+	SkySpherePtr mBlendingSkySphere;
 	
 
 	Impl(SkySphere* self)
@@ -48,8 +52,96 @@ public:
 	}
 
 	// IRenderable
+	void PreRender(const RenderParam& param, RenderParamOut* paramOut){
+		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
+			return;
+
+		if (mLastPreRendered == gpTimer->GetFrame())
+			return;
+		mLastPreRendered = gpTimer->GetFrame();
+
+		if (mBlendingSkySphere && mBlendingSkySphere->GetAlpha() == 1.0f){
+			mBlendingSkySphere->PreRender(param, paramOut);
+			return;
+		}
+
+		if (mInterpolating)
+		{
+			mCurInterpolationTime += gpTimer->GetDeltaTime();
+			float normTime = mCurInterpolationTime / mInterpolationTime;
+			if (normTime >= 1.0f)
+			{
+				normTime = 1.0f;
+				mInterpolating = false;
+				if (!mUseAlphaBlend)
+				{
+					SceneObjectFactory::GetInstance().UpdateEnvMapInNextFrame(mSelfPtr.lock());
+				}
+			}
+
+			for (int i = 0; i < 5; i++)
+			{
+				mMaterial->SetMaterialParameters(i, Lerp(mMaterialParamCur[i], mMaterialParamDest[i], normTime));
+				if (mMaterialOCC)
+				{
+					mMaterialOCC->SetMaterialParameters(i, Lerp(mMaterialParamCur[i], mMaterialParamDest[i], normTime));
+				}
+			}
+		}
+
+		if (mBlendingSkySphere && mBlendingSkySphere->GetAlpha() != 0.f){
+			mBlendingSkySphere->PreRender(param, paramOut);
+		}
+	}
+
+	void Render(const RenderParam& param, RenderParamOut* paramOut){
+		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
+			return;
+
+		if (mBlendingSkySphere && mBlendingSkySphere->GetAlpha() == 1.0f){
+			mBlendingSkySphere->Render(param, paramOut);
+			return;
+		}
+
+		if (!mMaterial)
+		{
+			assert(0);
+			return;
+		}
+
+		auto& renderer = Renderer::GetInstance();
+		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		renderer.UnbindInputLayout();
+		renderer.UnbindVertexBuffers();
+		if (mMaterialOCC && param.mRenderPass == RENDER_PASS::PASS_GODRAY_OCC_PRE)
+		{
+			RenderEventMarker mark("SkySphere_OCC");
+			mMaterialOCC->Bind(false);
+			renderer.Draw(3, 0);
+		}
+		else if (param.mRenderPass == RENDER_PASS::PASS_NORMAL)
+		{
+			RenderEventMarker mark("SkySphere");			
+			mMaterial->Bind(false);
+			if (mUseAlphaBlend)
+			{
+				renderer.GetResourceProvider()->BindBlendState(ResourceTypes::BlendStates::AlphaBlend);
+			}
+			renderer.Draw(3, 0);
+		}
+
+		if (mBlendingSkySphere && mBlendingSkySphere->GetAlpha() != 0.f){
+			mBlendingSkySphere->Render(param, paramOut);
+		}
+	}
+
+	void PostRender(const RenderParam& param, RenderParamOut* paramOut){
+		
+	}
+
+	// SkySphere
 	void SetMaterial(const char* filepath, int pass){
-		auto material = Renderer::GetInstance().CreateMaterial(filepath);		
+		auto material = Renderer::GetInstance().CreateMaterial(filepath);
 		if (material)
 		{
 			if (pass == RENDER_PASS::PASS_NORMAL)
@@ -87,92 +179,6 @@ public:
 		return 0;
 	}
 
-	void SetVertexBuffer(VertexBufferPtr pVertexBuffer){
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot set vertex buffer for SkySphere");
-	}
-
-	void SetIndexBuffer(IndexBufferPtr pIndexBuffer){
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot set index buffer for SkySphere");
-	}
-
-	// override the input layout defined in material
-	void SetInputLayout(InputLayoutPtr i){
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot set input layout for SkySphere");
-	}
-
-	void PreRender(const RenderParam& param, RenderParamOut* paramOut){
-		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
-			return;
-
-		if (mLastPreRendered == gpTimer->GetFrame())
-			return;
-		mLastPreRendered = gpTimer->GetFrame();
-
-		if (mInterpolating)
-		{
-			mCurInterpolationTime += gpTimer->GetDeltaTime();
-			float normTime = mCurInterpolationTime / mInterpolationTime;
-			if (normTime >= 1.0f)
-			{
-				normTime = 1.0f;
-				mInterpolating = false;
-				if (!mUseAlphaBlend)
-				{
-					SceneObjectFactory::GetInstance().UpdateEnvMapInNextFrame(mSelfPtr.lock());
-				}
-			}
-
-			for (int i = 0; i < 5; i++)
-			{
-				mMaterial->SetMaterialParameters(i, Lerp(mMaterialParamCur[i], mMaterialParamDest[i], normTime));
-				if (mMaterialOCC)
-				{
-					mMaterialOCC->SetMaterialParameters(i, Lerp(mMaterialParamCur[i], mMaterialParamDest[i], normTime));
-				}
-			}
-		}
-	}
-
-	void Render(const RenderParam& param, RenderParamOut* paramOut){
-		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
-			return;
-
-		if (!mMaterial)
-		{
-			assert(0);
-			return;
-		}
-
-		auto& renderer = Renderer::GetInstance();
-		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		renderer.UnbindInputLayout();
-		renderer.UnbindVertexBuffers();
-		if (mMaterialOCC && param.mRenderPass == RENDER_PASS::PASS_GODRAY_OCC_PRE)
-		{
-			RenderEventMarker mark("SkySphere_OCC");
-			mMaterialOCC->Bind(false);
-			renderer.Draw(3, 0);
-		}
-		else if (param.mRenderPass == RENDER_PASS::PASS_NORMAL)
-		{
-			RenderEventMarker mark("SkySphere");			
-			mMaterial->Bind(false);
-			if (mUseAlphaBlend)
-			{
-				renderer.GetResourceProvider()->BindBlendState(ResourceTypes::BlendStates::AlphaBlend);
-			}
-			renderer.Draw(3, 0);
-		}
-	}
-
-	void PostRender(const RenderParam& param, RenderParamOut* paramOut){
-		
-	}
-
-	void SetEnableHighlight(bool enable){		
-	}
-
-	// SkySphere
 	Vec3 NormalFromCubePixelCoord(int face, int w, int h, float halfWidth)
 	{
 		Vec3 n;
@@ -452,6 +458,19 @@ public:
 	float GetAlpha() const{
 		return mAlpha;
 	}
+
+	void AttachBlendingSky(SkySpherePtr sky){
+		mBlendingSkySphere = sky;
+		mBlendingSkySphere->SetUseAlphaBlend(true);
+	}
+
+	void DetachBlendingSky(){
+		mBlendingSkySphere = 0;
+	}
+
+	SkySpherePtr GetBlendingSky(){
+		return mBlendingSkySphere;
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -471,17 +490,84 @@ void SkySphere::CreateSharedEnvRT(){
 		sRT = renderer.CreateRenderTarget(param);
 		sScene = Scene::Create("SkySphereScene");
 		sRT->RegisterScene(sScene);
-
-		sRT->GetRenderPipeline().SetMinimum();
+		sRenderStrategy = RenderStrategyMinimum::Create();
+		sRT->SetRenderStrategy(sRenderStrategy);		
 	}
 }
 void SkySphere::DestroySharedEnvRT(){
-
+	sRenderStrategy = 0;
+	sScene = 0;
+	sRT = 0;
 }
 
+//---------------------------------------------------------------------------
 IMPLEMENT_STATIC_CREATE(SkySphere);
 SkySphere::SkySphere()
-	: mImpl(new Impl)
+	: mImpl(new Impl(this))
 {
+	SetRenderable(this);
+}
 
+SkySphere::~SkySphere()
+{
+}
+
+void SkySphere::SetMaterial(const char* filepath, int pass) {
+	mImpl->SetMaterial(filepath, pass);
+}
+
+void SkySphere::SetMaterial(MaterialPtr pMat, int pass) {
+	mImpl->SetMaterial(pMat, pass);
+}
+
+MaterialPtr SkySphere::GetMaterial(int pass) const {
+	return mImpl->GetMaterial(pass);
+}
+
+void SkySphere::PreRender(const RenderParam& param, RenderParamOut* paramOut) {
+	mImpl->PreRender(param, paramOut);
+}
+
+void SkySphere::Render(const RenderParam& param, RenderParamOut* paramOut) {
+	mImpl->Render(param, paramOut);
+}
+
+void SkySphere::PostRender(const RenderParam& param, RenderParamOut* paramOut) {
+	mImpl->PostRender(param, paramOut);
+}
+
+void SkySphere::UpdateEnvironmentMap(const Vec3& origin) {
+	mImpl->UpdateEnvironmentMap(origin);
+}
+
+void SkySphere::SetInterpolationData(unsigned index, const Vec4& data) {
+	mImpl->SetInterpolationData(index, data);
+}
+
+void SkySphere::PrepareInterpolation(float time, SkySpherePtr startFrom) {
+	mImpl->PrepareInterpolation(time, startFrom);
+}
+
+void SkySphere::SetUseAlphaBlend(bool use) {
+	mImpl->SetUseAlphaBlend(use);
+}
+
+void SkySphere::SetAlpha(float alpha) {
+	mImpl->SetAlpha(alpha);
+}
+
+float SkySphere::GetAlpha() const {
+	return mImpl->GetAlpha();
+}
+
+void SkySphere::AttachBlendingSky(SkySpherePtr sky){
+	mImpl->AttachBlendingSky(sky);
+}
+
+void SkySphere::DetachBlendingSky(){
+	mImpl->DetachBlendingSky();
+}
+
+SkySpherePtr SkySphere::GetBlendingSky(){
+	return mImpl->GetBlendingSky();
 }

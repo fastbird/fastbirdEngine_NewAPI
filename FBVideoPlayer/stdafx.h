@@ -24,9 +24,18 @@
  THE SOFTWARE.
  -----------------------------------------------------------------------------
 */
-
+#pragma warning (disable : 4251)
 #pragma comment(lib, "libogg.lib")
 #pragma comment(lib, "libtheora.lib")
+
+#if defined(_WIN32) 
+#define FB_DLL_VIDEOPLAYER __declspec(dllexport)
+#define FB_DLL_AUDIO __declspec(dllimport)
+#define FB_DLL_RENDERER __declspec(dllimport)
+#define FB_DLL_TIMER __declspec(dllimport)
+#else
+#define FB_DLL_AUDIO
+#endif
 
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"

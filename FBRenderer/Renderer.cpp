@@ -2370,6 +2370,7 @@ RendererPtr Renderer::Create(){
 		auto renderer = RendererPtr(FB_NEW(Renderer), [](Renderer* obj){ FB_DELETE(obj); });
 		renderer->mImpl->mSelf = renderer;
 		sRenderer = renderer;
+		return renderer;
 	}
 	return sRenderer.lock();
 }

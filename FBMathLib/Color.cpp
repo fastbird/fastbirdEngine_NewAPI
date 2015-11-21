@@ -206,13 +206,14 @@ unsigned Color::FixColorByteOrder(unsigned c)
 }
 
 
-
 Color Color::RandomColor(){
 	return Color(Random(), Random(), Random(), 1.f);
 }
-inline Color Random(const Color& min, const Color& max)
+
+Color Random(const Color& min, const Color& max)
 {
 	return Color(Random(min.r(), max.r()), Random(min.g(), max.g()),
 		Random(min.b(), max.b()));
 }
+
 }

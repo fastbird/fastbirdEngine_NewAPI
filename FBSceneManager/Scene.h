@@ -41,7 +41,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(SceneObject);
 	DECLARE_SMART_PTR(DirectionalLight);
 	DECLARE_SMART_PTR(Scene);
-	class FB_DLL_PUBLIC Scene : public Observable<ISceneObserver>{
+	class FB_DLL_SCENEMANAGER Scene : public Observable<ISceneObserver>{
 		DECLARE_PIMPL_NON_COPYABLE(Scene);		
 		Scene(const char* name);		
 		
@@ -69,13 +69,9 @@ namespace fastbird{
 		const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(CameraPtr cam);
 		void PrintSpatialObject();
 
-		void AttachSkySphere(SkySpherePtr p);
-		void AttachSkySphereBlend(SkySpherePtr p);
-		void DetachSkySphere();
-		void DetachSkySphereBlend();
-		void SwapSkySphereBlendAndDetach();
-		SkySpherePtr GetSkySphere();
-		SkySpherePtr GetSkySphereBlend() const;
+		void AttachSkySphere(SkySpherePtr p);		
+		void DetachSkySphere();				
+		SkySpherePtr GetSkySphere();		
 		void ToggleSkyRendering();
 		void SetSkyRendering(bool render);
 		bool GetSkyRendering();		

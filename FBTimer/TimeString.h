@@ -30,7 +30,7 @@
 #include <string>
 namespace fastbird
 {
-	class FB_DLL_PUBLIC TimeString{
+	class FB_DLL_TIMER TimeString{
 	public:
 		static std::string GetTimeString();
 		static std::string GetTimeStringForFileName();

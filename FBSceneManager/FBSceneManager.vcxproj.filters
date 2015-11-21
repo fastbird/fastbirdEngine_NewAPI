@@ -8,7 +8,6 @@
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SceneObjectFlag.h" />
     <ClInclude Include="SpatialObject.h" />
-    <ClInclude Include="SceneObjectType.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ICameraObserver.h" />
     <ClInclude Include="DirectionalLight.h" />

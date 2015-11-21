@@ -35,8 +35,8 @@
 #include "FBMathLib/Color.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBTimer/Timer.h"
-#include "FBSceneObjectFactory/SkySphere.h"
 #include "FBStringLib/StringLib.h"
+#include "FBSceneObjectFactory/SkySphere.h"// this doesn't make denpendency
 using namespace fastbird;
 
 class Scene::Impl{
@@ -56,9 +56,8 @@ public:
 	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleObjectsMain;
 	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleObjectsLight;
 	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mPreRenderList;
-	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleTransparentObjects;
+	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleTransparentObjects;	
 	SkySpherePtr mSkySphere;
-	SkySpherePtr mSkySphereBlend; // alphablend sky
 	DirectionalLightPtr mDirectionalLight[2];
 	bool mSkipSpatialObjects;
 	bool mSkyRendering;
@@ -237,17 +236,7 @@ public:
 		{
 			if (mSkySphere)
 			{
-				if (mSkySphereBlend && mSkySphereBlend->GetAlpha() == 1.0f)
-				{
-					mSkySphereBlend->PreRender(renderParam, renderParamOut);
-				}
-				else
-				{
-					mSkySphere->PreRender(renderParam, renderParamOut);
-					if (mSkySphereBlend && mSkySphereBlend->GetAlpha() != 0.f)
-						mSkySphereBlend->PreRender(renderParam, renderParamOut);
-				}
-
+				mSkySphere->PreRender(renderParam, renderParamOut);
 			}
 		}
 
@@ -305,14 +294,7 @@ public:
 			{
 				if (mSkySphere)
 				{
-					if (mSkySphereBlend && mSkySphereBlend->GetAlpha() == 1.0f)
-						mSkySphereBlend->Render(param, paramOut);
-					else
-					{
-						mSkySphere->Render(param, paramOut);
-						if (mSkySphereBlend && mSkySphereBlend->GetAlpha() != 0.f)
-							mSkySphereBlend->Render(param, paramOut);
-					}
+					mSkySphere->Render(param, paramOut);
 				}
 
 			}
@@ -438,20 +420,8 @@ public:
 		if (mSkySphere)
 			mSkySphere->OnDetachedFromScene(mSelfPtr.lock());
 		mSkySphere = p;
-		if (mSkySphere){
-			mSkySphere->SetUseAlphaBlend(false);
+		if (mSkySphere){			
 			mSkySphere->OnAttachedToScene(mSelfPtr.lock());
-		}
-	}
-
-	void AttachSkySphereBlend(SkySpherePtr p){		
-		if (mSkySphereBlend)
-			mSkySphereBlend->OnDetachedFromScene(mSelfPtr.lock());
-		mSkySphereBlend = p;
-		if (mSkySphereBlend)
-		{
-			mSkySphereBlend->SetUseAlphaBlend(true);
-			mSkySphereBlend->OnAttachedToScene(mSelfPtr.lock());
 		}
 	}
 
@@ -459,23 +429,8 @@ public:
 		mSkySphere = 0;
 	}
 
-	void DetachSkySphereBlend(){
-		mSkySphereBlend = 0;
-	}
-
-	void SwapSkySphereBlendAndDetach(){
-		mSkySphere = mSkySphereBlend;
-		if (mSkySphere)
-			mSkySphere->SetUseAlphaBlend(false);
-		mSkySphereBlend = 0;
-	}
-
 	SkySpherePtr GetSkySphere(){
 		return mSkySphere;
-	}
-
-	SkySpherePtr GetSkySphereBlend() const{
-		return mSkySphereBlend;
 	}
 
 	void ToggleSkyRendering(){
@@ -620,28 +575,12 @@ void Scene::AttachSkySphere(SkySpherePtr p) {
 	mImpl->AttachSkySphere(p);
 }
 
-void Scene::AttachSkySphereBlend(SkySpherePtr p) {
-	mImpl->AttachSkySphereBlend(p);
-}
-
 void Scene::DetachSkySphere() {
 	mImpl->DetachSkySphere();
 }
 
-void Scene::DetachSkySphereBlend() {
-	mImpl->DetachSkySphereBlend();
-}
-
-void Scene::SwapSkySphereBlendAndDetach() {
-	mImpl->SwapSkySphereBlendAndDetach();
-}
-
 SkySpherePtr Scene::GetSkySphere() {
 	return mImpl->GetSkySphere();
-}
-
-SkySpherePtr Scene::GetSkySphereBlend() const {
-	return mImpl->GetSkySphereBlend();
 }
 
 void Scene::ToggleSkyRendering() {

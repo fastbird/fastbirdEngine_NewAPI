@@ -32,7 +32,6 @@ namespace fastbird{
 	DECLARE_SMART_PTR(IVideoPlayer);
 	class IVideoPlayer{
 	public:
-		virtual ~IVideoPlayer(){}
 		typedef std::function<void(IVideoPlayer*)> VideoNotifierFunc;
 		virtual bool PlayVideo(const char* path) = 0;
 		virtual void StopVideo() = 0;

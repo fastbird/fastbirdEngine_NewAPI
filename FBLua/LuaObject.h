@@ -32,9 +32,9 @@
 #include "FBCommonHeaders/SpinLock.h"
 namespace fastbird
 {
-	class FB_DLL_PUBLIC LuaObject;
+	class FB_DLL_LUA LuaObject;
 	//-----------------------------------------------------------------------------
-	class FB_DLL_PUBLIC LuaTableIterator
+	class FB_DLL_LUA LuaTableIterator
 	{
 		lua_State* mL;
 	public:
@@ -46,7 +46,7 @@ namespace fastbird
 	};
 
 	//-----------------------------------------------------------------------------
-	class FB_DLL_PUBLIC LuaSequenceIterator
+	class FB_DLL_LUA LuaSequenceIterator
 	{
 		lua_State* mL;
 		size_t mLen;
@@ -60,7 +60,7 @@ namespace fastbird
 	};
 
 	//-----------------------------------------------------------------------------
-	class FB_DLL_PUBLIC LuaObject
+	class FB_DLL_LUA LuaObject
 	{
 		int mRef;
 		lua_State* mL;

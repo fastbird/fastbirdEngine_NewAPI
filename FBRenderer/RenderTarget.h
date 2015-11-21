@@ -38,6 +38,7 @@ namespace fastbird
 	class Scene;
 	class IRenderTargetListener;
 	typedef unsigned RenderTargetId;
+	DECLARE_SMART_PTR(IRenderStrategy);
 	DECLARE_SMART_PTR(IInputInjector);
 	DECLARE_SMART_PTR(GaussianDist);
 	DECLARE_SMART_PTR(RenderPipeline);	
@@ -48,7 +49,7 @@ namespace fastbird
 	DECLARE_SMART_PTR(Keyboard);
 	DECLARE_SMART_PTR(Renderer);
 	DECLARE_SMART_PTR(RenderTarget);
-	class FB_DLL_PUBLIC RenderTarget : public Observable<IRenderTargetObserver>
+	class FB_DLL_RENDERER RenderTarget : public Observable<IRenderTargetObserver>
 	{
 		static const int FB_NUM_BLOOM_TEXTURES = 3;
 		static const int FB_NUM_STAR_TEXTURES = 12;
@@ -75,7 +76,7 @@ namespace fastbird
 		RenderTargetId GetId() const;
 		bool CheckOptions(const RenderTargetParam& param);
 		
-		void SetRenderStrategy();
+		IRenderStrategyPtr SetRenderStrategy(IRenderStrategyPtr strategy);
 		ScenePtr RegisterScene(ScenePtr scene);
 		ScenePtr GetScene() const;
 		CameraPtr ReplaceCamera(CameraPtr cam);

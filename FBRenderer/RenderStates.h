@@ -32,7 +32,7 @@
 namespace fastbird{	
 	//---------------------------------------------------------------------------
 	DECLARE_SMART_PTR(RasterizerState);
-	class FB_DLL_PUBLIC RasterizerState{
+	class FB_DLL_RENDERER RasterizerState{
 		DECLARE_PIMPL_NON_COPYABLE(RasterizerState);
 		RasterizerState();
 
@@ -46,7 +46,7 @@ namespace fastbird{
 
 	//---------------------------------------------------------------------------
 	DECLARE_SMART_PTR(BlendState);
-	class FB_DLL_PUBLIC BlendState{
+	class FB_DLL_RENDERER BlendState{
 		DECLARE_PIMPL_NON_COPYABLE(BlendState);
 		BlendState();
 
@@ -61,7 +61,7 @@ namespace fastbird{
 
 	//---------------------------------------------------------------------------
 	DECLARE_SMART_PTR(DepthStencilState);
-	class FB_DLL_PUBLIC DepthStencilState{
+	class FB_DLL_RENDERER DepthStencilState{
 		DECLARE_PIMPL_NON_COPYABLE(DepthStencilState);
 		DepthStencilState();
 
@@ -77,7 +77,7 @@ namespace fastbird{
 
 	//---------------------------------------------------------------------------
 	DECLARE_SMART_PTR(SamplerState);
-	class FB_DLL_PUBLIC SamplerState{
+	class FB_DLL_RENDERER SamplerState{
 		DECLARE_PIMPL_NON_COPYABLE(SamplerState);
 		SamplerState();
 
@@ -95,7 +95,7 @@ namespace fastbird{
 	RenderStates usually resides in Material. Internal data will be efficiently shared among
 	RenderStates objects indicating the same states.
 	*/
-	class FB_DLL_PUBLIC RenderStates
+	class FB_DLL_RENDERER RenderStates
 	{
 		DECLARE_PIMPL(RenderStates);
 		RenderStates();

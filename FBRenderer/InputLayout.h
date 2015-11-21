@@ -29,7 +29,7 @@
 #include "IPlatformInputLayout.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(InputLayout);
-	class InputLayout{
+	class FB_DLL_RENDERER InputLayout{
 		DECLARE_PIMPL_NON_COPYABLE(InputLayout);
 		InputLayout();
 

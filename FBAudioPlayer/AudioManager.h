@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(AudioManager);
-	class FB_DLL_PUBLIC AudioManager{
+	class FB_DLL_AUDIO AudioManager{
 		DECLARE_PIMPL_NON_COPYABLE(AudioManager);		
 		AudioManager();
 	public:

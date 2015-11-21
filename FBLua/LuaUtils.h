@@ -144,7 +144,7 @@ for (int i = 0; i <= (endIdx); ++i)\
 
 namespace fastbird
 {
-	struct FB_DLL_PUBLIC LUA_STACK_WATCHER
+	struct FB_DLL_LUA LUA_STACK_WATCHER
 	{
 		lua_State* lua;
 		int top;
@@ -155,7 +155,7 @@ namespace fastbird
 		
 	};
 
-	struct FB_DLL_PUBLIC LUA_STACK_CLIPPER
+	struct FB_DLL_LUA LUA_STACK_CLIPPER
 	{
 		lua_State* lua;
 		int top;
@@ -167,7 +167,7 @@ namespace fastbird
 	//---------------------------------------------------------------------------
 	// Generic lua call
 	//---------------------------------------------------------------------------
-	class FB_DLL_PUBLIC LuaUtils{
+	class FB_DLL_LUA LuaUtils{
 	public:
 		/** The first lua state created by this function will be the main state.
 		*/

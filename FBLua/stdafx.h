@@ -26,6 +26,10 @@
 */
 
 #pragma warning (disable : 4251)
+#if defined(_WIN32)
+#define FB_DLL_LUA __declspec(dllexport)
+#else
+#endif
 // If you are linking against Lua compiled in C++, define LUAW_NO_EXTERN_C
 #ifndef LUAW_NO_EXTERN_C
 extern "C"

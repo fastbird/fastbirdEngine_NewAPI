@@ -36,7 +36,7 @@ namespace fastbird{
 	When you create server textures with the same file name, the underying hardward
 	texture resource will be shared among them.	
 	*/
-	class FB_DLL_PUBLIC Texture
+	class FB_DLL_RENDERER Texture
 	{
 		DECLARE_PIMPL(Texture);
 		friend class RenderResourceFactory;

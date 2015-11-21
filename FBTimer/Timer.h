@@ -32,7 +32,7 @@
 namespace fastbird
 {
 	DECLARE_SMART_PTR(Timer);
-	class FB_DLL_PUBLIC Timer
+	class FB_DLL_TIMER Timer
 	{
 		DECLARE_PIMPL(Timer);
 		Timer();
@@ -44,6 +44,9 @@ namespace fastbird
 
 		void Tick();
 		void Reset();
+		/// Get current game time
+		/// In seconds. Calling this function in the same frame will return
+		/// the same value.
 		TIME_PRECISION GetTime() const;
 		TIME_PRECISION GetDeltaTime() const;
 		TIME_PRECISION GetDeltaTimeNotPausable() const;		

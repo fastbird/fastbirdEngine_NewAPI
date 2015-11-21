@@ -25,8 +25,22 @@
  -----------------------------------------------------------------------------
 */
 #pragma warning (disable : 4251)
+
+#if defined(_WIN32) 
+#define FB_DLL_SCENEOBJECTFACTORY __declspec(dllexport)
+#define FB_DLL_ANIMATION __declspec(dllimport)
+#define FB_DLL_COLLADA __declspec(dllimport)
+#define FB_DLL_RENDERER __declspec(dllimport)
+#define FB_DLL_SCENEMANAGER __declspec(dllimport)
+#define FB_DLL_TIMER __declspec(dllimport)
+#else
+#define FB_DLL_ANIMATION
+#endif
+
+
 #include "FBCommonHeaders/platform.h"
 
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 #include "FBMathLib/Math.h"
+#include <queue>

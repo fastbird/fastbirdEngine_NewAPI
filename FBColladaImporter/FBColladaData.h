@@ -1,10 +1,11 @@
 #pragma once
+#include "FBCommonHeaders/Types.h"
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
 namespace fastbird{
-	class AnimationData;	
+	DECLARE_SMART_PTR(AnimationData);
 	namespace collada{
 		typedef std::vector<unsigned> IndexBuffer;
 		enum ColShape

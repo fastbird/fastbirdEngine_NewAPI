@@ -45,7 +45,8 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..;$(THEORA_DIR)\include;$(OGG_DIR)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FB_DLL_PROJECT;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -60,7 +61,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..;$(THEORA_DIR)\include;$(OGG_DIR)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FB_DLL_PROJECT;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -79,6 +80,7 @@
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="VideoPlayerDirectShow.cpp" />
     <ClCompile Include="VideoPlayerOgg.cpp" />
@@ -95,6 +97,9 @@
     </ProjectReference>
     <ProjectReference Include="..\FBStringLib\FBStringLib.vcxproj">
       <Project>{97920097-3e86-410d-8d98-a2ecad02a35f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBTimer\FBTimer.vcxproj">
+      <Project>{e828f5fb-d914-4891-8be0-737dd73f06ab}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

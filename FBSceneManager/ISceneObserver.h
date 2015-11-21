@@ -31,14 +31,14 @@
 namespace fastbird
 {
 	DECLARE_SMART_PTR(Scene);
-	class FB_DLL_PUBLIC ISceneObserver
+	class ISceneObserver
 	{
 	public:
 		enum{
 			Timing
 		};
-		virtual void OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){}
-		virtual void OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){}
-		virtual void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){}
+		virtual void OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
+		virtual void OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
+		virtual void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
 	};
 }

@@ -39,7 +39,7 @@ namespace fastbird{
 	directory. Order is not defined. You will get empty string _T("") if you get
 	all file names. This function is not thread safe.
 	*/
-	class FB_DLL_PUBLIC DirectoryIterator{
+	class FB_DLL_FILESYSTEM DirectoryIterator{
 		DECLARE_PIMPL_NON_COPYABLE(DirectoryIterator);
 
 	public:

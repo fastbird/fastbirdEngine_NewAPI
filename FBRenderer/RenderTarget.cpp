@@ -113,6 +113,12 @@ public:
 			param.mMipmap == mMiplevel && param.mCubemap == mCubeMap && param.mWillCreateDepth == mWillCreateDepth;
 	}
 
+	IRenderStrategyPtr SetRenderStrategy(IRenderStrategyPtr strategy){
+		auto prev = mStrategy;
+		mStrategy = strategy;
+		return prev;
+	}
+
 	ScenePtr RegisterScene(ScenePtr scene)
 	{
 		auto prevScene = mScene;
@@ -389,6 +395,10 @@ RenderTargetId RenderTarget::GetId() const{
 bool RenderTarget::CheckOptions(const RenderTargetParam& param)
 {
 	return mImpl->CheckOptions(param);
+}
+
+IRenderStrategyPtr RenderTarget::SetRenderStrategy(IRenderStrategyPtr strategy){
+	return mImpl->SetRenderStrategy(strategy);
 }
 
 ScenePtr RenderTarget::RegisterScene(ScenePtr scene)

@@ -70,3 +70,10 @@ if ((V))
 //assert((V));
 #define if_assert_fail(V)  \
 if (!(V))
+
+template <class T>
+void ClearWithSwap(T& m)
+{
+	T empty;
+	std::swap(m, empty);
+}

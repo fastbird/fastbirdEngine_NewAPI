@@ -33,7 +33,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(Animation);
 	/** Represents an animation instance using the AnimationData.
 	*/
-	class FB_DLL_PUBLIC Animation{
+	class FB_DLL_ANIMATION Animation{
 		DECLARE_PIMPL_CLONEABLE(Animation);
 		Animation();
 

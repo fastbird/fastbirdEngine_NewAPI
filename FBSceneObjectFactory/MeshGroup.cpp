@@ -74,32 +74,6 @@ public:
 	//---------------------------------------------------------------------------
 	// IRenderable
 	//---------------------------------------------------------------------------
-	void SetMaterial(const char* filepath, int pass){		
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot use this function for mesh group");
-	}
-
-	void SetMaterial(MaterialPtr pMat, int pass){
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot use this function for mesh group");
-	}
-
-	MaterialPtr GetMaterial(int pass = 0) const{
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot use this function for mesh group");
-		return 0;
-	}
-
-	void SetVertexBuffer(VertexBufferPtr pVertexBuffer){
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot use this function for mesh group");
-	}
-
-	void SetIndexBuffer(IndexBufferPtr pIndexBuffer){		
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot use this function for mesh group");
-	}
-
-	// override the input layout defined in material
-	void SetInputLayout(InputLayoutPtr i){		
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot use this function for mesh group");
-	}
-
 	void PreRender(const RenderParam& param, RenderParamOut* paramOut){
 		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
 			return;
@@ -136,18 +110,18 @@ public:
 		}
 	}
 
-	void SetEnableHighlight(bool enable){
-		for (auto& it : mMeshObjects){
-			it.first->SetEnableHighlight(enable);
-		}
-	}
-
 
 	//---------------------------------------------------------------------------
 	// Own functions
 	//---------------------------------------------------------------------------		
 	MeshGroupPtr Clone() const{
 		return MeshGroup::Create(*mSelf);
+	}
+
+	void SetEnableHighlight(bool enable){
+		for (auto& it : mMeshObjects){
+			it.first->SetEnableHighlight(enable);
+		}
 	}
 
 	// order of inserting meshes is important. parent first.
@@ -479,7 +453,7 @@ MeshGroupPtr MeshGroup::Create(const MeshGroup& other){
 MeshGroup::MeshGroup()
 	: mImpl(new Impl(this))
 {
-
+	SetRenderable(this);
 }
 
 MeshGroup::MeshGroup(const MeshGroup& other)
@@ -490,30 +464,6 @@ MeshGroup::MeshGroup(const MeshGroup& other)
 
 MeshGroup::~MeshGroup(){
 
-}
-
-void MeshGroup::SetMaterial(const char* filepath, int pass) {
-	mImpl->SetMaterial(name, pass);
-}
-
-void MeshGroup::SetMaterial(MaterialPtr pMat, int pass) {
-	mImpl->SetMaterial(pMat, pass);
-}
-
-MaterialPtr MeshGroup::GetMaterial(int pass) const {
-	return mImpl->GetMaterial(pass);
-}
-
-void MeshGroup::SetVertexBuffer(VertexBufferPtr pVertexBuffer) {
-	mImpl->SetVertexBuffer(pVertexBuffer);
-}
-
-void MeshGroup::SetIndexBuffer(IndexBufferPtr pIndexBuffer) {
-	mImpl->SetIndexBuffer(pIndexBuffer);
-}
-
-void MeshGroup::SetInputLayout(InputLayoutPtr i) {
-	mImpl->SetInputLayout(i);
 }
 
 void MeshGroup::PreRender(const RenderParam& param, RenderParamOut* paramOut) {

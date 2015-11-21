@@ -37,6 +37,18 @@ Plugin:
 // Happens when a interface can have not exposed symbols.
 // But they are all privates so it is fine.
 #pragma warning (disable : 4251)
+
+#if defined(_WIN32) 
+#define FB_DLL_SCENEOBJECTFACTORY __declspec(dllimport)
+#define FB_DLL_RENDERER __declspec(dllimport)
+#define FB_DLL_SCENEMANAGER __declspec(dllexport)
+#define FB_DLL_TIMER __declspec(dllimport)
+#define FB_DLL_ANIMATION __declspec(dllimport)
+#else
+#define FB_DLL_TIMER
+#define FB_DLL_ANIMATION
+#endif
+
 #define FBDLLProject
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)

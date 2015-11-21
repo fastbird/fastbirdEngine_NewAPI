@@ -37,7 +37,7 @@ namespace fastbird{
 	information inherit this class.
 	\ingroup FBInputManager
 	*/
-	class FB_DLL_PUBLIC IInputConsumer{		
+	class IInputConsumer{		
 	public:
 		/**Default priority
 		*/
@@ -46,8 +46,7 @@ namespace fastbird{
 			Priority33_UI = 33,			
 			Priority55_INTERACTION = 55,
 			Priority77_CAMERA = 77,	
-		};		
-		virtual ~IInputConsumer(){}
+		};				
 
 		/** Implement this function in your derived class to get user input.
 		*/

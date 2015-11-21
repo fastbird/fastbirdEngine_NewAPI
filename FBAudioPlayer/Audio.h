@@ -30,7 +30,7 @@
 namespace fastbird{
 	
 	DECLARE_SMART_PTR(Audio);
-	class FB_DLL_PUBLIC Audio{
+	class FB_DLL_AUDIO Audio{
 		DECLARE_PIMPL_NON_COPYABLE(Audio);
 		Audio();
 

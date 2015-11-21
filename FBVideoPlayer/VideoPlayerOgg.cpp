@@ -29,14 +29,15 @@
 #include "VideoPlayerOgg.h"
 #include "FBAudioPlayer/Audio.h"
 #include "FBRenderer/Renderer.h"
+#include "FBRenderer/ResourceProvider.h"
 #include "FBRenderer/Texture.h"
+#include "FBTimer/Timer.h"
 using namespace fastbird;
 
 namespace fastbird{
-	void stripe_decoded(VideoPlayerOgg* player, th_ycbcr_buffer _src,
-		int _fragy0, int _fragy_end){
-		player->StripeDecoded(_src, _fragy0, _fragy_end);
-	}
+	Timer* gpTimer = 0;
+	void stripe_decoded(VideoPlayerOgg::Impl* player, th_ycbcr_buffer _src,
+		int _fragy0, int _fragy_end);
 }
 
 class VideoPlayerOgg::Impl{
@@ -86,6 +87,9 @@ public:
 		, mIsFirstFrame(true)
 	{
 		mPS = Renderer::GetInstance().CreateShader("es/shaders/YUVMovie.hlsl", BINDING_SHADER_PS);
+		if (!gpTimer){
+			gpTimer = Timer::GetMainTimer().get();
+		}
 	}
 
 	~Impl(){
@@ -330,7 +334,7 @@ public:
 			}
 		}
 		cb.ctx = this;
-		cb.stripe_decoded = (th_stripe_decoded_func)stripe_decoded;
+		cb.stripe_decoded = (th_stripe_decoded_func)stripe_decoded;		
 		th_decode_ctl(mTheoraDecoderCtx, TH_DECCTL_SET_STRIPE_CB, &cb, sizeof(cb));
 	}
 
@@ -393,16 +397,27 @@ public:
 		}
 	}
 
+	bool IsFinish(){
+		return mFinish;
+	}
+
 	void Display(){
 		RenderEventMarker mark("Video Rendering");
 		for (int pli = 0; pli<3; pli++){
 			mTextures[pli]->Bind(BINDING_SHADER_PS, pli);
 		}
 		auto& renderer = Renderer::GetInstance();
-		renderer.SetNoDepthStencil();
+		renderer.GetResourceProvider()->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthStencil);
 		renderer.DrawFullscreenQuad(mPS, false);
 	}
 };
+
+namespace fastbird{
+	void stripe_decoded(VideoPlayerOgg::Impl* player, th_ycbcr_buffer _src,
+		int _fragy0, int _fragy_end){
+		player->StripeDecoded(_src, _fragy0, _fragy_end);
+	}
+}
 
 //---------------------------------------------------------------------------
 VideoPlayerOggPtr VideoPlayerOgg::Create(){
@@ -414,5 +429,33 @@ VideoPlayerOgg::VideoPlayerOgg()
 	: mImpl(new Impl)
 {
 	
+}
+
+VideoPlayerOgg::~VideoPlayerOgg(){
+
+}
+
+bool VideoPlayerOgg::PlayVideo(const char* path) {
+	return mImpl->PlayVideo(path);
+}
+
+void VideoPlayerOgg::StopVideo() {
+	mImpl->StopVideo();
+}
+
+void VideoPlayerOgg::RegisterVideoNotifier(VideoNotifierFunc func) {
+	mImpl->RegisterVideoNotifier(func);
+}
+
+void VideoPlayerOgg::SetDurationAfterFinish(TIME_PRECISION time) {
+	mImpl->SetDurationAfterFinish(time);
+}
+
+void VideoPlayerOgg::Update(TIME_PRECISION dt) {
+	mImpl->Update(dt);
+}
+
+bool VideoPlayerOgg::IsFinish() const {
+	return mImpl->IsFinish();
 }
 

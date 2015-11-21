@@ -46,7 +46,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..;$(VORBIS_DIR)\include;$(OGG_DIR)\include;$(OPENAL_SOFT_DIR)\include;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>FB_DLL_PROJECT;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -62,7 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>..;$(VORBIS_DIR)\include;$(OGG_DIR)\include;$(OPENAL_SOFT_DIR)\include;</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PreprocessorDefinitions>FB_DLL_PROJECT;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -24,23 +24,16 @@ namespace fastbird
 
 		//---------------------------------------------------------------------------
 		// IRenderable
-		//---------------------------------------------------------------------------
-		void SetMaterial(const char* filepath, int pass);
-		void SetMaterial(MaterialPtr pMat, int pass);
-		MaterialPtr GetMaterial(int pass = 0) const;		
-		void SetVertexBuffer(VertexBufferPtr pVertexBuffer);
-		void SetIndexBuffer(IndexBufferPtr pIndexBuffer);
-		// override the input layout defined in material
-		void SetInputLayout(InputLayoutPtr i);
+		//---------------------------------------------------------------------------								
 		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
 		void Render(const RenderParam& param, RenderParamOut* paramOut);
-		void PostRender(const RenderParam& param, RenderParamOut* paramOut);
-		void SetEnableHighlight(bool enable);		
+		void PostRender(const RenderParam& param, RenderParamOut* paramOut);		
 
 		//---------------------------------------------------------------------------
 		// Own functions
 		//---------------------------------------------------------------------------		
 		MeshGroupPtr Clone() const;
+		void SetEnableHighlight(bool enable);
 		// order of inserting meshes is important. parent first.
 		// transformation is in parent space.
 		size_t AddMesh(MeshObjectPtr mesh, const Transformation& transform, size_t parent);

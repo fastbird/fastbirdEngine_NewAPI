@@ -46,7 +46,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(DXSDK_DIR)\include;..;../EssentialEngineData;$(ZLIB_HOME)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FB_PLUGIN_DLL_PROJECT;CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -62,7 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(DXSDK_DIR)\include;..;../EssentialEngineData;$(ZLIB_HOME)\include</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>FB_PLUGIN_DLL_PROJECT;CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CPP;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -76,7 +76,10 @@
     <ClCompile Include="IndexBufferD3D11.cpp" />
     <ClCompile Include="InputLayoutD3D11.cpp" />
     <ClCompile Include="IUnknownDeleter.cpp" />
-    <ClCompile Include="RendererD3D11.cpp" />
+    <ClCompile Include="RendererD3D11.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</PreprocessToFile>
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</PreprocessToFile>
+    </ClCompile>
     <ClCompile Include="RenderStatesD3D11.cpp" />
     <ClCompile Include="ShaderD3D11.cpp" />
     <ClCompile Include="stdafx.cpp">

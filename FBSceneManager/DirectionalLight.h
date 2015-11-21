@@ -32,7 +32,7 @@ namespace fastbird
 {
 	DECLARE_SMART_PTR(DirectionalLight);
 	//------------------------------------------------------------------------
-	class FB_DLL_PUBLIC DirectionalLight
+	class FB_DLL_SCENEMANAGER DirectionalLight
 	{
 		DECLARE_PIMPL_NON_COPYABLE(DirectionalLight);
 		DirectionalLight();

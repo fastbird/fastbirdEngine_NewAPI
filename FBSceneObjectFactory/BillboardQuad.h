@@ -1,33 +1,31 @@
 #pragma once
-#include <Engine/IBillboardQuad.h>
-#include <Engine/RendererStructs.h>
-
+#include "FBCommonHeaders/platform.h"
+#include "FBSceneManager/SpatialObject.h"
+#include "FBRenderer/IRenderable.h"
 namespace fastbird
 {
-	class BillboardQuad : public IBillboardQuad
+	DECLARE_SMART_PTR(Color);
+	DECLARE_SMART_PTR(Material);
+	DECLARE_SMART_PTR(BillboardQuad);
+	class FB_DLL_SCENEOBJECTFACTORY BillboardQuad : public SpatialObject, public IRenderable
 	{
-	public:
+		DECLARE_PIMPL_NON_COPYABLE(BillboardQuad);
 		BillboardQuad();
-		virtual ~BillboardQuad();
+		~BillboardQuad();
 
-		// IObject
-		virtual void PreRender(float dt);
-		virtual void Render();
-		virtual void PostRender();
-		virtual void SetMaterial(IMaterial* mat, int pass = 0);
-		virtual IMaterial* GetMaterial(int pass = 0) const;
+	public:
 
-		// IBillboardQuad
-		virtual void SetBillobardData(const Vec3& pos, const Vec2& size, const Vec2& offset, const Color& color);
-		virtual void SetAlphaBlend(bool blend);
+		static BillboardQuadPtr Create();
+		//---------------------------------------------------------------------------
+		// IRenderable Interfaces
+		//---------------------------------------------------------------------------
+		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
+		void Render(const RenderParam& param, RenderParamOut* paramOut);
+		void PostRender(const RenderParam& param, RenderParamOut* paramOut);
 
-	private:		
-		Vec3 mWorldPos;
-		Vec2 mSize;
-		Vec2 mOffset;
-		DWORD mColor;
-		SmartPtr<IMaterial> mMaterial;
-		SmartPtr<RenderStates> mRenderStates;
-
+		void SetMaterial(MaterialPtr mat);
+		MaterialPtr GetMaterial() const;		
+		void SetBillobardData(const Vec3& pos, const Vec2& size, const Vec2& offset, const Color& color);
+		void SetAlphaBlend(bool blend);
 	};
 }

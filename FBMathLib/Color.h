@@ -92,5 +92,5 @@ namespace fastbird
 		Vec4 mValue;
 	};
 
-	inline Color Random(const Color& min, const Color& max);
+	Color Random(const Color& min, const Color& max);
 }

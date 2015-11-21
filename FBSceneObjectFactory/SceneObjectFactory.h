@@ -37,9 +37,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(MeshObject);
 	DECLARE_SMART_PTR(SceneObjectFactory);
 	class SceneObjectFactory{
-		DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);
-
-	protected:
+		DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);	
 		SceneObjectFactory();
 		~SceneObjectFactory();
 
@@ -49,7 +47,6 @@ namespace fastbird{
 
 		/// Set false to skip loading meshes.
 		void SetEnableMeshLoad(bool enable);
-
 		/** Creates a MeshObject with .dae file.
 		This function creates a MeshObject from the .dae file and returned the cloned version of it.
 		The original create version(archetype) will be preserved. Whenever you requested the same

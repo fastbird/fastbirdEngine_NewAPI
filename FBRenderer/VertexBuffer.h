@@ -31,7 +31,7 @@
 namespace fastbird{
 	DECLARE_SMART_PTR(IPlatformVertexBuffer);
 	DECLARE_SMART_PTR(VertexBuffer);
-	class FB_DLL_PUBLIC VertexBuffer{
+	class FB_DLL_RENDERER VertexBuffer{
 		DECLARE_PIMPL_NON_COPYABLE(VertexBuffer);
 		VertexBuffer(unsigned stride, unsigned numVertices);
 

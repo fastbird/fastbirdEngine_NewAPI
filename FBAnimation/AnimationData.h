@@ -34,7 +34,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(AnimationData);
 	/** Represents an unique animation set.
 	*/
-	class FB_DLL_PUBLIC AnimationData{
+	class FB_DLL_ANIMATION AnimationData{
 		DECLARE_PIMPL_NON_COPYABLE(AnimationData);
 		AnimationData();
 

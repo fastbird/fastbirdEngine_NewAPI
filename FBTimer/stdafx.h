@@ -26,4 +26,12 @@
 */
 
 #pragma warning (disable : 4251)
+
+#if defined(_WIN32) 
+#define FB_DLL_TIMER __declspec(dllexport)
+#else
+#define FB_DLL_TIMER
+#endif
+
+
 #include "FBCommonHeaders/platform.h"

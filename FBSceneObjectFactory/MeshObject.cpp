@@ -142,39 +142,9 @@ public:
 		}
 	}
 
-	void SetMaterial(const char* filepath, int pass){
-		auto& group = GetMaterialGroupFor(0);
-		auto& renderer = Renderer::GetInstance();
-		group.mMaterial = renderer.CreateMaterial(name);
-	}
-	
-	void SetMaterial(MaterialPtr pMat, int pass){
-		auto& group = GetMaterialGroupFor(0);
-		group.mMaterial = pMat;
-	}
-	
-	MaterialPtr GetMaterial(int pass) const{
-		if (!mMaterialGroups.empty())
-		{
-			return mForceAlphaBlending ? mMaterialGroups[0].mForceAlphaMaterial : mMaterialGroups[0].mMaterial;
-		}
-		return 0;
-	}
-	
-	void SetVertexBuffer(VertexBufferPtr pVertexBuffer){		
-		Logger::Log(FB_ERROR_LOG_ARG, "You cannot directly set a vertex buffer to a mesh object.\
-									  Use StartModification() / EndModification() functino.");
-	}
-	
-	void SetIndexBuffer(IndexBufferPtr pIndexBuffer){
-		Logger::Log(FB_ERROR_LOG_ARG, "Use SetIndexBuffer(int matGroupIdx, IIndexBuffer* pIndexBuffer) function instead.");
-	}
-	
-	// override the input layout defined in material
-	void SetInputLayout(InputLayoutPtr i){
-		// Don't need to support it now.
-	}
-
+	//---------------------------------------------------------------------------
+	// IRenderable
+	//---------------------------------------------------------------------------
 	void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut){		
 		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
 			return;
@@ -274,10 +244,10 @@ public:
 					continue;
 
 				if (it.mMaterial->GetBindingShaders() & BINDING_SHADER_GS) {
-					renderer.SetOccPreGSShader();
+					renderer.GetResourceProvider()->BindShader(ResourceTypes::Shaders::OcclusionPrePassVSGSPS);					
 				}
 				else {
-					renderer.SetOccPreShader();
+					renderer.GetResourceProvider()->BindShader(ResourceTypes::Shaders::OcclusionPrePassVSPS);					
 				}
 				it.mMaterial->BindMaterialParams();
 
@@ -405,14 +375,35 @@ public:
 	void PostRender(const RenderParam& renderParam, RenderParamOut* renderParamOut){
 		
 	}
-	
+
+	//---------------------------------------------------------------------------
+	// Own
+	//---------------------------------------------------------------------------
+	MeshObjectPtr Clone() const{
+		return MeshObject::Create(*mSelf);
+	}
+
+	void SetMaterial(const char* filepath, int pass){
+		auto& group = GetMaterialGroupFor(0);
+		auto& renderer = Renderer::GetInstance();
+		group.mMaterial = renderer.CreateMaterial(filepath);
+	}
+
+	void SetMaterial(MaterialPtr pMat, int pass){
+		auto& group = GetMaterialGroupFor(0);
+		group.mMaterial = pMat;
+	}
+
+	MaterialPtr GetMaterial(int pass) const{
+		if (!mMaterialGroups.empty())
+		{
+			return mForceAlphaBlending ? mMaterialGroups[0].mForceAlphaMaterial : mMaterialGroups[0].mMaterial;
+		}
+		return 0;
+	}
 
 	void SetEnableHighlight(bool enable){
 		mRenderHighlight = enable;
-	}
-
-	MeshObjectPtr Clone() const{
-		return MeshObject::Create(*mSelf);
 	}
 
 	void RenderSimple(){
@@ -1160,7 +1151,7 @@ MeshObjectPtr MeshObject::Create(const MeshObject& other){
 MeshObject::MeshObject()
 	: mImpl(new Impl(this))
 {
-
+	SetRenderable(this);
 }
 
 MeshObject::MeshObject(const MeshObject& other)
@@ -1174,8 +1165,12 @@ MeshObject::~MeshObject(){
 
 }
 
+MeshObjectPtr MeshObject::Clone() const{
+	return mImpl->Clone();
+}
+
 void MeshObject::SetMaterial(const char* filepath, int pass) {
-	mImpl->SetMaterial(name, pass);
+	mImpl->SetMaterial(filepath, pass);
 }
 
 void MeshObject::SetMaterial(MaterialPtr pMat, int pass) {
@@ -1184,18 +1179,6 @@ void MeshObject::SetMaterial(MaterialPtr pMat, int pass) {
 
 MaterialPtr MeshObject::GetMaterial(int pass) const {
 	return mImpl->GetMaterial(pass);
-}
-
-void MeshObject::SetVertexBuffer(VertexBufferPtr pVertexBuffer) {
-	mImpl->SetVertexBuffer(pVertexBuffer);
-}
-
-void MeshObject::SetIndexBuffer(IndexBufferPtr pIndexBuffer) {
-	mImpl->SetIndexBuffer(pIndexBuffer);
-}
-
-void MeshObject::SetInputLayout(InputLayoutPtr i) {
-	mImpl->SetInputLayout(i);
 }
 
 void MeshObject::PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut) {

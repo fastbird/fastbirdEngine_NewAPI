@@ -34,7 +34,7 @@ namespace fastbird
 {
 	DECLARE_SMART_PTR(IPlatformShader);
 	DECLARE_SMART_PTR(Shader);
-	class FB_DLL_PUBLIC Shader
+	class FB_DLL_RENDERER Shader
 	{
 		DECLARE_PIMPL(Shader);
 		Shader();

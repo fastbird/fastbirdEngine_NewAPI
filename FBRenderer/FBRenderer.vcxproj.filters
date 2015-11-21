@@ -48,9 +48,6 @@
     <ClInclude Include="TextTags.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="IPlatformRenderer.h" />
-    <ClInclude Include="IPlatformRendererStructs.h">
-      <Filter>Enum&amp;Structures</Filter>
-    </ClInclude>
     <ClInclude Include="IPlatformTexture.h" />
     <ClInclude Include="IPlatformVertexBuffer.h" />
     <ClInclude Include="IPlatformShader.h" />

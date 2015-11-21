@@ -31,6 +31,6 @@ namespace fastbird {
 	class IPlatformRenderer;
 }
 extern "C"{
-	FB_PLUGIN_DLL_PUBLIC fastbird::IPlatformRenderer* CreateRenderEngine();
-	FB_PLUGIN_DLL_PUBLIC void DeleteRenderEngine();
+	FB_DLL_RENDERERD3D11 fastbird::IPlatformRenderer* CreateRenderEngine();
+	FB_DLL_RENDERERD3D11 void DeleteRenderEngine();
 }

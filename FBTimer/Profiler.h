@@ -31,7 +31,7 @@
 #include "Timer.h"
 namespace fastbird
 {
-	class FB_DLL_PUBLIC Profiler
+	class FB_DLL_TIMER Profiler
 	{
 		static int indent;
 		typedef std::stack<std::string> MSG_STACK;
@@ -50,7 +50,7 @@ namespace fastbird
 		void Reset();	
 	};
 
-	class FB_DLL_PUBLIC ProfilerSimple
+	class FB_DLL_TIMER ProfilerSimple
 	{
 		const char* mName;
 		INT64 mStartTick;

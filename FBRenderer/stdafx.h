@@ -36,6 +36,19 @@ Plugin: \b FBRendererD3D11
 // Happens when a interface can have not exposed symbols.
 // But they are all privates so it is fine.
 #pragma warning (disable : 4251)
+
+#if defined(_WIN32) 
+#define FB_DLL_RENDERER __declspec(dllexport)
+#define FB_DLL_TIMER __declspec(dllimport)
+#define FB_DLL_FILESYSTEM __declspec(dllimport)
+#define FB_DLL_INPUTMANAGER __declspec(dllimport)
+#define FB_DLL_LUA __declspec(dllimport)
+#define FB_DLL_SCENEMANAGER __declspec(dllimport)
+#else
+#define FB_DLL_TIMER
+#endif
+
+
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #else

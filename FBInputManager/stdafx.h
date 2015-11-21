@@ -27,7 +27,13 @@
 
 #pragma warning (disable : 4251)
 
-#define FBDLLProject
+#if defined(_WIN32) 
+#define FB_DLL_INPUTMANAGER __declspec(dllexport)
+#define FB_DLL_TIMER __declspec(dllimport)
+#else
+#define FB_DLL_TIMER
+#endif
+
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define LEAN_AND_MEAN

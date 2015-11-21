@@ -26,3 +26,11 @@
 */
 
 #pragma warning (disable : 4251)
+
+#if defined(_WIN32) 
+#define FB_DLL_TIMER __declspec(dllimport)
+#define FB_DLL_ANIMATION __declspec(dllexport)
+#else
+#define FB_DLL_TIMER
+#define FB_DLL_ANIMATION
+#endif

@@ -70,7 +70,7 @@ namespace fastbird{
 	render states, lights and render targets.
 	\ingroup FBRenderer
 	*/
-	class FB_DLL_PUBLIC Renderer : public Observable<IRendererObserver>, public ISceneObserver, public IInputConsumer{
+	class FB_DLL_RENDERER Renderer : public Observable<IRendererObserver>, public ISceneObserver, public IInputConsumer{
 		DECLARE_PIMPL_NON_COPYABLE(Renderer);
 		Renderer();		
 
@@ -193,9 +193,7 @@ namespace fastbird{
 		// pre defined
 		void BindDepthTexture(bool set);		
 		void SetDepthWriteShader();
-		void SetDepthWriteShaderCloud();
-		void SetOccPreShader();
-		void SetOccPreGSShader();
+		void SetDepthWriteShaderCloud();		
 		void SetPositionInputLayout();
 
 		void SetSystemTextureBindings(SystemTextures::Enum type, const TextureBindings& bindings);

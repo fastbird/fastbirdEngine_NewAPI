@@ -7,7 +7,6 @@
 #include "FBColladaImporter/ColladaImporter.h"
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/ResourceProvider.h"
-#include "FBFileSystem/FileSystem.h"
 #include "FBAnimation/AnimationData.h"
 #include "FBAnimation/Animation.h"
 #include "FBTimer/Timer.h"
@@ -20,13 +19,13 @@ Timer* fastbird::gpTimer = 0;
 class SceneObjectFactory::Impl
 {
 public:
+	SceneObjectFactoryWeakPtr mSelfPtr;
 	// T itself should be shared_ptr
 	template <class T>
 	struct DataHolder{
 		unsigned mNumCloned;
 		T mObject;
 	};
-
 	// key is lower case.
 	VectorMap<std::string, DataHolder<MeshObjectPtr> > mMeshObjects;
 	VectorMap<std::string, DataHolder<MeshGroupPtr> > mMeshGroups;
@@ -167,7 +166,7 @@ public:
 			AUXILIARY aux;
 			aux.first = it.first;			
 			aux.second = ConvertCollada(it.second);
-			mesh->AddAuxiliaries(aux);
+			mesh->AddAuxiliary(aux);
 		}
 		mesh->SetCollisionShapes(ConvertCollada(meshData->mCollisionInfo));
 
@@ -176,7 +175,7 @@ public:
 	}
 
 	MeshObjectPtr CreateMeshObject(const char* daeFilePath){
-		CreateMeshObject(daeFilePath, MeshImportDesc());
+		return CreateMeshObject(daeFilePath, MeshImportDesc());
 	}
 
 	MeshObjectPtr CreateMeshObject(const char* daeFilePath, const MeshImportDesc& desc){
@@ -252,9 +251,10 @@ public:
 			AUXILIARY aux;
 			aux.first = it.first;
 			aux.second = ConvertCollada(it.second);
-			meshGroup->AddAuxiliaries(aux);
+			meshGroup->AddAuxiliary(aux);
 		}
 		meshGroup->SetCollisionShapes(ConvertCollada(groupData->mCollisionInfo));
+		return meshGroup;
 	}
 
 	MeshGroupPtr CreateMeshGroup(const char* file){
@@ -309,19 +309,19 @@ public:
 	}
 
 	SkySpherePtr CreateSkySphere(){
-		
+		return 0;
 	}
 
 	BillboardQuadPtr CreateBillboardQuad(){
-		
+		return 0;
 	}
 
 	DustRendererPtr CreateDustQuad(){
-		
+		return 0;
 	}
 
 	TrailObjectPtr CreateTrailObject(){
-		
+		return 0;
 	}
 
 	void UpdateEnvMapInNextFrame(SkySpherePtr sky){
@@ -336,3 +336,80 @@ public:
 		}
 	}
 };
+
+//---------------------------------------------------------------------------
+SceneObjectFactoryWeakPtr sSceneObjectFactory;
+SceneObjectFactoryPtr SceneObjectFactory::Create(){
+	if (sSceneObjectFactory.expired()){
+		auto p = SceneObjectFactoryPtr(new SceneObjectFactory, [](SceneObjectFactory* obj){ delete obj; });
+		sSceneObjectFactory = p;
+		p->mImpl->mSelfPtr = p;
+		return p;
+	}
+	return sSceneObjectFactory.lock();
+}
+SceneObjectFactory& SceneObjectFactory::GetInstance(){
+	auto p = sSceneObjectFactory.lock();
+	if (!p){
+		Logger::Log(FB_ERROR_LOG_ARG, "SceneObjectFactory is deleted. Program will crash.");
+	}
+	return *p;
+}
+
+SceneObjectFactory::SceneObjectFactory()
+	: mImpl(new Impl)
+{
+}
+
+SceneObjectFactory::~SceneObjectFactory(){
+
+}
+
+void SceneObjectFactory::SetEnableMeshLoad(bool enable) {
+	mImpl->SetEnableMeshLoad(enable);
+}
+
+MeshObjectPtr SceneObjectFactory::CreateMeshObject(const char* daeFilePath) {
+	return mImpl->CreateMeshObject(daeFilePath);
+}
+
+MeshObjectPtr SceneObjectFactory::CreateMeshObject(const char* daeFilePath, const MeshImportDesc& desc) {
+	return mImpl->CreateMeshObject(daeFilePath, desc);
+}
+
+MeshObjectConstPtr SceneObjectFactory::GetMeshArcheType(const char* name) {
+	return mImpl->GetMeshArcheType(name);
+}
+
+MeshGroupPtr SceneObjectFactory::CreateMeshGroup(const char* file) {
+	return mImpl->CreateMeshGroup(file);
+}
+
+MeshGroupPtr SceneObjectFactory::CreateMeshGroup(const char* file, const MeshImportDesc& desc) {
+	return mImpl->CreateMeshGroup(file, desc);
+}
+
+SkySpherePtr SceneObjectFactory::CreateSkySphere() {
+	return mImpl->CreateSkySphere();
+}
+
+BillboardQuadPtr SceneObjectFactory::CreateBillboardQuad() {
+	return mImpl->CreateBillboardQuad();
+}
+
+DustRendererPtr SceneObjectFactory::CreateDustQuad() {
+	return mImpl->CreateDustQuad();
+}
+
+TrailObjectPtr SceneObjectFactory::CreateTrailObject() {
+	return mImpl->CreateTrailObject();
+}
+
+void SceneObjectFactory::UpdateEnvMapInNextFrame(SkySpherePtr sky) {
+	mImpl->UpdateEnvMapInNextFrame(sky);
+}
+
+void SceneObjectFactory::Update(TIME_PRECISION dt) {
+	mImpl->Update(dt);
+}
+

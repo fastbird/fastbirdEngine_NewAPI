@@ -30,6 +30,12 @@
 #pragma comment(lib, "OpenAL32.lib")
 #pragma warning (disable : 4251)
 
+#if defined(_WIN32) 
+#define FB_DLL_AUDIO __declspec(dllexport)
+#else
+#define FB_DLL_AUDIO
+#endif
+
 #include "FBCommonHeaders/platform.h"
 
 #include <string>

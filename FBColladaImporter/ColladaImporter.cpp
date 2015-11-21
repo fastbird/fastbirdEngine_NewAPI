@@ -5,12 +5,13 @@
 #include "FBStringLib/StringLib.h"
 #include "FBFileSystem/FileSystem.h"
 #include "FBAnimation/AnimationData.h"
+#include <COLLADAFWIWriter.h>
 
 static const float PI = 3.1415926535897932384626433832795f;
 namespace fastbird{
 typedef std::vector< collada::CollisionInfo > COLLISION_INFOS;
 typedef std::map<std::string, collada::MeshPtr> MeshObjects;
-class ColladaImporter::Impl{
+class ColladaImporter::Impl : public COLLADAFW::IWriter{
 public:	
 	typedef std::vector<float> FLOAT_DATA;
 	ColladaImporter* mSelf;
@@ -65,7 +66,7 @@ public:
 			// different file.
 			mFilepath = filepath;
 			COLLADASaxFWL::Loader loader;
-			successful = loader.loadDocument(filepath, mSelf);
+			successful = loader.loadDocument(filepath, this);
 			if (!successful)
 			{
 				Logger::Log(FB_ERROR_LOG_ARG, FormatString("Importing dae(%s) is failed!", filepath).c_str());
@@ -1039,82 +1040,6 @@ collada::MeshPtr ColladaImporter::GetMeshObject() const {
 
 collada::MeshGroupPtr ColladaImporter::GetMeshGroup() const {
 	return mImpl->GetMeshGroup();
-}
-
-void ColladaImporter::cancel(const COLLADAFW::String& errorMessage) {
-	mImpl->cancel(errorMessage);
-}
-
-void ColladaImporter::start() {
-	mImpl->start();
-}
-
-void ColladaImporter::finish() {
-	mImpl->finish();
-}
-
-bool ColladaImporter::writeGlobalAsset(const COLLADAFW::FileInfo* asset) {
-	return mImpl->writeGlobalAsset(asset);
-}
-
-bool ColladaImporter::writeScene(const COLLADAFW::Scene* scene) {
-	return mImpl->writeScene(scene);
-}
-
-bool ColladaImporter::writeVisualScene(const COLLADAFW::VisualScene* visualScene) {
-	return mImpl->writeVisualScene(visualScene);
-}
-
-bool ColladaImporter::writeLibraryNodes(const COLLADAFW::LibraryNodes* libraryNodes) {
-	return mImpl->writeLibraryNodes(libraryNodes);
-}
-
-bool ColladaImporter::writeGeometry(const COLLADAFW::Geometry* geometry) {
-	return mImpl->writeGeometry(geometry);
-}
-
-bool ColladaImporter::writeMaterial(const COLLADAFW::Material* material) {
-	return mImpl->writeMaterial(material);
-}
-
-bool ColladaImporter::writeEffect(const COLLADAFW::Effect* effect) {
-	return mImpl->writeEffect(effect);
-}
-
-bool ColladaImporter::writeCamera(const COLLADAFW::Camera* camera) {
-	return mImpl->writeCamera(camera);
-}
-
-bool ColladaImporter::writeImage(const COLLADAFW::Image* image) {
-	return mImpl->writeImage(image);
-}
-
-bool ColladaImporter::writeLight(const COLLADAFW::Light* light) {
-	return mImpl->writeLight(light);
-}
-
-bool ColladaImporter::writeAnimation(const COLLADAFW::Animation* animation) {
-	return mImpl->writeAnimation(animation);
-}
-
-bool ColladaImporter::writeAnimationList(const COLLADAFW::AnimationList* animationList) {
-	return mImpl->writeAnimationList(animationList);
-}
-
-bool ColladaImporter::writeSkinControllerData(const COLLADAFW::SkinControllerData* skinControllerData) {
-	return mImpl->writeSkinControllerData(skinControllerData);
-}
-
-bool ColladaImporter::writeController(const COLLADAFW::Controller* controller) {
-	return mImpl->writeController(controller);
-}
-
-bool ColladaImporter::writeFormulas(const COLLADAFW::Formulas* formulas) {
-	return mImpl->writeFormulas(formulas);
-}
-
-bool ColladaImporter::writeKinematicsScene(const COLLADAFW::KinematicsScene* kinematicsScene) {
-	return mImpl->writeKinematicsScene(kinematicsScene);
 }
 
 }

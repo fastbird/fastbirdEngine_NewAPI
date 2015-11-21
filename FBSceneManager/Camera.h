@@ -40,7 +40,7 @@ namespace fastbird
 	DECLARE_SMART_PTR(SpatialObject);
 	DECLARE_SMART_PTR(ICameraObserver);
 	DECLARE_SMART_PTR(Camera);
-	class FB_DLL_PUBLIC Camera : public Observable<ICameraObserver>
+	class FB_DLL_SCENEMANAGER Camera : public Observable<ICameraObserver>
 	{
 		DECLARE_PIMPL_NON_COPYABLE(Camera);
 		Camera();

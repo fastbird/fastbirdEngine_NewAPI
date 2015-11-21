@@ -30,7 +30,7 @@
 #include "IInputInjector.h"
 
 namespace fastbird{
-	class FB_DLL_HIDDEN InputInjector{
+	class InputInjector{
 		DECLARE_PIMPL_NON_COPYABLE(InputInjector);
 
 	public:
