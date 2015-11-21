@@ -56,11 +56,16 @@ namespace fastbird{
 		/// Returns currently rendering pass which is RenderParam.mRenderPass when the Render() is called.
 		int GetRenderPass() const;
 
-		bool AttachObject(SceneObjectPtr pObject);
-		bool DetachObject(SceneObjectPtr pObject);
+		template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >* = nullptr>
+		bool AttachObject(std::shared_ptr<T> pObject);
+		template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >* = nullptr>
+		bool DetachObject(std::shared_ptr<T> pObject);
 
-		bool AttachObject(SpatialObjectPtr pSpatialObject);
-		bool DetachObject(SpatialObjectPtr pSpatialObject);
+		template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>* = nullptr>
+		bool AttachObject(std::shared_ptr<T> pSpatialObject);
+		template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>* = nullptr>
+		bool DetachObject(std::shared_ptr<T> pSpatialObject);
+
 		void SetSkipSpatialObjects(bool skip);
 		void ClearEverySpatialObject();
 		unsigned GetNumSpatialObjects() const;

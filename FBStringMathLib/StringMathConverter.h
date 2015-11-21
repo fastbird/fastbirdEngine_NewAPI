@@ -36,6 +36,7 @@
 #include "FBMathLib/Mat44.h"
 #include "FBMathLib/Quat.h"
 #include "FBMathLib/Rect.h"
+#include "FBMathLib/Color.h"
 namespace fastbird{
 	class StringMathConverter{
 	public:
@@ -59,5 +60,6 @@ namespace fastbird{
 		static Mat44 ParseMat44(const TString& str, const Mat44& def = Mat44::IDENTITY);
 		static Quat ParseQuat(const TString& str, const Quat& def = Quat::IDENTITY);
 		static Rect ParseRect(const TString& str, const Rect& def = { 0, 0, 0, 0 });
+		static Color ParseColor(const TString& str, const Color& def = { 0, 0, 0, 0 });
 	};
 }

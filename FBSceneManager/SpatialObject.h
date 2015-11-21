@@ -63,7 +63,7 @@ namespace fastbird{
 		void SetAnimation(AnimationPtr anim);
 		void UpdateAnimation(TIME_PRECISION dt);
 		bool IsPlayingAction() const;
-		void NotifyTransformChanged();
+		void NotifyTransformChanged();		
 
 	protected:
 		void SetBoundingVolume(const BoundingVolume& src);

@@ -88,7 +88,7 @@ public:
 	Real mHeight;
 	std::string mName;
 	Plane3 mPlanes[6];
-	SpatialObjectWeakPtr mTarget;
+	std::weak_ptr<Transformation> mTarget;
 	size_t mCamIndex;
 	bool mYZSwap;
 	bool mCurrentCamera;
@@ -195,7 +195,7 @@ public:
 		auto target = mTarget.lock();
 		if (!mProcessInput || !mCurrentCamera || !target)
 			return;
-		if (mUserParams.Changed() || mPrevTargetPos != target->GetPosition())
+		if (mUserParams.Changed() || mPrevTargetPos != target->GetTranslation())
 		{
 			mInternalParams.dist += mUserParams.dDist;
 			mInternalParams.dist = std::max((Real)2.0f, (Real)mInternalParams.dist);
@@ -236,10 +236,10 @@ public:
 			Mat33 rot(right.x, forward.x, up.x,
 				right.y, forward.y, up.y,
 				right.z, forward.z, up.z);
-			Vec3 pos = target->GetPosition() + toCam * mInternalParams.dist;
+			Vec3 pos = target->GetTranslation() + toCam * mInternalParams.dist;
 			SetTransformation(pos, Quat(rot));
 			mUserParams.Clear();
-			mPrevTargetPos = target->GetPosition();
+			mPrevTargetPos = target->GetTranslation();
 		}
 	}
 
@@ -403,7 +403,7 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void SetTarget(SpatialObjectPtr obj)
+	void SetTarget(std::shared_ptr<Transformation> obj)
 	{
 		if (mTarget.lock() == obj)
 			return;
@@ -426,7 +426,7 @@ public:
 			return;
 		if (injector->IsValid(FBInputDevice::DeviceMouse) && !injector->IsKeyDown(VK_CONTROL)){
 			const Vec3 camPos = GetPosition();
-			Vec3 toCam = camPos - target->GetPosition();
+			Vec3 toCam = camPos - target->GetTranslation();
 			const Real distToTarget = toCam.Normalize();
 			long dx, dy;
 			injector->GetHDDeltaXY(dx, dy);
@@ -658,7 +658,7 @@ void Camera::SetYZSwap(bool enable){
 	mImpl->SetYZSwap(enable);
 }
 
-void Camera::SetTarget(SpatialObjectPtr pObj){
+void Camera::SetTarget(std::shared_ptr<Transformation> pObj){
 	mImpl->SetTarget(pObj);
 }
 
@@ -666,7 +666,7 @@ void Camera::SetDistanceFromTarget(Real dist){
 	mImpl->SetDistanceFromTarget(dist);
 }
 
-SpatialObjectPtr Camera::GetTarget() const {
+std::shared_ptr<Transformation> Camera::GetTarget() const {
 	return mImpl->mTarget.lock(); 
 }
 

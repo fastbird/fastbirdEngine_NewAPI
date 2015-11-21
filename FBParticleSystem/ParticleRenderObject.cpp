@@ -1,0 +1,309 @@
+#include "stdafx.h"
+#include "ParticleRenderObject.h"
+#include "ParticleRenderKey.h"
+#include "FBRenderer/VertexBuffer.h"
+#include "FBRenderer/Renderer.h"
+#include "FBRenderer/Material.h"
+#include "FBSceneManager/SceneManager.h"
+#include "FBSceneManager/Scene.h"
+using namespace fastbird;
+
+namespace fastbird{
+	typedef VectorMap< ParticleRenderKey, ParticleRenderObjectPtr > RENDER_OBJECTS;
+	static RENDER_OBJECTS sRenderObjects;
+	static size_t sNumDrawCalls;
+	static size_t sNumDrawPrimitives;
+	const int ParticleRenderObject::MAX_SHARED_VERTICES = 5000;
+}
+
+class ParticleRenderObject::Impl{
+public:	
+	ParticleRenderObject* mSelf;
+	MaterialPtr mMaterial;	
+	unsigned mMaxVertices;
+	unsigned mLastFrameNumVertices;
+	std::string mTextureName;
+	VertexBufferPtr mVertexBuffer;
+	UINT mNextMap;
+	typedef std::vector< std::pair<UINT, UINT> > BATCHES;
+	BATCHES mBatches;
+	Vertex* mMapped;
+	bool mDoubleSided;
+
+	//---------------------------------------------------------------------------
+	Impl(ParticleRenderObject* self)
+		: mSelf(self)
+		, mNextMap(0)
+		, mMapped(0)
+		, mDoubleSided(false)
+		, mMaxVertices(MAX_SHARED_VERTICES)
+		, mLastFrameNumVertices(0)
+	{
+		mMaterial = Renderer::GetInstance().CreateMaterial("es/materials/particle.material");
+		mSelf->GetBoundingVolumeWorld()->SetAlwaysPass(true);
+	}
+
+	//---------------------------------------------------------------------------
+	// IRenderable Interfaces
+	//---------------------------------------------------------------------------
+	void PreRender(const RenderParam& param, RenderParamOut* paramOut){
+
+	}
+
+	void Render(const RenderParam& param, RenderParamOut* paramOut){
+		RenderEventMarker mark("ParticleRenderObject");
+		if (mMapped)
+		{
+			mVertexBuffer->Unmap(0);
+			mMapped = 0;
+		}
+
+		if (param.mRenderPass != RENDER_PASS::PASS_NORMAL || !mVertexBuffer || mBatches.empty())
+			return;
+
+		auto& renderer = Renderer::GetInstance();
+		mMaterial->Bind(true);
+		mVertexBuffer->Bind();
+		renderer.SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_POINTLIST);
+
+		/*for (auto batch : mBatches){
+		++sNumDrawCalls;
+		pRenderer->Draw(batch.second, batch.first);
+		sNumDrawPrimitives += batch.second;
+		}*/
+
+		//draw
+		UINT num = 0;
+		UINT start = mBatches[0].first;
+		for(const auto& it : mBatches)
+		{
+			if (start > it.first)
+			{
+				// draw
+				assert(start + num <= mMaxVertices);
+				renderer.Draw(num, start);
+				++sNumDrawCalls;
+				sNumDrawPrimitives += num;
+				start = it.first;
+				num = 0;
+			}
+			num += it.second;
+		}
+		if (num)
+		{
+			assert(num < mMaxVertices);
+			renderer.Draw(num, start);
+			++sNumDrawCalls;
+			sNumDrawPrimitives += num;
+		}
+		mMaterial->Unbind();
+	}
+
+	void PostRender(const RenderParam& param, RenderParamOut* paramOut){
+
+	}
+
+	//---------------------------------------------------------------------------
+	// OWN
+	//---------------------------------------------------------------------------
+	MaterialPtr GetMaterial() const{
+		return mMaterial;
+	}
+
+	void Clear(){
+		mBatches.clear();
+		if (mLastFrameNumVertices * 3 >= mMaxVertices)
+		{
+			mMaxVertices *= 2;
+			mVertexBuffer = 0;
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Particle Vertex Buffer(%s) resized to : %u", mTextureName.c_str(), mMaxVertices).c_str());			
+		}
+		mLastFrameNumVertices = 0;
+	}
+
+	void EndUpdate(){
+		if (mVertexBuffer && mMapped)
+		{
+			mVertexBuffer->Unmap(0);
+			mMapped = 0;
+		}
+	}
+
+	void SetDoubleSided(bool set){
+		if (mDoubleSided == set)
+			return;
+
+		if (!mMaterial)
+		{
+			Logger::Log(FB_ERROR_LOG_ARG, "Doesn't have material.");			
+			return;
+		}
+
+		if (set)
+		{
+			mDoubleSided = set;
+			RASTERIZER_DESC desc;
+			desc.CullMode = CULL_MODE_NONE;
+			mMaterial->SetRasterizerState(desc);
+		}
+		else
+		{
+			mMaterial->ClearRasterizerState();
+		}
+	}
+
+	void SetTexture(const char* texturePath){
+		mTextureName = texturePath;
+		if (mMaterial)
+			mMaterial->SetTexture(texturePath, BINDING_SHADER_PS, 0);
+	}
+
+	Vertex* Map(UINT numVertices, unsigned& canWrite){
+		mLastFrameNumVertices += numVertices;
+		assert(numVertices < mMaxVertices / 2);
+		if (!mVertexBuffer)
+			mVertexBuffer = Renderer::GetInstance().CreateVertexBuffer(
+			0, sizeof(Vertex), mMaxVertices, BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
+
+		canWrite = numVertices;
+		if (mNextMap + numVertices >= mMaxVertices)
+		{
+			if (!mBatches.empty())
+			{
+				if (mBatches[0].first < numVertices)
+				{
+					canWrite = mBatches[0].first;
+				}
+			}
+			mNextMap = 0;
+		}
+		if (canWrite == 0)
+			return 0;
+
+		if (!mMapped)
+		{
+			MapData m = mVertexBuffer->Map(0, MAP_TYPE_WRITE_NO_OVERWRITE, MAP_FLAG_NONE);
+			assert(m.pData);
+			mMapped = (Vertex*)m.pData;
+		}
+
+		mBatches.push_back(BATCHES::value_type(mNextMap, canWrite));
+		Vertex* p = mMapped;
+		p += mNextMap;
+		mNextMap += canWrite;
+
+		return p;
+	}
+
+};
+
+//---------------------------------------------------------------------------
+ParticleRenderObjectPtr ParticleRenderObject::GetRenderObject(ParticleRenderKey& key, bool& created)
+{
+	RENDER_OBJECTS::iterator it = sRenderObjects.Find(key);
+	if (it != sRenderObjects.end())
+	{
+		created = false;
+		return it->second;
+	}
+	created = true;
+	ParticleRenderObjectPtr p(new ParticleRenderObject, [](ParticleRenderObject* obj){ delete obj; });
+	auto material = p->GetMaterial();
+	if_assert_pass(material)
+	{
+		material->SetBlendState(key.mBDesc);
+	}
+	p->SetTexture(key.mTexturePath);
+
+	auto scene = SceneManager::GetInstance().GetMainScene();
+	if (scene){
+		scene->AttachObject(p);
+	}
+	
+	sRenderObjects.Insert(RENDER_OBJECTS::value_type(key, p));
+	return p;
+}
+
+size_t ParticleRenderObject::GetNumRenderObject()
+{
+	return sRenderObjects.size();
+}
+
+size_t ParticleRenderObject::GetNumDrawCalls()
+{
+	return sNumDrawCalls;
+}
+size_t ParticleRenderObject::GetNumPrimitives()
+{
+	return sNumDrawPrimitives;
+}
+
+void ParticleRenderObject::ClearParticles()
+{
+	for (auto& it : sRenderObjects){
+		it.second->Clear();
+	}
+
+	sNumDrawCalls = 0;
+	sNumDrawPrimitives = 0;
+}
+
+void ParticleRenderObject::EndUpdateParticles()
+{
+	for (auto it : sRenderObjects)
+	{
+		it.second->EndUpdate();
+	}
+}
+
+void ParticleRenderObject::FinalizeRenderObjects()
+{
+	sRenderObjects.clear();
+}
+
+ParticleRenderObject::ParticleRenderObject()
+	: mImpl(new Impl(this))
+{
+
+}
+
+ParticleRenderObject::~ParticleRenderObject(){
+
+}
+
+void ParticleRenderObject::PreRender(const RenderParam& param, RenderParamOut* paramOut) {
+	mImpl->PreRender(param, paramOut);
+}
+
+void ParticleRenderObject::Render(const RenderParam& param, RenderParamOut* paramOut) {
+	mImpl->Render(param, paramOut);
+}
+
+void ParticleRenderObject::PostRender(const RenderParam& param, RenderParamOut* paramOut) {
+	mImpl->PostRender(param, paramOut);
+}
+
+MaterialPtr ParticleRenderObject::GetMaterial() const {
+	return mImpl->GetMaterial();
+}
+
+void ParticleRenderObject::Clear() {
+	mImpl->Clear();
+}
+
+void ParticleRenderObject::EndUpdate() {
+	mImpl->EndUpdate();
+}
+
+void ParticleRenderObject::SetDoubleSided(bool set) {
+	mImpl->SetDoubleSided(set);
+}
+
+void ParticleRenderObject::SetTexture(const char* texturePath) {
+	mImpl->SetTexture(texturePath);
+}
+
+ParticleRenderObject::Vertex* ParticleRenderObject::Map(UINT numVertices, unsigned& canWrite) {
+	return mImpl->Map(numVertices, canWrite);
+}
+

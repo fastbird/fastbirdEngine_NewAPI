@@ -354,7 +354,7 @@ public:
 	}
 
 
-	bool AttachObject(SpatialObjectPtr pSpatialObject){
+	bool AttachSpatialObject(SpatialObjectPtr pSpatialObject){
 		if (!ValueExistsInVector(mSpatialObjects, pSpatialObject)){
 			mSpatialObjects.push_back(pSpatialObject);
 			pSpatialObject->OnAttachedToScene(mSelfPtr.lock());
@@ -363,7 +363,7 @@ public:
 		return false;
 	}
 
-	bool DetachObject(SpatialObjectPtr pSpatialObject){
+	bool DetachSpatialObject(SpatialObjectPtr pSpatialObject){
 		DeleteValuesInVector(mSpatialObjects, pSpatialObject);
 		if (mSpatialObjectsDeletedAny) {
 			pSpatialObject->OnDetachedFromScene(mSelfPtr.lock());
@@ -535,20 +535,29 @@ int Scene::GetRenderPass() const {
 	return mImpl->GetRenderPass();
 }
 
-bool Scene::AttachObject(SceneObjectPtr pObject) {
+template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >*>
+bool Scene::AttachObject(std::shared_ptr<T> pObject) {
+#if defined(_DEBUG)
+	if (std::dynamic_pointer_cast<SpatialObject>(pObject)){
+		Logger::Log(FB_ERROR_LOG_ARG, "A SpatialObject is added as a SceneObject. Consider using Scene::AttachSpatialObject() rather than Scene::AttachObject()");
+	}
+#endif
 	return mImpl->AttachObject(pObject);
 }
 
-bool Scene::DetachObject(SceneObjectPtr pObject) {
+template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >*>
+bool Scene::DetachObject(std::shared_ptr<T> pObject) {
 	return mImpl->DetachObject(pObject);
 }
 
-bool Scene::AttachObject(SpatialObjectPtr pSpatialObject) {
-	return mImpl->AttachObject(pSpatialObject);
+template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>*>
+bool Scene::AttachObject(std::shared_ptr<T> pSpatialObject) {
+	return mImpl->AttachSpatialObject(pSpatialObject);
 }
 
-bool Scene::DetachObject(SpatialObjectPtr pSpatialObject) {
-	return mImpl->DetachObject(pSpatialObject);
+template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>*>
+bool Scene::DetachObject(std::shared_ptr<T> pSpatialObject) {
+	return mImpl->DetachSpatialObject(pSpatialObject);
 }
 
 void Scene::SetSkipSpatialObjects(bool skip) {

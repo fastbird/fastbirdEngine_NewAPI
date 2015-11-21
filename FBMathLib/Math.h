@@ -44,6 +44,7 @@
 #include "MathDefines.h"
 #include "Rect.h"
 #include "Mat44.h"
+#include "Color.h"
 
 namespace fastbird
 {

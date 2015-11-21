@@ -14,6 +14,7 @@
     <ClInclude Include="MeshGroup.h" />
     <ClInclude Include="TrailObject.h" />
     <ClInclude Include="MeshAuxiliary.h" />
+    <ClInclude Include="ParticleEmitter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MeshObject.cpp" />
@@ -25,5 +26,6 @@
     <ClCompile Include="MeshGroup.cpp" />
     <ClCompile Include="TrailObject.cpp" />
     <ClCompile Include="SkySphere.cpp" />
+    <ClCompile Include="ParticleEmitter.cpp" />
   </ItemGroup>
 </Project>

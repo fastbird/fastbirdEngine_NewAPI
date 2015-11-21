@@ -28,6 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{	
+	DECLARE_SMART_PTR(Camera);
 	DECLARE_SMART_PTR(Scene);
 	DECLARE_SMART_PTR(SceneManager);
 	class FB_DLL_SCENEMANAGER SceneManager{
@@ -44,7 +45,10 @@ namespace fastbird{
 		static SceneManager& GetInstance();
 		static void DeleteSceneManager();
 
-		/** You have the ownership of returned scene. */
+		/** You have the ownership of returned scene. 
+		The first created scene is the main scene. */
 		ScenePtr CreateScene(const char* name);
+		/// Get the main scene.
+		ScenePtr GetMainScene() const;
 	};
 }

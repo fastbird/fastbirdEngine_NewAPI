@@ -34,17 +34,14 @@ using namespace fastbird;
 
 class PointLightManager::Impl{
 public:
-	typedef std::vector< PointLightPtr > PointLights;
+	typedef std::vector< PointLightWeakPtr > PointLights;
 	PointLights mPointLights;
 
 	PointLightPtr CreatePointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion)
 	{
-		mPointLights.push_back(PointLight::Create(pos, range, color, intensity, lifeTime, manualDeletion));
-		return mPointLights.back();
-	}
-	void DeletePointLight(PointLightPtr pointLight)
-	{
-		DeleteValuesInVector(mPointLights, pointLight);
+		auto newLight = PointLight::Create(pos, range, color, intensity, lifeTime, manualDeletion);
+		mPointLights.push_back(newLight);
+		return newLight;
 	}
 
 	void Update(Real dt)
@@ -52,20 +49,22 @@ public:
 		static std::vector<unsigned> deleted;
 
 		for (auto it = mPointLights.begin(); it != mPointLights.end();){
-			auto p = *it;
-			bool deleted = false;
+			auto p = it->lock();
+			if (!p){
+				it = mPointLights.erase(it);
+				continue;
+			}
+
 			if (p->GetLifeTime() > 0)
 			{
 				auto lifeTime = p->GetOlder(dt);
 				if (lifeTime <= 0 && !p->GetManualDeletion())
 				{
 					it = mPointLights.erase(it);
-					deleted = true;
+					continue;
 				}
 			}
-			if (!deleted){
-				++it;
-			}
+			++it;
 		}		
 	}
 
@@ -85,8 +84,9 @@ public:
 		gathered.reserve(50);
 
 		unsigned i = 0;
-		for (auto& p : mPointLights)
+		for (auto& it : mPointLights)
 		{			
+			auto p = it.lock();
 			if (!p->GetEnabled())
 				continue;
 			Ray3 ray(p->GetPosition(), transform.GetTranslation() - p->GetPosition());
@@ -108,11 +108,15 @@ public:
 
 		plConst->gPointLightColor[0].w = 0;
 		int count = std::min(3, (int)gathered.size());
+		unsigned validNumber = 0;
 		for (int i = 0; i < count; i++)
 		{
-			PointLightPtr p = mPointLights[gathered[i].mIndex];
-			plConst->gPointLightPos[i] = Vec4(p->GetPosition(), p->GetRange());			
-			plConst->gPointLightColor[i] = Vec4(p->GetColorPowered(), (Real)count);
+			PointLightPtr p = mPointLights[gathered[i].mIndex].lock();
+			if (p){
+				plConst->gPointLightPos[validNumber] = Vec4(p->GetPosition(), p->GetRange());
+				plConst->gPointLightColor[validNumber] = Vec4(p->GetColorPowered(), (Real)count);
+				++validNumber;
+			}
 		}
 
 		gathered.clear();
@@ -134,10 +138,6 @@ PointLightManager::PointLightManager()
 
 PointLightPtr PointLightManager::CreatePointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion) {
 	return mImpl->CreatePointLight(pos, range, color, intensity, lifeTime, manualDeletion);
-}
-
-void PointLightManager::DeletePointLight(PointLightPtr pointLight) {
-	mImpl->DeletePointLight(pointLight);
 }
 
 void PointLightManager::Update(Real dt) {

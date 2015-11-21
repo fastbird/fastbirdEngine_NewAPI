@@ -62,6 +62,7 @@
 #include "FBInputManager/IInputInjector.h"
 #include "FBLua/LuaObject.h"
 #include "TinyXmlLib/tinyxml2.h"
+#include "FBTimer/Timer.h"
 #include <set>
 #undef DrawText
 #undef CreateDirectory

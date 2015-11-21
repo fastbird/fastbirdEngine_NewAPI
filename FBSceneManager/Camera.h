@@ -108,9 +108,9 @@ namespace fastbird
 		Ray3 ScreenPosToRay(long x, long y);
 		Vec2I WorldToScreen(const Vec3& worldPos) const;
 		void SetYZSwap(bool enable);
-		void SetTarget(SpatialObjectPtr pObj);
+		void SetTarget(std::shared_ptr<Transformation> pObj);
 		void SetDistanceFromTarget(Real dist);
-		SpatialObjectPtr GetTarget() const;
+		std::shared_ptr<Transformation> GetTarget() const;
 		void SetCurrent(bool cur);
 		void SetCameraIndex(size_t idx);
 		void SetEnalbeInput(bool enable);

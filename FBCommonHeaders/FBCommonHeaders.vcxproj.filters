@@ -10,5 +10,6 @@
     <ClInclude Include="Observable.h" />
     <ClInclude Include="CowPtr.h" />
     <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="CircularBuffer.h" />
   </ItemGroup>
 </Project>

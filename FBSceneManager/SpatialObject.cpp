@@ -27,6 +27,7 @@
 
 #include "stdafx.h"
 #include "SpatialObject.h"
+#include "Scene.h"
 #include "FBMathLib/BoundingVolume.h"
 #include "FBAnimation/Animation.h"
 #include "FBAnimation/AnimationData.h"

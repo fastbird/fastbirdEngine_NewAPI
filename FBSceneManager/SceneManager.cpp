@@ -36,6 +36,7 @@ class SceneManager::Impl{
 public:
 	SceneManagerWeakPtr mSelf;
 	std::map<std::string, SceneWeakPtr> mScenes;
+	SceneWeakPtr mMainScene;
 
 	//---------------------------------------------------------------------------
 
@@ -53,9 +54,14 @@ public:
 		}
 		auto scene = Scene::Create(name);
 		mScenes[name] = scene;
+		if (mMainScene.expired())
+			mMainScene = scene;
 		return scene;
 	}
 
+	ScenePtr GetMainScene() const{
+		return mMainScene.lock();
+	}
 };
 
 Timer* fastbird::gpTimer = 0;
@@ -82,4 +88,8 @@ SceneManager::SceneManager()
 
 ScenePtr SceneManager::CreateScene(const char* name){
 	return 	mImpl->CreateScene(name);
+}
+
+ScenePtr SceneManager::GetMainScene() const{
+	return mImpl->GetMainScene();
 }

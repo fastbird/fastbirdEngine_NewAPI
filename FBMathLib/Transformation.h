@@ -139,6 +139,7 @@ namespace fastbird
 
 		Vec3 GetRight() const;
 		Vec3 GetForward() const;
+		/// Same with GetFoward()
 		Vec3 GetUp() const;	
 
 		bool operator==(const Transformation& other) const;	

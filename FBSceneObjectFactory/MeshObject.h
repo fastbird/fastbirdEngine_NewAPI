@@ -41,7 +41,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(MeshObject);
 	class FB_DLL_SCENEOBJECTFACTORY MeshObject : public SpatialObject, public IRenderable{
 		DECLARE_PIMPL_CLONEABLE(MeshObject);		
-
+		static MeshObjectPtr Create(const MeshObject& other);
 	protected:
 		MeshObject();
 		~MeshObject();
@@ -51,8 +51,7 @@ namespace fastbird{
 		/** Creates new instance.
 		Usullay when you want to load a .dae file, you use SceneManager::CreateMesh(filepath) function instead
 		calling this function directly. */
-		static MeshObjectPtr Create();
-		static MeshObjectPtr Create(const MeshObject& other);		
+		static MeshObjectPtr Create();		
 
 		//---------------------------------------------------------------------------
 		// IRenderable Interfaces

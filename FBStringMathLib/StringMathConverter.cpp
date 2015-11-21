@@ -240,4 +240,17 @@ Rect StringMathConverter::ParseRect(const TString& str, const Rect& def){
 	return value;
 }
 
+Color StringMathConverter::ParseColor(const TString& str, const Color& def){
+	TStringVector vec = Split(str);
+
+	if (vec.size() < 4)
+	{
+		return def;
+	}
+	else
+	{
+		return Color(StringConverter::ParseReal(vec[0]), StringConverter::ParseReal(vec[1]), StringConverter::ParseReal(vec[2]), StringConverter::ParseReal(vec[3]));
+	}
+}
+
 }

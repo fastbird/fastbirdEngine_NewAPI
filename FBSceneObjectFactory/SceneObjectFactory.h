@@ -61,7 +61,7 @@ namespace fastbird{
 
 		SkySpherePtr CreateSkySphere();
 		BillboardQuadPtr CreateBillboardQuad();
-		DustRendererPtr CreateDustQuad();
+		DustRendererPtr CreateDustRenderer();
 		TrailObjectPtr CreateTrailObject();
 
 		void UpdateEnvMapInNextFrame(SkySpherePtr sky);

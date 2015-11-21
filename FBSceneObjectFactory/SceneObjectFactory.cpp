@@ -13,6 +13,10 @@
 #include "MeshObject.h"
 #include "MeshGroup.h"
 #include "SkySphere.h"
+#include "BillboardQuad.h"
+#include "DustRenderer.h"
+#include "TrailObject.h"
+
 using namespace fastbird;
 
 Timer* fastbird::gpTimer = 0;
@@ -309,19 +313,19 @@ public:
 	}
 
 	SkySpherePtr CreateSkySphere(){
-		return 0;
+		return SkySphere::Create();
 	}
 
 	BillboardQuadPtr CreateBillboardQuad(){
-		return 0;
+		return BillboardQuad::Create();
 	}
 
-	DustRendererPtr CreateDustQuad(){
-		return 0;
+	DustRendererPtr CreateDustRenderer(){
+		return DustRenderer::Create();
 	}
 
 	TrailObjectPtr CreateTrailObject(){
-		return 0;
+		return TrailObject::Create();
 	}
 
 	void UpdateEnvMapInNextFrame(SkySpherePtr sky){
@@ -397,8 +401,8 @@ BillboardQuadPtr SceneObjectFactory::CreateBillboardQuad() {
 	return mImpl->CreateBillboardQuad();
 }
 
-DustRendererPtr SceneObjectFactory::CreateDustQuad() {
-	return mImpl->CreateDustQuad();
+DustRendererPtr SceneObjectFactory::CreateDustRenderer() {
+	return mImpl->CreateDustRenderer();
 }
 
 TrailObjectPtr SceneObjectFactory::CreateTrailObject() {
