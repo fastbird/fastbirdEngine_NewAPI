@@ -8,7 +8,6 @@
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureAtlas.h" />
-    <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IRenderTargetObserver.h" />
     <ClInclude Include="IRendererObserver.h" />
     <ClInclude Include="Spatial.h" />
@@ -71,6 +70,9 @@
     <ClInclude Include="NullPlatformRenderer.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderStrategyMinimum.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="ICamera.h" />
+    <ClInclude Include="ICameraObserver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -112,6 +114,7 @@
     <ClCompile Include="NullPlatformRenderer.cpp" />
     <ClCompile Include="GaussianDistribution.cpp" />
     <ClCompile Include="RenderStrategyMinimum.cpp" />
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

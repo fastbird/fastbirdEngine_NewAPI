@@ -217,7 +217,7 @@ ParticleRenderObjectPtr ParticleRenderObject::GetRenderObject(ParticleRenderKey&
 
 	auto scene = SceneManager::GetInstance().GetMainScene();
 	if (scene){
-		scene->AttachObject(p);
+		scene->AttachObjectFB(p);
 	}
 	
 	sRenderObjects.Insert(RENDER_OBJECTS::value_type(key, p));

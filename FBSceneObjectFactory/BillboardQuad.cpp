@@ -84,7 +84,6 @@ IMPLEMENT_STATIC_CREATE(BillboardQuad);
 BillboardQuad::BillboardQuad()
 	:mImpl(new Impl(this))
 {
-	SetRenderable(this);
 }
 BillboardQuad::~BillboardQuad()
 {

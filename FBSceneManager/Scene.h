@@ -29,53 +29,55 @@
 #include "FBCommonHeaders/Types.h"
 #include "SceneManager.h"
 #include "ISceneObserver.h"
+#include "IScene.h"
 #include "FBRenderer/RenderParam.h"
 #include "FBCommonHeaders/Observable.h"
 namespace fastbird{
 	class Vec3;
 	class Color;
 	class Ray3;
-	DECLARE_SMART_PTR(Camera);
+	DECLARE_SMART_PTR(ICamera);
 	DECLARE_SMART_PTR(SkySphere);
 	DECLARE_SMART_PTR(SpatialObject);
+	DECLARE_SMART_PTR(SpatialSceneObject);
 	DECLARE_SMART_PTR(SceneObject);
 	DECLARE_SMART_PTR(DirectionalLight);
 	DECLARE_SMART_PTR(Scene);
-	class FB_DLL_SCENEMANAGER Scene : public Observable<ISceneObserver>{
+	class FB_DLL_SCENEMANAGER Scene : public IScene, public Observable<ISceneObserver>{
 		DECLARE_PIMPL_NON_COPYABLE(Scene);		
 		Scene(const char* name);		
 		
 	public:		
-		typedef std::vector<SpatialObject*> SPATIAL_OBJECTS_RAW;
+		typedef std::vector<SpatialSceneObject*> SPATIAL_OBJECTS_RAW;
 		static ScenePtr Create(const char* name);		
 		
 		const char* GetName() const;
+		void Update(TIME_PRECISION dt);
+		void AddSceneObserver(int ISceneObserverEnum, ISceneObserverPtr observer);
+		void GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data);
+		const Vec3& GetMainLightDirection();
 		void PreRender(const RenderParam& prarm, RenderParamOut* paramOut);
-		void Render(const RenderParam& prarm, RenderParamOut* paramOut);
+		void Render(const RenderParam& prarm, RenderParamOut* paramOut);		
 
 		/// Returns currently rendering pass which is RenderParam.mRenderPass when the Render() is called.
 		int GetRenderPass() const;
 
-		template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >* = nullptr>
-		bool AttachObject(std::shared_ptr<T> pObject);
-		template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >* = nullptr>
-		bool DetachObject(std::shared_ptr<T> pObject);
+		bool AttachObjectFB(SceneObjectPtr object, SceneObject* rawPointer);
+		bool DetachObjectFB(SceneObjectPtr object, SceneObject* rawPointer);
 
-		template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>* = nullptr>
-		bool AttachObject(std::shared_ptr<T> pSpatialObject);
-		template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>* = nullptr>
-		bool DetachObject(std::shared_ptr<T> pSpatialObject);
+		bool AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer);
+		bool DetachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer);
 
 		void SetSkipSpatialObjects(bool skip);
 		void ClearEverySpatialObject();
 		unsigned GetNumSpatialObjects() const;
 		/** You do not own the returned pointers of this function
 		do not keep any pointer. */
-		const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(CameraPtr cam);
+		const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(ICameraPtr cam);
 		void PrintSpatialObject();
 
 		void AttachSkySphere(SkySpherePtr p);		
-		void DetachSkySphere();				
+		void DetachSkySphere();
 		SkySpherePtr GetSkySphere();		
 		void ToggleSkyRendering();
 		void SetSkyRendering(bool render);
@@ -84,7 +86,7 @@ namespace fastbird{
 		const Vec3& GetWindVector() const;
 
 		/** p is a MeshObject*/
-		void AddCloudVolume(SpatialObjectPtr p);
+		void AddCloudVolume(SpatialSceneObjectPtr p);
 		void ClearClouds();
 		void PreRenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
 		void RenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
@@ -97,6 +99,9 @@ namespace fastbird{
 		void SetRttScene(bool set);
 		bool IsRttScene() const;
 
-		DirectionalLightPtr GetDirectionalLight(unsigned idx);				
+		DirectionalLightPtr GetDirectionalLight(unsigned idx);
 	};
 }
+
+#define AttachObjectFB(p) AttachObjectFB((p), (p).get())
+#define DetachObjectFB(p) DetachObjectFB((p), (p).get())

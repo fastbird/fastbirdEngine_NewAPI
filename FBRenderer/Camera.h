@@ -31,18 +31,19 @@
 #include "FBCommonHeaders/Observable.h"
 #include "FBMathLib/Math.h"
 #include "ICameraObserver.h"
+#include "ICamera.h"
 
 namespace fastbird
 {
 	DECLARE_SMART_PTR(IInputInjector);
 	DECLARE_SMART_PTR(IMouse);
 	DECLARE_SMART_PTR(IKeyboard);
-	DECLARE_SMART_PTR(SpatialObject);
+	DECLARE_SMART_PTR(ISpatialObject);
 	DECLARE_SMART_PTR(ICameraObserver);
 	DECLARE_SMART_PTR(Camera);
-	class FB_DLL_SCENEMANAGER Camera : public Observable<ICameraObserver>
+	class FB_DLL_RENDERER Camera : public ICamera, public Observable<ICameraObserver>
 	{
-		DECLARE_PIMPL_NON_COPYABLE(Camera);
+		DECLARE_PIMPL(Camera);
 		Camera();
 
 	public:
@@ -61,7 +62,9 @@ namespace fastbird
 		};
 
 		static CameraPtr Create();
+		Camera(const Camera& other);
 		~Camera();
+		Camera& operator= (const Camera& other);
 
 		//-------------------------------------------------------------------------
 		void SetOrthogonal(bool ortho);
@@ -75,15 +78,6 @@ namespace fastbird
 		void SetTransformation(const Transformation& t);
 		const Transformation& GetTransformation() const;
 		const Vec3 GetDirection() const;
-		enum MatrixType {
-			View,
-			InverseView,
-			InverseViewProj,
-			Proj, // Projection
-			InverseProj,
-			ViewProj,
-			NumMatrices,
-		};
 		const Mat44& GetMatrix(MatrixType type);
 		
 		// field of view in the y direction, in radians.
@@ -108,9 +102,9 @@ namespace fastbird
 		Ray3 ScreenPosToRay(long x, long y);
 		Vec2I WorldToScreen(const Vec3& worldPos) const;
 		void SetYZSwap(bool enable);
-		void SetTarget(std::shared_ptr<Transformation> pObj);
 		void SetDistanceFromTarget(Real dist);
-		std::shared_ptr<Transformation> GetTarget() const;
+		void SetTarget(ISpatialObjectPtr pObj);
+		ISpatialObjectPtr GetTarget() const;
 		void SetCurrent(bool cur);
 		void SetCameraIndex(size_t idx);
 		void SetEnalbeInput(bool enable);

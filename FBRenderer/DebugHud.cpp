@@ -29,7 +29,6 @@
 #include "DebugHud.h"
 #include "Renderer.h"
 #include "Font.h"
-#include "FBSceneManager/Scene.h"
 #include "FBTimer/Timer.h"
 #include "RenderOptions.h"
 #include "RenderStates.h"
@@ -37,8 +36,8 @@
 #include "Shader.h"
 #include "VertexBuffer.h"
 #include "Material.h"
-#include "FBSceneManager/Camera.h"
-#include "FBSceneManager/SceneManager.h"
+#include "Camera.h"
+#include "FBSceneManager/IScene.h"
 
 using namespace fastbird;
 
@@ -157,10 +156,7 @@ public:
 		DEPTH_STENCIL_DESC ddesc;
 		ddesc.DepthEnable = false;
 		mRenderStates = RenderStates::Create();
-		mRenderStates->CreateDepthStencilState(ddesc);
-
-		//mSphereMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugSphere.dae");
-		//mBoxMesh = SceneManager::GetInstance().CreateMeshObject("es/objects/DebugBox.dae");
+		mRenderStates->CreateDepthStencilState(ddesc);		
 	}
 
 	void SetRenderTargetSize(const Vec2I& size){
@@ -505,7 +501,7 @@ public:
 		mTriangles.clear();
 	}
 
-	void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
+	void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
 		if (!Renderer::GetInstance().GetOptions()->r_debugDraw)
 			return;
@@ -624,7 +620,7 @@ void DebugHud::DrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const C
 	mImpl->DrawTriangle(a, b, c, color, alpha);
 }
 
-void DebugHud::OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
+void DebugHud::OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
 {
 	mImpl->OnBeforeRenderingTransparents(scene, renderParam, renderParamOut);
 }

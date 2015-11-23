@@ -24,9 +24,8 @@
  THE SOFTWARE.
  -----------------------------------------------------------------------------
 */
-#pragma warning (disable : 4251)
-
-#if defined(_WIN32) 
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_) 
 #define FB_DLL_SCENEOBJECTFACTORY __declspec(dllexport)
 #define FB_DLL_ANIMATION __declspec(dllimport)
 #define FB_DLL_COLLADA __declspec(dllimport)
@@ -37,10 +36,9 @@
 #define FB_DLL_ANIMATION
 #endif
 
-
 #include "FBCommonHeaders/platform.h"
-
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 #include "FBMathLib/Math.h"
+#include "FBTimer/Timer.h"
 #include <queue>

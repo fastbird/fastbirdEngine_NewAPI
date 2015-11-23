@@ -27,13 +27,14 @@
 
 #pragma once
 #include "SceneObject.h"
+#include "ISpatialObject.h"
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Math.h"
 #include "FBMathLib/BoundingVolume.h"
 namespace fastbird{	
 	DECLARE_SMART_PTR(Animation);
 	DECLARE_SMART_PTR(SpatialObject);
-	class FB_DLL_SCENEMANAGER SpatialObject : public SceneObject{
+	class FB_DLL_SCENEMANAGER SpatialObject : public ISpatialObject {
 		DECLARE_PIMPL_CLONEABLE(SpatialObject);		
 
 	protected:
@@ -46,14 +47,17 @@ namespace fastbird{
 		void SetDistToCam(Real dist);
 		Real GetDistToCam() const;
 		const Vec3& GetPosition() const;
+		const Vec3& GetPreviousPosition() const;
 		const Vec3& GetScale() const;
+		Vec3 GetDirection() const;
+		const Quat& GetRotation() const;
 		void SetPosition(const Vec3& pos);
 		void SetRotation(const Quat& rot);
 		void SetScale(const Vec3& scale); // use uniform only.
 		void SetDirection(const Vec3& dir);
 		void SetDirectionAndRight(const Vec3& dir, const Vec3& right);
 		BoundingVolumePtr GetBoundingVolume();
-		BoundingVolumePtr GetBoundingVolumeWorld();				
+		BoundingVolumePtr GetBoundingVolumeWorld();
 		const Transformation& GetLocation() const;
 		const Transformation& GetAnimatedLocation() const;
 		AnimationPtr GetAnimation() const;

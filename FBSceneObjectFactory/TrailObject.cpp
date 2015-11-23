@@ -3,7 +3,7 @@
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/Material.h"
 #include "FBRenderer/VertexBuffer.h"
-#include "FBSceneManager/Camera.h"
+#include "FBRenderer/Camera.h"
 using namespace fastbird;
 class TrailObject::Impl
 {
@@ -204,7 +204,6 @@ IMPLEMENT_STATIC_CREATE(TrailObject)
 TrailObject::TrailObject()
 : mImpl(new Impl(this))
 {
-	SetRenderable(this);
 }
 
 TrailObject::~TrailObject(){

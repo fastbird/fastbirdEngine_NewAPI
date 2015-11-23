@@ -11,7 +11,7 @@
 #include "FBRenderer/Renderer.h"
 #include "FBSceneManager/SceneManager.h"
 #include "FBSceneManager/Scene.h"
-#include "FBSceneManager/Camera.h"
+#include "FBRenderer/Camera.h"
 #include "FBSceneObjectFactory/MeshObject.h"
 #include "FBSceneObjectFactory/SceneObjectFactory.h"
 
@@ -59,9 +59,7 @@ public:
 	Vec3 mRelativeVelocityDir;
 	float mRelativeVelocity;
 	Vec3 mStartPos;
-	float mFinalAlphaMod; // for glares in the opposite side of camera.
-	Transformation mTransformation;
-	Vec3 mPrevPos;
+	float mFinalAlphaMod; // for glares in the opposite side of camera.	
 	bool mVisible;
 
 	VectorMap<std::string, std::string>  mShaderDefines;
@@ -618,7 +616,7 @@ public:
 						if (p.mCurLifeTime >= p.mLifeTime)
 						{
 							if (p.mMeshObject){
-								SceneManager::GetInstance().GetMainScene()->DetachObject(p.mMeshObject);								
+								SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);								
 							}
 							if (p.mPointLight)
 							{
@@ -653,7 +651,7 @@ public:
 					if (pt->mVelocityToCenter)
 					{
 						if (pt->mEmitTo == ParticleEmitTo::WorldSpace)
-							p.mVelDir = mTransformation.GetTranslation() - p.mPos;
+							p.mVelDir = mSelf->GetPosition() - p.mPos;
 						else
 							p.mVelDir = -p.mPos;
 					}
@@ -663,7 +661,7 @@ public:
 
 					if (pt->IsLocalSpace())
 					{
-						p.mPosWorld = mTransformation.ApplyForward(p.mPos);
+						p.mPosWorld = mSelf->GetLocation().ApplyForward(p.mPos);
 					}
 					else
 					{
@@ -691,7 +689,7 @@ public:
 					p.mRot += p.mRotSpeed * elapsedTime;
 
 
-					float scale = mTransformation.GetScale().x;
+					float scale = mSelf->GetScale().x;
 					// change scale speed
 					if (!p.IsInfinite())
 					{
@@ -711,7 +709,7 @@ public:
 					if (p.mSize.y < 0.0f)
 						p.mSize.y = 0.0f;
 
-					Vec3 toSidePos = mTransformation.GetForward() * p.mSize.x;
+					Vec3 toSidePos = mSelf->GetDirection() * p.mSize.x;
 					/*mBoundingVolumeWorld->Merge(p.mPosWorld - pt->mPivot.x * toSidePos);
 					mBoundingVolumeWorld->Merge(p.mPosWorld + (1.0f - pt->mPivot.x) * toSidePos);*/
 
@@ -810,14 +808,14 @@ public:
 					auto axis = oppositeStart.Cross(toStartPos).NormalizeCopy();
 					auto desiredLocation = camPos + (Quat(rotAngle, axis) * oppositeStart);
 					auto dest = Lerp(desiredLocation, camPos, emitterNormTime);
-					mTransformation.SetTranslation(dest);
+					mSelf->SetPosition(dest);
 					mFinalAlphaMod += emitterNormTime *.5f;
 					mFinalAlphaMod = std::min(1.0f, mFinalAlphaMod);
 				}
 				else
 				{
 					auto dest = Lerp(mStartPos, camPos, emitterNormTime);
-					mTransformation.SetTranslation(dest);
+					mSelf->SetPosition(dest);					
 					mFinalAlphaMod = 1.0f;
 				}
 			}
@@ -861,7 +859,7 @@ public:
 					mNextEmits[&it] = (float)it.mInitialParticles;
 				}
 			}
-			mStartPos = mTransformation.GetTranslation();
+			mStartPos = mSelf->GetPosition();
 			ProcessDeleteOnStop(false);
 		}
 		else if (!a && mInActiveList)
@@ -893,7 +891,7 @@ public:
 					{
 						p.mCurLifeTime = p.mLifeTime;
 						if (p.mMeshObject){
-							SceneManager::GetInstance().GetMainScene()->DetachObject(p.mMeshObject);							
+							SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
 						}
 						if (p.mPointLight)
 							p.mPointLight->SetEnabled(false);
@@ -906,7 +904,7 @@ public:
 					for (auto& p : particles)
 					{
 						if (p.mMeshObject){
-							SceneManager::GetInstance().GetMainScene()->AttachObject(p.mMeshObject);							
+							SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
 						}
 						if (p.mPointLight)
 							p.mPointLight->SetEnabled(true);
@@ -932,7 +930,7 @@ public:
 			{
 				if (p.mMeshObject){
 					p.mMeshObject->SetVisible(visible);
-					SceneManager::GetInstance().GetMainScene()->AttachObject(p.mMeshObject);
+					SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
 				}
 				if (p.mPointLight)
 					p.mPointLight->SetEnabled(visible);
@@ -1091,7 +1089,7 @@ public:
 									Mat33 toViewRot = pCamera->GetMatrix(Camera::View).To33();
 									if (i == 0)
 									{
-										Vec3 worldForward = (mTransformation.GetRotation() * udir);
+										Vec3 worldForward = (mSelf->GetRotation() * udir);
 
 										udir = toViewRot * worldForward;
 										udirBackup = udir;
@@ -1142,8 +1140,8 @@ public:
 							Vec2 size = p.mSize;
 							if (pt->mStretchMax > 0.f)
 							{
-								auto pos = mTransformation.GetTranslation();
-								auto prevPos = mPrevPos;
+								auto pos = mSelf->GetPosition();
+								auto prevPos = mSelf->GetPreviousPosition();
 								if (!IsEqual(mRelativeVelocity, 0.f, 0.001f))
 								{
 									size.x += std::min(size.x * pt->mStretchMax, std::max(0.f, mRelativeVelocity));
@@ -1151,7 +1149,7 @@ public:
 								else if (!IsEqual(pos, prevPos, 0.001f))
 								{
 									auto cam = Renderer::GetInstance().GetCamera();
-									auto distToCam = cam->GetPosition().DistanceTo(mTransformation.GetTranslation());
+									auto distToCam = cam->GetPosition().DistanceTo(mSelf->GetPosition());
 									size.x += std::min(size.x*pt->mStretchMax, std::max(0.f, (pos - prevPos).Length() / dt*0.1f - distToCam*.1f));
 								}
 							}
@@ -1175,7 +1173,7 @@ public:
 							if (p.mMeshObject)
 							{
 								p.mMeshObject->SetPosition(p.mPosWorld);
-								p.mMeshObject->SetRotation(mTransformation.GetRotation());
+								p.mMeshObject->SetRotation(mSelf->GetRotation());
 							}
 							if (p.mPointLight)
 							{
@@ -1193,23 +1191,6 @@ public:
 				}
 			}
 		}
-	}
-
-	void SetPosition(const Vec3& pos){
-		mPrevPos = mTransformation.GetTranslation();
-		mTransformation.SetTranslation(pos);
-	}
-
-	void SetScale(const Vec3& scale){
-		mTransformation.SetScale(scale);
-	}
-
-	const Vec3& GetPosition() const{
-		return mTransformation.GetTranslation();
-	}
-
-	void SetDirection(const Vec3& dir){
-		mTransformation.SetDirection(dir);
 	}
 
 	bool IsInfinite() const{
@@ -1328,7 +1309,7 @@ public:
 		PARTICLES& particles = *(mParticlesPerTemplate[&pt]);
 		size_t addedPos = particles.push_back(Particle());
 		Particle& p = particles.GetAt(addedPos);
-		const auto& vScale = mTransformation.GetScale();
+		const auto& vScale = mSelf->GetScale();
 		float scale = vScale.x;
 		switch (pt.mRangeType)
 		{
@@ -1340,7 +1321,7 @@ public:
 			}
 			else
 			{
-				p.mPos = mTransformation.GetTranslation();
+				p.mPos = mSelf->GetPosition();
 			}
 		}
 		break;
@@ -1349,7 +1330,7 @@ public:
 			p.mPos = Random(Vec3(-pt.mRangeRadius), Vec3(pt.mRangeRadius))*scale;
 			if (!pt.IsLocalSpace())
 			{
-				p.mPos += mTransformation.GetTranslation();
+				p.mPos += mSelf->GetPosition();
 			}
 		}
 		break;
@@ -1361,7 +1342,7 @@ public:
 			p.mPos = SphericalToCartesian(r, theta, phi);
 			if (!pt.IsLocalSpace())
 			{
-				p.mPos += mTransformation.GetTranslation();
+				p.mPos += mSelf->GetPosition();
 			}
 		}
 		break;
@@ -1373,7 +1354,7 @@ public:
 			p.mPos = SphericalToCartesian(theta, phi) * r;
 			if (!pt.IsLocalSpace())
 			{
-				p.mPos += mTransformation.GetTranslation();
+				p.mPos += mSelf->GetPosition();
 			}
 		}
 		break;
@@ -1386,18 +1367,18 @@ public:
 			p.mPos = Vec3(height*tanS*cosT, height*tanS*sinT, height);
 			if (!pt.IsLocalSpace())
 			{
-				p.mPos += mTransformation.GetTranslation();
+				p.mPos += mSelf->GetPosition();
 			}
 		}
 		break;
 		}
-		float angle = pt.mDefaultDirection.AngleBetween(mTransformation.GetForward());
+		float angle = pt.mDefaultDirection.AngleBetween(mSelf->GetDirection());
 		Vec3 posOffset = pt.mPosOffset;
 		if (pt.mPosOffset != Vec3::ZERO && pt.mEmitTo == ParticleEmitTo::WorldSpace)
 		{
 			if (angle > 0.01f)
 			{
-				Vec3 axis = pt.mDefaultDirection.Cross(mTransformation.GetForward());
+				Vec3 axis = pt.mDefaultDirection.Cross(mSelf->GetDirection());
 				axis.Normalize();
 				Quat matchRot(angle, axis);
 				posOffset = matchRot * posOffset;
@@ -1409,7 +1390,7 @@ public:
 		if (pt.mVelocityToCenter)
 		{
 			if (pt.mEmitTo == ParticleEmitTo::WorldSpace)
-				velDir = mTransformation.GetTranslation() - p.mPos;
+				velDir = mSelf->GetPosition() - p.mPos;
 			else
 				velDir = -p.mPos;
 		}
@@ -1420,7 +1401,7 @@ public:
 
 		if (angle > 0.01f && pt.mEmitTo == ParticleEmitTo::WorldSpace)
 		{
-			Vec3 axis = pt.mDefaultDirection.Cross(mTransformation.GetForward());
+			Vec3 axis = pt.mDefaultDirection.Cross(mSelf->GetDirection());
 			axis.Normalize();
 			Quat matchRot(angle, axis);
 			velDir = matchRot * velDir;
@@ -1470,7 +1451,7 @@ public:
 
 		if (pt.IsLocalSpace())
 		{
-			p.mPosWorld = mTransformation.ApplyForward(p.mPos);
+			p.mPosWorld = mSelf->GetLocation().ApplyForward(p.mPos);
 		}
 		else
 		{
@@ -1492,11 +1473,11 @@ public:
 				}
 			}
 			if (mVisible){
-				SceneManager::GetInstance().GetMainScene()->AttachObject(p.mMeshObject);
+				SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
 			}
 			p.mMeshObject->SetPosition(p.mPosWorld);
 			p.mMeshObject->SetScale(Vec3(scale));
-			p.mMeshObject->SetDirection(mTransformation.GetForward());
+			p.mMeshObject->SetDirection(mSelf->GetDirection());
 		}
 
 		if (pt.mParticleEmitter != -1)
@@ -1564,8 +1545,8 @@ ParticleEmitterPtr ParticleEmitter::Clone(){
 	return mImpl->Clone();
 }
 
-bool ParticleEmitter::Load(const char* filepath) {
-	return mImpl->Load(filepath);
+bool ParticleEmitter::Load(const char* filepath, bool reload) {
+	return mImpl->Load(filepath, reload);
 }
 
 bool ParticleEmitter::Update(float elapsedTime) {
@@ -1626,22 +1607,6 @@ void ParticleEmitter::UpdateEmit(float dt) {
 
 void ParticleEmitter::CopyDataToRenderer(float dt) {
 	mImpl->CopyDataToRenderer(dt);
-}
-
-void ParticleEmitter::SetPosition(const Vec3& pos) {
-	mImpl->SetPosition(pos);
-}
-
-void ParticleEmitter::SetScale(const Vec3& scale) {
-	mImpl->SetScale(scale);
-}
-
-const Vec3& ParticleEmitter::GetPosition() const{
-	return mImpl->GetPosition();
-}
-
-void ParticleEmitter::SetDirection(const Vec3& dir){
-	mImpl->SetDirection(dir);
 }
 
 bool ParticleEmitter::IsInfinite() const {

@@ -57,7 +57,7 @@ namespace fastbird
 		Quat(Real radian, const Vec3& axis);
 		Quat(const Vec3& xAxis, const Vec3& yAxis, const Vec3& zAxis);
 		explicit Quat(const Vec3& euler);
-		explicit Quat(const QuatTuple& t);
+		Quat(const QuatTuple& t);
 
 		//-------------------------------------------------------------------		
 		Quat operator-(void) const;		

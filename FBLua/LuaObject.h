@@ -115,6 +115,7 @@ namespace fastbird
 		void SetField(const char* fieldName, const Vec3ITuple& v) const; /// Vec3I
 		void SetField(const char* fieldName, const Vec4Tuple& v) const; // Vec4
 		void SetField(const char* fieldName, const Vec2Tuple& v) const; // Vec2
+		void SetField(const char* fieldName, const QuatTuple& v) const; // Quat
 		void SetField(const char* fieldName, const std::tuple<int, int>& v) const; // Vec2I
 		void SetField(const char* fieldName, const TransformationTuple& v) const; // Transformation
 		void SetField(const char* fieldName, LuaObject& value) const;

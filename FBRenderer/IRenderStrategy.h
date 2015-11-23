@@ -30,7 +30,7 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(Camera);
-	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(IScene);
 	DECLARE_SMART_PTR(RenderTarget);	
 	DECLARE_SMART_PTR(IRenderStrategy);
 	class FB_DLL_RENDERER IRenderStrategy{
@@ -38,7 +38,7 @@ namespace fastbird{
 		virtual ~IRenderStrategy(){}
 
 	public:
-		virtual void SetScene(ScenePtr scene) = 0;
+		virtual void SetScene(IScenePtr scene) = 0;
 		virtual void SetRenderTarget(RenderTargetPtr renderTarget) = 0;
 		virtual void UpdateLightCamera() = 0;
 		virtual void Render(size_t face) = 0;

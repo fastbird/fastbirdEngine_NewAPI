@@ -33,8 +33,8 @@
 #include "RenderEventMarker.h"
 #include "RenderOptions.h"
 #include "RenderTargetParam.h"
-#include "FBSceneManager/Scene.h"
-#include "FBSceneManager/Camera.h"
+#include "Camera.h"
+#include "FBSceneManager/IScene.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBCommonHeaders/Observable.h"
 
@@ -44,11 +44,11 @@ RenderTargetId NextRenderTargetId = 1;
 
 class RenderTarget::Impl{
 public:
-	RenderTargetWeakPtr mSelf;
+	RenderTargetWeakPtr mSelfPtr;
 	CameraPtr mCamera;
 	IRenderStrategyPtr mStrategy;
 	RendererWeakPtr mRenderer;
-	SceneWeakPtr mScene;
+	ISceneWeakPtr mScene;
 	RenderTargetId mId;
 
 	bool mEnabled;
@@ -87,7 +87,6 @@ public:
 		, mFace(0)
 		, mId(NextRenderTargetId++)
 	{
-		mCamera = Camera::Create();
 		mStrategy = RenderStrategyDefault::Create();
 	}
 
@@ -119,15 +118,20 @@ public:
 		return prev;
 	}
 
-	ScenePtr RegisterScene(ScenePtr scene)
+	IScenePtr RegisterScene(IScenePtr scene)
 	{
 		auto prevScene = mScene;
 		mScene = scene;
-		if (scene){
-			scene->AddObserver(ISceneObserver::Timing, Renderer::GetInstancePtr());
+		auto mainRt = Renderer::GetInstance().GetMainRenderTarget();
+		if (scene && mainRt == mSelfPtr.lock()){
+			scene->AddSceneObserver(ISceneObserver::Timing, Renderer::GetInstancePtr());
 		}
 		mStrategy->SetScene(scene);
 		return prevScene.lock();
+	}
+
+	void SetCamera(CameraPtr cam){
+		mCamera = cam;
 	}
 
 	CameraPtr ReplaceCamera(CameraPtr cam){
@@ -152,8 +156,10 @@ public:
 		auto& renderer = Renderer::GetInstance();		
 		mRenderTargetTexture = renderer.CreateTexture(0, width, height, format,
 			BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, type);
-		mCamera->SetWidth((float)width);
-		mCamera->SetHeight((float)height);
+		if (mCamera){
+			mCamera->SetWidth((float)width);
+			mCamera->SetHeight((float)height);
+		}
 		mViewport.mTopLeftX = 0;
 		mViewport.mTopLeftY = 0;
 		mViewport.mWidth = (float)mSize.x;
@@ -178,7 +184,7 @@ public:
 		if (!mEnabled)
 			return;
 		auto& renderer = Renderer::GetInstance();
-		renderer.SetCurrentRenderTarget(mSelf.lock());
+		renderer.SetCurrentRenderTarget(mSelfPtr.lock());
 
 		Renderer::GetInstance().UnbindRenderTarget(mRenderTargetTexture);
 		
@@ -190,10 +196,11 @@ public:
 			mDepthClear, mStencilClear);
 		auto scene = mScene.lock();
 		if (scene){
-			auto light = scene->GetDirectionalLight(0);
-			renderer.SetDirectionalLight(light, 0);
-			light = scene->GetDirectionalLight(1);
-			renderer.SetDirectionalLight(light, 1);
+			DirectionalLightInfo lightInfo;
+			scene->GetDirectionalLightInfo(0, lightInfo);
+			renderer.SetDirectionalLightInfo(0, lightInfo);
+			scene->GetDirectionalLightInfo(1, lightInfo);
+			renderer.SetDirectionalLightInfo(1, lightInfo);			
 		}
 
 		renderer.SetCamera(mCamera);
@@ -211,7 +218,7 @@ public:
 	void BindTargetOnly(bool hdr)
 	{
 		auto& renderer = Renderer::GetInstance();
-		renderer.SetCurrentRenderTarget(mSelf.lock());
+		renderer.SetCurrentRenderTarget(mSelfPtr.lock());
 		if (hdr &&  mStrategy->IsHDR() && renderer.GetOptions()->r_HDR){
 			mStrategy->SetHDRTarget();
 		}
@@ -242,9 +249,9 @@ public:
 
 		mFace = face;
 		auto& renderer = Renderer::GetInstance();
-
 		RenderEventMarker mark("RenderTarget");
 		mStrategy->Render(face);
+		
 		return true;
 	}
 
@@ -364,7 +371,7 @@ public:
 //-------------------------------------------------------------------
 RenderTargetPtr RenderTarget::Create(){
 	auto p = RenderTargetPtr(FB_NEW(RenderTarget), [](RenderTarget* obj){ FB_DELETE(obj); });
-	p->mImpl->mSelf = p;
+	p->mImpl->mSelfPtr = p;
 	return p;
 }
 
@@ -401,14 +408,18 @@ IRenderStrategyPtr RenderTarget::SetRenderStrategy(IRenderStrategyPtr strategy){
 	return mImpl->SetRenderStrategy(strategy);
 }
 
-ScenePtr RenderTarget::RegisterScene(ScenePtr scene)
+IScenePtr RenderTarget::RegisterScene(IScenePtr scene)
 {
 	return mImpl->RegisterScene(scene);
 }
 
-ScenePtr RenderTarget::GetScene() const
+IScenePtr RenderTarget::GetScene() const
 {
 	return mImpl->mScene.lock();
+}
+
+void RenderTarget::SetCamera(CameraPtr cam){
+	mImpl->SetCamera(cam);
 }
 
 CameraPtr RenderTarget::ReplaceCamera(CameraPtr cam){

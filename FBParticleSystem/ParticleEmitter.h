@@ -1,10 +1,11 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBCommonHeaders/CircularBuffer.h"
+#include "FBSceneManager/SpatialObject.h"
 namespace fastbird
 {
 	DECLARE_SMART_PTR(ParticleEmitter);
-	class FB_DLL_PARTICLESYSTEM ParticleEmitter
+	class FB_DLL_PARTICLESYSTEM ParticleEmitter : public SpatialObject
 	{
 		DECLARE_PIMPL_CLONEABLE(ParticleEmitter);
 		ParticleEmitter();
@@ -33,11 +34,7 @@ namespace fastbird
 		void SetAlpha(float alpha);
 		float GetAlpha() const ;
 		void UpdateEmit(float dt);
-		void CopyDataToRenderer(float dt);
-		void SetPosition(const Vec3& pos);
-		void SetScale(const Vec3& scale);
-		const Vec3& GetPosition() const;
-		void SetDirection(const Vec3& dir);
+		void CopyDataToRenderer(float dt);		
 		bool IsInfinite() const;
 		void SetBufferSize(unsigned size);
 		//void Sort();

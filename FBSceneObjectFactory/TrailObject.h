@@ -1,11 +1,10 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "FBSceneManager/SpatialObject.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBSceneManager/SpatialSceneObject.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(TrailObject);
-	class FB_DLL_SCENEOBJECTFACTORY TrailObject : public SpatialObject, public IRenderable
+	class FB_DLL_SCENEOBJECTFACTORY TrailObject : public SpatialSceneObject
 	{
 		DECLARE_PIMPL_NON_COPYABLE(TrailObject);
 		TrailObject();
@@ -15,7 +14,7 @@ namespace fastbird{
 		static TrailObjectPtr Create();
 
 		//---------------------------------------------------------------------------
-		// IRenderable Interfaces
+		// SceneObject Interfaces
 		//---------------------------------------------------------------------------		
 		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
 		void Render(const RenderParam& param, RenderParamOut* paramOut);

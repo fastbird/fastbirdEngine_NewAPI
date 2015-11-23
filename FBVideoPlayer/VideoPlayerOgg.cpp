@@ -341,8 +341,7 @@ public:
 	//---------------------------------------------------------------------------
 	void Update(TIME_PRECISION dt){
 		if (mFinish){
-			if (mDurationAfterFinish > 0){
-				Display();
+			if (mDurationAfterFinish > 0){				
 				mDurationAfterFinish -= dt;
 			}
 			return;
@@ -368,8 +367,7 @@ public:
 		}
 
 		if (!mVideoBufReady){
-			mFinish = true;
-			Display();
+			mFinish = true;			
 			if (mNotifierFunc){
 				mNotifierFunc(mSelf.lock().get());
 			}
@@ -389,19 +387,14 @@ public:
 					mTextures[pli]->Unmap(0);
 				}
 			}
-		}
-		Display();
+		}		
 
 		if (mAudio){
 			mAudio->Update(dt);
 		}
 	}
 
-	bool IsFinish(){
-		return mFinish;
-	}
-
-	void Display(){
+	void Render(){
 		RenderEventMarker mark("Video Rendering");
 		for (int pli = 0; pli<3; pli++){
 			mTextures[pli]->Bind(BINDING_SHADER_PS, pli);
@@ -410,6 +403,11 @@ public:
 		renderer.GetResourceProvider()->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthStencil);
 		renderer.DrawFullscreenQuad(mPS, false);
 	}
+
+	bool IsFinish(){
+		return mFinish;
+	}
+
 };
 
 namespace fastbird{
@@ -453,6 +451,10 @@ void VideoPlayerOgg::SetDurationAfterFinish(TIME_PRECISION time) {
 
 void VideoPlayerOgg::Update(TIME_PRECISION dt) {
 	mImpl->Update(dt);
+}
+
+void VideoPlayerOgg::Render(){
+	mImpl->Render();
 }
 
 bool VideoPlayerOgg::IsFinish() const {

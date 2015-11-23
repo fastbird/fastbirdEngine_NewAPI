@@ -53,7 +53,7 @@ namespace fastbird
 #endif
 		explicit Vec4(const Vec3& xyz);
 		explicit Vec4(const char* s);
-		explicit Vec4(const Vec4Tuple& t);
+		Vec4(const Vec4Tuple& t);
 
 		//-------------------------------------------------------------------------
 		Vec4 operator+(const Vec4& r) const;

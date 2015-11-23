@@ -27,11 +27,10 @@
 
 #include "stdafx.h"
 #include "Camera.h"
-#include "SpatialObject.h"
-#include "SceneManager.h"
 #include "FBMathLib/BoundingVolume.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBInputManager/KeyCodes.h"
+#include "FBSceneManager/ISpatialObject.h"
 
 using namespace fastbird;
 
@@ -88,7 +87,7 @@ public:
 	Real mHeight;
 	std::string mName;
 	Plane3 mPlanes[6];
-	std::weak_ptr<Transformation> mTarget;
+	ISpatialObjectWeakPtr mTarget;
 	size_t mCamIndex;
 	bool mYZSwap;
 	bool mCurrentCamera;
@@ -109,7 +108,36 @@ public:
 		mNear = 0.5f;
 		mFar = 1500.0f;
 	}
+
 	~Impl(){		
+	}
+
+	Impl& operator=(const Impl& other){
+		mViewPropertyChanged = other.mViewPropertyChanged;
+		mProjPropertyChanged = other.mProjPropertyChanged;
+		mOrthogonal = other.mOrthogonal;
+		for (int i = 0; i < NumMatrices; ++i){
+			mMatrices[i] = other.mMatrices[i];
+		}
+		mTransformation = other.mTransformation;
+		mFov = other.mFov;
+		mTanHalfFOV = other.mTanHalfFOV;
+		mAspectRatio = other.mAspectRatio;
+		mNear = other.mNear;
+		mFar = other.mFar;
+		mWidth = other.mWidth;
+		mHeight = other.mHeight;
+		mName = other.mName;
+		for (int i = 0; i < 6; ++i){
+			mPlanes[i] = other.mPlanes[i];
+		}
+		mTarget = other.mTarget;
+		mCamIndex = other.mCamIndex;
+		mYZSwap = other.mYZSwap;
+		mCurrentCamera = other.mCurrentCamera;
+		mProcessInput = other.mProcessInput;
+		mPrevTargetPos = other.mPrevTargetPos;		
+		return *this;
 	}
 
 	//----------------------------------------------------------------------------
@@ -195,7 +223,7 @@ public:
 		auto target = mTarget.lock();
 		if (!mProcessInput || !mCurrentCamera || !target)
 			return;
-		if (mUserParams.Changed() || mPrevTargetPos != target->GetTranslation())
+		if (mUserParams.Changed() || mPrevTargetPos != target->GetPosition())
 		{
 			mInternalParams.dist += mUserParams.dDist;
 			mInternalParams.dist = std::max((Real)2.0f, (Real)mInternalParams.dist);
@@ -236,10 +264,10 @@ public:
 			Mat33 rot(right.x, forward.x, up.x,
 				right.y, forward.y, up.y,
 				right.z, forward.z, up.z);
-			Vec3 pos = target->GetTranslation() + toCam * mInternalParams.dist;
+			Vec3 pos = target->GetPosition() + toCam * mInternalParams.dist;
 			SetTransformation(pos, Quat(rot));
 			mUserParams.Clear();
-			mPrevTargetPos = target->GetTranslation();
+			mPrevTargetPos = target->GetPosition();
 		}
 	}
 
@@ -403,17 +431,17 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void SetTarget(std::shared_ptr<Transformation> obj)
+	void SetDistanceFromTarget(Real dist){
+		mInternalParams.dist = dist;
+		mUserParams.forceChanged = true;
+	}
+
+	void SetTarget(ISpatialObjectPtr obj)
 	{
 		if (mTarget.lock() == obj)
 			return;
 
 		mTarget = obj;
-	}
-
-	void SetDistanceFromTarget(Real dist){
-		mInternalParams.dist = dist;
-		mUserParams.forceChanged = true;
 	}
 
 	//---------------------------------------------------------------------------
@@ -426,7 +454,7 @@ public:
 			return;
 		if (injector->IsValid(FBInputDevice::DeviceMouse) && !injector->IsKeyDown(VK_CONTROL)){
 			const Vec3 camPos = GetPosition();
-			Vec3 toCam = camPos - target->GetTranslation();
+			Vec3 toCam = camPos - target->GetPosition();
 			const Real distToTarget = toCam.Normalize();
 			long dx, dy;
 			injector->GetHDDeltaXY(dx, dy);
@@ -500,16 +528,25 @@ public:
 
 //----------------------------------------------------------------------------
 IMPLEMENT_STATIC_CREATE(Camera);
-//CameraPtr Camera::Create(){
-//	return CameraPtr(FB_NEW(Camera), )
-//}
 
 Camera::Camera()
 	: mImpl(new Impl){
 	
 }
 
+Camera::Camera(const Camera& other)
+	: mImpl(new Impl)
+{
+	*mImpl = *other.mImpl;
+}
+
 Camera::~Camera(){	
+}
+
+Camera& Camera::operator= (const Camera& other)
+{
+	*mImpl = *other.mImpl;
+	return *this;
 }
 
 //----------------------------------------------------------------------------
@@ -658,15 +695,15 @@ void Camera::SetYZSwap(bool enable){
 	mImpl->SetYZSwap(enable);
 }
 
-void Camera::SetTarget(std::shared_ptr<Transformation> pObj){
-	mImpl->SetTarget(pObj);
-}
-
 void Camera::SetDistanceFromTarget(Real dist){
 	mImpl->SetDistanceFromTarget(dist);
 }
 
-std::shared_ptr<Transformation> Camera::GetTarget() const {
+void Camera::SetTarget(ISpatialObjectPtr pObj){
+	mImpl->SetTarget(pObj);
+}
+
+ISpatialObjectPtr Camera::GetTarget() const {
 	return mImpl->mTarget.lock(); 
 }
 

@@ -34,11 +34,8 @@ Required modules:
 Plugin: 
 */
 
-// Happens when a interface can have not exposed symbols.
-// But they are all privates so it is fine.
-#pragma warning (disable : 4251)
-
-#if defined(_WIN32) 
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_) 
 #define FB_DLL_SCENEOBJECTFACTORY __declspec(dllimport)
 #define FB_DLL_RENDERER __declspec(dllimport)
 #define FB_DLL_SCENEMANAGER __declspec(dllexport)

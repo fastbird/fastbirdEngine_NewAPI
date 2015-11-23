@@ -424,6 +424,16 @@ void LuaObject::SetField(const char* fieldName, const Vec2Tuple& v) const
 	lua_pop(mL, 1);
 }
 
+void LuaObject::SetField(const char* fieldName, const QuatTuple& v) const // Quat
+{
+	assert(fieldName);
+	LUA_STACK_WATCHER w(mL, "void LuaObject::SetField(const char* fieldName, const Vec2& v)");
+	PushToStack();
+	luaU_push(mL, v);
+	lua_setfield(mL, -2, fieldName);
+	lua_pop(mL, 1);
+}
+
 void LuaObject::SetField(const char* fieldName, const Vec2ITuple& v) const{
 	assert(fieldName);
 	LUA_STACK_WATCHER w(mL, "void LuaObject::SetField(const char* fieldName, const Vec2& v)");

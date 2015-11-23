@@ -40,6 +40,7 @@ namespace fastbird{
 		virtual void SetDurationAfterFinish(TIME_PRECISION time) = 0;
 		// Update called internally.
 		virtual void Update(TIME_PRECISION dt) = 0;
+		virtual void Render() = 0;
 
 		virtual bool IsFinish() const = 0;
 	};

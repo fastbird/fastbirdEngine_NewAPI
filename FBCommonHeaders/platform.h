@@ -31,6 +31,7 @@ A group containing header files only.
 */
 #pragma once
 #define FBCommonHeaders_platform_h
+#pragma warning (disable : 4251)
 
 #if defined(_WIN32)
 	#define _PLATFORM_WINDOWS_

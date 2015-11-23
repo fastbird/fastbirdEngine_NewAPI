@@ -5,11 +5,13 @@
     <ClInclude Include="ModuleHandler.h" />
     <ClInclude Include="StdOutRedirect.h" />
     <ClInclude Include="ClipboardData.h" />
+    <ClInclude Include="System.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="ModuleHandler.cpp" />
     <ClCompile Include="StdOutRedirect.cpp" />
     <ClCompile Include="ClipboardData.cpp" />
+    <ClCompile Include="System.cpp" />
   </ItemGroup>
 </Project>

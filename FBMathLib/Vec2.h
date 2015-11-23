@@ -44,7 +44,7 @@ namespace fastbird
 		Vec2();
 		Vec2(Real _x, Real _y);
 		explicit Vec2(const Vec2I& v);		
-		explicit Vec2(const Vec2Tuple& t);
+		Vec2(const Vec2Tuple& t);
 
 		//-------------------------------------------------------------------
 		Vec2 operator+ (Real s) const;

@@ -25,8 +25,8 @@
  -----------------------------------------------------------------------------
 */
 
-#pragma warning (disable : 4251)
-#if defined(_WIN32)
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_)
 #define FB_DLL_LUA __declspec(dllexport)
 #else
 #define FB_DLL_LUA

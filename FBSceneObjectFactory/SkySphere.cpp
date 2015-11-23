@@ -9,7 +9,7 @@
 #include "FBRenderer/RenderStrategyMinimum.h"
 #include "FBSceneManager/Scene.h"
 #include "FBSceneManager/DirectionalLight.h"
-#include "FBSceneManager/Camera.h"
+#include "FBRenderer/Camera.h"
 #include "SceneObjectFactory.h"
 
 using namespace fastbird;
@@ -385,10 +385,7 @@ public:
 
 		auto& renderer = Renderer::GetInstance();
 		TexturePtr pTexture = sRT->GetRenderTargetTexture();
-		auto dest = sRT->GetScene()->GetDirectionalLight(0);
-		auto src = renderer.GetMainRenderTarget()->GetScene()->GetDirectionalLight(0);
-		dest->CopyLight(src);
-
+		SceneManager::GetInstance().CopyDirectionalLight(sRT->GetScene(), 0, renderer.GetMainRenderTarget()->GetScene(), 0);
 		sRT->GetScene()->AttachSkySphere(mSelfPtr.lock());
 		sRT->GetCamera()->SetPosition(origin);
 		sRT->GetCamera()->SetFOV(HALF_PI);
@@ -505,7 +502,6 @@ IMPLEMENT_STATIC_CREATE(SkySphere);
 SkySphere::SkySphere()
 	: mImpl(new Impl(this))
 {
-	SetRenderable(this);
 }
 
 SkySphere::~SkySphere()

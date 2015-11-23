@@ -40,11 +40,12 @@
 #include "SystemTextures.h"
 #include "RenderEventMarker.h"
 #include "FBSceneManager/ISceneObserver.h"
+#include "FBSceneManager/IScene.h"
 #include "FBInputManager/IInputConsumer.h"
 #include "FBMathLib/Math.h"
-#include "EssentialEngineData/shaders/Constants.h"
 struct lua_State;
 namespace fastbird{	
+	struct POINT_LIGHT_CONSTANTS;
 	class RenderOptions;
 	typedef unsigned RenderTargetId;
 	DECLARE_SMART_PTR(ResourceProvider);
@@ -53,8 +54,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(PointLightManager);
 	DECLARE_SMART_PTR(Font);
 	DECLARE_SMART_PTR(DirectionalLight);
-	DECLARE_SMART_PTR(PointLight);
-	DECLARE_SMART_PTR(Scene);	
+	DECLARE_SMART_PTR(PointLight);	
 	DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
 	DECLARE_SMART_PTR(TextureAtlas);	
 	DECLARE_SMART_PTR(Material);
@@ -128,7 +128,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		bool InitCanvas(HWindowId id, HWindow window, int width, int height);
 		void ReleaseCanvas(HWindowId id);
-		void Render(TIME_PRECISION dt);
+		void Render();
 
 		//-------------------------------------------------------------------
 		// Resource Creation
@@ -250,17 +250,15 @@ namespace fastbird{
 		void SetForcedWireFrame(bool enable);
 		bool GetForcedWireFrame() const;
 		RenderTargetPtr GetMainRenderTarget() const;
-		ScenePtr GetMainScene() const; // move to SceneManager
+		IScenePtr GetMainScene() const; // move to SceneManager
 		const Vec2I& GetMainRenderTargetSize() const;
 		void SetCurrentRenderTarget(RenderTargetPtr renderTarget);
 		RenderTargetPtr GetCurrentRenderTarget() const;
-		void SetCurrentScene(ScenePtr scene);
+		void SetCurrentScene(IScenePtr scene);
 		bool IsMainRenderTarget() const;
 		const Vec2I& GetRenderTargetSize(HWindowId id = INVALID_HWND_ID) const;
 		const Vec2I& GetRenderTargetSize(HWindow hwnd = 0) const;
-		void SetDirectionalLight(DirectionalLightPtr pLight, int idx);
-		DirectionalLightPtr GetDirectionalLight(int idx) const;
-		DirectionalLightPtr GetMainDirectionalLight(int idx) const;
+		void SetDirectionalLightInfo(int idx, const DirectionalLightInfo& info);		
 		void InitFrameProfiler(Real dt);
 		const RENDERER_FRAME_PROFILER& GetFrameProfiler() const;
 		inline FontPtr GetFont(Real fontHeight) const;
@@ -281,7 +279,8 @@ namespace fastbird{
 		void GetSampleOffsets_DownScale2x2(DWORD texWidth, DWORD texHeight, Vec4f* avSampleOffsets);
 		bool IsLuminanceOnCpu() const;
 		void SetLockDepthStencilState(bool lock);
-		void SetLockBlendState(bool lock);		
+		void SetLockBlendState(bool lock);
+		void Update(TIME_PRECISION dt);
 
 		//-------------------------------------------------------------------
 		// Queries
@@ -362,9 +361,9 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// ISceneObserver
 		//-------------------------------------------------------------------
-		void OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
-		void OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
-		void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnBeforeRenderingOpaques(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
 
 		//-------------------------------------------------------------------
 		// IInputConsumer

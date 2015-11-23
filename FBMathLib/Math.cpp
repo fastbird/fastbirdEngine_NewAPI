@@ -50,7 +50,7 @@ namespace fastbird
 		return degree / 180.0f * PI;
 	}
 
-	Vec2 Radian(Vec2 degrees)
+	Vec2 Radian(const Vec2& degrees)
 	{
 		return Vec2(Radian(degrees.x), Radian(degrees.y));
 	}

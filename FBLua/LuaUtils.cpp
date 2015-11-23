@@ -30,6 +30,7 @@
 #include "LuaObject.h"
 #include "FBCommonHeaders/Helpers.h"
 #include "luawrapperutil.hpp"
+#include "FBCommonHeaders/RecursiveSpinLock.h"
 
 // luawapper util
 template<>
@@ -448,6 +449,27 @@ namespace fastbird
 		if (sLuaState)
 			return Push(sLuaState, str);
 		return 0;
+	}
+
+	RecursiveSpinLock<true, false> sLuaLock;
+	void LuaUtils::LockLua(){
+		sLuaLock.Lock();
+	}
+
+	void LuaUtils::UnlockLua(){
+		sLuaLock.Unlock();
+	}
+
+	LuaLock::LuaLock(){
+		LuaUtils::LockLua();
+	}
+	
+	LuaLock::~LuaLock(){
+		LuaUtils::UnlockLua();
+	}
+
+	LuaLock::operator lua_State*() const{
+		return LuaUtils::GetLuaState();
 	}
 
 	//---------------------------------------------------------------------------

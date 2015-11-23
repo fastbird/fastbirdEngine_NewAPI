@@ -28,6 +28,7 @@
 #include "stdafx.h"
 #include "SceneManager.h"
 #include "Scene.h"
+#include "DirectionalLight.h"
 #include "FBTimer/Timer.h"
 using namespace fastbird;
 
@@ -62,12 +63,35 @@ public:
 	ScenePtr GetMainScene() const{
 		return mMainScene.lock();
 	}
+
+	void Update(TIME_PRECISION dt){
+		for (auto it = mScenes.begin(); it != mScenes.end(); ){
+			auto scene = it->second.lock();
+			++it;
+			if (!scene){
+				mScenes.erase(it);
+				continue;
+			}
+			scene->Update(dt);
+		}
+	}
+
+	void CopyDirectionalLight(IScenePtr destScene, int destLightSlot, IScenePtr srcScene, int srcLightSlot){
+		auto d = std::dynamic_pointer_cast<Scene>(destScene);
+		auto s = std::dynamic_pointer_cast<Scene>(srcScene);
+		if (d && s){
+			auto dLight = d->GetDirectionalLight(destLightSlot);
+			auto sLight = s->GetDirectionalLight(srcLightSlot);
+			if (dLight && sLight)
+				dLight->CopyLight(sLight);
+		}
+	}
 };
 
 Timer* fastbird::gpTimer = 0;
 //---------------------------------------------------------------------------
 SceneManagerWeakPtr sSceneManager;
-SceneManagerPtr SceneManager::CreateSceneManager(){
+SceneManagerPtr SceneManager::Create(){
 	if (sSceneManager.expired()){
 		auto sceneManager = SceneManagerPtr(new SceneManager, [](SceneManager* obj){ delete obj; });
 		sceneManager->mImpl->mSelf = sceneManager;
@@ -92,4 +116,12 @@ ScenePtr SceneManager::CreateScene(const char* name){
 
 ScenePtr SceneManager::GetMainScene() const{
 	return mImpl->GetMainScene();
+}
+
+void SceneManager::Update(TIME_PRECISION dt){
+	mImpl->Update(dt);
+}
+
+void SceneManager::CopyDirectionalLight(IScenePtr destScene, int destLightSlot, IScenePtr srcScene, int srcLightSlot){
+	mImpl->CopyDirectionalLight(destScene, destLightSlot, srcScene, srcLightSlot);
 }

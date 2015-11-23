@@ -35,7 +35,6 @@
 namespace fastbird
 {
 	struct RenderTargetParam;
-	class Scene;
 	class IRenderTargetListener;
 	typedef unsigned RenderTargetId;
 	DECLARE_SMART_PTR(IRenderStrategy);
@@ -43,7 +42,7 @@ namespace fastbird
 	DECLARE_SMART_PTR(GaussianDist);
 	DECLARE_SMART_PTR(RenderPipeline);	
 	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(IScene);
 	DECLARE_SMART_PTR(Camera);
 	DECLARE_SMART_PTR(Mouse);
 	DECLARE_SMART_PTR(Keyboard);
@@ -77,8 +76,10 @@ namespace fastbird
 		bool CheckOptions(const RenderTargetParam& param);
 		
 		IRenderStrategyPtr SetRenderStrategy(IRenderStrategyPtr strategy);
-		ScenePtr RegisterScene(ScenePtr scene);
-		ScenePtr GetScene() const;
+		IScenePtr RegisterScene(IScenePtr scene);
+		IScenePtr GetScene() const;
+		void SetCamera(CameraPtr cam);
+		/// Returns previous camera
 		CameraPtr ReplaceCamera(CameraPtr cam);
 		CameraPtr GetCamera() const;
 

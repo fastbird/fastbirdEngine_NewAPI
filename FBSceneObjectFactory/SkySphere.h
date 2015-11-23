@@ -28,10 +28,10 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBSceneManager/SceneObject.h"
-#include "FBRenderer/IRenderable.h"
 namespace fastbird{
+	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(SkySphere);
-	class FB_DLL_SCENEOBJECTFACTORY SkySphere : public SceneObject, public IRenderable{
+	class FB_DLL_SCENEOBJECTFACTORY SkySphere : public SceneObject{
 		DECLARE_PIMPL_NON_COPYABLE(SkySphere);
 		SkySphere();
 		~SkySphere();

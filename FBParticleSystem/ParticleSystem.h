@@ -12,7 +12,7 @@ namespace fastbird
 
 	public:
 		static ParticleSystemPtr Create();
-		static ParticleSystem& GetInstance();		
+		static ParticleSystem& GetInstance();
 
 		void Update(float elapsedTime);
 		void RenderProfile();

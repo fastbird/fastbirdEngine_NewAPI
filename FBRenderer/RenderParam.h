@@ -27,11 +27,11 @@
 
 #pragma once
 namespace fastbird{
-	class Camera;
+	class ICamera;
 	struct RenderParam{
 		/// Vaild while rendering.
-		Camera* mCamera;
-		Camera* mLightCamera;
+		ICamera* mCamera;
+		ICamera* mLightCamera;
 		/// enum RENDER_PASS.
 		int mRenderPass;
 		int mReserved[3]; /// reserved.

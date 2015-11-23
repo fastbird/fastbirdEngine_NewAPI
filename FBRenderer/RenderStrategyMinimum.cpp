@@ -33,15 +33,16 @@ THE SOFTWARE.
 #include "RenderOptions.h"
 #include "Texture.h"
 #include "ResourceProvider.h"
-#include "FBSceneManager/Scene.h"
-#include "FBSceneManager/Camera.h"
-#include "FBSceneManager/SpatialObject.h"
+#include "Camera.h"
+#include "FBMathLib/BoundingVolume.h"
+#include "FBSceneManager/IScene.h"
+#include "FBSceneManager/ISpatialObject.h"
 #include "FBSceneManager/DirectionalLight.h"
 using namespace fastbird;
 IMPLEMENT_STATIC_CREATE(RenderStrategyMinimum);
 class RenderStrategyMinimum::Impl{
 public:
-	SceneWeakPtr mScene;
+	ISceneWeakPtr mScene;
 	RenderTargetWeakPtr mRenderTarget;
 	Vec2I mSize; // Render target size.
 	RenderTargetId mId;
@@ -65,7 +66,7 @@ public:
 	//-------------------------------------------------------------------
 	// IRenderStrategy
 	//-------------------------------------------------------------------
-	void SetScene(ScenePtr scene){
+	void SetScene(IScenePtr scene){
 		mScene = scene;
 	}
 
@@ -115,20 +116,16 @@ public:
 		float shadowCamDist = renderer.GetOptions()->r_ShadowCamDist;
 		auto scene = mScene.lock();
 		if (scene){
-			auto light = scene->GetDirectionalLight(0);
-			if (!light)
-				light = scene->GetDirectionalLight(1);
-			if (light){
-				if (target && target->GetBoundingVolume() && target->GetBoundingVolume()->GetRadius() < shadowCamDist)
-				{
-					mLightCamera->SetPosition(target->GetPosition() + cam->GetDirection() * 10.0f + light->GetDirection() *shadowCamDist);
-				}
-				else
-				{
-					mLightCamera->SetPosition(cam->GetPosition() + cam->GetDirection() * 10.0f + light->GetDirection() * shadowCamDist);
-				}
-				mLightCamera->SetDirection(-light->GetDirection());
+			const auto& lightDir = scene->GetMainLightDirection();			
+			if (target && target->GetBoundingVolumeWorld() && target->GetBoundingVolumeWorld()->GetRadius() < shadowCamDist)
+			{
+				mLightCamera->SetPosition(target->GetPosition() + cam->GetDirection() * 10.0f + lightDir *shadowCamDist);
 			}
+			else
+			{
+				mLightCamera->SetPosition(cam->GetPosition() + cam->GetDirection() * 10.0f + lightDir * shadowCamDist);
+			}
+			mLightCamera->SetDirection(-lightDir);
 		}
 	}
 
@@ -314,7 +311,7 @@ RenderStrategyMinimum::RenderStrategyMinimum()
 RenderStrategyMinimum::~RenderStrategyMinimum(){
 }
 
-void RenderStrategyMinimum::SetScene(ScenePtr scene){
+void RenderStrategyMinimum::SetScene(IScenePtr scene){
 	mImpl->SetScene(scene);
 }
 

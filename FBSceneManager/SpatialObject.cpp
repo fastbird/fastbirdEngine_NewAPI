@@ -92,8 +92,20 @@ public:
 		return mLocation.GetTranslation();
 	}
 
+	const Vec3& GetPreviousPosition() const{
+		return mPreviousPosition;
+	}
+
 	const Vec3& GetScale() const{
 		return mLocation.GetScale();
+	}
+
+	Vec3 GetDirection() const{
+		return mLocation.GetForward();
+	}
+
+	const Quat& GetRotation() const{
+		return mLocation.GetRotation();
 	}
 
 	void SetPosition(const Vec3& pos){
@@ -204,8 +216,7 @@ SpatialObject::SpatialObject()
 }
 
 SpatialObject::SpatialObject(const SpatialObject& other)
-	: SceneObject(other)
-	, mImpl(new Impl(*other.mImpl)){
+	: mImpl(new Impl(*other.mImpl)){
 
 }
 
@@ -233,8 +244,20 @@ const Vec3& SpatialObject::GetPosition() const{
 	return mImpl->GetPosition();
 }
 
+const Vec3& SpatialObject::GetPreviousPosition() const{
+	return mImpl->GetPreviousPosition();
+}
+
 const Vec3& SpatialObject::GetScale() const{
 	return mImpl->GetScale();
+}
+
+Vec3 SpatialObject::GetDirection() const{
+	return mImpl->GetDirection();
+}
+
+const Quat& SpatialObject::GetRotation() const{
+	return mImpl->GetRotation();
 }
 
 void SpatialObject::SetPosition(const Vec3& pos){

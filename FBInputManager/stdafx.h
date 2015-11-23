@@ -25,16 +25,14 @@
  -----------------------------------------------------------------------------
 */
 
-#pragma warning (disable : 4251)
-
-#if defined(_WIN32) 
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_) 
 #define FB_DLL_INPUTMANAGER __declspec(dllexport)
 #define FB_DLL_TIMER __declspec(dllimport)
 #else
 #define FB_DLL_TIMER
 #endif
 
-#include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define LEAN_AND_MEAN
 #include <Windows.h>

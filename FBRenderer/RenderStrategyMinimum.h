@@ -14,7 +14,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// IRenderStrategy
 		//-------------------------------------------------------------------
-		void SetScene(ScenePtr scene);
+		void SetScene(IScenePtr scene);
 		void SetRenderTarget(RenderTargetPtr renderTarget);
 		void UpdateLightCamera();
 		void Render(size_t face);

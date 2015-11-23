@@ -43,12 +43,8 @@ Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "zdll.lib")
 
-#if defined(_WIN32)
-	#define FB_DLL_RENDERERD3D11 __declspec(dllexport)
-	#define FB_DLL_FILESYSTEM __declspec(dllimport)
-#else
-#endif
-
+#define FB_DLL_RENDERERD3D11 __declspec(dllexport)
+#define FB_DLL_FILESYSTEM __declspec(dllimport)
 
 #define NOMINMAX
 #include <memory>

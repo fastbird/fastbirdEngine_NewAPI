@@ -33,11 +33,8 @@ Required libraries: \b FBDebugLib, \b FBMath, \b FBSystemLib, \b FBMemoryManager
 Required modules: \b FBColladaImporter, \b FBRenderableFactory
 Plugin: \b FBRendererD3D11
 */
-// Happens when a interface can have not exposed symbols.
-// But they are all privates so it is fine.
-#pragma warning (disable : 4251)
-
-#if defined(_WIN32) 
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_) 
 #define FB_DLL_RENDERER __declspec(dllexport)
 #define FB_DLL_TIMER __declspec(dllimport)
 #define FB_DLL_FILESYSTEM __declspec(dllimport)
@@ -48,8 +45,6 @@ Plugin: \b FBRendererD3D11
 #define FB_DLL_TIMER
 #endif
 
-
-#include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #else
 #include "PrefixHeader.pch"

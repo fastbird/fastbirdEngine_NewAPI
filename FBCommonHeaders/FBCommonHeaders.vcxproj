@@ -15,7 +15,10 @@
     <ClInclude Include="CowPtr.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="IteratorWrapper.h" />
+    <ClInclude Include="LockFreeQueue.h" />
     <ClInclude Include="Observable.h" />
+    <ClInclude Include="RecursiveSpinLock.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="String.h" />
     <ClInclude Include="Types.h" />

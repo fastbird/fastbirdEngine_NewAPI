@@ -107,6 +107,11 @@ std::string FileSystem::GetName(const char* path){
 	return filepath.stem().generic_string();
 }
 
+std::string FileSystem::GetNameWithoutExtension(const char* path){
+	auto name = GetName(path);
+	return ReplaceExtension(name.c_str(), "");
+}
+
 std::string FileSystem::GetParentPath(const char* path){
 	boost::filesystem::path filepath(path);
 	return filepath.parent_path().generic_string();

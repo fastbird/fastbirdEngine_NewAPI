@@ -28,16 +28,17 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "DirectionalLight.h"
-#include "Camera.h"
-#include "SpatialObject.h"
+#include "SpatialSceneObject.h"
+#include "FBRenderer/ICamera.h"
 #include "FBRenderer/RenderPass.h"
-#include "FBRenderer/IRenderable.h"
 #include "FBMathLib/Color.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBTimer/Timer.h"
 #include "FBStringLib/StringLib.h"
 #include "FBSceneObjectFactory/SkySphere.h"// this doesn't make denpendency
 using namespace fastbird;
+#undef AttachObjectFB
+#undef DetachObjectFB
 
 class Scene::Impl{
 public:
@@ -45,29 +46,33 @@ public:
 	SceneWeakPtr mSelfPtr;
 	std::string mName;
 	RENDER_PASS mRenderPass; // processing render pass
-	typedef std::vector<SpatialObjectPtr> SPATIAL_OBJECTS;
-	typedef std::vector<SpatialObjectWeakPtr> SPATIAL_OBJECTS_WEAK;
-	typedef std::vector<SpatialObject*> SPATIAL_OBJECTS_RAW;
+	typedef std::vector<SpatialSceneObjectPtr> SPATIAL_OBJECTS;
+	typedef std::vector<SpatialSceneObjectWeakPtr> SPATIAL_OBJECTS_WEAK;
+	typedef std::vector<SpatialSceneObject*> SPATIAL_OBJECTS_RAW;
 	typedef std::vector<SceneObjectPtr> OBJECTS;
 	typedef std::vector<SceneObjectWeakPtr> OBJECTS_WEAK;
 	typedef std::vector<SceneObject*> OBJECTS_RAW;
 	OBJECTS_WEAK mObjects;
 	SPATIAL_OBJECTS_WEAK mSpatialObjects;
-	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleObjectsMain;
-	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleObjectsLight;
-	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mPreRenderList;
-	VectorMap<Camera*, SPATIAL_OBJECTS_RAW> mVisibleTransparentObjects;	
+	VectorMap<ICamera*, SPATIAL_OBJECTS_RAW> mVisibleObjectsMain;
+	VectorMap<ICamera*, SPATIAL_OBJECTS_RAW> mVisibleObjectsLight;
+	VectorMap<ICamera*, SPATIAL_OBJECTS_RAW> mPreRenderList;
+	VectorMap<ICamera*, SPATIAL_OBJECTS_RAW> mVisibleTransparentObjects;
+	
+	std::vector<SceneObjectWeakPtr> mMarkObjects;
+	std::vector<SceneObjectWeakPtr> mHPBarObjects;
+
 	SkySpherePtr mSkySphere;
 	DirectionalLightPtr mDirectionalLight[2];
 	bool mSkipSpatialObjects;
 	bool mSkyRendering;
 	std::mutex mSpatialObjectsMutex;
-	std::vector< SpatialObjectPtr > mCloudVolumes;
+	std::vector< SpatialSceneObjectPtr > mCloudVolumes;
 	Vec3 mWindDir;
 	float mWindVelocity;
 	Vec3 mWindVector;
 	Color mFogColor;
-	VectorMap<Camera*, unsigned> mLastPreRenderFramePerCam;
+	VectorMap<ICamera*, unsigned> mLastPreRenderFramePerCam;
 	bool mDrawClouds;
 	bool mRttScene;
 
@@ -105,6 +110,26 @@ public:
 		return mName.c_str();
 	}
 
+	void Update(TIME_PRECISION dt){
+		for (int i = 0; i < 2; i++)
+			mDirectionalLight[i]->Update(dt);
+	}
+
+	void AddSceneObserver(int ISceneObserverEnum, ISceneObserverPtr observer){
+		mSelf->AddObserver(ISceneObserverEnum, observer);
+	}
+
+	const Vec3& GetMainLightDirection(){
+		return mDirectionalLight[0]->GetDirection();
+	}
+
+	void GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data){
+		auto& light = mDirectionalLight[idx];
+		data.mDirection_Intensiy = Vec4(light->GetDirection(), light->GetIntensity());
+		data.mDiffuse = Vec4(light->GetDiffuse(), 1.f);
+		data.mSpecular = Vec4(light->GetSpecular(), 1.f);
+	}
+
 	void MakeVisibleSet(const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
 		if (mSkipSpatialObjects)
@@ -137,7 +162,7 @@ public:
 					continue;
 				}
 
-				if (obj->HasObjFlag(SceneObjectFlag::Ignore) || !obj->GetRenderable()){
+				if (obj->HasObjFlag(SceneObjectFlag::Ignore)){
 					++it;
 					continue;
 				}
@@ -227,8 +252,7 @@ public:
 			for (; objIt != objItEnd; objIt++)
 			{
 				// Only objects that have a valid renderable is in the render lists.
-				auto renderable = (*objIt)->GetRenderable();
-				renderable->PreRender(renderParam, renderParamOut);
+				(*objIt)->PreRender(renderParam, renderParamOut);				
 			}
 		}
 
@@ -247,9 +271,7 @@ public:
 				continue;
 			}
 			++it;
-			auto renderable = obj->GetRenderable();
-			if (renderable)
-				renderable->PreRender(renderParam, renderParamOut);
+			obj->PreRender(renderParam, renderParamOut);			
 		}
 	}
 
@@ -263,8 +285,7 @@ public:
 			{
 				for (auto& obj : mVisibleObjectsLight[lightCamera])
 				{
-					auto renderable = obj->GetRenderable();
-					renderable->Render(param, paramOut);
+					obj->Render(param, paramOut);
 				}
 			}
 			else
@@ -282,8 +303,7 @@ public:
 
 				for (auto& obj : mVisibleObjectsMain[cam])
 				{
-					auto renderable = obj->GetRenderable();
-					renderable->Render(param, paramOut);
+					obj->Render(param, paramOut);
 				}
 			}
 		}
@@ -311,18 +331,14 @@ public:
 				auto it = mVisibleTransparentObjects[cam].begin(), itEnd = mVisibleTransparentObjects[cam].end();
 				for (; it != itEnd; it++)
 				{
-					auto renderable = (*it)->GetRenderable();
-					renderable->Render(param, paramOut);
+					(*it)->Render(param, paramOut);					
 				}
 			}
 			{
 				for (auto it : mObjects){
 					auto obj = it.lock();
 					if (obj){
-						auto renderable = obj->GetRenderable();
-						if (renderable){
-							renderable->Render(param, paramOut);
-						}
+						obj->Render(param, paramOut);						
 					}
 				}
 			}
@@ -354,7 +370,7 @@ public:
 	}
 
 
-	bool AttachSpatialObject(SpatialObjectPtr pSpatialObject){
+	bool AttachSpatialObject(SpatialSceneObjectPtr pSpatialObject){
 		if (!ValueExistsInVector(mSpatialObjects, pSpatialObject)){
 			mSpatialObjects.push_back(pSpatialObject);
 			pSpatialObject->OnAttachedToScene(mSelfPtr.lock());
@@ -363,7 +379,7 @@ public:
 		return false;
 	}
 
-	bool DetachSpatialObject(SpatialObjectPtr pSpatialObject){
+	bool DetachSpatialObject(SpatialSceneObjectPtr pSpatialObject){
 		DeleteValuesInVector(mSpatialObjects, pSpatialObject);
 		if (mSpatialObjectsDeletedAny) {
 			pSpatialObject->OnDetachedFromScene(mSelfPtr.lock());
@@ -383,7 +399,7 @@ public:
 		return mSpatialObjects.size();
 	}
 
-	const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(CameraPtr cam){
+	const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(ICameraPtr cam){
 		return mVisibleObjectsMain[cam.get()];
 	}
 
@@ -450,7 +466,7 @@ public:
 	}
 
 	/** p is a MeshObject*/
-	void AddCloudVolume(SpatialObjectPtr p){
+	void AddCloudVolume(SpatialSceneObjectPtr p){
 		mCloudVolumes.push_back(p);
 	}
 
@@ -461,16 +477,14 @@ public:
 	void PreRenderCloudVolumes(const RenderParam& param, RenderParamOut* paramOut){
 		for (auto var : mCloudVolumes)
 		{
-			auto renderable = var->GetRenderable();
-			renderable->PreRender(param, paramOut);			
+			var->PreRender(param, paramOut);			
 		}
 	}
 
 	void RenderCloudVolumes(const RenderParam& param, RenderParamOut* paramOut){
 		for (auto var : mCloudVolumes)
 		{
-			auto renderable = var->GetRenderable();
-			renderable->Render(param, paramOut);
+			var->Render(param, paramOut);			
 		}
 	}
 
@@ -522,6 +536,22 @@ const char* Scene::GetName() const {
 	return mImpl->GetName();
 }
 
+void Scene::Update(TIME_PRECISION dt){
+	mImpl->Update(dt);
+}
+
+void Scene::AddSceneObserver(int ISceneObserverEnum, ISceneObserverPtr observer){
+	mImpl->AddSceneObserver(ISceneObserverEnum, observer);
+}
+
+const Vec3& Scene::GetMainLightDirection(){
+	return mImpl->GetMainLightDirection();
+}
+
+void Scene::GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data){
+	mImpl->GetDirectionalLightInfo(idx, data);
+}
+
 void Scene::PreRender(const RenderParam& prarm, RenderParamOut* paramOut) {
 	mImpl->PreRender(prarm, paramOut);
 }
@@ -535,29 +565,20 @@ int Scene::GetRenderPass() const {
 	return mImpl->GetRenderPass();
 }
 
-template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >*>
-bool Scene::AttachObject(std::shared_ptr<T> pObject) {
-#if defined(_DEBUG)
-	if (std::dynamic_pointer_cast<SpatialObject>(pObject)){
-		Logger::Log(FB_ERROR_LOG_ARG, "A SpatialObject is added as a SceneObject. Consider using Scene::AttachSpatialObject() rather than Scene::AttachObject()");
-	}
-#endif
-	return mImpl->AttachObject(pObject);
+bool Scene::AttachObjectFB(SceneObjectPtr object, SceneObject*) {
+	return mImpl->AttachObject(object);
 }
 
-template<typename T, typename std::enable_if_t< std::is_same<T, SceneObject>::value >*>
-bool Scene::DetachObject(std::shared_ptr<T> pObject) {
-	return mImpl->DetachObject(pObject);
+bool Scene::DetachObjectFB(SceneObjectPtr object, SceneObject*) {
+	return mImpl->DetachObject(object);
 }
 
-template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>*>
-bool Scene::AttachObject(std::shared_ptr<T> pSpatialObject) {
-	return mImpl->AttachSpatialObject(pSpatialObject);
+bool Scene::AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject*) {
+	return mImpl->AttachSpatialObject(object);
 }
 
-template<typename T, typename std::enable_if_t<std::is_base_of<SpatialObject, T>::value>*>
-bool Scene::DetachObject(std::shared_ptr<T> pSpatialObject) {
-	return mImpl->DetachSpatialObject(pSpatialObject);
+bool Scene::DetachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject*) {
+	return mImpl->DetachSpatialObject(object);
 }
 
 void Scene::SetSkipSpatialObjects(bool skip) {
@@ -572,7 +593,7 @@ unsigned Scene::GetNumSpatialObjects() const {
 	return mImpl->GetNumSpatialObjects();
 }
 
-const Scene::SPATIAL_OBJECTS_RAW& Scene::GetVisibleSpatialList(CameraPtr cam) {
+const Scene::SPATIAL_OBJECTS_RAW& Scene::GetVisibleSpatialList(ICameraPtr cam) {
 	return mImpl->GetVisibleSpatialList(cam);
 }
 
@@ -608,7 +629,7 @@ const Vec3& Scene::GetWindVector() const {
 	return mImpl->GetWindVector();
 }
 
-void Scene::AddCloudVolume(SpatialObjectPtr p) {
+void Scene::AddCloudVolume(SpatialSceneObjectPtr p) {
 	mImpl->AddCloudVolume(p);
 }
 

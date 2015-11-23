@@ -20,7 +20,7 @@ public:
 	}
 
 	//---------------------------------------------------------------------------
-	// IRenderable Interfaces
+	// SceneObject Interfaces
 	//---------------------------------------------------------------------------
 	void PreRender(const RenderParam& param, RenderParamOut* paramOut){
 		
@@ -113,7 +113,6 @@ IMPLEMENT_STATIC_CREATE(DustRenderer);
 DustRenderer::DustRenderer()
 	: mImpl(new Impl(this))
 {
-	SetRenderable(this);
 }
 DustRenderer::~DustRenderer(){
 

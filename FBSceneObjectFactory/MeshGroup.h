@@ -1,7 +1,6 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "FBSceneManager/SpatialObject.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBSceneManager/SpatialSceneObject.h"
 #include "MeshAuxiliary.h"
 #include "CollisionInfo.h"
 namespace fastbird
@@ -10,7 +9,7 @@ namespace fastbird
 	class AnimationData;
 	DECLARE_SMART_PTR(MeshObject);
 	DECLARE_SMART_PTR(MeshGroup);
-	class MeshGroup : public SpatialObject, public IRenderable
+	class MeshGroup : public SpatialSceneObject
 	{
 		DECLARE_PIMPL_CLONEABLE(MeshGroup);
 

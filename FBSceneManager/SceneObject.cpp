@@ -34,7 +34,6 @@ using namespace fastbird;
 class SceneObject::Impl{
 public:
 	std::string mName;
-	IRenderable* mRenderable;
 	std::vector<SceneWeakPtr> mScenes;
 	int mObjFlag;
 	int mGameType;
@@ -67,14 +66,6 @@ public:
 
 	const char* GetName() const{
 		return mName.c_str();
-	}
-
-	void SetRenderable(IRenderable* renderable){
-		mRenderable = renderable;
-	}
-
-	IRenderable* GetRenderable() const{
-		return mRenderable;
 	}
 
 	void OnAttachedToScene(ScenePtr pScene)
@@ -183,14 +174,6 @@ void SceneObject::SetName(const char* name){
 
 const char* SceneObject::GetName() const{
 	return mImpl->GetName();
-}
-
-void SceneObject::SetRenderable(IRenderable* renderable){
-	mImpl->SetRenderable(renderable);
-}
-
-IRenderable* SceneObject::GetRenderable() const{
-	return mImpl->GetRenderable();
 }
 
 void SceneObject::OnAttachedToScene(ScenePtr pScene){

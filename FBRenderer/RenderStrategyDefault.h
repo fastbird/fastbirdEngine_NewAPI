@@ -30,7 +30,7 @@
 #include "IRenderStrategy.h"
 namespace fastbird{
 	DECLARE_SMART_PTR(RenderTarget);
-	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(IScene);
 	DECLARE_SMART_PTR(RenderStrategyDefault);
 	class RenderStrategyDefault : public IRenderStrategy{
 		DECLARE_PIMPL_NON_COPYABLE(RenderStrategyDefault);
@@ -43,7 +43,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// IRenderStrategy
 		//-------------------------------------------------------------------
-		void SetScene(ScenePtr scene);
+		void SetScene(IScenePtr scene);
 		void SetRenderTarget(RenderTargetPtr renderTarget);
 		void UpdateLightCamera();
 		void Render(size_t face);

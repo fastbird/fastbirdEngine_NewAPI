@@ -1,12 +1,12 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
-#include "FBSceneManager/SpatialObject.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBSceneManager/SpatialSceneObject.h"
 namespace fastbird
 {
 	struct ParticleRenderKey;
+	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(ParticleRenderObject);
-	class ParticleRenderObject : public SpatialObject, public IRenderable
+	class ParticleRenderObject : public SpatialSceneObject
 	{
 		DECLARE_PIMPL_NON_COPYABLE(ParticleRenderObject);
 		ParticleRenderObject();
@@ -23,7 +23,7 @@ namespace fastbird
 		static size_t GetNumPrimitives();
 
 		//---------------------------------------------------------------------------
-		// IRenderable Interfaces
+		// SceneObject Interfaces
 		//---------------------------------------------------------------------------
 		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
 		void Render(const RenderParam& param, RenderParamOut* paramOut);

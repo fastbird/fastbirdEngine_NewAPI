@@ -453,11 +453,10 @@ MeshGroupPtr MeshGroup::Create(const MeshGroup& other){
 MeshGroup::MeshGroup()
 	: mImpl(new Impl(this))
 {
-	SetRenderable(this);
 }
 
 MeshGroup::MeshGroup(const MeshGroup& other)
-	: SpatialObject(other)
+	: SpatialSceneObject(other)
 	, mImpl(new Impl(this, *other.mImpl))
 {
 }

@@ -28,9 +28,9 @@
 #pragma comment(lib, "libogg.lib")
 #pragma comment(lib, "libvorbis.lib")
 #pragma comment(lib, "OpenAL32.lib")
-#pragma warning (disable : 4251)
 
-#if defined(_WIN32) 
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_) 
 #define FB_DLL_AUDIO __declspec(dllexport)
 #else
 #define FB_DLL_AUDIO

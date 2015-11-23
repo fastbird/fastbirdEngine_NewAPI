@@ -52,6 +52,7 @@ namespace fastbird{
 		void RegisterVideoNotifier(VideoNotifierFunc func);
 		void SetDurationAfterFinish(TIME_PRECISION time);
 		void Update(TIME_PRECISION dt);
+		void Render();
 		bool IsFinish() const;
 	};
 }

@@ -69,7 +69,9 @@ namespace fastbird
 		Transformation();
 		~Transformation();
 		Transformation(const Quat& q);
-		explicit Transformation(const TransformationTuple& t);
+		Transformation(const Mat33& t);
+		Transformation(const TransformationTuple& t);
+		
 
 		void MakeIdentity ();
 		void MakeUnitScale ();

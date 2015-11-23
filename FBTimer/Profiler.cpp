@@ -49,7 +49,7 @@ namespace fastbird
 		char buffer[2048];
 		vsprintf_s(buffer, format, args);
 		va_end(args);
-#if defined(_WIN32)
+#if defined(_PLATFORM_WINDOWS_)
 		OutputDebugString(buffer);
 #else
 		assert(0 && "Not implemented");

@@ -1,13 +1,12 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "FBSceneManager/SpatialObject.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBSceneManager/SpatialSceneObject.h"
 namespace fastbird
 {
 	DECLARE_SMART_PTR(Color);
 	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(BillboardQuad);
-	class FB_DLL_SCENEOBJECTFACTORY BillboardQuad : public SpatialObject, public IRenderable
+	class FB_DLL_SCENEOBJECTFACTORY BillboardQuad : public SpatialSceneObject
 	{
 		DECLARE_PIMPL_NON_COPYABLE(BillboardQuad);
 		BillboardQuad();
@@ -17,7 +16,7 @@ namespace fastbird
 
 		static BillboardQuadPtr Create();
 		//---------------------------------------------------------------------------
-		// IRenderable Interfaces
+		// SceneObject Interfaces
 		//---------------------------------------------------------------------------
 		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
 		void Render(const RenderParam& param, RenderParamOut* paramOut);

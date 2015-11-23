@@ -11,5 +11,8 @@
     <ClInclude Include="CowPtr.h" />
     <ClInclude Include="SpinLock.h" />
     <ClInclude Include="CircularBuffer.h" />
+    <ClInclude Include="LockFreeQueue.h" />
+    <ClInclude Include="RecursiveSpinLock.h" />
+    <ClInclude Include="IteratorWrapper.h" />
   </ItemGroup>
 </Project>

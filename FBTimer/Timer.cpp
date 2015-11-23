@@ -95,7 +95,7 @@ namespace fastbird
 			return mFrames;
 		}
 
-		INT64 GetTickCount()
+		INT64 GetTickCount() const
 		{
 			return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 		}
@@ -167,9 +167,13 @@ namespace fastbird
 		return mImpl->GetFrame();
 	}
 
-	INT64 Timer::GetTickCount()
+	INT64 Timer::GetTickCount() const
 	{
 		return mImpl->GetTickCount();
+	}
+
+	INT64 Timer::GetFrequency() const{
+		return std::milli::den;
 	}
 
 	void Timer::Pause()

@@ -53,7 +53,7 @@ namespace fastbird
 		explicit Vec3(Real s);		
 		explicit Vec3(const Vec3I& v);
 		explicit Vec3(const char* s);
-		explicit Vec3(const Vec3Tuple& t);
+		Vec3(const Vec3Tuple& t);
 
 		//-------------------------------------------------------------------
 		Vec3 operator+ (const Vec3& r) const;

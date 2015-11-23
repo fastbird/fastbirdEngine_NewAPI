@@ -86,12 +86,18 @@ namespace fastbird{
 		Real, Real, Real,
 		// itentity, RSSeperated, UniformScale
 		bool, bool, bool> TransformationTuple;
+}
 
-	template <typename T>
-	bool operator == (const std::weak_ptr<T>& a, const std::shared_ptr<T>& b)
-	{
-		return a.lock() == b;
-	}
+template <typename T>
+bool operator == (const std::weak_ptr<T>& a, const std::shared_ptr<T>& b)
+{
+	return a.lock() == b;
+}
+
+template <typename T>
+bool operator == (const std::weak_ptr<T>& a, const std::weak_ptr<T>& b)
+{
+	return a.lock() == b.lock();
 }
 
 #define DECLARE_NON_COPYABLE(className) \

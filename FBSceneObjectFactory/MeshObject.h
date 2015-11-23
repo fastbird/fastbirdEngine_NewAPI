@@ -30,8 +30,7 @@
 #include "FBCollisionShape.h"
 #include "CollisionInfo.h"
 #include "MeshAuxiliary.h"
-#include "FBSceneManager/SpatialObject.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBSceneManager/SpatialSceneObject.h"
 #include "FBRenderer/RenderParam.h"
 #include "FBRenderer/RendererEnums.h"
 #include "FBRenderer/RendererStructs.h"
@@ -39,7 +38,7 @@ namespace fastbird{
 	DECLARE_SMART_PTR(IndexBuffer);
 	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(MeshObject);
-	class FB_DLL_SCENEOBJECTFACTORY MeshObject : public SpatialObject, public IRenderable{
+	class FB_DLL_SCENEOBJECTFACTORY MeshObject : public SpatialSceneObject{
 		DECLARE_PIMPL_CLONEABLE(MeshObject);		
 		static MeshObjectPtr Create(const MeshObject& other);
 	protected:
@@ -54,7 +53,7 @@ namespace fastbird{
 		static MeshObjectPtr Create();		
 
 		//---------------------------------------------------------------------------
-		// IRenderable Interfaces
+		// SceneObject Interfaces
 		//---------------------------------------------------------------------------				
 		void PreRender(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut);

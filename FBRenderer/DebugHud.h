@@ -43,7 +43,7 @@ namespace fastbird
 	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(RenderStates);
 	DECLARE_SMART_PTR(VertexBuffer);
-	DECLARE_SMART_PTR(Scene);
+	DECLARE_SMART_PTR(IScene);
 	DECLARE_SMART_PTR(DebugHud);
 	class DebugHud
 	{
@@ -56,7 +56,7 @@ namespace fastbird
 		void SetRenderTargetSize(const Vec2I& size);		
 		void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		/// for rendering mWorldLinesBeforeAlphaPass
-		void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
 
 		//--------------------------------------------------------------------
 		// Own

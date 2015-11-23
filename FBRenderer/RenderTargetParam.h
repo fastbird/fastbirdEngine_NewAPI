@@ -29,6 +29,7 @@
 #include "RendererEnums.h"
 #include "FBMathLib/Vec2I.h"
 namespace fastbird{
+	DECLARE_SMART_PTR(ICamera);
 	struct RenderTargetParam
 	{
 		RenderTargetParam()
@@ -43,9 +44,9 @@ namespace fastbird{
 		{
 
 		}
-		bool mEveryFrame;
 		Vec2I mSize;
 		PIXEL_FORMAT mPixelFormat;
+		bool mEveryFrame;
 		bool mShaderResourceView;
 		bool mMipmap;
 		bool mCubemap;

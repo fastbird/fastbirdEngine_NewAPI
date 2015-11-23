@@ -51,7 +51,8 @@ namespace fastbird
 		TIME_PRECISION GetDeltaTime() const;
 		TIME_PRECISION GetDeltaTimeNotPausable() const;		
 		FRAME_PRECISION GetFrame() const;
-		INT64 GetTickCount();
+		INT64 GetTickCount() const;
+		INT64 GetFrequency() const;
 
 		void Pause();
 		void Resume();

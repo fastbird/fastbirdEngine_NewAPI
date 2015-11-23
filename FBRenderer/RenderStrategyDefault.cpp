@@ -33,20 +33,20 @@
 #include "RenderTarget.h"
 #include "Renderer.h"
 #include "RenderParam.h"
-#include "IRenderable.h"
 #include "GaussianDistribution.h"
 #include "StarDef.h"
 #include "RenderOptions.h"
 #include "SystemTextures.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
-#include "FBSceneManager/Scene.h"
+#include "Camera.h"
+#include "FBSceneManager/IScene.h"
 #include "FBSceneManager/DirectionalLight.h"
 #include "FBStringLib/StringLib.h"
 #include "FBSceneObjectFactory/SceneObjectType.h"
-#include "FBSceneManager/Camera.h"
-#include "FBSceneManager/SpatialObject.h"
+#include "FBSceneManager/ISpatialObject.h"
 #include "FBMathLib/BoundingVolume.h"
+#include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;
 
 static const int FB_NUM_BLOOM_TEXTURES = 3;
@@ -65,7 +65,7 @@ IMPLEMENT_STATIC_CREATE(RenderStrategyDefault);
 class RenderStrategyDefault::Impl{
 public:
 	static const int FB_MAX_SAMPLES = 16;
-	SceneWeakPtr mScene;
+	ISceneWeakPtr mScene;
 	RenderTargetWeakPtr mRenderTarget;
 	Vec2I mSize; // Render target size.
 	RenderTargetId mId;
@@ -105,7 +105,7 @@ public:
 	//-------------------------------------------------------------------
 	// IRenderStrategy
 	//-------------------------------------------------------------------
-	void SetScene(ScenePtr scene){
+	void SetScene(IScenePtr scene){
 		mScene = scene;
 	}
 
@@ -155,20 +155,16 @@ public:
 		float shadowCamDist = renderer.GetOptions()->r_ShadowCamDist;
 		auto scene = mScene.lock();
 		if (scene){
-			auto light = scene->GetDirectionalLight(0);
-			if (!light)
-				light = scene->GetDirectionalLight(1);
-			if (light){
-				if (target && target->GetBoundingVolume() && target->GetBoundingVolume()->GetRadius() < shadowCamDist)
-				{
-					mLightCamera->SetPosition(target->GetPosition() + cam->GetDirection() * 10.0f + light->GetDirection() *shadowCamDist);
-				}
-				else
-				{
-					mLightCamera->SetPosition(cam->GetPosition() + cam->GetDirection() * 10.0f + light->GetDirection() * shadowCamDist);
-				}
-				mLightCamera->SetDirection(-light->GetDirection());
+			auto lightDir = scene->GetMainLightDirection();
+			if (target && target->GetBoundingVolumeWorld() && target->GetBoundingVolumeWorld()->GetRadius() < shadowCamDist)
+			{
+				mLightCamera->SetPosition(target->GetPosition() + cam->GetDirection() * 10.0f + lightDir *shadowCamDist);
 			}
+			else
+			{
+				mLightCamera->SetPosition(cam->GetPosition() + cam->GetDirection() * 10.0f + lightDir * shadowCamDist);
+			}
+			mLightCamera->SetDirection(-lightDir);
 		}
 	}
 
@@ -598,14 +594,12 @@ public:
 	void GodRay()
 	{
 		auto& renderer = Renderer::GetInstance();
-		auto rt = mRenderTarget.lock();
-		DirectionalLightPtr light = renderer.GetDirectionalLight(0);
-		if (!light)
-			light = renderer.GetDirectionalLight(1);
-		assert(light);
-		if (light){
+		auto rt = mRenderTarget.lock();		
+		auto scene = mScene.lock();
+		if (scene){
+			const auto& lightDir = scene->GetMainLightDirection();
 			auto camera = rt->GetCamera();
-			Vec4 lightPos(camera->GetPosition() + light->GetDirection(), 1);
+			Vec4 lightPos(camera->GetPosition() + lightDir, 1);
 			lightPos = camera->GetMatrix(Camera::ViewProj) * lightPos; // only x,y nee
 			lightPos.x = lightPos.x*.5f + .5f;
 			lightPos.y = .5f - lightPos.y*.5f;
@@ -1307,7 +1301,7 @@ RenderStrategyDefault::RenderStrategyDefault()
 RenderStrategyDefault::~RenderStrategyDefault(){
 }
 
-void RenderStrategyDefault::SetScene(ScenePtr scene){
+void RenderStrategyDefault::SetScene(IScenePtr scene){
 	mImpl->SetScene(scene);
 }
 

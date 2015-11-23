@@ -115,6 +115,7 @@ namespace fastbird{
 		Extension(from the last dot to end) and path are excluded.		
 		*/
 		static std::string GetName(const char* path);
+		static std::string GetNameWithoutExtension(const char* path);
 		/** Returns the parent path.
 		ex) dir1/dir2/file.exe -> dir1/dir1
 		*/

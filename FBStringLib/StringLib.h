@@ -100,4 +100,19 @@ namespace fastbird{
 
 	const char* WideToAnsi(const WCHAR* source);	
 	///@}
+
+
+	class HashedString
+	{
+		void *             mIdent;
+		std::string		   mIdentStr;
+
+	public:
+		explicit HashedString(char const * const pIdentString);
+		unsigned long getHashValue(void) const;
+		const std::string & getStr() const;
+		static void* hash_name(char const *  pIdentStr);
+		bool operator< (HashedString const & o) const;
+		bool operator== (HashedString const & o) const;
+	};
 }

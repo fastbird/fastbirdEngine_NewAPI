@@ -60,6 +60,12 @@ Transformation::Transformation(const Quat& q)
 :Transformation()
 {
 	SetRotation(q);
+}
+
+Transformation::Transformation(const Mat33& t)
+	: Transformation()
+{
+	SetRotation(t);
 
 }
 

@@ -78,7 +78,6 @@
     <ClInclude Include="MeshGroup.h" />
     <ClInclude Include="MeshImportDesc.h" />
     <ClInclude Include="MeshObject.h" />
-    <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="SceneObjectFactory.h" />
     <ClInclude Include="SceneObjectType.h" />
     <ClInclude Include="SkySphere.h" />
@@ -91,7 +90,6 @@
     <ClCompile Include="FBCollisionShape.cpp" />
     <ClCompile Include="MeshGroup.cpp" />
     <ClCompile Include="MeshObject.cpp" />
-    <ClCompile Include="ParticleEmitter.cpp" />
     <ClCompile Include="SkySphere.cpp" />
     <ClCompile Include="TrailObject.cpp" />
   </ItemGroup>

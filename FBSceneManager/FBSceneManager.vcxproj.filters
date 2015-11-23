@@ -8,9 +8,10 @@
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SceneObjectFlag.h" />
     <ClInclude Include="SpatialObject.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="ICameraObserver.h" />
+    <ClInclude Include="SpatialSceneObject.h" />
+    <ClInclude Include="IScene.h" />
     <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="ISpatialObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -18,7 +19,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SceneObject.cpp" />
     <ClCompile Include="SpatialObject.cpp" />
-    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="SpatialSceneObject.cpp" />
     <ClCompile Include="DirectionalLight.cpp" />
   </ItemGroup>
 </Project>

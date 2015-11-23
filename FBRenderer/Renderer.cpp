@@ -33,7 +33,6 @@
 #include "RendererStructs.h"
 #include "Texture.h"
 #include "RenderTarget.h"
-#include "IRenderable.h"
 #include "IPlatformTexture.h"
 #include "Font.h"
 #include "RenderOptions.h"
@@ -50,15 +49,14 @@
 #include "IVideoPlayer.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
-#include "FBSceneManager/DirectionalLight.h"
+#include "Camera.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBCommonHeaders/Factory.h"
 #include "FBSystemLib/ModuleHandler.h"
 #include "FBFileSystem/FileSystem.h"
-#include "FBSceneManager/Scene.h"
-#include "FBSceneManager/Camera.h"
+#include "FBSceneManager/IScene.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBLua/LuaObject.h"
 #include "TinyXmlLib/tinyxml2.h"
@@ -126,7 +124,7 @@ public:
 	std::vector<RenderTargetPtr> mRenderTargetPool;
 	RenderTargets mRenderTargets;
 	RenderTargets mRenderTargetsEveryFrame;	
-	SceneWeakPtr mCurrentScene;
+	ISceneWeakPtr mCurrentScene;
 	CameraPtr mCamera;
 	CameraPtr mCameraBackup;
 	struct InputInfo{
@@ -149,7 +147,7 @@ public:
 	RENDERTARGET_CONSTANTS	mRenderTargetConstants;
 	SCENE_CONSTANTS			mSceneConstants;
 
-	DirectionalLightPtr		mDirectionalLight[2];
+	DirectionalLightInfo	mDirectionalLight[2];
 	bool mRefreshPointLight;
 	PointLightManagerPtr mPointLightMan;
 	VectorMap<int, FontPtr> mFonts;
@@ -190,11 +188,9 @@ public:
 	typedef VectorMap< std::pair<HWindowId, std::string>, std::vector<UIObjectPtr>> UI_3DOBJECTS;
 	UI_3DOBJECTS mUI3DObjects;
 	VectorMap<std::string, RenderTargetPtr> mUI3DObjectsRTs;
-	VectorMap<std::string, UI3DObjPtr> mUI3DRenderObjs;
-	// todo: generalize. layer 1~4.
-	std::vector<IRenderablePtr> mMarkObjects;
-	std::vector<IRenderablePtr> mHPBarObjects;
+	VectorMap<std::string, UI3DObjPtr> mUI3DRenderObjs;	
 	std::vector<IVideoPlayerPtr> mVideoPlayers;
+	INT64 mLastRenderedTime;
 	
 	//-----------------------------------------------------------------------
 	Impl(Renderer* renderer)
@@ -206,8 +202,10 @@ public:
 		, mFadeAlpha(0.)
 		, mLuminance(0.5f)
 		, mLuminanceOnCpu(false)
+		, mLastRenderedTime(0)
 	{
 		gpTimer = Timer::GetMainTimer().get();
+		mLastRenderedTime = gpTimer->GetTickCount();
 		auto& envBindings = mSystemTextureBindings[SystemTextures::Environment];
 		envBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 4 });
 		auto& depthBindings = mSystemTextureBindings[SystemTextures::Depth];
@@ -295,10 +293,11 @@ public:
 			RenderTargetParam param;
 			param.mSize = { width, height };
 			param.mWillCreateDepth = true;
-			auto rt = CreateRenderTarget(param);
-			
+			auto rt = CreateRenderTarget(param);	
 			rt->SetColorTexture(CreateTexture(colorTexture));
 			rt->SetDepthTexture(CreateTexture(depthTexture));
+			
+			mWindowRenderTargets[id] = rt;
 
 			mRenderTargetConstants.gScreenSize = Vec2((Real)width, (Real)height);
 			mRenderTargetConstants.gScreenRatio = width / (float)height;
@@ -578,24 +577,6 @@ public:
 		}*/
 	}
 
-	void RenderMarks()
-	{
-		/*D3DEventMarker mark("Render Marks / HPBar");
-		FB_FOREACH(it, mMarkObjects)
-		{
-			(*it)->PreRender();
-			(*it)->Render();
-			(*it)->PostRender();
-		}
-
-		for (auto it : mHPBarObjects)
-		{
-			it->PreRender();
-			it->Render();
-			it->PostRender();
-		}*/
-	}
-
 	void RenderUI(HWindowId hwndId)
 	{
 		//D3DEventMarker mark("RenderUI");
@@ -635,7 +616,8 @@ public:
 		DrawQuad(Vec2I(0, 0), mainRT->GetSize(), Color(0, 0, 0, mFadeAlpha));
 	}
 
-	void Render(TIME_PRECISION dt){
+	void Render(){
+		Real dt = (gpTimer->GetTickCount() - mLastRenderedTime) / (Real)gpTimer->GetFrequency();
 		InitFrameProfiler(dt);
 		UpdateFrameConstantsBuffer();
 
@@ -655,10 +637,6 @@ public:
 			assert(rt);
 			bool rendered = rt->Render();
 			if (rendered) {
-				if (rt == mainRT.get()) {
-					RenderMarks();
-				}
-
 				for (auto it : mObject->mObservers_[IRendererObserver::DefaultRenderEvent])	{
 					auto observer = it.lock();
 					if (observer)
@@ -676,7 +654,7 @@ public:
 		mainRT->BindTargetOnly(false);
 
 		for (auto& it : mVideoPlayers){
-			it->Update(dt);
+			it->Render();
 		}
 
 		RenderDebugHud();
@@ -704,7 +682,7 @@ public:
 		}
 
 		auto rt = RenderTarget::Create();
-		mRenderTargets.push_back(rt);
+		mRenderTargets.push_back(rt);		
 		rt->SetColorTextureDesc(param.mSize.x, param.mSize.y, param.mPixelFormat, param.mShaderResourceView,
 				param.mMipmap, param.mCubemap);
 		
@@ -1402,13 +1380,13 @@ public:
 		if (!mCamera)
 			return;
 
-		mCameraConstants.gView = mCamera->GetMatrix(Camera::View);
-		mCameraConstants.gInvView = mCamera->GetMatrix(Camera::InverseView);
-		mCameraConstants.gViewProj = mCamera->GetMatrix(Camera::ViewProj);
-		mCameraConstants.gInvViewProj = mCamera->GetMatrix(Camera::InverseViewProj);		
+		mCameraConstants.gView = mCamera->GetMatrix(ICamera::View);
+		mCameraConstants.gInvView = mCamera->GetMatrix(ICamera::InverseView);
+		mCameraConstants.gViewProj = mCamera->GetMatrix(ICamera::ViewProj);
+		mCameraConstants.gInvViewProj = mCamera->GetMatrix(ICamera::InverseViewProj);
 		mCamera->GetTransformation().GetHomogeneous(mCameraConstants.gCamTransform);
-		mCameraConstants.gProj = mCamera->GetMatrix(Camera::Proj);
-		mCameraConstants.gInvProj = mCamera->GetMatrix(Camera::InverseProj);
+		mCameraConstants.gProj = mCamera->GetMatrix(ICamera::Proj);
+		mCameraConstants.gInvProj = mCamera->GetMatrix(ICamera::InverseProj);
 		Real ne, fa;
 		mCamera->GetNearFar(ne, fa);
 		mCameraConstants.gNearFar.x = (float)ne;
@@ -1436,14 +1414,13 @@ public:
 		}
 		auto pLightCam = mCurrentRenderTarget->GetLightCamera();
 		if (pLightCam)
-			mSceneConstants.gLightViewProj = pLightCam->GetMatrix(Camera::ViewProj);
+			mSceneConstants.gLightViewProj = pLightCam->GetMatrix(ICamera::ViewProj);
 
 		for (int i = 0; i < 2; i++)
 		{
-			auto pLight = mDirectionalLight[i];
-			mSceneConstants.gDirectionalLightDir_Intensity[i] = float4(pLight->GetDirection(), pLight->GetIntensity());
-			mSceneConstants.gDirectionalLightDiffuse[i] = float4(pLight->GetDiffuse(), 1.0f);
-			mSceneConstants.gDirectionalLightSpecular[i] = float4(pLight->GetSpecular(), 1.0f);
+			mSceneConstants.gDirectionalLightDir_Intensity[i] = float4(mDirectionalLight[i].mDirection_Intensiy);
+			mSceneConstants.gDirectionalLightDiffuse[i] = float4(mDirectionalLight[i].mDiffuse);
+			mSceneConstants.gDirectionalLightSpecular[i] = float4(mDirectionalLight[i].mSpecular);
 		}
 		mSceneConstants.gFogColor = scene->GetFogColor().GetVec4();
 		GetPlatformRenderer().UpdateShaderConstants(ShaderConstants::Scene, &mSceneConstants, sizeof(SCENE_CONSTANTS));
@@ -1905,7 +1882,7 @@ public:
 		return it->second;
 	}
 
-	ScenePtr GetMainScene() const{
+	IScenePtr GetMainScene() const{
 		auto rt = GetMainRenderTarget();
 		if (rt){
 			return rt->GetScene();
@@ -1934,7 +1911,7 @@ public:
 		return mCurrentRenderTarget;
 	}
 
-	void SetCurrentScene(ScenePtr scene){
+	void SetCurrentScene(IScenePtr scene){
 		mCurrentScene = scene;
 		UpdateSceneConstantsBuffer();
 	}
@@ -1964,27 +1941,8 @@ public:
 	}
 
 	
-
-	void SetDirectionalLight(DirectionalLightPtr pLight, int idx){
-		if (!(idx >= 0 && idx <= 1))
-			return;
-		mDirectionalLight[idx] = pLight;
-	}
-
-	DirectionalLightPtr GetDirectionalLight(int idx) const{
-		if (!(idx >= 0 && idx <= 1))
-			return 0;
-		return mDirectionalLight[idx];
-	}
-
-	DirectionalLightPtr GetMainDirectionalLight(int idx) const{
-		auto mainRT = GetMainRenderTarget();
-		auto scene = mainRT ? mainRT->GetScene() : 0;
-		if (scene){
-			return scene->GetDirectionalLight(idx);
-		}
-
-		return 0;
+	void SetDirectionalLightInfo(int idx, const DirectionalLightInfo& info){
+		mDirectionalLight[idx] = info;
 	}
 
 	void InitFrameProfiler(Real dt){
@@ -2198,6 +2156,12 @@ public:
 		BlendState::SetLock(lock);
 	}
 
+	void Update(TIME_PRECISION dt){
+		mPointLightMan->Update(dt);
+		// good point to reset.
+		mRefreshPointLight = false;
+	}
+
 	//-------------------------------------------------------------------
 	// Queries
 	//-------------------------------------------------------------------
@@ -2335,15 +2299,15 @@ public:
 	//-------------------------------------------------------------------
 	// ISceneObserver
 	//-------------------------------------------------------------------
-	void OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
+	void OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
 
 	}
 
-	void OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
+	void OnBeforeRenderingOpaques(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
 		
 	}
 
-	void OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
+	void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
 		if (mDebugHud){
 			mDebugHud->OnBeforeRenderingTransparents(scene, renderParam, renderParamOut);
 		}
@@ -2431,8 +2395,8 @@ void Renderer::ReleaseCanvas(HWindowId id) {
 	mImpl->ReleaseCanvas(id);
 }
 
-void Renderer::Render(TIME_PRECISION dt) {
-	mImpl->Render(dt);
+void Renderer::Render() {
+	mImpl->Render();
 }
 
 //-------------------------------------------------------------------
@@ -2748,7 +2712,7 @@ RenderTargetPtr Renderer::GetMainRenderTarget() const {
 	return mImpl->GetMainRenderTarget();
 }
 
-ScenePtr Renderer::GetMainScene() const {
+IScenePtr Renderer::GetMainScene() const {
 	return mImpl->GetMainScene();
 }
 
@@ -2764,7 +2728,7 @@ RenderTargetPtr Renderer::GetCurrentRenderTarget() const {
 	return mImpl->GetCurrentRenderTarget();
 }
 
-void Renderer::SetCurrentScene(ScenePtr scene){
+void Renderer::SetCurrentScene(IScenePtr scene){
 	mImpl->SetCurrentScene(scene);
 }
 
@@ -2780,16 +2744,8 @@ const Vec2I& Renderer::GetRenderTargetSize(HWindow hwnd) const {
 	return mImpl->GetRenderTargetSize(hwnd);
 }
 
-void Renderer::SetDirectionalLight(DirectionalLightPtr pLight, int idx) {
-	mImpl->SetDirectionalLight(pLight, idx);
-}
-
-DirectionalLightPtr Renderer::GetDirectionalLight(int idx) const {
-	return mImpl->GetDirectionalLight(idx);
-}
-
-DirectionalLightPtr Renderer::GetMainDirectionalLight(int idx) const {
-	return mImpl->GetMainDirectionalLight(idx);
+void Renderer::SetDirectionalLightInfo(int idx, const DirectionalLightInfo& info){
+	mImpl->SetDirectionalLightInfo(idx, info);
 }
 
 void Renderer::InitFrameProfiler(Real dt) {
@@ -2861,6 +2817,10 @@ void Renderer::SetLockDepthStencilState(bool lock){
 
 void Renderer::SetLockBlendState(bool lock){
 	mImpl->SetLockBlendState(lock);
+}
+
+void Renderer::Update(TIME_PRECISION dt){
+	mImpl->Update(dt);
 }
 
 //-------------------------------------------------------------------
@@ -3083,15 +3043,15 @@ void Renderer::RenderDebugHud() {
 //-------------------------------------------------------------------
 // ISceneObserver
 //-------------------------------------------------------------------
-void Renderer::OnAfterMakeVisibleSet(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
+void Renderer::OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
 	mImpl->OnAfterMakeVisibleSet(scene, renderParam, renderParamOut);
 }
 
-void Renderer::OnBeforeRenderingOpaques(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
+void Renderer::OnBeforeRenderingOpaques(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
 	mImpl->OnBeforeRenderingOpaques(scene, renderParam, renderParamOut);
 }
 
-void Renderer::OnBeforeRenderingTransparents(Scene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
+void Renderer::OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
 	mImpl->OnBeforeRenderingTransparents(scene, renderParam, renderParamOut);
 }
 

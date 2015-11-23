@@ -1,12 +1,12 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "FBSceneManager/SpatialObject.h"
-#include "FBRenderer/IRenderable.h"
+#include "FBSceneManager/SpatialSceneObject.h"
 #include "FBMathLib/Color.h"
 namespace fastbird
 {
+	DECLARE_SMART_PTR(Material);
 	DECLARE_SMART_PTR(DustRenderer);
-	class FB_DLL_SCENEOBJECTFACTORY DustRenderer : public SpatialObject, public IRenderable
+	class FB_DLL_SCENEOBJECTFACTORY DustRenderer : public SpatialSceneObject
 	{
 		DECLARE_PIMPL_NON_COPYABLE(DustRenderer);
 		DustRenderer();
@@ -17,14 +17,14 @@ namespace fastbird
 		static DustRendererPtr Create();
 
 		//---------------------------------------------------------------------------
-		// IRenderable Interfaces
+		// SceneObject Interfaces
 		//---------------------------------------------------------------------------		
 		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
 		void Render(const RenderParam& param, RenderParamOut* paramOut);
 		void PostRender(const RenderParam& param, RenderParamOut* paramOut);
 
 
-		// IDustRenderer
+		// DustRenderer
 		void Initialize(const Vec3& min, const Vec3& max, size_t count,
 			const Color& cmin, const Color& cmax, float normalizeDist);
 		void SetMaterial(const char* filepath, int pass);

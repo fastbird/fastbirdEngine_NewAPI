@@ -29,6 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{	
 	DECLARE_SMART_PTR(Camera);
+	DECLARE_SMART_PTR(IScene);
 	DECLARE_SMART_PTR(Scene);
 	DECLARE_SMART_PTR(SceneManager);
 	class FB_DLL_SCENEMANAGER SceneManager{
@@ -37,7 +38,7 @@ namespace fastbird{
 		
 	public:
 		/** You have the ownership of returned scene. */
-		static SceneManagerPtr CreateSceneManager();
+		static SceneManagerPtr Create();
 		/** Returns the SceneManager as a reference.
 		This function does not check the validity whether the SceneManager is created or not.
 		It will cause a crash if you call this function without calling CreateSceneManager();
@@ -50,5 +51,9 @@ namespace fastbird{
 		ScenePtr CreateScene(const char* name);
 		/// Get the main scene.
 		ScenePtr GetMainScene() const;
+		
+		void Update(TIME_PRECISION dt);
+
+		void CopyDirectionalLight(IScenePtr destScene, int destLightSlot, IScenePtr srcScene, int srcLightSlot);
 	};
 }

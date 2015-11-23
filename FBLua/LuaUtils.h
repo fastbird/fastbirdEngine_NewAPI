@@ -54,7 +54,7 @@ if (numLuaArgs != (x)) \
 {\
 	const char* errorString = lua_tostring(lua, -1); \
 	Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());\
-	fastbird::PrintLuaErrorString(lua, errorString);\
+	LuaUtils::PrintLuaErrorString(lua, errorString);\
 	lua_pop(lua, 1); \
 	assert(0);\
 	return;\
@@ -69,7 +69,7 @@ if(int error = lua_pcall((lua), (arg), ret, cfuncbase)) \
 	lua_remove(lua, cfuncbase);\
 	const char* errorString = lua_tostring(lua, -1);\
 	Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());\
-	fastbird::LuaUtils::PrintLuaErrorString(lua, errorString);\
+	LuaUtils::PrintLuaErrorString(lua, errorString);\
 	lua_pop(lua, 1); \
 	assert(0); \
 	return false; \
@@ -82,7 +82,7 @@ else{\
 {\
 	const char* errorString = lua_tostring(lua, -1); \
 	Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());\
-	fastbird::PrintLuaErrorString(lua, errorString);\
+	LuaUtils::PrintLuaErrorString(lua, errorString);\
 	lua_pop(lua, 1); \
 	assert(0); \
 }
@@ -202,5 +202,15 @@ namespace fastbird
 		*/
 		static const char* Push(lua_State* L, const char* str);
 		static const char* Push(const char* str);
+
+		static void LockLua();
+		static void UnlockLua();
 	};	
+
+	struct FB_DLL_LUA LuaLock{
+		LuaLock();
+		~LuaLock();
+
+		operator lua_State*() const;
+	};
 }

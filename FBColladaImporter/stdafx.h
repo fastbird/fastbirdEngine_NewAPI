@@ -1,6 +1,7 @@
 #pragma warning (disable : 4251 4275 4819)
 
-#if defined(_WIN32) 
+#include "FBCommonHeaders/platform.h"
+#if defined(_PLATFORM_WINDOWS_) 
 #define FB_DLL_COLLADA __declspec(dllexport)
 #define FB_DLL_ANIMATION __declspec(dllimport)
 #define FB_DLL_FILESYSTEM __declspec(dllimport)

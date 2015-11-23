@@ -31,7 +31,7 @@
 namespace fastbird
 {
 	DECLARE_SMART_PTR(PointLight);
-	class PointLight
+	class FB_DLL_RENDERER PointLight
 	{
 		DECLARE_PIMPL_NON_COPYABLE(PointLight);
 		friend class PointLightMan;

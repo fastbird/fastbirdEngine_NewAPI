@@ -36,12 +36,13 @@ namespace fastbird{
 	DECLARE_SMART_PTR(MeshGroup);
 	DECLARE_SMART_PTR(MeshObject);
 	DECLARE_SMART_PTR(SceneObjectFactory);
-	class SceneObjectFactory{
+	class FB_DLL_SCENEOBJECTFACTORY SceneObjectFactory{
 		DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);	
 		SceneObjectFactory();
 		~SceneObjectFactory();
 
 	public:
+		/// You have the ownership of the returned pointer.
 		static SceneObjectFactoryPtr Create();		
 		static SceneObjectFactory& GetInstance();
 

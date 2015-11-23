@@ -38,8 +38,8 @@
 #include "RenderOptions.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
+#include "Camera.h"
 #include "FBSceneManager/SceneManager.h"
-#include "FBSceneManager/Camera.h"
 #include "FBSceneManager/Scene.h"
 #include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;

@@ -33,7 +33,7 @@
 #include "FBAnimation/AnimationData.h"
 #include "FBDebugLib/Logger.h"
 #include "FBSceneManager/SceneManager.h"
-#include "FBSceneManager/Camera.h"
+#include "FBRenderer/Camera.h"
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/RenderOptions.h"
 #include "FBRenderer/RenderStates.h"
@@ -1151,11 +1151,10 @@ MeshObjectPtr MeshObject::Create(const MeshObject& other){
 MeshObject::MeshObject()
 	: mImpl(new Impl(this))
 {
-	SetRenderable(this);
 }
 
 MeshObject::MeshObject(const MeshObject& other)
-	: SpatialObject(other)
+	: SpatialSceneObject(other)
 	, mImpl(new Impl(this, *other.mImpl))
 {
 

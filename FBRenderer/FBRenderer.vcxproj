@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="CandidatesData.h" />
     <ClInclude Include="Console.h" />
     <ClInclude Include="ConsoleDataType.h" />
@@ -18,13 +19,14 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="GaussianDistribution.h" />
     <ClInclude Include="GeometryRenderer.h" />
+    <ClInclude Include="ICamera.h" />
+    <ClInclude Include="ICameraObserver.h" />
     <ClInclude Include="InputLayout.h" />
     <ClInclude Include="IPlatformIndexBuffer.h" />
     <ClInclude Include="IPlatformInputLayout.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="InputElementDesc.h" />
     <ClInclude Include="IPlatformRenderStates.h" />
-    <ClInclude Include="IRenderable.h" />
     <ClInclude Include="IPlatformRenderer.h" />
     <ClInclude Include="IRendererObserver.h" />
     <ClInclude Include="IRenderStrategy.h" />
@@ -67,6 +69,7 @@
     <ClInclude Include="VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CandidatesData.cpp" />
     <ClCompile Include="Console.cpp" />
     <ClCompile Include="ConsoleDataType.cpp" />
