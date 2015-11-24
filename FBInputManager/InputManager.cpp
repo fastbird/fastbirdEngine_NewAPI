@@ -43,15 +43,28 @@ public:
 	IKeyboardPtr mKeyboard;
 	IMousePtr mMouse;
 	IInputInjectorPtr mInjector;
+	HWindow mMainWindowHandle;
 	std::map<int, std::vector<IInputConsumerWeakPtr>> mConsumers;
 	int mValid;
 
 	Impl()
-		:mValid(0){
+		: mValid(0)
+		, mMainWindowHandle((HWindow)-1)
+	{
+		
 		gpTimer = Timer::GetMainTimer().get();
 		for (int i = 0; i < FBInputDevice::DeviceNum; ++i){
 			mValid += 1 << i;
 		}
+		SetInputInjector(InputInjector::Create());
+	}
+
+	void SetMainWindowHandle(HWindow window){
+		mMainWindowHandle = window;
+	}
+
+	HWindow GetMainWindowHandle() const{
+		return mMainWindowHandle;
 	}
 
 	void RegisterInputConsumer(IInputConsumerPtr consumer, int priority){
@@ -88,12 +101,12 @@ public:
 	void Invalidate(FBInputDevice::Enum type, bool includeButtonClicks){
 		if (mValid & type)
 			mValid -= mValid & type;
-		if (type & FBInputDevice::DeviceKeyboard){
+		if (type & InputDevice::Keyboard){
 			if (mKeyboard){
 				mKeyboard->Invalidate(includeButtonClicks);
 			}
 		}
-		if (type & FBInputDevice::DeviceMouse) {
+		if (type & InputDevice::Mouse) {
 			if (mMouse){
 				mMouse->Invalidate(includeButtonClicks);
 			}
@@ -102,12 +115,12 @@ public:
 
 	void InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
 		switch (type){
-		case FBInputDevice::DeviceKeyboard:
+		case InputDevice::Keyboard:
 			if (mKeyboard){
 				mKeyboard->InvalidTemporary(invalidate);
 			}
 			break;
-		case FBInputDevice::DeviceMouse:
+		case InputDevice::Mouse:
 			if (mMouse){
 				mMouse->InvalidTemporary(invalidate);
 			}
@@ -119,12 +132,12 @@ public:
 
 	bool IsValid(FBInputDevice::Enum type) const{
 		switch (type){
-		case FBInputDevice::DeviceKeyboard:
+		case InputDevice::Keyboard:
 			if (mKeyboard){
 				return mKeyboard->IsValid();
 			}
 			break;
-		case FBInputDevice::DeviceMouse:
+		case InputDevice::Mouse:
 			if (mMouse){
 				return mMouse->IsValid();
 			}
@@ -149,6 +162,10 @@ public:
 		mInjector->SetKeyboard(mKeyboard);
 		mInjector->SetMouse(mMouse);
 	}
+
+	IInputInjectorPtr GetInputInjector() const{
+		return mInjector;
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -158,12 +175,16 @@ InputManagerPtr InputManager::Create(){
 		auto inputManager = InputManagerPtr(new InputManager, [](InputManager* obj){ delete obj; });
 		sInputManager = inputManager;
 		inputManager->mImpl->mSelf = inputManager;
+		return inputManager;
 	}
 	return sInputManager.lock();
 }
 
-InputManagerPtr InputManager::GetInstance(){
-	return sInputManager.lock();
+InputManager& InputManager::GetInstance(){
+	if (sInputManager.expired()){
+		Logger::Log(FB_ERROR_LOG_ARG, "InputManager is deleted! The program will crash...");
+	}
+	return *sInputManager.lock();
 }
 
 InputManager::InputManager()
@@ -174,6 +195,15 @@ InputManager::InputManager()
 
 InputManager::~InputManager(){	
 }
+
+void InputManager::SetMainWindowHandle(HWindow window){
+	mImpl->SetMainWindowHandle(window);
+}
+
+HWindow InputManager::GetMainWindowHandle() const{
+	return mImpl->GetMainWindowHandle();
+}
+
 //-------------------------------------------------------------------
 // Manager
 //-------------------------------------------------------------------
@@ -247,6 +277,10 @@ void InputManager::AddHwndInterested(HWindow wnd){
 
 void InputManager::SetInputInjector(IInputInjectorPtr injector){
 	mImpl->SetInputInjector(injector);
+}
+
+IInputInjectorPtr InputManager::GetInputInjector() const{
+	return mImpl->GetInputInjector();
 }
 
 //-------------------------------------------------------------------

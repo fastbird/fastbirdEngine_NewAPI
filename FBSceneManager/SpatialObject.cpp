@@ -201,7 +201,7 @@ public:
 	}
 
 	void MergeBoundingVolume(const BoundingVolumePtr src){
-		mBoundingVolume->Merge(src);
+		mBoundingVolume->Merge(src.get());
 		*mBoundingVolumeWorld = *mBoundingVolume;
 		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
 		auto scale = mLocation.GetScale();

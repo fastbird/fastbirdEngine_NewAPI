@@ -28,6 +28,18 @@
 #pragma once
 #include <string>
 
+#define FB_REGISTER_CVAR(name, def, category, desc) \
+	CVar* pCVar##name = new CVar(#name, def, name, category, desc); \
+	mCVars.push_back(pCVar##name);\
+	if (Console::HasInstance()){\
+		Console::GetInstance().RegisterVariable(pCVar##name);\
+		}
+
+#define FB_REGISTER_CC(p) \
+	mCommands.push_back(p);\
+	if (Console::HasInstance())\
+		Console::GetInstance().RegisterCommand(p);
+
 namespace fastbird{
 	class Vec2I;
 	enum CVAR_CATEGORY
@@ -44,7 +56,7 @@ namespace fastbird{
 		CVAR_TYPE_VEC2I,
 	};
 
-	struct CVar
+	struct FB_DLL_CONSOLE CVar
 	{
 		CVar(const char* _name, const int _def, int& _storage,
 			CVAR_CATEGORY _category, const std::string& _desc);
@@ -73,7 +85,7 @@ namespace fastbird{
 
 	typedef std::function<void(StringVector&)> CFunc;
 	//--------------------------------------------------------------------------
-	struct ConsoleCommand
+	struct FB_DLL_CONSOLE ConsoleCommand
 	{
 		ConsoleCommand(const std::string& name, CFunc f,
 			const std::string& desc);
@@ -82,11 +94,5 @@ namespace fastbird{
 		std::string mName;
 		CFunc mFunc;
 		std::string mDesc;
-	};
-
-	class ICVarObserver
-	{
-	public:
-		virtual bool OnChangeCVar(CVar* pCVar) = 0;
 	};
 }

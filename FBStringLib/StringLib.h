@@ -58,6 +58,7 @@ namespace fastbird{
 	bool StartsWith(const std::string& str, const std::string& pattern, bool lowerCase = true);
 	
 	void ToLowerCase(std::string& str);	
+	void ToLowerCaseFirst(std::string& str);
 	void ToUpperCase(std::string& str);
 	
 	bool IsNumeric(const char* str);

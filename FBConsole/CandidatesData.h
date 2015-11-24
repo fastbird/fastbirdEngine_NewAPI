@@ -26,39 +26,44 @@
 */
 
 #pragma once
+#include <string>
 #include "FBCommonHeaders/Types.h"
-#include "FBCommonHeaders/Observable.h"
-#include "FBInputManager/IInputConsumer.h"
-#include "ConsoleDataType.h"
-namespace fastbird{
-	class StdOutRedirect;
-	DECLARE_SMART_PTR(Console);
-	class Console : public IInputConsumer, public Observable<ICVarObserver>{
-		DECLARE_PIMPL_NON_COPYABLE(Console);
-		Console();
+namespace fastbird
+{
+	struct FB_DLL_CONSOLE Candidate
+	{
+		bool operator< (const Candidate& other) const
+		{
+			return mName < other.mName;
+		}
 
-	public:
-		static ConsolePtr Create();
-		static ConsolePtr GetInstance();		
+		bool operator== (const std::string& otherName) const
+		{
+			return mName == otherName;
+		}
 
-		void SetRenderTargetSize(const Vec2I& size);
-		void RegisterCommand(ConsoleCommand* pCom);
-		void UnregisterCommand(ConsoleCommand* pCom);
-		void RegisterVariable(CVar* cvar);
-		void UnregisterVariable(CVar* cvar);
-		void AddCandidatesTo(const char* parent, const StringVector& candidates);
-		void Log(const char* szFmt, ...);
-		void ProcessCommand(const char* command, bool history = true);
-		void QueueProcessCommand(const char* command, bool history = true);
-		void ToggleOpen();
-		void Update();
-		void Render();
-		void RegisterStdout(StdOutRedirect* p);
-		void Clear();
+		void AddCandidate(const StringVector& candidates);
 
-		//---------------------------------------------------------------------------
-		// IInputConsumer
-		//---------------------------------------------------------------------------
-		void ConsumeInput(IInputInjectorPtr injector);
+		std::string mName;
+		std::vector<Candidate> mChildren;
 	};
+
+	typedef std::vector<Candidate> CANDIDATES;
+
+	class FB_DLL_CONSOLE CandidatesData
+	{
+	public:
+		CandidatesData();
+		~CandidatesData();
+
+		void AddCandidate(const char* name);
+		void AddCandidatesTo(const char* parent, const StringVector& candidates);
+
+		StringVector GetCandidates(const char* input, int& outDepth);
+
+	private:
+		CANDIDATES mCandidates;
+
+	};
+
 }

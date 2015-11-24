@@ -32,7 +32,6 @@
 #include "RendererStructs.h"
 #include "FBMathLib/Vec2I.h"
 #include  "TextTags.h"
-#include "EssentialEngineData/shaders/Constants.h"
 
 namespace fastbird{
 	DECLARE_SMART_PTR(Texture);
@@ -42,7 +41,7 @@ namespace fastbird{
 	struct SCharDescr;
 	typedef DEFAULT_INPUTS::V_PCTB  FontVertex;
 	DECLARE_SMART_PTR(Font);
-	class Font
+	class FB_DLL_RENDERER Font
 	{
 		DECLARE_PIMPL_NON_COPYABLE(Font);
 		Font();

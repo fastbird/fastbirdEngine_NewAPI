@@ -11,9 +11,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DebugLib.h" />
     <ClInclude Include="Logger.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DebugLib.cpp" />
     <ClCompile Include="Logger.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

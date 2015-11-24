@@ -125,7 +125,7 @@ public:
 		BoundingVolumePtr localBV = BoundingVolume::Create();
 		localBV->SetCenter(newCenter);
 		localBV->SetRadius(newRad);
-		return mBV->TestIntersection(localBV);
+		return mBV->TestIntersection(localBV.get());
 	}
 
 	Vec3 GetRandomPosInVolume(const Vec3* nearWorld, const Transformation& objT) const{

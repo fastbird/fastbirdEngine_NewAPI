@@ -26,44 +26,42 @@
 */
 
 #pragma once
-#include <string>
 #include "FBCommonHeaders/Types.h"
-namespace fastbird
-{
-	struct Candidate
-	{
-		bool operator< (const Candidate& other) const
-		{
-			return mName < other.mName;
-		}
+#include "FBCommonHeaders/Observable.h"
+#include "FBInputManager/IInputConsumer.h"
+#include "ICVarObserver.h"
+#include "ConsoleDataType.h"
+namespace fastbird{
+	class StdOutRedirect;
+	DECLARE_SMART_PTR(Console);
+	class FB_DLL_CONSOLE Console : public IInputConsumer, public Observable<ICVarObserver>{
+		DECLARE_PIMPL_NON_COPYABLE(Console);
+		Console();
+		~Console();
 
-		bool operator== (const std::string& otherName) const
-		{
-			return mName == otherName;
-		}
-
-		void AddCandidate(const StringVector& candidates);
-
-		std::string mName;
-		std::vector<Candidate> mChildren;
-	};
-
-	typedef std::vector<Candidate> CANDIDATES;
-
-	class CandidatesData
-	{
 	public:
-		CandidatesData();
-		~CandidatesData();
+		static ConsolePtr Create();
+		static Console& GetInstance();		
+		static bool HasInstance();
 
-		void AddCandidate(const char* name);
+		void SetRenderTargetSize(const Vec2I& size);
+		void RegisterCommand(ConsoleCommand* pCom);
+		void UnregisterCommand(ConsoleCommand* pCom);
+		void RegisterVariable(CVar* cvar);
+		void UnregisterVariable(CVar* cvar);
 		void AddCandidatesTo(const char* parent, const StringVector& candidates);
+		void Log(const char* szFmt, ...);
+		void ProcessCommand(const char* command, bool history = true);
+		void QueueProcessCommand(const char* command, bool history = true);
+		void ToggleOpen();
+		void Update();
+		void Render();
+		void RegisterStdout(StdOutRedirect* p);
+		void Clear();
 
-		StringVector GetCandidates(const char* input, int& outDepth);
-
-	private:
-		CANDIDATES mCandidates;
-
+		//---------------------------------------------------------------------------
+		// IInputConsumer
+		//---------------------------------------------------------------------------
+		void ConsumeInput(IInputInjectorPtr injector);
 	};
-
 }

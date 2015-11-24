@@ -1,5 +1,6 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
+#include "FBThreadLib/AsyncObjects.h"
 #include <thread>
 namespace fastbird
 {
@@ -57,14 +58,15 @@ DECLARE_SMART_PTR(Thread);
 class Thread
 {
 	DECLARE_PIMPL_NON_COPYABLE(Thread);
+protected:
+	Thread();
+	~Thread();
 
 public:
     ThreadInfo* mThreadDesc;
-	static void RegisterThread(char* ThreadName);
+	static void RegisterThread(const char* ThreadName);
 
-	Thread();    
-
-    void CreateThread(int StackSize, char* ThreadName);
+    void CreateThread(int StackSize, const char* ThreadName);
     void RegisterThread();    
 
 	void StartRun();
@@ -73,10 +75,12 @@ public:
 	bool IsForceExit();
 	void ForceExit(bool Wait);
 	bool IsRunning();
-	void Join();
+	bool IsJoinable();
+	void Join();	
 
     // Interface
     virtual bool Init() { return true; }
+	// Returns 'repeat?' flag.
     virtual bool Run() = 0;
     virtual void Exit() {}
 };

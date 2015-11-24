@@ -56,7 +56,7 @@ namespace fastbird
 
 		void Pause();
 		void Resume();
-		bool IsPause() const;
+		bool IsPaused() const;
 		
 	};
 	/// only declaration. you need to define it.

@@ -45,8 +45,10 @@ namespace fastbird{
 		}
 	}
 
-	BoundingVolume& BoundingVolume::operator = (const BoundingVolume& other){
-		mAlwaysPass = other.mAlwaysPass;
-		return *this;
+	void BoundingVolume::SetAlwaysPass(bool p){
+		mAlwaysPass = p;
+	}
+	bool BoundingVolume::GetAlwaysPass() const{
+		return mAlwaysPass;
 	}
 }

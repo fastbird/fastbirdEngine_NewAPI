@@ -44,12 +44,12 @@
 #include "PointLightManager.h"
 #include "DebugHud.h"
 #include "GeometryRenderer.h"
-#include "Console.h"
 #include "RenderStates.h"
 #include "IVideoPlayer.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
 #include "Camera.h"
+#include "EssentialEngineData/shaders/Constants.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/VectorMap.h"
@@ -83,7 +83,6 @@ public:
 	RendererWeakPtr mSelf;
 	Renderer* mObject;
 	lua_State* mL;
-	ConsolePtr mConsole;
 
 	std::string mPlatformRendererType;
 	struct PlatformRendererHolder{
@@ -534,9 +533,6 @@ public:
 		if (mGeomRenderer){
 			mGeomRenderer->SetRenderTargetSize(rtSize);
 		}
-		if (mConsole){
-			mConsole->SetRenderTargetSize(rtSize);
-		}
 	}
 
 	void ReleaseCanvas(HWindowId id){
@@ -637,17 +633,26 @@ public:
 			assert(rt);
 			bool rendered = rt->Render();
 			if (rendered) {
-				for (auto it : mObject->mObservers_[IRendererObserver::DefaultRenderEvent])	{
-					auto observer = it.lock();
-					if (observer)
-						observer->BeforeUIRendering(hwndId, GetWindowHandle(hwndId));
+				auto& observers = mObject->mObservers_[IRendererObserver::DefaultRenderEvent];
+				for (auto it = observers.begin(); it != observers.end(); /**/){
+					auto observer = it->lock();
+					if (!observer){
+						it = observers.erase(it);
+						continue;
+					}
+					++it;
+					observer->BeforeUIRendering(hwndId, GetWindowHandle(hwndId));
 				}
 				RenderUI(hwndId);
 
-				for (auto it : mObject->mObservers_[IRendererObserver::DefaultRenderEvent]){
-					auto observer = it.lock();
-					if (observer)
-						observer->AfterUIRendered(hwndId, GetWindowHandle(hwndId));
+				for (auto it = observers.begin(); it != observers.end(); /**/){
+					auto observer = it->lock();
+					if (!observer){
+						it = observers.erase(it);
+						continue;
+					}
+					++it;
+					observer->AfterUIRendered(hwndId, GetWindowHandle(hwndId));
 				}
 			}
 		}
@@ -1714,12 +1719,16 @@ public:
 		if (!mDebugHud)
 			return;
 		RenderEventMarker devent("RenderDebugHud");
-		for (auto it : mObject->mObservers_[IRendererObserver::DefaultRenderEvent])
+		auto& observers = mObject->mObservers_[IRendererObserver::DefaultRenderEvent];
+		for (auto it = observers.begin(); it != observers.end(); /**/)
 		{
-			auto observer = it.lock();
-			if (observer){
-				observer->BeforeDebugHudRendered( mMainWindowId, GetMainWindowHandle() );
+			auto observer = it->lock();
+			if (!observer){
+				it = observers.erase(it);
+				continue;
 			}
+			++it;
+			observer->BeforeDebugHudRendered( mMainWindowId, GetMainWindowHandle() );
 		}
 
 		RestoreRenderStates();
@@ -1727,13 +1736,16 @@ public:
 		param.mRenderPass = PASS_NORMAL;
 		param.mCamera = mCamera.get();
 		mDebugHud->Render(param, 0);
-		//SetWireframe(backup);
-		for (auto it : mObject->mObservers_[IRendererObserver::DefaultRenderEvent])
+		//SetWireframe(backup);		
+		for (auto it = observers.begin(); it != observers.end(); /**/)
 		{
-			auto observer = it.lock();
-			if (observer){
-				observer->AfterDebugHudRendered(mMainWindowId, GetMainWindowHandle());
+			auto observer = it->lock();
+			if (!observer){
+				it = observers.erase(it);
+				continue;
 			}
+			++it;
+			observer->AfterDebugHudRendered(mMainWindowId, GetMainWindowHandle());
 		}
 	}
 
@@ -1814,14 +1826,14 @@ public:
 		auto it = FileSystem::GetDirectoryIterator(screenShotFolder.c_str(), false);
 		
 		while (it->HasNext()){
-			const char* filename = it->GetNextFileName();
+			const char* filename = it->GetNextFilePath();
 		}
 	
 
 		unsigned n = 0;		
 		while (it->HasNext())
 		{
-			const char* filename = it->GetNextFileName();
+			const char* filename = it->GetNextFilePath();
 			std::regex match("screenshot_([0-9]+)\\.bmp");
 			std::smatch result;			
 			if (std::regex_match(std::string(filename), result, match)){
@@ -2233,9 +2245,18 @@ public:
 
 	HWindow GetWindowHandle(HWindowId windowId){
 		auto it = mWindowHandles.Find(windowId);
-		if (it != mWindowHandles.end())
+		if (it != mWindowHandles.end()){
 			return it->second;
+		}
 		return INVALID_HWND;
+	}
+
+	HWindowId GetWindowHandleId(HWindow window){
+		auto it = mWindowIds.Find(window);
+		if (it != mWindowIds.end()){
+			return it->second;
+		}
+		return INVALID_HWND_ID;
 	}
 
 	Vec2I ToSreenPos(HWindowId id, const Vec3& ndcPos) const{
@@ -2325,7 +2346,6 @@ public:
 	void ConsumeInput(IInputInjectorPtr injector){
 		mInputInfo.mCurrentMousePos = injector->GetMousePos();
 		mInputInfo.mLButtonDown = injector->IsLButtonDown();
-		mConsole->ConsumeInput(injector);
 	}
 };
 
@@ -2862,8 +2882,12 @@ HWindowId Renderer::GetMainWindowHandleId(){
 	return mImpl->GetMainWindowHandleId();
 }
 
-HWindow Renderer::GetWindowHandle(RenderTargetId rtId) {
-	return mImpl->GetWindowHandle(rtId);
+HWindow Renderer::GetWindowHandle(HWindowId windowId){
+	return mImpl->GetWindowHandle(windowId);
+}
+
+HWindowId Renderer::GetWindowHandleId(HWindow window){
+	return mImpl->GetWindowHandleId(window);
 }
 
 Vec2I Renderer::ToSreenPos(HWindowId id, const Vec3& ndcPos) const {

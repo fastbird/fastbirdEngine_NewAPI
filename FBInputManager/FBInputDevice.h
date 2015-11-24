@@ -27,10 +27,10 @@
 
 #pragma once
 namespace fastbird{
-	namespace FBInputDevice{
+	namespace InputDevice{
 		enum Enum{
-			DeviceKeyboard = 0x01,
-			DeviceMouse = 0x02,
+			Keyboard = 0x01,
+			Mouse = 0x02,
 			AllMask = 0x03,
 			DeviceNum = 2,
 		};

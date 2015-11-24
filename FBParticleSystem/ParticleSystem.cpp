@@ -259,7 +259,7 @@ public:
 
 		auto iterator = FileSystem::GetDirectoryIterator(particleFolder, false);
 		while (iterator->HasNext()){
-			std::string filename = iterator->GetNextFileName();
+			std::string filename = iterator->GetNextFilePath();
 			auto sv = Split(filename, "_");
 			if (sv.size() >= 2)
 			{

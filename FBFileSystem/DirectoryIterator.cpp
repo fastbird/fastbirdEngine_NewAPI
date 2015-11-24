@@ -94,11 +94,11 @@ namespace fastbird{
 	bool DirectoryIterator::HasNext() const{
 		return mImpl->HasNext();
 	}
-	const char* DirectoryIterator::GetNextFileName(bool* isDirectory){
+	const char* DirectoryIterator::GetNextFilePath(bool* isDirectory){
 		return mImpl->GetNext(isDirectory);
 	}
 
-	const char* DirectoryIterator::GetNextFileName(){
-		return GetNextFileName(0);
+	const char* DirectoryIterator::GetNextFilePath(){
+		return GetNextFilePath(0);
 	}
 }

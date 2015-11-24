@@ -50,7 +50,10 @@ namespace fastbird{
 	public:
 
 		static InputManagerPtr Create();
-		static InputManagerPtr GetInstance();
+		static InputManager& GetInstance();
+
+		void SetMainWindowHandle(HWindow window);
+		HWindow GetMainWindowHandle() const;
 
 		//-------------------------------------------------------------------
 		// Manager
@@ -87,6 +90,7 @@ namespace fastbird{
 		void OnKillFocus();
 		void AddHwndInterested(HWindow wnd);
 		void SetInputInjector(IInputInjectorPtr injector);
+		IInputInjectorPtr GetInputInjector() const;
 
 		//-------------------------------------------------------------------
 		// Keyboard
@@ -105,6 +109,6 @@ namespace fastbird{
 		Real GetWheelSensitivity() const;
 		void SetWheelSensitivity(Real sens);
 		void SetMousePosition(int x, int y);
-		void MouseToCenter();
+		void MouseToCenter();		
 	};
 }

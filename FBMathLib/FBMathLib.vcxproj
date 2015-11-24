@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AABB.cpp" />
     <ClCompile Include="BoundingVolume.cpp" />
     <ClCompile Include="BVaabb.cpp" />
     <ClCompile Include="BVSphere.cpp" />

@@ -60,9 +60,6 @@
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="DebugHud.h" />
     <ClInclude Include="GeometryRenderer.h" />
-    <ClInclude Include="ConsoleDataType.h" />
-    <ClInclude Include="Console.h" />
-    <ClInclude Include="CandidatesData.h" />
     <ClInclude Include="ShaderConstants.h" />
     <ClInclude Include="IVideoPlayer.h" />
     <ClInclude Include="ResourceTypes.h" />
@@ -106,9 +103,6 @@
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="DebugHud.cpp" />
     <ClCompile Include="GeometryRenderer.cpp" />
-    <ClCompile Include="ConsoleDataType.cpp" />
-    <ClCompile Include="Console.cpp" />
-    <ClCompile Include="CandidatesData.cpp" />
     <ClCompile Include="InputLayout.cpp" />
     <ClCompile Include="ResourceProvider.cpp" />
     <ClCompile Include="NullPlatformRenderer.cpp" />

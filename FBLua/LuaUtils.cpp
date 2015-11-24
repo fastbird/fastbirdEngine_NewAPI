@@ -417,6 +417,9 @@ namespace fastbird
 		if (error)
 		{
 			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Running script(%s) is failed: %s", filepath, lua_tostring(L, -1)).c_str());			
+			char buf[1024];
+			sprintf_s(buf, "\n%s/%s\n", GetCWD(), lua_tostring(L, -1));
+			Logger::Log(buf);
 			return false;
 		}
 		return true;
@@ -449,6 +452,16 @@ namespace fastbird
 		if (sLuaState)
 			return Push(sLuaState, str);
 		return 0;
+	}
+
+	const char* LuaUtils::ToString(lua_State* L, int idx){
+		return lua_tostring(L, idx);
+	}
+
+	const char* LuaUtils::ToString(int idx){
+		if (sLuaState)
+			return ToString(sLuaState, idx);
+		return "";
 	}
 
 	RecursiveSpinLock<true, false> sLuaLock;

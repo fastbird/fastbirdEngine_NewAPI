@@ -111,15 +111,17 @@ namespace fastbird{
 		If the extension is found, '.' is included in the returned string.
 		*/
 		static const char* GetExtension(const char* path);	
+		/** Get filename + extension*/
+		static std::string GetFileName(const char* path);
 		/** Get file name.
 		Extension(from the last dot to end) and path are excluded.		
 		*/
-		static std::string GetName(const char* path);
-		static std::string GetNameWithoutExtension(const char* path);
+		static std::string GetName(const char* path);		
 		/** Returns the parent path.
 		ex) dir1/dir2/file.exe -> dir1/dir1
 		*/
 		static std::string GetParentPath(const char* path);
 		static std::string ConcatPath(const char* path1, const char* path2);
+		static std::string UnifyFilepath(const char* path);
 	};
 }

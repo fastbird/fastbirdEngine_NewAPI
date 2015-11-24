@@ -4,6 +4,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="DirectoryIterator.h" />
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="..\FBFileMonitor\IFileChangeObserver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

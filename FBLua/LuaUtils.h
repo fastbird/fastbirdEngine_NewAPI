@@ -203,6 +203,9 @@ namespace fastbird
 		static const char* Push(lua_State* L, const char* str);
 		static const char* Push(const char* str);
 
+		static const char* ToString(lua_State* L, int idx);
+		static const char* ToString(int idx);
+
 		static void LockLua();
 		static void UnlockLua();
 	};	

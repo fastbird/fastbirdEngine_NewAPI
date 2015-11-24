@@ -55,10 +55,11 @@ namespace fastbird
 
 		BoundingVolume() : mAlwaysPass(false) {}
 		virtual ~BoundingVolume(){}		
-		BoundingVolume& operator=(const BoundingVolume& other);
+		virtual BoundingVolume& operator=(const BoundingVolume& other) = 0;
 
 	public:
-		void SetAlwaysPass(bool p) { mAlwaysPass = p; }
+		void SetAlwaysPass(bool p);
+		bool GetAlwaysPass() const;
 
 		virtual int GetBVType() const = 0;
 		virtual void SetCenter (const Vec3& center) = 0;
@@ -74,10 +75,10 @@ namespace fastbird
 		virtual int WhichSide(const Plane3& plane) const { assert(0); return -1;}
 		virtual int WhichSide(const Vec3& min, const Vec3& max) const { assert(0); return -1;}
 		virtual bool TestIntersection(const Ray3& ray) const = 0;
-		virtual bool TestIntersection(BoundingVolumePtr pBV) const = 0;
+		virtual bool TestIntersection(BoundingVolume* pBV) const = 0;
 		virtual Vec3 GetRandomPosInVolume(const Vec3* nearLocal = 0) const = 0;
 		virtual bool Contain(const Vec3& pos) const = 0;
-		virtual void Merge(const BoundingVolumePtr pBV) = 0;
+		virtual void Merge(const BoundingVolume* pBV) = 0;
 		virtual void Merge(const Vec3& pos) = 0;
 		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal) = 0;
 		virtual void Invalidate() = 0;		

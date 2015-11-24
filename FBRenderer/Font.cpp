@@ -41,6 +41,7 @@
 #include "FBTimer/Profiler.h"
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
+#include "EssentialEngineData/shaders/Constants.h"
 namespace fastbird{
 struct SCharDescr
 {

@@ -170,7 +170,8 @@ public:
 
 	void Join()
 	{
-		mThread.join();
+		if (mThread.joinable())
+			mThread.join();
 	}
 };
 
@@ -218,7 +219,7 @@ public:
 		delete mSelf->mThreadDesc;
 	}
 
-	void CreateThread(int StackSize, char* ThreadName){
+	void CreateThread(int StackSize, const char* ThreadName){
 		if (mSelf->mThreadDesc)
 		{
 			Logger::Log(FB_ERROR_LOG_ARG, "Already created.");
@@ -278,10 +279,24 @@ public:
 		assert(mThreadHandle);
 		mThreadHandle->Join();
 	}
+
+	bool IsJoinable(){
+		return mThreadHandle->IsValid();
+	}
 };
 
 //---------------------------------------------------------------------------
-void Thread::CreateThread(int StackSize, char* ThreadName)
+Thread::Thread()
+	:mImpl(new Impl(this))
+{
+
+}
+
+Thread::~Thread(){
+
+}
+
+void Thread::CreateThread(int StackSize, const char* ThreadName)
 {
 	mImpl->CreateThread(StackSize, ThreadName);
 }
@@ -293,13 +308,41 @@ void Thread::RegisterThread()
 }
 
 // static
-void Thread::RegisterThread(char* ThreadName)
+void Thread::RegisterThread(const char* ThreadName)
 {
 	assert(!GThreadDesc);
 
 	GThreadDesc = new (ThreadInfo); // deleting is caller's responsibility.
 	strcpy_s(GThreadDesc->ThreadName, ThreadName);
 	GThreadDesc->mThreadID = std::this_thread::get_id();
+}
+
+void Thread::StartRun(){
+	mImpl->StartRun();
+}
+
+void Thread::EndRun(){
+	mImpl->EndRun();
+}
+
+bool Thread::IsForceExit(){
+	return mImpl->IsForceExit();
+}
+
+void Thread::ForceExit(bool Wait){
+	mImpl->ForceExit(Wait);
+}
+
+bool Thread::IsRunning(){
+	return mImpl->IsRunning();
+}
+
+bool Thread::IsJoinable(){
+	return mImpl->IsJoinable();
+}
+
+void Thread::Join(){
+	mImpl->Join();
 }
 
 }

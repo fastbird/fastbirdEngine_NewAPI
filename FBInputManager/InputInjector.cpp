@@ -38,6 +38,7 @@ public:
 	IMousePtr mMouse;
 };
 
+IMPLEMENT_STATIC_CREATE(InputInjector);
 InputInjector::InputInjector()
 	:mImpl(new Impl){
 
@@ -51,23 +52,16 @@ InputInjector::~InputInjector(){
 // IInputInjector
 //-------------------------------------------------------------------
 bool InputInjector::IsValid(FBInputDevice::Enum type) const{
-	auto im = InputManager::GetInstance();
-	if (im){
-		return im->IsValid(type);
-	}
-	return false;
+	auto& im = InputManager::GetInstance();
+	return im.IsValid(type);
 }
 void InputInjector::Invalidate(FBInputDevice::Enum type) const{
-	auto im = InputManager::GetInstance();
-	if (im){
-		im->Invalidate(type);
-	}
+	auto& im = InputManager::GetInstance();
+	im.Invalidate(type);
 }
 void InputInjector::InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
-	auto im = InputManager::GetInstance();
-	if (im){
-		im->InvalidTemporary(type, invalidate);
-	}
+	auto& im = InputManager::GetInstance();
+	im.InvalidTemporary(type, invalidate);
 }
 
 //-------------------------------------------------------------------

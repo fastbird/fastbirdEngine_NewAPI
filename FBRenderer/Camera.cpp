@@ -324,16 +324,26 @@ public:
 			UpdateFrustum();
 
 			if (viewChanged && !cam->mObservers_.empty()){
-				auto observers = cam->mObservers_[TransformChanged];
-				for (auto it : observers){
-					auto observer = it.lock();
+				auto& observers = cam->mObservers_[TransformChanged];
+				for (auto it = observers.begin(); it != observers.end(); /**/){
+					auto observer = it->lock();
+					if (!observer){
+						it = observers.erase(it);
+						continue;
+					}
+					++it;
 					observer->OnViewMatrixChanged();
-				}
+				}				
 			}
 			if (projChanged && !cam->mObservers_.empty()){
-				auto observers = cam->mObservers_[TransformChanged];
-				for (auto it : observers){
-					auto observer = it.lock();
+				auto& observers = cam->mObservers_[TransformChanged];
+				for (auto it = observers.begin(); it != observers.end(); /**/){
+					auto observer = it->lock();
+					if (!observer){
+						it = observers.erase(it);
+						continue;
+					}
+					++it;
 					observer->OnProjMatrixChanged();
 				}
 			}			
@@ -452,7 +462,7 @@ public:
 		auto target = mTarget.lock();
 		if (!mProcessInput || !target)
 			return;
-		if (injector->IsValid(FBInputDevice::DeviceMouse) && !injector->IsKeyDown(VK_CONTROL)){
+		if (injector->IsValid(InputDevice::Mouse) && !injector->IsKeyDown(VK_CONTROL)){
 			const Vec3 camPos = GetPosition();
 			Vec3 toCam = camPos - target->GetPosition();
 			const Real distToTarget = toCam.Normalize();
@@ -473,7 +483,7 @@ public:
 				}
 
 				injector->LockMousePos(true, this);
-				injector->Invalidate(FBInputDevice::DeviceMouse);
+				injector->Invalidate(InputDevice::Mouse);
 			}
 			else
 			{
@@ -491,7 +501,7 @@ public:
 				Real numLinesSens = wheelSens * (Real)injector->GetNumLinesWheelScroll();
 				numLinesSens *= std::max((Real)1.0f, (Real)(mInternalParams.dist * 0.05f));
 				mUserParams.dDist += -wheel * numLinesSens * shift;
-				injector->Invalidate(FBInputDevice::DeviceMouse);
+				injector->Invalidate(InputDevice::Mouse);
 			}
 		}
 	}

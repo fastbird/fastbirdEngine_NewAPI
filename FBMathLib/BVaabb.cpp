@@ -39,15 +39,17 @@ BVaabb::BVaabb()
 {
 }
 
-BVaabb& BVaabb::operator=(const BVaabb& other){
-	__super::operator=(other);
-	mAABB = other.mAABB;
-	mCenter = other.mCenter;
-	mRadius = other.mRadius;
+BoundingVolume& BVaabb::operator=(const BoundingVolume& other){
+	mAlwaysPass = other.GetAlwaysPass();
+	mAABB.Invalidate();
+	mAABB.Merge(other.GetCenter());
+	float radius = other.GetRadius();
+	SetRadius(radius);
+	mCenter = mAABB.GetCenter();
 	return *this;
 }
 
-void BVaabb::Merge(const BoundingVolumePtr pBV)
+void BVaabb::Merge(const BoundingVolume* pBV)
 {
 	assert(pBV);
 	const Vec3& center = pBV->GetCenter();
@@ -185,7 +187,7 @@ bool BVaabb::TestIntersection(const Ray3& ray) const
 }
 
 
-bool BVaabb::TestIntersection(BoundingVolumePtr pBV) const
+bool BVaabb::TestIntersection(BoundingVolume* pBV) const
 {
 	Real R = pBV->GetRadius();
 	const auto& S = pBV->GetCenter();

@@ -38,7 +38,8 @@
 #include "Material.h"
 #include "Camera.h"
 #include "FBSceneManager/IScene.h"
-
+#include "EssentialEngineData/shaders/Constants.h"
+#undef DrawText
 using namespace fastbird;
 
 class DebugHud::Impl{

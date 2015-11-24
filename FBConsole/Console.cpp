@@ -28,8 +28,8 @@
 #include "stdafx.h"
 #include "Console.h"
 #include "CandidatesData.h"
-#include "Renderer.h"
-#include "Font.h"
+#include "FBRenderer/Renderer.h"
+#include "FBRenderer/Font.h"
 #include "FBSystemLib/StdOutRedirect.h"
 #include "FBSystemLib/ClipboardData.h"
 #include "FBMathLib/Math.h"
@@ -313,7 +313,7 @@ public:
 	void ToggleOpen()
 	{
 		mOpen = !mOpen;
-		InputManager::GetInstance()->ClearBuffer();
+		InputManager::GetInstance().ClearBuffer();
 	}
 
 	//--------------------------------------------------------------------------
@@ -944,20 +944,23 @@ ConsolePtr Console::Create(){
 		auto console = ConsolePtr(new Console, [](Console* obj){ delete obj; });
 		sConsole = console;
 		console->mImpl->mSelf = sConsole;
-		auto inputMgr = InputManager::GetInstance();
-		if (inputMgr){
-			inputMgr->RegisterInputConsumer(console, IInputConsumer::Priority11_Console);
-		}
-		else{
-			Logger::Log(FB_ERROR_LOG_ARG, "Console is created before the InputManager. Input consumer for the console is not registered!");
-		}
+		auto& inputMgr = InputManager::GetInstance();
+		inputMgr.RegisterInputConsumer(console, IInputConsumer::Priority11_Console);
+		return console;
 	}
 
 	return sConsole.lock();
 }
 
-ConsolePtr Console::GetInstance(){
-	return sConsole.lock();
+Console& Console::GetInstance(){
+	if (sConsole.expired()){
+		Logger::Log(FB_ERROR_LOG_ARG, "The Console is deleted. Program will crash...");
+	}
+	return *sConsole.lock();
+}
+
+bool Console::HasInstance(){
+	return !sConsole.expired();
 }
 
 Console::Console()

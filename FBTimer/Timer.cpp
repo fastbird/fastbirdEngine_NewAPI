@@ -110,6 +110,10 @@ namespace fastbird
 		{
 			mPaused = false;
 		}
+
+		bool IsPaused() const {
+			return mPaused;
+		}
 	};
 
 	//---------------------------------------------------------------------------
@@ -184,5 +188,9 @@ namespace fastbird
 	void Timer::Resume()
 	{
 		mImpl->Resume();
+	}
+
+	bool Timer::IsPaused() const{
+		return mImpl->IsPaused();
 	}
 }

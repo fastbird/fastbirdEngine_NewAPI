@@ -34,6 +34,7 @@ using namespace fastbird;
 
 static bool gLogginStarted = false;
 static boost::filesystem::path gWorkingPath;
+
 void FileSystem::StartLoggingIfNot(const char* path){
 	if (gLogginStarted)
 		return;
@@ -102,14 +103,14 @@ const char* FileSystem::GetExtension(const char* path){
 	return "";
 }
 
+std::string FileSystem::GetFileName(const char* path){
+	boost::filesystem::path filepath(path);
+	return filepath.filename().generic_string();
+}
+
 std::string FileSystem::GetName(const char* path){
 	boost::filesystem::path filepath(path);
 	return filepath.stem().generic_string();
-}
-
-std::string FileSystem::GetNameWithoutExtension(const char* path){
-	auto name = GetName(path);
-	return ReplaceExtension(name.c_str(), "");
 }
 
 std::string FileSystem::GetParentPath(const char* path){
@@ -119,6 +120,10 @@ std::string FileSystem::GetParentPath(const char* path){
 
 std::string FileSystem::ConcatPath(const char* path1, const char* path2){
 	return boost::filesystem::path(path1).concat(path2).generic_string();
+}
+
+std::string FileSystem::UnifyFilepath(const char* path){
+	return boost::filesystem::path(path).generic_string();
 }
 
 void FileSystem::BackupFile(const char* filepath, unsigned numKeeping) {

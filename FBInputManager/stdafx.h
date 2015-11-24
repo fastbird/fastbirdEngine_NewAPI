@@ -47,5 +47,6 @@
 #include <memory>
 #include <bitset>
 
-#include "FBDebugLib\Logger.h"
-#include "FBTimer\Timer.h"
+#include "FBTimer/Timer.h"
+#include "FBStringLib/StringLib.h"
+#include "FBDebugLib/DebugLib.h"

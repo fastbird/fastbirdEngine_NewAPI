@@ -210,6 +210,11 @@ namespace fastbird{
 			_ttolower);
 	}	
 
+	void ToLowerCaseFirst(std::string& str){
+		std::transform(
+			str.begin(), str.begin() + 1, str.begin(), tolower);
+	}
+
 	void ToUpperCase(std::string& str){
 		std::transform(
 			str.begin(),

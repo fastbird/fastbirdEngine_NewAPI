@@ -29,7 +29,6 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Color.h"
 #include "FBMathLib/Math.h"
-#include "EssentialEngineData/shaders/Constants.h"
 #include <queue>
 #include <list>
 #include <map>

@@ -34,7 +34,7 @@ namespace fastbird
 	{
 	public:
 		BVaabb();
-		BVaabb& operator=(const BVaabb& other);
+		BoundingVolume& operator=(const BoundingVolume& other);
 		
 		virtual int GetBVType() const {return BV_AABB; }
 		virtual void SetCenter (const Vec3& center);
@@ -51,9 +51,9 @@ namespace fastbird
 			BoundingVolumePtr result);
 		virtual int WhichSide(const Plane3& plane) const;
 		virtual bool TestIntersection(const Ray3& ray) const;
-		virtual bool TestIntersection(BoundingVolumePtr pBV) const;
+		virtual bool TestIntersection(BoundingVolume* pBV) const;
 
-		virtual void Merge(const BoundingVolumePtr pBV);
+		virtual void Merge(const BoundingVolume* pBV);
 		virtual void Merge(const Vec3& worldPos);
 
 		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& source, Vec3& normal);

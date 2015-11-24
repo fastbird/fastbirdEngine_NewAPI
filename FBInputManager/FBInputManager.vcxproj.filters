@@ -15,6 +15,8 @@
     <ClInclude Include="InputInjector.h" />
     <ClInclude Include="FBInputDevice.h" />
     <ClInclude Include="IInputConsumer.h" />
+    <ClInclude Include="TextManipulator.h" />
+    <ClInclude Include="ITextManipulatorObserver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Mouse.cpp" />
@@ -22,5 +24,6 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="InputInjector.cpp" />
+    <ClCompile Include="TextManipulator.cpp" />
   </ItemGroup>
 </Project>

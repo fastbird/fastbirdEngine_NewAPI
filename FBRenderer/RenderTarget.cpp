@@ -334,7 +334,7 @@ public:
 
 	void ConsumeInput(IInputInjectorPtr injector)
 	{
-		if (!injector->IsValid(FBInputDevice::DeviceMouse))
+		if (!injector->IsValid(InputDevice::Mouse))
 			return;			
 		
 		mCamera->SetCurrent(true);

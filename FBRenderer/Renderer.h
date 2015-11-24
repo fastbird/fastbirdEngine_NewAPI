@@ -104,8 +104,6 @@ namespace fastbird{
 		
 	public:
 		~Renderer();
-
-		static const HWindowId INVALID_HWND_ID = (HWindowId)-1;
 		static const HWindow INVALID_HWND;
 
 		/** Set lua state.
@@ -293,8 +291,9 @@ namespace fastbird{
 		CameraPtr GetCamera() const; // this is for current carmera.
 		CameraPtr GetMainCamera() const;
 		HWindow GetMainWindowHandle() const;
-		HWindowId GetMainWindowHandleId();
-		HWindow GetWindowHandle(RenderTargetId rtId);
+		HWindowId GetMainWindowHandleId();		
+		HWindow GetWindowHandle(HWindowId windowId);
+		HWindowId GetWindowHandleId(HWindow window);
 		Vec2I ToSreenPos(HWindowId id, const Vec3& ndcPos) const;
 		Vec2 ToNdcPos(HWindowId id, const Vec2I& screenPos) const;
 		unsigned GetNumLoadingTexture() const;

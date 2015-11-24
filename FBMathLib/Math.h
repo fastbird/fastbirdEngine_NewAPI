@@ -98,6 +98,8 @@ namespace fastbird
 	}
 
 	//-------------------------------------------------------------------------
+#undef min
+#undef max
 	template <class T>
 	T Lerp(const T& a, const T& b, Real lp)
 	{

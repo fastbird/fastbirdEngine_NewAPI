@@ -30,12 +30,15 @@
 #include "IInputInjector.h"
 
 namespace fastbird{
-	class InputInjector{
+	DECLARE_SMART_PTR(InputInjector);
+	class InputInjector : public IInputInjector{
 		DECLARE_PIMPL_NON_COPYABLE(InputInjector);
-
-	public:
 		InputInjector();
 		~InputInjector();
+
+	public:
+		static InputInjectorPtr Create();
+		
 
 		//-------------------------------------------------------------------
 		// IInputInjector

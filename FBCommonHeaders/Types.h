@@ -51,6 +51,7 @@ namespace fastbird{
 	typedef float Real;
 
 	typedef __int64 HWindowId;
+	static const HWindowId INVALID_HWND_ID = (HWindowId)-1;
 	typedef std::vector<std::string> StringVector;
 	typedef std::vector<std::wstring> WStringVector;
 	typedef std::shared_ptr < char > BinaryData;
@@ -86,6 +87,18 @@ namespace fastbird{
 		Real, Real, Real,
 		// itentity, RSSeperated, UniformScale
 		bool, bool, bool> TransformationTuple;
+
+	template <typename T>
+	bool operator == (const std::weak_ptr<T>& a, const std::shared_ptr<T>& b)
+	{
+		return a.lock() == b;
+	}
+
+	template <typename T>
+	bool operator == (const std::weak_ptr<T>& a, const std::weak_ptr<T>& b)
+	{
+		return a.lock() == b.lock();
+	}
 }
 
 template <typename T>

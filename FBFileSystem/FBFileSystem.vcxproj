@@ -74,6 +74,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\FBFileMonitor\IFileChangeObserver.h" />
     <ClInclude Include="DirectoryIterator.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="stdafx.h" />
