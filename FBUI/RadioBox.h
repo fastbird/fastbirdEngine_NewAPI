@@ -1,32 +1,63 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 
-#include "Wnd.h"
-#include "IRadioBox.h"
+#include "Container.h"
 namespace fastbird
 {
-class IUIObject;
-class ImageBox;
-class StaticText;
-class RadioBox : public Wnd, public IRadioBox
+FB_DECLARE_SMART_PTR(ImageBox);
+FB_DECLARE_SMART_PTR(StaticText);
+FB_DECLARE_SMART_PTR(RadioBox);
+class FB_DLL_UI RadioBox : public Container
 {
-public:
+protected:
 	RadioBox();
-	virtual ~RadioBox();
+	~RadioBox();
 
-	virtual void OnCreated();
+public:
+
+	static RadioBoxPtr Create();
+	
+
+	void OnCreated();
 	// IWinBase
-	virtual ComponentType::Enum GetType() const { return ComponentType::RadioBox; }
-	virtual void GatherVisit(std::vector<IUIObject*>& v);
-	virtual void SetText(const wchar_t* szText);
-	virtual bool SetProperty(UIProperty::Enum prop, const char* val);
-	virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
-	virtual void OnSizeChanged();
+	ComponentType::Enum GetType() const { return ComponentType::RadioBox; }
+	void GatherVisit(std::vector<UIObject*>& v);
+	void SetText(const wchar_t* szText);
+	bool SetProperty(UIProperty::Enum prop, const char* val);
+	bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
+	void OnSizeChanged();
 
 	// IRadioBox
-	virtual void SetCheck(bool check);
-	virtual bool GetCheck() const;
-	virtual void SetGroupID(int id){ mGroupID = id; }
-	virtual int GetGroupID() const { return mGroupID; }
+	void SetCheck(bool check);
+	bool GetCheck() const;
+	void SetGroupID(int id){ mGroupID = id; }
+	int GetGroupID() const { return mGroupID; }
 
 	// event
 	void OnChildrenClicked(void* arg);
@@ -38,8 +69,8 @@ private:
 	void UpdateImage();
 
 private:
-	ImageBox* mRadioImageBox;
-	StaticText* mStaticText;
+	ImageBoxWeakPtr mRadioImageBox;
+	StaticTextWeakPtr mStaticText;
 	bool mChecked;
 	int mGroupID;
 	std::wstring mTempString;

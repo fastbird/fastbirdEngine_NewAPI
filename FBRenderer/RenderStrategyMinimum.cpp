@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "FBSceneManager/ISpatialObject.h"
 #include "FBSceneManager/DirectionalLight.h"
 using namespace fastbird;
-IMPLEMENT_STATIC_CREATE(RenderStrategyMinimum);
+FB_IMPLEMENT_STATIC_CREATE(RenderStrategyMinimum);
 class RenderStrategyMinimum::Impl{
 public:
 	ISceneWeakPtr mScene;

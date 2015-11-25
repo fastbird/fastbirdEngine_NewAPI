@@ -33,7 +33,7 @@
 #include "KeyboardEvent.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IKeyboard);
+	FB_DECLARE_SMART_PTR(IKeyboard);
 	class IKeyboard : public IInputDevice
 	{
 	public:

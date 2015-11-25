@@ -570,7 +570,7 @@ public:
 
 		mInputStringw = AnsiToWide(mInputString.c_str(), mInputString.size());
 
-		injector->Invalidate(FBInputDevice::AllMask);		
+		injector->Invalidate(InputDevice::AllMask);		
 	}
 
 	void EnableInputListener(bool enable)

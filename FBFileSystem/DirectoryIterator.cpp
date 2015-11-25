@@ -39,6 +39,10 @@ namespace fastbird{
 		Impl() :mRecursive(false){
 		}
 
+		bool IsOpen() const{
+			return mIterator != boost::filesystem::directory_iterator();
+		}
+
 		bool HasNext(){
 			if (mRecursive)
 				return mRecursiveIterator != boost::filesystem::recursive_directory_iterator();
@@ -89,6 +93,10 @@ namespace fastbird{
 
 	DirectoryIterator::~DirectoryIterator(){
 
+	}
+
+	bool DirectoryIterator::IsOpen() const{
+		return mImpl->IsOpen();
 	}
 
 	bool DirectoryIterator::HasNext() const{

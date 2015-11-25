@@ -1,22 +1,51 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "Wnd.h"
-#include "IUIManager.h"
+#include "UIManager.h"
 #include "Button.h"
 #include "ImageBox.h"
 #include "Scroller.h"
 #include "UIObject.h"
+#include "FBRenderer/TextureAtlas.h"
 
 namespace fastbird
 {
-
+WndPtr Wnd::Create(){
+	WndPtr p(new Wnd, [](Wnd* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
 Wnd::Wnd()
-:mTitlebar(0)
-, mUseFrame(false)
-, mBackgroundImage(0)
+: mUseFrame(false)
 , mAlwaysOnTop(false)
 , mCloseByEsc(false)
 , mSyncWindowPos(false)
-, mCloseBtn(0)
 , mNoFocus(false)
 , mMoveToBottom(false)
 {
@@ -31,22 +60,17 @@ Wnd::~Wnd()
 {
 	if (mAlwaysOnTop)
 	{
-		gFBEnv->pUIManager->UnRegisterAlwaysOnTopWnd(this);
-	}
-	for (auto var : mFrames)
-	{
-		if (var)
-			gFBEnv->pUIManager->DeleteComponent(var);
-	}
+		UIManager::GetInstance().UnRegisterAlwaysOnTopWnd(mSelfPtr.lock());
+	}	
 	mFrames.clear();
 }
 
-void Wnd::GatherVisit(std::vector<IUIObject*>& v)
+void Wnd::GatherVisit(std::vector<UIObject*>& v)
 {
 	if (!mVisibility.IsVisible())
 		return;
 
-	v.push_back(mUIObject);
+	v.push_back(mUIObject.get());
 
 	__super::GatherVisit(v);
 
@@ -71,95 +95,96 @@ void Wnd::OnPosChanged(bool anim)
 
 void Wnd::RefreshFrame()
 {
-	if (mTitlebar)
+	auto titlebar = mTitlebar.lock();
+	if (titlebar)
 	{
-		mTitlebar->ChangeSizeX(std::max(40, GetFinalSize().x - 80));
+		titlebar->ChangeSizeX(std::max(40, GetFinalSize().x - 80));
 	}
+
 	if (mUseFrame)
 	{
 		const char* uixmlPath = "es/textures/ui.xml";
 		if (mFrames.empty())
 		{			
-			ImageBox* T = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto T = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			T->SetHwndId(GetHwndId());
 			T->SetRender3D(mRender3D, GetRenderTargetSize());
-			T->SetManualParent(this);
+			T->SetManualParent(mSelfPtr.lock());
 			T->SetProperty(UIProperty::SPECIAL_ORDER, "1");
 			T->SetProperty(UIProperty::KEEP_IMAGE_RATIO, "false");
 			T->SetVisible(true);
-			const auto& sizeT = T->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("t"));
+			const auto& sizeT = T->SetTextureAtlasRegion(uixmlPath, UIManager::GetInstance().GetWndBorderRegion("t"));
 			T->ChangeSize(sizeT);
 			mFrames.push_back(T);			
 
-			ImageBox* L = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto L = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			L->SetHwndId(GetHwndId());
 			L->SetRender3D(mRender3D, GetRenderTargetSize());
-			L->SetManualParent(this);
+			L->SetManualParent(mSelfPtr.lock());
 			L->SetProperty(UIProperty::SPECIAL_ORDER, "1");
 			L->SetProperty(UIProperty::KEEP_IMAGE_RATIO, "false");
 			L->SetVisible(true);
 			const auto& sizeL = L->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("l"));
+				UIManager::GetInstance().GetWndBorderRegion("l"));
 			L->ChangeSize(sizeL);
 			mFrames.push_back(L);			
 
-			ImageBox* R = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto R = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			R->SetHwndId(GetHwndId());
 			R->SetRender3D(mRender3D, GetRenderTargetSize());
 			R->SetAlign(ALIGNH::RIGHT, ALIGNV::TOP);
-			R->SetManualParent(this);
+			R->SetManualParent(mSelfPtr.lock());
 			R->SetProperty(UIProperty::SPECIAL_ORDER, "1");
 			R->SetProperty(UIProperty::KEEP_IMAGE_RATIO, "false");
 			R->SetVisible(true);
 			const auto& sizeR = R->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("r"));
+				UIManager::GetInstance().GetWndBorderRegion("r"));
 			R->ChangeSize(sizeR);
 			mFrames.push_back(R);
 
-			ImageBox* B = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto B = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			B->SetHwndId(GetHwndId());
 			B->SetRender3D(mRender3D, GetRenderTargetSize());
 			B->SetAlign(ALIGNH::LEFT, ALIGNV::BOTTOM);
-			B->SetManualParent(this);
+			B->SetManualParent(mSelfPtr.lock());
 			B->SetProperty(UIProperty::SPECIAL_ORDER, "1");
 			B->SetProperty(UIProperty::KEEP_IMAGE_RATIO, "false");
 			B->SetVisible(true);
 			const auto& sizeB = B->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("b"));
+				UIManager::GetInstance().GetWndBorderRegion("b"));
 			B->ChangeSize(sizeB);
 			mFrames.push_back(B);
 
-			ImageBox* LT = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto LT = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			LT->SetHwndId(GetHwndId());
 			LT->SetRender3D(mRender3D, GetRenderTargetSize());
-			LT->SetManualParent(this);
+			LT->SetManualParent(mSelfPtr.lock());
 			const auto& sizeLT = LT->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("lt"));
+				UIManager::GetInstance().GetWndBorderRegion("lt"));
 			LT->ChangeSize(sizeLT);			
 			LT->SetProperty(UIProperty::SPECIAL_ORDER, "2");
 			LT->SetVisible(true);
 			mFrames.push_back(LT);
 
-			ImageBox* RT = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto RT = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			RT->SetHwndId(GetHwndId());
 			RT->SetRender3D(mRender3D, GetRenderTargetSize());
 			RT->SetAlign(ALIGNH::RIGHT, ALIGNV::TOP);
-			RT->SetManualParent(this);
+			RT->SetManualParent(mSelfPtr.lock());
 			const auto& sizeRT = RT->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("rt"));
+				UIManager::GetInstance().GetWndBorderRegion("rt"));
 			RT->ChangeSize(sizeRT);
 			RT->SetProperty(UIProperty::SPECIAL_ORDER, "2");
 			RT->SetVisible(true);
 			mFrames.push_back(RT);
 
-			const char* mtRegion = gFBUIManager->GetWndBorderRegion("mt");
+			const char* mtRegion = UIManager::GetInstance().GetWndBorderRegion("mt");
 			if (mtRegion&&strlen(mtRegion)>0){
-				ImageBox* MT = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+				auto MT = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 				MT->SetHwndId(GetHwndId());
 				MT->SetRender3D(mRender3D, GetRenderTargetSize());
 				MT->SetAlign(ALIGNH::CENTER, ALIGNV::TOP);
-				MT->SetManualParent(this);
+				MT->SetManualParent(mSelfPtr.lock());
 				const auto& sizeMT = MT->SetTextureAtlasRegion(uixmlPath, mtRegion);
 				MT->ChangeSize(sizeMT);
 				MT->SetProperty(UIProperty::SPECIAL_ORDER, "2");
@@ -171,47 +196,49 @@ void Wnd::RefreshFrame()
 			}
 			
 
-			ImageBox* LB = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto LB = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			LB->SetHwndId(GetHwndId());
 			LB->SetRender3D(mRender3D, GetRenderTargetSize());
 			LB->SetAlign(ALIGNH::LEFT, ALIGNV::BOTTOM);
-			LB->SetManualParent(this);
+			LB->SetManualParent(mSelfPtr.lock());
 			const auto& sizeLB = LB->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("lb"));
+				UIManager::GetInstance().GetWndBorderRegion("lb"));
 			LB->ChangeSize(sizeLB);
 			LB->SetProperty(UIProperty::SPECIAL_ORDER, "2");
 			LB->SetVisible(true);
 			mFrames.push_back(LB);
 
-			ImageBox* RB = (ImageBox*)gFBEnv->pUIManager->CreateComponent(ComponentType::ImageBox);
+			auto RB = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 			RB->SetHwndId(GetHwndId());
 			RB->SetRender3D(mRender3D, GetRenderTargetSize());			
 			RB->SetAlign(ALIGNH::RIGHT, ALIGNV::BOTTOM);
-			RB->SetManualParent(this);
+			RB->SetManualParent(mSelfPtr.lock());
 			const auto& sizeRB = RB->SetTextureAtlasRegion(uixmlPath,
-				gFBUIManager->GetWndBorderRegion("rb"));
+				UIManager::GetInstance().GetWndBorderRegion("rb"));
 			RB->ChangeSize(sizeRB);
 			RB->SetProperty(UIProperty::SPECIAL_ORDER, "2");
 			RB->SetVisible(true);
 			mFrames.push_back(RB);
 		}
 
-		if (!mWndContentUI && !mTitlebarString.empty()){
-			mWndContentUI = (Wnd*)AddChild(0.f, 0.f, 1.0f, 1.0f, ComponentType::Window);
-			DoNotTransfer(mWndContentUI);
-			mWndContentUI->SetName("_@ContentWindow");
-			mWndContentUI->SetGhost(true);
-			mWndContentUI->SetRuntimeChild(true);
-			mWndContentUI->SetRender3D(mRender3D, GetRenderTargetSize());
-			auto atlas = gFBEnv->pRenderer->GetTextureAtlas(uixmlPath);
+		auto contentUI = mWndContentUI.lock();
+		if (!contentUI && !mTitlebarString.empty()){
+			auto wndContentUI = std::static_pointer_cast<Wnd>(AddChild(0.f, 0.f, 1.0f, 1.0f, ComponentType::Window));
+			mWndContentUI = wndContentUI;
+			DoNotTransfer(wndContentUI);
+			wndContentUI->SetName("_@ContentWindow");
+			wndContentUI->SetGhost(true);
+			wndContentUI->SetRuntimeChild(true);
+			wndContentUI->SetRender3D(mRender3D, GetRenderTargetSize());
+			auto atlas = Renderer::GetInstance().GetTextureAtlas(uixmlPath);
 			if (atlas){
 				Vec2I leftTopSize(0, 0);
-				auto ltRegion = atlas->GetRegion(gFBUIManager->GetWndBorderRegion("lt"));
+				auto ltRegion = atlas->GetRegion(UIManager::GetInstance().GetWndBorderRegion("lt"));
 				if (ltRegion){
 					leftTopSize = ltRegion->GetSize();
 				}
 				Vec2I leftBottomSize(0, 0);
-				auto lbRegion = atlas->GetRegion(gFBUIManager->GetWndBorderRegion("lb"));
+				auto lbRegion = atlas->GetRegion(UIManager::GetInstance().GetWndBorderRegion("lb"));
 				if (lbRegion){
 					leftBottomSize = lbRegion->GetSize();
 				}
@@ -220,21 +247,22 @@ void Wnd::RefreshFrame()
 					mUseFrame ? -leftTopSize.x*2 : 0, // x
 					mUseFrame ? -(titleBar + leftBottomSize.y) : -titleBar, // y
 				};
-				mWndContentUI->ModifySize(sizeMod);
-				mWndContentUI->ChangePos(Vec2I(leftTopSize.x, titleBar));
+				wndContentUI->ModifySize(sizeMod);
+				wndContentUI->ChangePos(Vec2I(leftTopSize.x, titleBar));
 			}
 
-			mWndContentUI->SetProperty(UIProperty::NO_BACKGROUND, "true");
-			mWndContentUI->SetProperty(UIProperty::USE_NSIZEX, "true");
-			mWndContentUI->SetProperty(UIProperty::USE_NSIZEY, "true");
+			wndContentUI->SetProperty(UIProperty::NO_BACKGROUND, "true");
+			wndContentUI->SetProperty(UIProperty::USE_NSIZEX, "true");
+			wndContentUI->SetProperty(UIProperty::USE_NSIZEY, "true");
 			if (mUseScrollerV)
 			{
-				mPendingDelete.push_back(mScrollerV);
+				if (!mScrollerV.expired())
+					mPendingDelete.push_back(mScrollerV.lock());
 				mUseScrollerV = false;
-				mWndContentUI->SetProperty(UIProperty::SCROLLERV, "true");
+				wndContentUI->SetProperty(UIProperty::SCROLLERV, "true");
 			}
-			TransferChildrenTo(mWndContentUI);
-			mWndContentUI->SetVisible(mVisibility.IsVisible());
+			TransferChildrenTo(wndContentUI);
+			wndContentUI->SetVisible(mVisibility.IsVisible());
 		}
 		
 		enum FRAME_ORDER
@@ -294,16 +322,12 @@ void Wnd::RefreshFrame()
 		// !mUseFrame
 		if (!mFrames.empty())
 		{
-			for (auto var : mFrames)
-			{
-				if (var)
-					gFBEnv->pUIManager->DeleteComponent(var);
-			}
 			mFrames.clear();
-			gFBUIManager->DirtyRenderList(GetHwndId());
-			if (mWndContentUI){
-				mWndContentUI->TransferChildrenTo(this);
-				RemoveChild(mWndContentUI);
+			UIManager::GetInstance().DirtyRenderList(GetHwndId());
+			auto contentUI = mWndContentUI.lock();
+			if (contentUI){
+				contentUI->TransferChildrenTo(std::static_pointer_cast<Container>(mSelfPtr.lock()));
+				RemoveChild(contentUI);
 			}
 		}
 	}
@@ -324,38 +348,48 @@ bool Wnd::SetProperty(UIProperty::Enum prop, const char* val)
 		mTitlebarString = val;
 		if (!mTitlebarString.empty())
 		{
-			if (!mTitlebar)
+			if (mTitlebar.expired())
 			{
-				BackupContentWnd backup(&mWndContentUI);
-				mTitlebar = (Button*)AddChild(0.5f, 0.f, 1.f, 0.1f, ComponentType::Button);				
-				DoNotTransfer(mTitlebar);
-				mTitlebar->SetVisible(mVisibility.IsVisible());				
-				mTitlebar->SetSizeX(std::max(40, GetFinalSize().x - 80));
-				mTitlebar->SetRuntimeChild(true);
-				mTitlebar->ChangeSizeY(44);
-				mTitlebar->SetUseAbsPos(false);
-				mTitlebar->SetProperty(UIProperty::ALIGNH, "center");
-				mTitlebar->SetProperty(UIProperty::TEXT_ALIGN, "center");
-				mTitlebar->SetProperty(UIProperty::TEXT_VALIGN, "middle");
-				mTitlebar->SetProperty(UIProperty::NO_BACKGROUND, "true");
-				mTitlebar->SetProperty(UIProperty::TEXT_SIZE, "24");
-				mTitlebar->SetProperty(UIProperty::SPECIAL_ORDER, "3");
-				mTitlebar->SetName("_@TitleBar");
-				mTitlebar->RegisterEventFunc(UIEvents::EVENT_MOUSE_DRAG,
+				// backup and remove content UI
+				auto contentUI = mWndContentUI.lock();
+				mWndContentUI.reset();			
+
+				auto titlebar = std::static_pointer_cast<Button>(AddChild(0.5f, 0.f, 1.f, 0.1f, ComponentType::Button));
+				mTitlebar = titlebar;
+				DoNotTransfer(titlebar);
+				titlebar->SetVisible(mVisibility.IsVisible());				
+				titlebar->SetSizeX(std::max(40, GetFinalSize().x - 80));
+				titlebar->SetRuntimeChild(true);
+				titlebar->ChangeSizeY(44);
+				titlebar->SetUseAbsPos(false);
+				titlebar->SetProperty(UIProperty::ALIGNH, "center");
+				titlebar->SetProperty(UIProperty::TEXT_ALIGN, "center");
+				titlebar->SetProperty(UIProperty::TEXT_VALIGN, "middle");
+				titlebar->SetProperty(UIProperty::NO_BACKGROUND, "true");
+				titlebar->SetProperty(UIProperty::TEXT_SIZE, "24");
+				titlebar->SetProperty(UIProperty::SPECIAL_ORDER, "3");
+				titlebar->SetName("_@TitleBar");
+				titlebar->RegisterEventFunc(UIEvents::EVENT_MOUSE_DRAG,
 					std::bind(&Wnd::OnTitlebarDrag, this, std::placeholders::_1));
 				RefreshFrame();
 
+				// recover content ui
+				mWndContentUI = contentUI;
 			}
+			auto titilebar = mTitlebar.lock();
 			auto text = TranslateText(val);
 			if (text.empty())
-				mTitlebar->SetText(AnsiToWide(val));
+				titilebar->SetText(AnsiToWide(val));
 			else
-				mTitlebar->SetText(AnsiToWide(text.c_str()));
+				titilebar->SetText(AnsiToWide(text.c_str()));
 		}
 		else{
-			if (mTitlebar){
-				BackupContentWnd backup(&mWndContentUI);
-				RemoveChild(mTitlebar);
+			auto titilebar = mTitlebar.lock();
+			if (titilebar){
+				auto contentUI = mWndContentUI.lock();
+				mWndContentUI.reset();				
+				RemoveChild(titilebar);
+				mWndContentUI = contentUI;
 			}
 		}
 								 
@@ -366,32 +400,39 @@ bool Wnd::SetProperty(UIProperty::Enum prop, const char* val)
 	{
 		bool closeBtn = StringConverter::ParseBool(val);
 		if (closeBtn){
-			if (!mCloseBtn){
-				BackupContentWnd backup(&mWndContentUI);
+			auto cbtn = mCloseBtn.lock();
+			if (!cbtn){
+				auto contentUI = mWndContentUI.lock();
+				mWndContentUI.reset();
 
-				mCloseBtn = (Button*)AddChild(Vec2I(0, 0), Vec2I(26, 24), ComponentType::Button);
-				DoNotTransfer(mCloseBtn);
-				mCloseBtn->SetVisible(mVisibility.IsVisible());				
-				mCloseBtn->SetInitialOffset(Vec2I(-10, +10));
-				mCloseBtn->ChangeNPos(Vec2(1, 0));
-				mCloseBtn->SetUseAbsPos(false);
-				mCloseBtn->SetRuntimeChild(true);
-				mCloseBtn->SetProperty(UIProperty::ALIGNH, "right");				
-				mCloseBtn->SetProperty(UIProperty::REGION, "x");				
-				mCloseBtn->SetProperty(UIProperty::BACK_COLOR, "0.2, 0.2, 0.6, 0.1");
-				mCloseBtn->SetProperty(UIProperty::BACK_COLOR_OVER, "0.2, 0.2, 0.6, 0.4");
-				mCloseBtn->SetProperty(UIProperty::SPECIAL_ORDER, "4");
-				mCloseBtn->SetName("_@CloseBtn");
-				mCloseBtn->SetProperty(UIProperty::USE_BORDER, "true");
-				mCloseBtn->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+				cbtn = std::static_pointer_cast<Button>(AddChild(Vec2I(0, 0), Vec2I(26, 24), ComponentType::Button));
+				mCloseBtn = cbtn;
+				DoNotTransfer(cbtn);
+				cbtn->SetVisible(mVisibility.IsVisible());				
+				cbtn->SetInitialOffset(Vec2I(-10, +10));
+				cbtn->ChangeNPos(Vec2(1, 0));
+				cbtn->SetUseAbsPos(false);
+				cbtn->SetRuntimeChild(true);
+				cbtn->SetProperty(UIProperty::ALIGNH, "right");				
+				cbtn->SetProperty(UIProperty::REGION, "x");				
+				cbtn->SetProperty(UIProperty::BACK_COLOR, "0.2, 0.2, 0.6, 0.1");
+				cbtn->SetProperty(UIProperty::BACK_COLOR_OVER, "0.2, 0.2, 0.6, 0.4");
+				cbtn->SetProperty(UIProperty::SPECIAL_ORDER, "4");
+				cbtn->SetName("_@CloseBtn");
+				cbtn->SetProperty(UIProperty::USE_BORDER, "true");
+				cbtn->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 					std::bind(&Wnd::OnCloseBtnClicked, this, std::placeholders::_1));
+
+				mWndContentUI = contentUI;
 			}
 		}
 		else{
-			if (mCloseBtn){
-				BackupContentWnd backup(&mWndContentUI);
-				RemoveChild(mCloseBtn);
-				mCloseBtn = 0;
+			auto cbtn = mCloseBtn.lock();
+			if (cbtn){
+				auto contentUI = mWndContentUI.lock();				
+				RemoveChild(cbtn);
+				mCloseBtn.reset();
+				mWndContentUI = contentUI;
 			}
 		}
 		return true;
@@ -399,23 +440,23 @@ bool Wnd::SetProperty(UIProperty::Enum prop, const char* val)
 	case UIProperty::BACKGROUND_IMAGE_NOATLAS:
 	{
 		mStrBackground = val;
-		if (!mBackgroundImage)
+		if (mBackgroundImage.expired())
 		{
 			mBackgroundImage = CreateBackgroundImage();
 		}
 
-		mBackgroundImage->SetTexture(val);
+		mBackgroundImage.lock()->SetTexture(val);
 		return true;
 	}
 
 	case UIProperty::KEEP_IMAGE_RATIO:
 	{
 		mStrKeepRatio = val;
-		if (!mBackgroundImage)
+		if (mBackgroundImage.expired())
 		{
 			mBackgroundImage = CreateBackgroundImage();
 		}
-		mBackgroundImage->SetKeepImageRatio(StringConverter::ParseBool(val, true));
+		mBackgroundImage.lock()->SetKeepImageRatio(StringConverter::ParseBool(val, true));
 		return true;
 	}
 
@@ -423,9 +464,9 @@ bool Wnd::SetProperty(UIProperty::Enum prop, const char* val)
 	{
 									  mAlwaysOnTop = StringConverter::ParseBool(val);
 									  if (mAlwaysOnTop)
-										  gFBEnv->pUIManager->RegisterAlwaysOnTopWnd(this);
+										  UIManager::GetInstance().RegisterAlwaysOnTopWnd(mSelfPtr.lock());
 									  else
-										  gFBEnv->pUIManager->UnRegisterAlwaysOnTopWnd(this);
+										  UIManager::GetInstance().UnRegisterAlwaysOnTopWnd(mSelfPtr.lock());
 									  return true;
 	}
 
@@ -464,17 +505,18 @@ bool Wnd::SetProperty(UIProperty::Enum prop, const char* val)
 	return __super::SetProperty(prop, val);
 }
 
-ImageBox* Wnd::CreateBackgroundImage(){
-	if (!mBackgroundImage)
+ImageBoxPtr Wnd::CreateBackgroundImage(){
+	if (mBackgroundImage.expired())
 	{
-		mBackgroundImage = (ImageBox*)AddChild(0.f, 0.f, 1.f, 1.f, ComponentType::ImageBox);
-		mBackgroundImage->SetRuntimeChild(true);
-		mBackgroundImage->SetProperty(UIProperty::NO_MOUSE_EVENT_ALONE, "true");
-		mBackgroundImage->SetVisible(GetVisible());
-		mBackgroundImage->SetUseAbsSize(false);
-		mBackgroundImage->SetGhost(true);
+		auto image = std::static_pointer_cast<ImageBox>(AddChild(0.f, 0.f, 1.f, 1.f, ComponentType::ImageBox));
+		mBackgroundImage = image;
+		image->SetRuntimeChild(true);
+		image->SetProperty(UIProperty::NO_MOUSE_EVENT_ALONE, "true");
+		image->SetVisible(GetVisible());
+		image->SetUseAbsSize(false);
+		image->SetGhost(true);
 	}
-	return mBackgroundImage;
+	return mBackgroundImage.lock();
 }
 
 bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly)
@@ -488,7 +530,7 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 			if (mUseFrame == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		strcpy_s(val, bufsize, StringConverter::toString(mUseFrame).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mUseFrame).c_str());
 		return true;
 	}
 	case UIProperty::TITLEBAR:
@@ -503,14 +545,14 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 	}
 	case UIProperty::CLOSE_BTN:
 	{
-		bool closeBtn = mCloseBtn != 0;
+		bool closeBtn = !mCloseBtn.expired();
 		if (notDefaultOnly){			
 			if (closeBtn == UIProperty::GetDefaultValueBool(prop)){
 				return false;
 			}
 		}
 
-		strcpy_s(val, bufsize, StringConverter::toString(closeBtn).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(closeBtn).c_str());
 		return true;
 	}
 	case UIProperty::BACKGROUND_IMAGE_NOATLAS:
@@ -543,7 +585,7 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 				return false;
 		}
 
-		strcpy_s(val, bufsize, StringConverter::toString(mAlwaysOnTop).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mAlwaysOnTop).c_str());
 		return true;
 	}
 
@@ -555,7 +597,7 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 				return false;
 		}
 
-		strcpy_s(val, bufsize, StringConverter::toString(mCloseByEsc).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mCloseByEsc).c_str());
 		return true;
 	}
 
@@ -567,7 +609,7 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 				return false;
 		}
 
-		strcpy_s(val, bufsize, StringConverter::toString(mSyncWindowPos).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mSyncWindowPos).c_str());
 		return true;
 	}
 
@@ -588,7 +630,7 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 			if (mNoFocus == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		strcpy_s(val, bufsize, StringConverter::toString(mNoFocus).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mNoFocus).c_str());
 		return true;
 	}
 
@@ -598,7 +640,7 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 			if (mMoveToBottom == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		strcpy_s(val, bufsize, StringConverter::toString(mMoveToBottom).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mMoveToBottom).c_str());
 		return true;
 	}
 
@@ -609,22 +651,26 @@ bool Wnd::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool 
 
 void Wnd::OnTitlebarDrag(void *arg)
 {
+	auto injector = InputManager::GetInstance().GetInputInjector();
 	if (mSyncWindowPos)
 	{
-		auto mouse = gFBEnv->pEngine->GetMouse();		
 		// move OS window
 		long sx, sy, x, y;
-		mouse->GetDragStart(sx, sy);
-		mouse->GetPos(x, y);
-		auto hwnd = gFBEnv->pEngine->GetWindowHandle(mHwndId);
+		injector->GetDragStart(sx, sy);
+		injector->GetMousePos(x, y);
+		auto hwnd = Renderer::GetInstance().GetWindowHandle(mHwndId);
 		RECT rect;
-		GetWindowRect(hwnd, &rect);
-		MoveWindow(hwnd, rect.left + x - sx, rect.top + y - sy, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+#if defined(_PLATFORM_WINDOWS_)
+		GetWindowRect((HWND)hwnd, &rect);
+		MoveWindow((HWND)hwnd, rect.left + x - sx, rect.top + y - sy, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+#else
+		assert(0 && "Not Implemented");
+#endif
 	}
 	else
 	{
-		long x, y;
-		gFBEnv->pEngine->GetMouse()->GetDeltaXY(x, y);
+		long x, y;		
+		injector->GetDeltaXY(x, y);
 		Move(Vec2I(x, y));
 		/*auto rtSize = GetRenderTargetSize();
 		Vec2 nposOffset = { x / (float)rtSize.x, y / (float)rtSize.y };
@@ -639,15 +685,17 @@ void Wnd::OnCloseBtnClicked(void* arg){
 bool Wnd::SetVisible(bool show)
 {
 	if (show){
-		if (!mParent && !mManualParent){
+		auto parent = GetParent();
+		auto manualParent = GetManualParent();
+		if (!parent && !manualParent){
 			if (mNoFocus && !mMoveToBottom){
-				gFBEnv->pUIManager->MoveToTop(this);
+				UIManager::GetInstance().MoveToTop(mSelfPtr.lock());
 			}
 			else{
-				gFBEnv->pUIManager->SetFocusUI(this);
+				UIManager::GetInstance().SetFocusUI(mSelfPtr.lock());
 			}
 			if (mMoveToBottom){
-				gFBEnv->pUIManager->MoveToBottom(this);
+				UIManager::GetInstance().MoveToBottom(mSelfPtr.lock());
 			}
 
 		}
@@ -655,10 +703,9 @@ bool Wnd::SetVisible(bool show)
 	bool changed = __super::SetVisible(show);
 	if (changed)
 	{
-		
-
-		if (mTitlebar)
-			mTitlebar->SetVisible(show);
+		auto titlebar = mTitlebar.lock();
+		if (titlebar)
+			titlebar->SetVisible(show);
 	}
 	return changed;
 }
@@ -666,9 +713,10 @@ bool Wnd::SetVisible(bool show)
 void Wnd::RefreshScissorRects()
 {
 	__super::RefreshScissorRects();
-	if (mTitlebar)
+	auto titleBar = mTitlebar.lock();
+	if (titleBar)
 	{
-		mTitlebar->RefreshScissorRects();
+		titleBar->RefreshScissorRects();
 	}
 	if (!mFrames.empty())
 	{
@@ -694,9 +742,10 @@ void Wnd::OnResolutionChanged(HWindowId hwndId){
 
 void Wnd::SetAnimScale(const Vec2& scale)
 {
-	if (mTitlebar)
+	auto titlebar = mTitlebar.lock();
+	if (titlebar)
 	{
-		mTitlebar->SetAnimScale(scale);
+		titlebar->SetAnimScale(scale);
 	}
 	if (!mFrames.empty())
 	{
@@ -734,9 +783,10 @@ void Wnd::StopHighlight()
 void Wnd::SetHwndId(HWindowId hwndId)
 {
 	__super::SetHwndId(hwndId);
-	if (mTitlebar)
+	auto titlebar = mTitlebar.lock();
+	if (titlebar)
 	{
-		mTitlebar->SetHwndId(hwndId);
+		titlebar->SetHwndId(hwndId);
 	}
 	for (auto win : mFrames)
 	{
@@ -749,7 +799,7 @@ void Wnd::SetHwndId(HWindowId hwndId)
 
 const char* Wnd::GetMsgTranslationUnit() const
 {
-	auto root = GetRootWnd();
+	auto root = GetRootWnd().get();
 	if (root == this)
 	{
 		if (mMsgTranslationUnit.empty())

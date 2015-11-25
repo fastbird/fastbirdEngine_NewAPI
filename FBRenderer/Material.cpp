@@ -830,7 +830,7 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void SetMaterialParameters(unsigned index, const Vec4& value)
+	void SetMaterialParameter(unsigned index, const Vec4& value)
 	{
 		mMaterialData->mMaterialParameters[index] = value;
 	}
@@ -1259,8 +1259,8 @@ void Material::ApplyShaderDefines() {
 	mImpl->ApplyShaderDefines();
 }
 
-void Material::SetMaterialParameters(unsigned index, const Vec4& value) {
-	mImpl->SetMaterialParameters(index, value);
+void Material::SetMaterialParameter(unsigned index, const Vec4& value) {
+	mImpl->SetMaterialParameter(index, value);
 }
 
 const SHADER_DEFINES& Material::GetShaderDefines() const {

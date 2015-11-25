@@ -243,7 +243,7 @@ public:
 };
 
 //----------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(TextureD3D11);
+FB_IMPLEMENT_STATIC_CREATE(TextureD3D11);
 TextureD3D11::TextureD3D11()
 	: mImpl(new Impl)
 {

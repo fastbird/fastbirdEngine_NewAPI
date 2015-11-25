@@ -30,7 +30,7 @@
 #include "RendererEnums.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IPlatformRasterizerState);
+	FB_DECLARE_SMART_PTR(IPlatformRasterizerState);
 	class IPlatformRasterizerState
 	{
 	public:
@@ -41,7 +41,7 @@ namespace fastbird
 		~IPlatformRasterizerState() {}
 	};
 
-	DECLARE_SMART_PTR(IPlatformBlendState);
+	FB_DECLARE_SMART_PTR(IPlatformBlendState);
 	class IPlatformBlendState
 	{
 	public:
@@ -52,7 +52,7 @@ namespace fastbird
 		~IPlatformBlendState() {}
 	};
 
-	DECLARE_SMART_PTR(IPlatformDepthStencilState);
+	FB_DECLARE_SMART_PTR(IPlatformDepthStencilState);
 	class IPlatformDepthStencilState
 	{
 	public:		
@@ -63,7 +63,7 @@ namespace fastbird
 		~IPlatformDepthStencilState() {}
 	};
 	
-	DECLARE_SMART_PTR(IPlatformSamplerState);
+	FB_DECLARE_SMART_PTR(IPlatformSamplerState);
 	class IPlatformSamplerState
 	{
 	public:

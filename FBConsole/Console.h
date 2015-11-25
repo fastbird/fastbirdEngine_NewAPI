@@ -33,11 +33,10 @@
 #include "ConsoleDataType.h"
 namespace fastbird{
 	class StdOutRedirect;
-	DECLARE_SMART_PTR(Console);
+	FB_DECLARE_SMART_PTR(Console);
 	class FB_DLL_CONSOLE Console : public IInputConsumer, public Observable<ICVarObserver>{
-		DECLARE_PIMPL_NON_COPYABLE(Console);
-		Console();
-		~Console();
+		FB_DECLARE_PIMPL_NON_COPYABLE(Console);
+		Console();		
 
 	public:
 		static ConsolePtr Create();

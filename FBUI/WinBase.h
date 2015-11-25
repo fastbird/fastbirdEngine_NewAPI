@@ -1,14 +1,43 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
-#include "IWinBase.h"
 #include "EventHandler.h"
 #include "VisibleStatus.h"
-
+#include "UIProperty.h"
 namespace fastbird
 {
-	class Container;
-	class IUIAnimation;
-	class ImageBox;
-	class WinBase : public IWinBase, public EventHandler
+	FB_DECLARE_SMART_PTR(UIAnimation);	
+	FB_DECLARE_SMART_PTR(ImageBox);
+	struct RegionTestParam;
+	FB_DECLARE_SMART_PTR(UIObject);
+	FB_DECLARE_SMART_PTR(Container);
+	FB_DECLARE_SMART_PTR(WinBase);
+	class FB_DLL_UI WinBase : public EventHandler
 	{
 	protected:
 		static const int WinBase::LEFT_GAP;
@@ -18,7 +47,9 @@ namespace fastbird
 
 		static Vec2I sLastPos;
 		friend class VisibleStatus;
+		friend class UIManager;
 
+		WinBaseWeakPtr mSelfPtr;
 		HWindowId mHwndId;
 		VisibleStatus mVisibility;
 		std::string mName;
@@ -54,8 +85,8 @@ namespace fastbird
 		bool mUseAbsoluteXSize;
 		bool mUseAbsoluteYSize;
 
-		Container* mParent;
-		WinBase* mManualParent;
+		ContainerWeakPtr mParent;
+		WinBaseWeakPtr mManualParent;
 
 		Vec2I mAbsOffset; // when loading;
 		Vec2I mSizeMod;
@@ -63,10 +94,7 @@ namespace fastbird
 
 
 		bool mMouseIn;
-		bool mMouseInPrev;
-
-		IWinBase* mPrev;
-		IWinBase* mNext;
+		bool mMouseInPrev;		
 
 		std::wstring mTextw;
 		std::string mTextBeforeTranslated;
@@ -93,10 +121,10 @@ namespace fastbird
 
 		Vec2 mDestNPos;
 		float mAnimationSpeed;
-		VectorMap<std::string, IUIAnimation*> mAnimations;
+		VectorMap<std::string, UIAnimationPtr> mAnimations;
 		std::wstring mTooltipText;
 		std::string mTooltipTextBeforeT;
-		// this is not related to mAnimation(IUIAnimation)
+		// this is not related to mAnimations
 		bool mSimplePosAnimEnabled;
 		bool mNoMouseEvent;
 		bool mNoMouseEventAlone;
@@ -104,7 +132,7 @@ namespace fastbird
 		bool mUseScissor;
 		bool mEnable;
 
-		std::vector<ImageBox*> mBorders;
+		std::vector<ImageBoxPtr> mBorders;
 
 		void* mCustomContent;
 		int mSpecialOrder;
@@ -148,38 +176,41 @@ namespace fastbird
 
 		VectorMap<UIEvents::Enum, std::string> mEventFuncNames;
 
-	public:
 		WinBase();
 		virtual ~WinBase();
+
+	public:		
 
 		static void SuppressPropertyWarning(bool warning);
 
 		virtual void SetHwndId(HWindowId hwndId);
 		virtual void OnResolutionChanged(HWindowId hwndId);
 		virtual HWindowId GetHwndId() const;
+		WinBasePtr GetPtr();
 		virtual void OnCreated(){}
+		virtual ComponentType::Enum GetType() const = 0;
 
-		virtual IWinBase* AddChild(float posX, float posY, float width, float height, ComponentType::Enum type) {
+		virtual WinBasePtr AddChild(float posX, float posY, float width, float height, ComponentType::Enum type) {
 			return 0;
 		}
-		virtual IWinBase* AddChild(float posX, float posY, const Vec2& width_aspectRatio, ComponentType::Enum type) {
+		virtual WinBasePtr AddChild(float posX, float posY, const Vec2& width_aspectRatio, ComponentType::Enum type) {
 			return 0;
 		}
-		virtual IWinBase* AddChild(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type){
+		virtual WinBasePtr AddChild(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type){
 			return 0;
 		}
-		virtual IWinBase* AddChild(const fastbird::LuaObject& compTable) {
+		virtual WinBasePtr AddChild(const fastbird::LuaObject& compTable) {
 			return 0;
 		}
-		virtual IWinBase* AddChild(ComponentType::Enum type) {
+		virtual WinBasePtr AddChild(ComponentType::Enum type) {
 			return 0;
 		}
-		virtual void RemoveChild(IWinBase* child, bool immediately = false) {}
-		virtual void RemoveAllChild(bool immediately = false) {}
-		virtual void RemoveChildNotDelete(IWinBase* child){}
-		virtual IWinBase* GetChild(const std::string& name, bool includeSubChildren = false) { return 0; }
-		virtual IWinBase* GetChild(unsigned idx) { return 0; }
-		virtual IWinBase* GetParent() { return (IWinBase*)mParent; }
+		virtual void RemoveChild(WinBasePtr child, bool immediately = false) {}
+		virtual void RemoveAllChildren(bool immediately = false) {}		
+		virtual WinBasePtr GetChild(const std::string& name, bool includeSubChildren = false) { return 0; }
+		virtual WinBasePtr GetChild(unsigned idx) { return 0; }
+		ContainerPtr GetParent() const { return mParent.lock(); }
+		WinBasePtr GetManualParent() const { return mManualParent.lock(); }
 		virtual unsigned GetNumChildren(bool excludeRunTimeChild = false) const { return 0; }
 		virtual void RemoveAllEvents(bool includeChildren);
 		virtual void SetName(const char* name);
@@ -281,7 +312,7 @@ namespace fastbird
 			return mAlignH;
 		}
 		virtual void OnStartUpdate(float elapsedTime);
-		virtual bool IsIn(IMouse* mouse) const;
+		virtual bool IsIn(IInputInjectorPtr injector) const;
 		virtual bool IsIn(const Vec2I& pt, bool ignoreScissor, Vec2I* expand = 0) const;
 		virtual bool IsPtOnLeft(const Vec2I& pt, int area) const;
 		virtual bool IsPtOnRight(const Vec2I& pt, int area) const;
@@ -298,12 +329,12 @@ namespace fastbird
 		virtual int GetTextEndPosLocal() const;
 
 		virtual void SetPasswd(bool passwd) {};
-		virtual IUIAnimation* GetOrCreateUIAnimation(const char* name);
-		virtual IUIAnimation* GetUIAnimation(const char* name);
-		virtual void SetUIAnimation(IUIAnimation* anim);
+		virtual UIAnimationPtr GetOrCreateUIAnimation(const char* name);
+		virtual UIAnimationPtr GetUIAnimation(const char* name);
+		virtual void SetUIAnimation(UIAnimationPtr anim);
 		virtual void ClearAnimationResult();
 
-		virtual IEventHandler* GetEventHandler() const { return (IEventHandler*)this; }
+		virtual EventHandler* GetEventHandler() const { return (EventHandler*)this; }
 
 		virtual bool SetProperty(UIProperty::Enum prop, const char* val);
 		virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
@@ -318,7 +349,7 @@ namespace fastbird
 		virtual void SetAnimPos(const Vec2& pos);
 		/*virtual void SetPivotToUIObject(const Vec2& pivot);*/
 		//virtual Vec2 GetPivotWNPos();
-		virtual const RECT& GetRegion() const;
+		virtual const Rect& GetRegion() const;
 		// OWN
 		// local space.
 		fastbird::Vec2 ConvertToAlignedPos(const fastbird::Vec2& beforeAlign) const;
@@ -326,15 +357,10 @@ namespace fastbird
 		fastbird::Vec2 ConvertToNormalized(const fastbird::Vec2I pos) const; // convert to 0~1
 
 
-		void SetParent(Container* parent);
+		void SetParent(ContainerPtr parent);
 		// manually controlling objects are allowed to have parent which is not a container.
 		// only for scissor culling.
-		void SetManualParent(WinBase* parent);
-
-		virtual void SetNext(IWinBase* next);
-		virtual void SetPrev(IWinBase* prev);
-		virtual IWinBase* GetNext() const;
-		virtual IWinBase* GetPrev() const;
+		void SetManualParent(WinBasePtr parent);		
 
 		static void InitMouseCursor();
 		static HCURSOR GetMouseCursorOver();
@@ -377,7 +403,7 @@ namespace fastbird
 		virtual Vec2I GetRenderTargetSize() const;
 		virtual Vec2I GetParentSize() const;
 
-		virtual IWinBase* GetRootWnd() const;
+		virtual WinBasePtr GetRootWnd() const;
 
 		virtual bool IsAlwaysOnTop() const{ return false; }
 
@@ -395,9 +421,9 @@ namespace fastbird
 		virtual void OnAlphaChanged();
 		virtual const char* GetMsgTranslationUnit() const;
 		virtual void TriggerRedraw();
-		virtual IWinBase* WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& param) const;
-		virtual void GatherTabOrder(VectorMap<unsigned, IWinBase*>& winbases) const;
-		virtual IWinBase* WinBaseWithTabOrder(unsigned tabOrder) const{
+		virtual WinBasePtr WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& param) const;
+		virtual void GatherTabOrder(VectorMap<unsigned, WinBasePtr>& winbases) const;
+		virtual WinBasePtr WinBaseWithTabOrder(unsigned tabOrder) const{
 			return 0;
 		}
 		virtual int GetTabOrder() const { return mTabOrder; }
@@ -442,8 +468,8 @@ namespace fastbird
 		virtual void OnEnableChanged(){}
 
 		virtual void AlignText();
-		RECT GetScissorRegion() const;
-		void GetScissorIntersection(RECT& region);
+		Rect GetScissorRegion() const;
+		void GetScissorIntersection(Rect& region);
 		virtual void SetUseBorder(bool use);
 		void RefreshBorder();
 		virtual void GatherVisit(std::vector<UIObject*>& v);
@@ -451,14 +477,14 @@ namespace fastbird
 		void OnDrag(int dx, int dy);
 		virtual void OnChildHasDragged(){}
 
-		virtual void OnMouseIn(IMouse* mouse, IKeyboard* keyboard, bool propergated = false);
-		virtual void OnMouseOut(IMouse* mouse, IKeyboard* keyboard, bool propergated = false);
-		virtual void OnMouseHover(IMouse* mouse, IKeyboard* keyboard, bool propergated = false);
-		virtual void OnMouseDown(IMouse* mouse, IKeyboard* keyboard);
-		virtual void OnMouseClicked(IMouse* mouse, IKeyboard* keyboard);
-		virtual void OnMouseDoubleClicked(IMouse* mouse, IKeyboard* keyboard);
-		virtual void OnMouseRButtonClicked(IMouse* mouse, IKeyboard* keyboard);
-		virtual void OnMouseDrag(IMouse* mouse, IKeyboard* keyboard);
+		virtual void OnMouseIn(IInputInjectorPtr injector, bool propergated = false);
+		virtual void OnMouseOut(IInputInjectorPtr injector, bool propergated = false);
+		virtual void OnMouseHover(IInputInjectorPtr injector, bool propergated = false);
+		virtual void OnMouseDown(IInputInjectorPtr injector);
+		virtual void OnMouseClicked(IInputInjectorPtr injector);
+		virtual void OnMouseDoubleClicked(IInputInjectorPtr injector);
+		virtual void OnMouseRButtonClicked(IInputInjectorPtr injector);
+		virtual void OnMouseDrag(IInputInjectorPtr injector);
 
 		
 	private:
@@ -469,7 +495,7 @@ namespace fastbird
 		int ParseIntPosY(const std::string& posY);
 
 		void ProcessHighlight(float dt);
-		void ApplyAnim(IUIAnimation* anim, Vec2& pos, Vec2& scale, bool& hasPos, bool& hasScale);
+		void ApplyAnim(UIAnimationPtr anim, Vec2& pos, Vec2& scale, bool& hasPos, bool& hasScale);
 
 		void UpdateAlphaTexture();
 

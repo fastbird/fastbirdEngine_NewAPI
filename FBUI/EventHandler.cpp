@@ -1,7 +1,34 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "EventHandler.h"
 #include "WinBase.h"
-#include "IUIManager.h"
+#include "UIManager.h"
 
 namespace fastbird
 {
@@ -16,7 +43,7 @@ EventHandler::~EventHandler()
 {
 }
 
-IEventHandler::FunctionID EventHandler::RegisterEventFunc(UIEvents::Enum e, EVENT_FUNCTION func)
+EventHandler::FunctionID EventHandler::RegisterEventFunc(UIEvents::Enum e, EVENT_FUNCTION func)
 {
 	mFuncMap[UNIQUE_ID] = func;
 	mEventFuncMap[e].insert(UNIQUE_ID);
@@ -45,7 +72,7 @@ bool EventHandler::RegisterEventLuaFunc(UIEvents::Enum e, const char* luaFuncNam
 	}
 	std::string funcName = StripBoth(luaFuncName);
 	LuaObject func;
-	func.FindFunction(gFBEnv->pUIManager->GetLuaState(), funcName.c_str());
+	func.FindFunction(UIManager::GetInstance().GetLuaState(), funcName.c_str());
 	if_assert_pass(func.IsFunction()){
 		mLuaFuncMap[e] = func;
 		return true;
@@ -83,13 +110,13 @@ bool EventHandler::OnEvent(UIEvents::Enum e)
 		{
 			assert(it->second.IsFunction());
 
-			lua_State* L = gFBEnv->pUIManager->GetLuaState();
+			lua_State* L = UIManager::GetInstance().GetLuaState();
 			LUA_STACK_CLIPPER lsc(L);
 			it->second.PushToStack();
 			WinBase* pComp = dynamic_cast<WinBase*>(this);
-			lua_pushstring(L, pComp->GetName());
+			LuaUtils::pushstring(pComp->GetName());
 			int args = it->second.IsMethod() ? 2 : 1;
-			LUA_PCALL_RET_FALSE(L, args, 0);
+			it->second.CallWithManualArgs(args, 0);
 			processed = processed || true;
 		}
 		

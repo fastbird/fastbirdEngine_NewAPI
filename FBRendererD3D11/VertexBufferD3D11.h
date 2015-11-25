@@ -33,10 +33,10 @@
 #include "D3D11Types.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(VertexBufferD3D11);
+	FB_DECLARE_SMART_PTR(VertexBufferD3D11);
 	class VertexBufferD3D11 : public IPlatformVertexBuffer
 	{
-		DECLARE_NON_COPYABLE(VertexBufferD3D11);
+		FB_DECLARE_NON_COPYABLE(VertexBufferD3D11);
 		VertexBufferD3D11(ID3D11Buffer* buffer, unsigned stride);
 
 		ID3D11BufferPtr mVertexBuffer;

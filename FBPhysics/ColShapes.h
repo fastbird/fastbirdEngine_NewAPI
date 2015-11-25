@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 
 class btTriangleMesh;
@@ -22,7 +49,7 @@ namespace fastbird
 		static Enum ConvertToEnum(const char* str);
 	};
 
-	DECLARE_SMART_PTR_STRUCT(CollisionShape);
+	FB_DECLARE_SMART_PTR_STRUCT(CollisionShape);
 	struct CollisionShape
 	{
 	protected:
@@ -38,7 +65,7 @@ namespace fastbird
 		void* mUserPtr;
 	};
 
-	DECLARE_SMART_PTR_STRUCT(BoxShape);
+	FB_DECLARE_SMART_PTR_STRUCT(BoxShape);
 	struct BoxShape : public CollisionShape
 	{
 	private:
@@ -51,7 +78,7 @@ namespace fastbird
 		Vec3 mExtent;		
 	};
 
-	DECLARE_SMART_PTR_STRUCT(SphereShape);
+	FB_DECLARE_SMART_PTR_STRUCT(SphereShape);
 	struct SphereShape : public CollisionShape
 	{
 	private:
@@ -64,7 +91,7 @@ namespace fastbird
 		float mRadius;
 	};
 
-	DECLARE_SMART_PTR_STRUCT(CylinderShape);
+	FB_DECLARE_SMART_PTR_STRUCT(CylinderShape);
 	struct CylinderShape : public CollisionShape
 	{
 	private:
@@ -77,7 +104,7 @@ namespace fastbird
 		Vec3 mExtent;
 	};
 
-	DECLARE_SMART_PTR_STRUCT(CapsuleShape);
+	FB_DECLARE_SMART_PTR_STRUCT(CapsuleShape);
 	struct CapsuleShape : public CollisionShape
 	{
 	private:
@@ -91,7 +118,7 @@ namespace fastbird
 		float mHeight;
 	};
 
-	DECLARE_SMART_PTR_STRUCT(MeshShape);
+	FB_DECLARE_SMART_PTR_STRUCT(MeshShape);
 	struct MeshShape : public CollisionShape
 	{
 	private:

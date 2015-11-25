@@ -31,10 +31,10 @@
 #include <chrono>
 namespace fastbird
 {
-	DECLARE_SMART_PTR(Timer);
+	FB_DECLARE_SMART_PTR(Timer);
 	class FB_DLL_TIMER Timer
 	{
-		DECLARE_PIMPL(Timer);
+		FB_DECLARE_PIMPL(Timer);
 		Timer();
 
 	public:

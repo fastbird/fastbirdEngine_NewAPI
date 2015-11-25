@@ -440,7 +440,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(GeometryRenderer);
+FB_IMPLEMENT_STATIC_CREATE(GeometryRenderer);
 GeometryRenderer::GeometryRenderer()
 	: mImpl(new Impl)
 {

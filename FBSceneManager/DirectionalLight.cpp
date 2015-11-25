@@ -197,7 +197,7 @@ public:
 };
 
 //----------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(DirectionalLight);
+FB_IMPLEMENT_STATIC_CREATE(DirectionalLight);
 
 DirectionalLight::DirectionalLight()
 	:mImpl(new Impl)

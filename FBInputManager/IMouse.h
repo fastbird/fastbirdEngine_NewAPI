@@ -35,7 +35,7 @@
 
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IMouse);	
+	FB_DECLARE_SMART_PTR(IMouse);	
 	class IMouse : public IInputDevice
 	{
 	public:

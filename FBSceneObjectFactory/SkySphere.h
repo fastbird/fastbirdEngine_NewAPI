@@ -29,10 +29,10 @@
 #include "FBCommonHeaders/platform.h"
 #include "FBSceneManager/SceneObject.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(Material);
-	DECLARE_SMART_PTR(SkySphere);
+	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(SkySphere);
 	class FB_DLL_SCENEOBJECTFACTORY SkySphere : public SceneObject{
-		DECLARE_PIMPL_NON_COPYABLE(SkySphere);
+		FB_DECLARE_PIMPL_NON_COPYABLE(SkySphere);
 		SkySphere();
 		~SkySphere();
 

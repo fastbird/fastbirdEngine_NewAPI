@@ -1,10 +1,46 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "ImageBox.h"
-#include "IUIManager.h"
-#include <FBRenderer/RenderTarget.h>
-#include <FBRenderer/Camera.h>
+#include "UIManager.h"
+#include "UIObject.h"
+#include "FBRenderer/RenderTarget.h"
+#include "FBRenderer/Camera.h"
+#include "FBRenderer/TextureAtlas.h"
+#include "FBRenderer/Texture.h"
 namespace fastbird
 {
+
+ImageBoxPtr ImageBox::Create(){
+	ImageBoxPtr p(new ImageBox, [](ImageBox* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
 
 ImageBox::ImageBox()
 	: mTextureAtlas(0)
@@ -29,10 +65,6 @@ ImageBox::ImageBox()
 
 ImageBox::~ImageBox()
 {
-	if (mRenderTarget){
-		gFBEnv->pRenderer->DeleteRenderTarget(mRenderTarget);
-		mRenderTarget = 0;
-	}
 }
 
 void ImageBox::OnCreated()
@@ -63,7 +95,7 @@ void ImageBox::CalcUV(const Vec2I& textureSize)
 	float width = (float)textureSize.x;
 	float height = (float)textureSize.y;
 	float imgRatio = width / height;
-	const RECT& uiRect = mUIObject->GetRegion();
+	const Rect& uiRect = mUIObject->GetRegion();
 	float uiRatio = (uiRect.right - uiRect.left) /
 		(float)(uiRect.bottom - uiRect.top);
 	if (uiRatio == imgRatio || !mKeepImageRatio)
@@ -111,7 +143,7 @@ void ImageBox::OnStartUpdate(float elapsedTime)
 bool ImageBox::OnInputFromHandler(IInputInjectorPtr injector){
 	auto ret = __super::OnInputFromHandler(injector);
 	if (ret && mRenderTarget && injector->IsValid(InputDevice::Mouse)){
-		mRenderTarget->OnInputFromHandler(injector);
+		mRenderTarget->ConsumeInput(injector);
 	}
 	return ret;
 }
@@ -126,20 +158,20 @@ void ImageBox::SetTexture(const char* file)
 	mImageFile = file ? file : "";
 
 	if (mImageFile.empty()){
-		SetTexture((ITexture*)0);
+		SetTexture(TexturePtr());
 	}
 	else{
-		ITexture* pTexture = gFBEnv->pRenderer->CreateTexture(mImageFile.c_str());
+		TexturePtr pTexture = Renderer::GetInstance().CreateTexture(mImageFile.c_str());
 		SetTexture(pTexture);
 	}
 	
-	gFBEnv->pUIManager->DirtyRenderList(GetHwndId());
+	UIManager::GetInstance().DirtyRenderList(GetHwndId());
 }
 
-void ImageBox::SetTexture(ITexture* pTexture)
+void ImageBox::SetTexture(TexturePtr pTexture)
 {
 	//mImageFile.clear();
-	if (!pTexture || pTexture->GetName().empty()){
+	if (!pTexture || strlen(pTexture->GetFilePath())==0){
 		mImageFile.clear();
 	}
 	mTexture = pTexture;
@@ -152,18 +184,14 @@ void ImageBox::SetTexture(ITexture* pTexture)
 		CalcUV(pTexture->GetSize());
 }
 
-void ImageBox::SetRenderTargetTexture(IRenderTarget* rt){
-	if (mRenderTarget){
-		gFBEnv->pRenderer->DeleteRenderTarget(mRenderTarget);
-		mRenderTarget = 0;
-	}
+void ImageBox::SetRenderTargetTexture(RenderTargetPtr rt){
 	mRenderTarget = rt;
 	SetTexture(mRenderTarget->GetRenderTargetTexture());
 }
 
 const Vec2I& ImageBox::SetTextureAtlasRegion(const char* atlas, const char* region)
 {
-	mTextureAtlas = gFBEnv->pRenderer->GetTextureAtlas(atlas);
+	mTextureAtlas = Renderer::GetInstance().GetTextureAtlas(atlas);
 	if (mTextureAtlas)
 	{
 		if (mImageFixedSize)
@@ -178,16 +206,14 @@ const Vec2I& ImageBox::SetTextureAtlasRegion(const char* atlas, const char* regi
 		if (!mAtlasRegion)
 		{
 			mTexture = 0;
-			mUIObject->GetMaterial()->SetTexture((ITexture*)0,
-				BINDING_SHADER_PS, 0, sdesc);
+			mUIObject->GetMaterial()->SetTexture(TexturePtr(), BINDING_SHADER_PS, 0, sdesc);
 			mUIObject->ClearTexCoord();
 			Error("Cannot find the region %s in the atlas %s", region, atlas);
 			return Vec2I::ZERO;
 		}
 		// need to set to material. matarial will hold its reference counter
-		mTexture = mTextureAtlas->mTexture->Clone();
-		mUIObject->GetMaterial()->SetTexture(mTexture, 
-			BINDING_SHADER_PS, 0, sdesc);
+		mTexture = mTextureAtlas->GetTexture();
+		mUIObject->GetMaterial()->SetTexture(mTexture, BINDING_SHADER_PS, 0, sdesc);
 		Vec2 texcoords[4];
 		mAtlasRegion->GetQuadUV(texcoords);
 		mUIObject->SetTexCoord(texcoords, 4);
@@ -201,11 +227,10 @@ const Vec2I& ImageBox::SetTextureAtlasRegion(const char* atlas, const char* regi
 
 void ImageBox::SetTextureAtlasRegions(const char* atlas, const std::vector<std::string>& data)
 {
-	mTextureAtlas = gFBEnv->pRenderer->GetTextureAtlas(atlas);
+	mTextureAtlas = Renderer::GetInstance().GetTextureAtlas(atlas);
 	if (mTextureAtlas)
 	{
-		// need to set to material. matarial will hold its reference counter
-		mTexture = mTextureAtlas->mTexture->Clone();
+		mTexture = mTextureAtlas->GetTexture();
 		if (mImageFixedSize)
 		{
 			DrawAsFixedSize();
@@ -216,8 +241,7 @@ void ImageBox::SetTextureAtlasRegions(const char* atlas, const std::vector<std::
 		}
 		SAMPLER_DESC sdesc;
 		sdesc.Filter = TEXTURE_FILTER_MIN_MAG_MIP_POINT;
-		mUIObject->GetMaterial()->SetTexture(mTexture,
-			BINDING_SHADER_PS, 0, sdesc);
+		mUIObject->GetMaterial()->SetTexture(mTexture, BINDING_SHADER_PS, 0, sdesc);
 
 		if (!mAtlasRegions.empty())
 		{
@@ -230,7 +254,7 @@ void ImageBox::SetTextureAtlasRegions(const char* atlas, const std::vector<std::
 	}
 }
 
-void ImageBox::ChangeRegion(TextureAtlasRegion* region)
+void ImageBox::ChangeRegion(TextureAtlasRegionPtr region)
 {
 	mAtlasRegion = region;
 	if (mAtlasRegion)
@@ -244,7 +268,7 @@ void ImageBox::ChangeRegion(TextureAtlasRegion* region)
 void ImageBox::ChangeRegion(const char* region)
 {
 	if (!mTextureAtlas)
-		mTextureAtlas = gFBEnv->pRenderer->GetTextureAtlas(mTextureAtlasFile.c_str());
+		mTextureAtlas = Renderer::GetInstance().GetTextureAtlas(mTextureAtlasFile.c_str());
 
 	if (mTextureAtlas)
 	{
@@ -259,14 +283,14 @@ void ImageBox::ChangeRegion(const char* region)
 
 }
 
-void ImageBox::GatherVisit(std::vector<IUIObject*>& v)
+void ImageBox::GatherVisit(std::vector<UIObject*>& v)
 {
 	if (!mVisibility.IsVisible())
 		return;
 
 	if (!mTexture && mImageFile.empty())
 		return;
-	v.push_back(mUIObject);
+	v.push_back(mUIObject.get());
 	__super::GatherVisit(v);
 }
 
@@ -365,8 +389,8 @@ bool ImageBox::SetProperty(UIProperty::Enum prop, const char* val)
 			auto fromtoData = Split(useNumberData[1], ",");
 			fromtoData[0] = StripBoth(fromtoData[0].c_str());
 			fromtoData[1] = StripBoth(fromtoData[1].c_str());
-			unsigned from = StringConverter::parseUnsignedInt(fromtoData[0].c_str());
-			unsigned to = StringConverter::parseUnsignedInt(fromtoData[1].c_str());
+			unsigned from = StringConverter::ParseUnsignedInt(fromtoData[0].c_str());
+			unsigned to = StringConverter::ParseUnsignedInt(fromtoData[1].c_str());
 			assert(to > from);
 			std::vector<std::string> data;
 			char buf[256];
@@ -400,7 +424,7 @@ bool ImageBox::SetProperty(UIProperty::Enum prop, const char* val)
 
 	case UIProperty::FPS:
 	{
-							mSecPerFrame = 1.0f / StringConverter::parseReal(val);
+							mSecPerFrame = 1.0f / StringConverter::ParseReal(val);
 							return true;
 	}
 		break;
@@ -421,7 +445,7 @@ bool ImageBox::SetProperty(UIProperty::Enum prop, const char* val)
 		mStrFrameImage = val;
 									if (!mFrameImage)
 									{
-										mFrameImage = CreateImageBox();
+										mFrameImage = CreateChildImageBox();
 									}
 									mFrameImage->SetTextureAtlasRegion(mTextureAtlasFile.c_str(), val);
 									if (strlen(val) == 0)
@@ -522,7 +546,7 @@ bool ImageBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 				return false;
 
 		}
-		auto data = StringConverter::toString(mSecPerFrame==0.f ? 0.f : 1.f / mSecPerFrame);
+		auto data = StringConverter::ToString(mSecPerFrame==0.f ? 0.f : 1.f / mSecPerFrame);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -546,7 +570,7 @@ bool ImageBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 			if (mKeepImageRatio == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mKeepImageRatio);
+		auto data = StringConverter::ToString(mKeepImageRatio);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -570,7 +594,7 @@ bool ImageBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 		}
 		if (!mUIObject)
 			return false;
-		auto data = StringConverter::toString(mUIObject->GetMaterial()->GetDiffuseColor());
+		auto data = StringMathConverter::ToString(mUIObject->GetMaterial()->GetDiffuseColor());
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -583,7 +607,7 @@ bool ImageBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 				return false;
 		}
 
-		auto data = StringConverter::toString(mImageFixedSize);
+		auto data = StringConverter::ToString(mImageFixedSize);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 
@@ -596,7 +620,7 @@ bool ImageBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 				return false;
 		}
 
-		auto data = StringConverter::toString(mImageRot);
+		auto data = StringConverter::ToString(mImageRot);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -607,7 +631,7 @@ bool ImageBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 			if (mLinearSampler == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		strcpy_s(val, bufsize, StringConverter::toString(mLinearSampler).c_str());
+		strcpy_s(val, bufsize, StringConverter::ToString(mLinearSampler).c_str());
 		return true;
 	}
 
@@ -634,9 +658,9 @@ void ImageBox::SetKeepImageRatio(bool keep)
 	}
 }
 
-ImageBox* ImageBox::CreateImageBox()
+ImageBoxPtr ImageBox::CreateChildImageBox()
 {
-	auto image = (ImageBox*)AddChild(0, 0, 1.0f, 1.0f, ComponentType::ImageBox);
+	auto image = std::static_pointer_cast<ImageBox>(AddChild(0, 0, 1.0f, 1.0f, ComponentType::ImageBox));	
 	image->SetRuntimeChild(true);
 	return image;
 }
@@ -673,7 +697,7 @@ void ImageBox::SetCenterUVMatParam()
 		auto mat = mUIObject->GetMaterial();
 		if_assert_pass(mat)
 		{
-			mat->SetMaterialParameters(0, Vec4(center.x, center.y, 0, 0));
+			mat->SetMaterialParameter(0, Vec4(center.x, center.y, 0, 0));
 		}
 
 	}
@@ -763,7 +787,7 @@ void ImageBox::SetSpecularColor(const Vec4& color)
 }
 
 void ImageBox::SetAlphaTextureAutoGenerated(bool set){
-	SmartPtr<IMaterial> curMat = mUIObject->GetMaterial();
+	auto curMat = mUIObject->GetMaterial();
 	if (set){		
 		mUIObject->SetMaterial("es/Materials/UIImageBox_SeperatedAlpha.material");
 		auto newMat = mUIObject->GetMaterial();
@@ -773,7 +797,7 @@ void ImageBox::SetAlphaTextureAutoGenerated(bool set){
 			newMat->CopyTexturesFrom(curMat);
 			const Vec2I& finalSize = GetFinalSize();
 			bool callmeLater = false;
-			auto texture = gFBUIManager->GetBorderAlphaInfoTexture(finalSize, callmeLater);
+			auto texture = UIManager::GetInstance().GetBorderAlphaInfoTexture(finalSize, callmeLater);
 			if (texture && newMat){
 				newMat->SetTexture(texture, BINDING_SHADER_PS, 1);
 			}
@@ -826,7 +850,6 @@ void ImageBox::SetAlphaTextureAutoGenerated(bool set){
 
 void ImageBox::SetBorderAlpha(bool use){
 	SetAlphaTextureAutoGenerated(use);
-
 }
 }
 

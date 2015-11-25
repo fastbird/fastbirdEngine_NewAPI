@@ -99,6 +99,11 @@ Color::Color(unsigned int c)
 	mValue.w = rgba->a / 255.0f;
 }
 
+Color::Color(const Vec4Tuple& t)
+	: mValue(t)
+{
+}
+
 // when you want to send the data to gpu
 unsigned int Color::Get4Byte() const
 {
@@ -154,6 +159,10 @@ Color Color::operator+ (const Color& r) const {
 
 bool Color::operator== (const Color& other) const{
 	return mValue == other.mValue;
+}
+
+Color::operator Vec4Tuple() const{
+	return Vec4Tuple(mValue);
 }
 
 void Color::SetColor(Real r, Real g, Real b, Real a){

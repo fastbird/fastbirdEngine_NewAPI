@@ -55,6 +55,10 @@ bool FileSystem::Exists(const char* path){
 	return boost::filesystem::exists(path);
 }
 
+bool FileSystem::IsDirectory(const char* path){
+	return boost::filesystem::is_directory(path);
+}
+
 int FileSystem::Rename(const char* path, const char* newpath){
 	if (!Exists(path)){
 		return RENAME_NO_SOURCE;
@@ -103,6 +107,23 @@ const char* FileSystem::GetExtension(const char* path){
 	return "";
 }
 
+const char* FileSystem::GetExtensionWithOutDot(const char* path){
+	size_t len = strlen(path);
+	int count = 0;
+	while (--len)
+	{
+		if (path[len] == '.')
+		{
+			if (count == 0)
+				return "";
+			else
+				return &path[len+1];
+		}
+		++count;
+	}
+	return "";
+}
+
 std::string FileSystem::GetFileName(const char* path){
 	boost::filesystem::path filepath(path);
 	return filepath.filename().generic_string();
@@ -124,6 +145,10 @@ std::string FileSystem::ConcatPath(const char* path1, const char* path2){
 
 std::string FileSystem::UnifyFilepath(const char* path){
 	return boost::filesystem::path(path).generic_string();
+}
+
+std::string FileSystem::Absolute(const char* path){
+	return boost::filesystem::absolute(path).generic_string();
 }
 
 void FileSystem::BackupFile(const char* filepath, unsigned numKeeping) {
@@ -242,4 +267,9 @@ std::string FileSystem::GetAppDataFolder(){
 	assert(0 && "Not implemented");
 #endif
 	return std::string("./temp/");
+}
+
+
+std::string FileSystem::GetCurrentDir(){
+	return gWorkingPath.generic_string();
 }

@@ -129,7 +129,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(PointLightManager);
+FB_IMPLEMENT_STATIC_CREATE(PointLightManager);
 
 PointLightManager::PointLightManager()
 	:mImpl(new Impl)

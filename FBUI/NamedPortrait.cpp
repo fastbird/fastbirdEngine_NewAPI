@@ -1,20 +1,58 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "NamedPortrait.h"
-#include "IUIManager.h"
+#include "UIManager.h"
 #include "ImageBox.h"
+#include "UIObject.h"
+#include "TextBox.h"
+
 namespace fastbird
 {
+
+	NamedPortraitPtr NamedPortrait::Create(){
+		NamedPortraitPtr p(new NamedPortrait, [](NamedPortrait* obj){ delete obj; });
+		p->mSelfPtr = p;
+		return p;
+	}
 
 	NamedPortrait::NamedPortrait()
 	{
 		mUIObject = UIObject::Create(GetRenderTargetSize());		
 		mUIObject->mOwnerUI = this;
 		mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
-		mImageBox = AddChild(0.5f, 0.0f, 1.0f, 0.8f, ComponentType::ImageBox);
-		mImageBox->SetRuntimeChild(true);
-		mTextBox = AddChild(0.5f, 1.0f, 1.f, 0.2f, ComponentType::TextBox);
-		mTextBox->SetRuntimeChild(true);
-		mTextBox->SetProperty(UIProperty::TEXT_SIZE, "22");
+		auto imageBox = std::static_pointer_cast<ImageBox>(AddChild(0.5f, 0.0f, 1.0f, 0.8f, ComponentType::ImageBox));
+		mImageBox = imageBox;		
+		imageBox->SetRuntimeChild(true);
+		auto textBox = std::static_pointer_cast<TextBox>(AddChild(0.5f, 1.0f, 1.f, 0.2f, ComponentType::TextBox));
+		mTextBox = textBox;		
+		textBox->SetRuntimeChild(true);
+		textBox->SetProperty(UIProperty::TEXT_SIZE, "22");
 	}
 
 	NamedPortrait::~NamedPortrait()
@@ -23,22 +61,23 @@ namespace fastbird
 
 	void NamedPortrait::OnCreated()
 	{
-		assert(mImageBox);
-		mImageBox->SetAlign(ALIGNH::CENTER, ALIGNV::TOP);	
-		mImageBox->SetProperty(UIProperty::OFFSETY, "2");
-		assert(mTextBox);		
-		mTextBox->SetPosY(mImageBox->GetSize().y+2);
-		mTextBox->SetProperty(UIProperty::TEXT_GAP, "2");
-		mTextBox->SetProperty(UIProperty::NSIZEY, "fill");
-		mTextBox->SetProperty(UIProperty::TEXT_ALIGN, "center");
-		mTextBox->SetProperty(UIProperty::TEXT_VALIGN, "top");
-		mTextBox->SetAlign(ALIGNH::CENTER, ALIGNV::TOP);
-		
+		auto imageBox = mImageBox.lock();
+		assert(imageBox);
+		imageBox->SetAlign(ALIGNH::CENTER, ALIGNV::TOP);
+		imageBox->SetProperty(UIProperty::OFFSETY, "2");
+		auto textBox = mTextBox.lock();
+		assert(textBox);
+		textBox->SetPosY(imageBox->GetSize().y + 2);
+		textBox->SetProperty(UIProperty::TEXT_GAP, "2");
+		textBox->SetProperty(UIProperty::NSIZEY, "fill");
+		textBox->SetProperty(UIProperty::TEXT_ALIGN, "center");
+		textBox->SetProperty(UIProperty::TEXT_VALIGN, "top");
+		textBox->SetAlign(ALIGNH::CENTER, ALIGNV::TOP);
 	}
 
-	void NamedPortrait::GatherVisit(std::vector<IUIObject*>& v)
+	void NamedPortrait::GatherVisit(std::vector<UIObject*>& v)
 	{
-		v.push_back(mUIObject);
+		v.push_back(mUIObject.get());
 		__super::GatherVisit(v);
 	}
 
@@ -55,20 +94,13 @@ namespace fastbird
 		case UIProperty::FRAME_IMAGE:
 		case UIProperty::IMAGE_COLOR_OVERLAY:
 		case UIProperty::IMAGE_FIXED_SIZE:
-			if (mImageBox)
-			{
-				return mImageBox->SetProperty(prop, val);
-			}
-			break;
-
+			return mImageBox.lock()->SetProperty(prop, val);	
 		case UIProperty::NAMED_PORTRAIT_IMAGE_SIZE:
-			return mImageBox->SetProperty(UIProperty::SIZE, val);
-
+			return mImageBox.lock()->SetProperty(UIProperty::SIZE, val);
 		case UIProperty::NAMED_PORTRAIT_TEXT:
-			return mTextBox->SetProperty(UIProperty::TEXT, val);
-
+			return mTextBox.lock()->SetProperty(UIProperty::TEXT, val);
 		case UIProperty::NAMED_PORTRAIT_TEXT_COLOR:
-			return mTextBox->SetProperty(UIProperty::TEXT_COLOR, val);
+			return mTextBox.lock()->SetProperty(UIProperty::TEXT_COLOR, val);
 		}
 
 		return __super::SetProperty(prop, val);
@@ -87,35 +119,21 @@ namespace fastbird
 		case UIProperty::FRAME_IMAGE:
 		case UIProperty::IMAGE_COLOR_OVERLAY:
 		case UIProperty::IMAGE_FIXED_SIZE:
-			if (mImageBox)
-			{
-				return mImageBox->GetProperty(prop, val, bufsize, notDefaultOnly);
-			}
-			break;
-
+			return mImageBox.lock()->GetProperty(prop, val, bufsize, notDefaultOnly);
 		case UIProperty::NAMED_PORTRAIT_IMAGE_SIZE:
-			return mImageBox->GetProperty(UIProperty::SIZE, val, bufsize, notDefaultOnly);
-
+			return mImageBox.lock()->GetProperty(UIProperty::SIZE, val, bufsize, notDefaultOnly);
 		case UIProperty::NAMED_PORTRAIT_TEXT:
-			return mTextBox->GetProperty(UIProperty::TEXT, val, bufsize, notDefaultOnly);
-
+			return mTextBox.lock()->GetProperty(UIProperty::TEXT, val, bufsize, notDefaultOnly);
 		case UIProperty::NAMED_PORTRAIT_TEXT_COLOR:
-			return mTextBox->GetProperty(UIProperty::TEXT_COLOR, val, bufsize, notDefaultOnly);
+			return mTextBox.lock()->GetProperty(UIProperty::TEXT_COLOR, val, bufsize, notDefaultOnly);
 		}
 
 		return __super::GetProperty(prop, val, bufsize, notDefaultOnly);
 	}
 
 
-	void NamedPortrait::SetTexture(ITexture* texture)
+	void NamedPortrait::SetTexture(TexturePtr texture)
 	{
-		if (mImageBox)
-		{
-			assert(mImageBox->GetType() == ComponentType::ImageBox);
-			ImageBox* imgBox = (ImageBox*)mImageBox;
-			imgBox->SetTexture(texture);
-		}
+		mImageBox.lock()->SetTexture(texture);		
 	}
-
-
 }

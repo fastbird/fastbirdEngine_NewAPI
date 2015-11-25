@@ -38,7 +38,7 @@ public:
 	IMousePtr mMouse;
 };
 
-IMPLEMENT_STATIC_CREATE(InputInjector);
+FB_IMPLEMENT_STATIC_CREATE(InputInjector);
 InputInjector::InputInjector()
 	:mImpl(new Impl){
 
@@ -51,15 +51,20 @@ InputInjector::~InputInjector(){
 //-------------------------------------------------------------------
 // IInputInjector
 //-------------------------------------------------------------------
-bool InputInjector::IsValid(FBInputDevice::Enum type) const{
+bool InputInjector::IsValid(InputDevice::Enum type) const{
 	auto& im = InputManager::GetInstance();
 	return im.IsValid(type);
 }
-void InputInjector::Invalidate(FBInputDevice::Enum type) const{
+void InputInjector::Invalidate(InputDevice::Enum type) const{
 	auto& im = InputManager::GetInstance();
 	im.Invalidate(type);
 }
-void InputInjector::InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
+
+void InputInjector::InvalidateClickTime() const{
+	InputManager::GetInstance().Invalidate(InputDevice::Mouse, true);
+}
+
+void InputInjector::InvalidTemporary(InputDevice::Enum type, bool invalidate){
 	auto& im = InputManager::GetInstance();
 	im.InvalidTemporary(type, invalidate);
 }
@@ -332,4 +337,12 @@ unsigned long InputInjector::GetNumLinesWheelScroll() const{
 	if (mImpl->mMouse)
 		return mImpl->mMouse->GetNumLinesWheelScroll();
 	return 0;
+}
+
+void InputInjector::SetKeyboard(IKeyboardPtr keyboard){
+	mImpl->mKeyboard = keyboard;
+}
+
+void InputInjector::SetMouse(IMousePtr mouse){
+	mImpl->mMouse = mouse;
 }

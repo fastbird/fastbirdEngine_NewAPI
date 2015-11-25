@@ -1144,7 +1144,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(MeshObject);
+FB_IMPLEMENT_STATIC_CREATE(MeshObject);
 MeshObjectPtr MeshObject::Create(const MeshObject& other){
 	return MeshObjectPtr(new MeshObject(other), [](MeshObject* obj){ delete obj; });
 }

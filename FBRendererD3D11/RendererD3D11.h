@@ -49,10 +49,10 @@ namespace fastbird
 	class ShaderD3D11;
 	class InputLayoutD3D11;
 	
-	DECLARE_SMART_PTR(RendererD3D11);
+	FB_DECLARE_SMART_PTR(RendererD3D11);
 	class RendererD3D11 : public IPlatformRenderer
 	{	
-		DECLARE_PIMPL_NON_COPYABLE(RendererD3D11);
+		FB_DECLARE_PIMPL_NON_COPYABLE(RendererD3D11);
 		RendererD3D11();
 		virtual ~RendererD3D11();
 

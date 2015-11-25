@@ -34,7 +34,7 @@ namespace fastbird
 		INDEXBUFFER_FORMAT_16BIT,
 		INDEXBUFFER_FORMAT_32BIT,
 	};
-	DECLARE_SMART_PTR(IPlatformIndexBuffer);
+	FB_DECLARE_SMART_PTR(IPlatformIndexBuffer);
 	class IPlatformIndexBuffer
 	{
 	public:		

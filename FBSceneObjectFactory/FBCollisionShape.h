@@ -49,11 +49,11 @@ namespace fastbird
 
 	typedef std::pair<FBColShape::Enum, Transformation> COL_SHAPE;
 
-	DECLARE_SMART_PTR(MeshObject);
-	DECLARE_SMART_PTR(FBCollisionShape);
+	FB_DECLARE_SMART_PTR(MeshObject);
+	FB_DECLARE_SMART_PTR(FBCollisionShape);
 	class FBCollisionShape
 	{
-		DECLARE_PIMPL(FBCollisionShape);
+		FB_DECLARE_PIMPL(FBCollisionShape);
 		FBCollisionShape(FBColShape::Enum e, const Transformation& t, MeshObjectPtr colMesh);
 		~FBCollisionShape();
 

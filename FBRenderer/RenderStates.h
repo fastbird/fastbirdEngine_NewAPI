@@ -31,9 +31,9 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{	
 	//---------------------------------------------------------------------------
-	DECLARE_SMART_PTR(RasterizerState);
+	FB_DECLARE_SMART_PTR(RasterizerState);
 	class FB_DLL_RENDERER RasterizerState{
-		DECLARE_PIMPL_NON_COPYABLE(RasterizerState);
+		FB_DECLARE_PIMPL_NON_COPYABLE(RasterizerState);
 		RasterizerState();
 
 	public:
@@ -45,9 +45,9 @@ namespace fastbird{
 	};
 
 	//---------------------------------------------------------------------------
-	DECLARE_SMART_PTR(BlendState);
+	FB_DECLARE_SMART_PTR(BlendState);
 	class FB_DLL_RENDERER BlendState{
-		DECLARE_PIMPL_NON_COPYABLE(BlendState);
+		FB_DECLARE_PIMPL_NON_COPYABLE(BlendState);
 		BlendState();
 
 	public:
@@ -60,9 +60,9 @@ namespace fastbird{
 	};
 
 	//---------------------------------------------------------------------------
-	DECLARE_SMART_PTR(DepthStencilState);
+	FB_DECLARE_SMART_PTR(DepthStencilState);
 	class FB_DLL_RENDERER DepthStencilState{
-		DECLARE_PIMPL_NON_COPYABLE(DepthStencilState);
+		FB_DECLARE_PIMPL_NON_COPYABLE(DepthStencilState);
 		DepthStencilState();
 
 	public:
@@ -76,9 +76,9 @@ namespace fastbird{
 	};
 
 	//---------------------------------------------------------------------------
-	DECLARE_SMART_PTR(SamplerState);
+	FB_DECLARE_SMART_PTR(SamplerState);
 	class FB_DLL_RENDERER SamplerState{
-		DECLARE_PIMPL_NON_COPYABLE(SamplerState);
+		FB_DECLARE_PIMPL_NON_COPYABLE(SamplerState);
 		SamplerState();
 
 	public:
@@ -90,14 +90,14 @@ namespace fastbird{
 	};
 
 	//---------------------------------------------------------------------------
-	DECLARE_SMART_PTR(RenderStates);
+	FB_DECLARE_SMART_PTR(RenderStates);
 	/** represents RasterizerState, BlendState and DepthStencilState as one integrated object.
 	RenderStates usually resides in Material. Internal data will be efficiently shared among
 	RenderStates objects indicating the same states.
 	*/
 	class FB_DLL_RENDERER RenderStates
 	{
-		DECLARE_PIMPL(RenderStates);
+		FB_DECLARE_PIMPL(RenderStates);
 		RenderStates();
 
 	public:

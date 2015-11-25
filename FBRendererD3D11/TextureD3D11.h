@@ -30,10 +30,10 @@
 #include "FBRenderer/IPlatformTexture.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(TextureD3D11);
+	FB_DECLARE_SMART_PTR(TextureD3D11);
 	class TextureD3D11 : public IPlatformTexture
 	{
-		DECLARE_PIMPL(TextureD3D11);
+		FB_DECLARE_PIMPL(TextureD3D11);
 		TextureD3D11();		
 
 	public:

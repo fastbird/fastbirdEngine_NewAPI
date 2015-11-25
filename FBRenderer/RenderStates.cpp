@@ -52,7 +52,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(RasterizerState);
+FB_IMPLEMENT_STATIC_CREATE(RasterizerState);
 RasterizerState::RasterizerState()
 	: mImpl(new Impl)
 {
@@ -93,7 +93,7 @@ public:
 bool BlendState::Impl::Lock = false;
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(BlendState);
+FB_IMPLEMENT_STATIC_CREATE(BlendState);
 BlendState::BlendState()
 	: mImpl(new Impl)
 {
@@ -138,7 +138,7 @@ public:
 bool DepthStencilState::Impl::Lock = false;
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(DepthStencilState);
+FB_IMPLEMENT_STATIC_CREATE(DepthStencilState);
 DepthStencilState::DepthStencilState()
 	: mImpl(new Impl)
 {
@@ -184,7 +184,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(SamplerState);
+FB_IMPLEMENT_STATIC_CREATE(SamplerState);
 SamplerState::SamplerState()
 	: mImpl(new Impl)
 {
@@ -305,7 +305,7 @@ const BLEND_DESC RenderStates::Impl::DefaultBDesc;
 const DEPTH_STENCIL_DESC RenderStates::Impl::DefaultDDesc;
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(RenderStates);
+FB_IMPLEMENT_STATIC_CREATE(RenderStates);
 RenderStates::RenderStates()
 	: mImpl(new Impl)
 {

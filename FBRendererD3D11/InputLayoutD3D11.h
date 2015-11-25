@@ -32,10 +32,10 @@
 
 namespace fastbird
 {
-	DECLARE_SMART_PTR(InputLayoutD3D11);
+	FB_DECLARE_SMART_PTR(InputLayoutD3D11);
 	class InputLayoutD3D11 : public IPlatformInputLayout
 	{
-		DECLARE_NON_COPYABLE(InputLayoutD3D11);
+		FB_DECLARE_NON_COPYABLE(InputLayoutD3D11);
 
 		ID3D11InputLayoutPtr mInputLayout;
 

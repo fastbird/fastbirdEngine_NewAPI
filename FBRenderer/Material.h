@@ -38,10 +38,10 @@ namespace tinyxml2{
 }
 namespace fastbird{
 	struct MATERIAL_CONSTANTS;
-	DECLARE_SMART_PTR(ColorRamp);
-	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(Material);
-	DECLARE_SMART_PTR(RenderStates);
+	FB_DECLARE_SMART_PTR(ColorRamp);
+	FB_DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(RenderStates);
 	/** encapsulates material information(diffuse color, specular color...), 
 	texture, shader, input layout and reder states.
 	Use MaterialPtr Renderer::CreateMaterial(const char* filepath) to load 
@@ -51,7 +51,7 @@ namespace fastbird{
 	to the cloned material, the internal data of the material will be copied and be unique.
 	*/
 	class FB_DLL_RENDERER Material{
-		DECLARE_PIMPL(Material);
+		FB_DECLARE_PIMPL(Material);
 		Material();
 		Material& Material::operator=(const Material& other) = delete;
 		typedef std::vector< MaterialWeakPtr > Materials;
@@ -96,7 +96,7 @@ namespace fastbird{
 		bool AddShaderDefine(const char* def, const char* val);
 		bool RemoveShaderDefine(const char* def);
 		void ApplyShaderDefines();
-		void SetMaterialParameters(unsigned index, const Vec4& value);
+		void SetMaterialParameter(unsigned index, const Vec4& value);
 		const SHADER_DEFINES& GetShaderDefines() const;
 		const Vec4f& GetAmbientColor() const;
 		const Vec4f& GetDiffuseColor() const;

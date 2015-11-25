@@ -673,7 +673,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(ResourceProvider);
+FB_IMPLEMENT_STATIC_CREATE(ResourceProvider);
 
 ResourceProvider::ResourceProvider()
 	:mImpl(new Impl)

@@ -29,8 +29,8 @@
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBMathLib/Math.h"
 namespace fastbird{
-	DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
-	struct TextureAtlasRegion
+	FB_DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
+	struct FB_DLL_RENDERER TextureAtlasRegion
 	{
 		DWORD mID;
 		std::string mName;
@@ -46,9 +46,9 @@ namespace fastbird{
 	};
 
 	//------------------------------------------------------------------------
-	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(TextureAtlas);
-	class TextureAtlas
+	FB_DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(TextureAtlas);
+	class FB_DLL_RENDERER TextureAtlas
 	{
 		std::string mPath;
 		TexturePtr mTexture;

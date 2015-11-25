@@ -537,7 +537,7 @@ public:
 };
 
 //----------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(Camera);
+FB_IMPLEMENT_STATIC_CREATE(Camera);
 
 Camera::Camera()
 	: mImpl(new Impl){

@@ -444,25 +444,272 @@ namespace fastbird
 		return 1;
 	}
 
-	const char* LuaUtils::Push(lua_State* L, const char* str){
+	void LuaUtils::pushnil(){
+		lua_pushnil(sLuaState);
+	}
+
+	void LuaUtils::pushnil(lua_State* L){
+		lua_pushnil(L);
+	}
+
+	const char* LuaUtils::pushstring(const char* str){
+		return lua_pushstring(sLuaState, str);
+	}
+
+	const char* LuaUtils::pushstring(lua_State* L, const char* str){
 		return lua_pushstring(L, str);
 	}
 
-	const char* LuaUtils::Push(const char* str){
-		if (sLuaState)
-			return Push(sLuaState, str);
-		return 0;
+	void LuaUtils::pushnumber(double number){
+		lua_pushnumber(sLuaState, number);
 	}
 
-	const char* LuaUtils::ToString(lua_State* L, int idx){
+	void LuaUtils::pushnumber(lua_State* L, double number){
+		lua_pushnumber(L, number);
+	}
+
+	void LuaUtils::pushinteger(int i){
+		lua_pushinteger(sLuaState, i);
+	}
+
+	void LuaUtils::pushinteger(lua_State* L, int i){
+		lua_pushinteger(L, i);
+	}
+
+	void LuaUtils::pushunsigned(unsigned u){
+		lua_pushunsigned(sLuaState, u);
+	}
+
+	void LuaUtils::pushunsigned(lua_State* L, unsigned u){
+		lua_pushunsigned(L, u);
+	}
+
+	void LuaUtils::pushboolean(bool b){
+		lua_pushboolean(sLuaState, b ? 1 : 0);
+	}
+
+	void LuaUtils::pushboolean(lua_State* L, bool b){
+		lua_pushboolean(L, b ? 1 : 0);
+	}
+
+	void LuaUtils::pushcfunction(lua_CFunction f){
+		lua_pushcfunction(sLuaState, f);
+	}
+
+	void LuaUtils::pushcfunction(lua_State* L, lua_CFunction f){
+		lua_pushcfunction(L, f);
+	}
+
+	const char* LuaUtils::tostring(int idx){
+		if (sLuaState)
+			return tostring(sLuaState, idx);
+		return "";
+	}
+
+	const char* LuaUtils::tostring(lua_State* L, int idx){
 		return lua_tostring(L, idx);
 	}
 
-	const char* LuaUtils::ToString(int idx){
-		if (sLuaState)
-			return ToString(sLuaState, idx);
-		return "";
+	bool LuaUtils::toboolean(int idx){
+		return lua_toboolean(sLuaState, idx) != 0;
 	}
+
+	bool LuaUtils::toboolean(lua_State* L, int idx){
+		return lua_toboolean(L, idx) != 0;
+	}
+
+	int LuaUtils::tointeger(int idx){
+		return lua_tointeger(sLuaState, idx);
+	}
+
+	int LuaUtils::tointeger(lua_State* L, int idx){
+		return lua_tointeger(L, idx);
+	}
+
+	unsigned LuaUtils::tounsigned(int idx){
+		return lua_tounsigned(sLuaState, idx);
+	}
+
+	unsigned LuaUtils::tounsigned(lua_State* L, int idx){
+		return lua_tounsigned(L, idx);
+	}
+
+	double LuaUtils::tonumber(int idx){
+		return lua_tonumber(sLuaState, idx);
+	}
+
+	double LuaUtils::tonumber(lua_State* L, int idx){
+		return lua_tonumber(L, idx);
+	}
+
+	const char* LuaUtils::checkstring(int index){
+		return luaL_checkstring(sLuaState, index);
+	}
+
+	const char* LuaUtils::checkstring(lua_State* L, int index){
+		return luaL_checkstring(L, index);
+	}
+
+	int LuaUtils::checkint(int index){
+		return luaL_checkint(sLuaState, index);
+	}
+
+	int LuaUtils::checkint(lua_State* L, int index){
+		return luaL_checkint(L, index);
+	}
+
+	unsigned LuaUtils::checkunsigned(int index){
+		return luaL_checkunsigned(sLuaState, index);
+	}
+
+	unsigned LuaUtils::checkunsigned(lua_State* L, int index){
+		return luaL_checkunsigned(L, index);
+	}
+
+	double LuaUtils::checknumber(int index){
+		return luaL_checknumber(sLuaState, index);
+	}
+
+	double LuaUtils::checknumber(lua_State* L, int index){
+		return luaL_checknumber(L, index);
+	}
+
+	void LuaUtils::checktype(int index, int luaType){
+		luaL_checktype(sLuaState, index, luaType);
+	}
+
+	void LuaUtils::checktype(lua_State* L, int index, int luaType){
+		luaL_checktype(L, index, luaType);
+	}
+
+	Vec2ITuple LuaUtils::checkVec2I(int index){
+		return luaU_check<Vec2ITuple>(sLuaState, index);
+	}
+
+	Vec2ITuple LuaUtils::checkVec2I(lua_State* L, int index){
+		return luaU_check<Vec2ITuple>(L, index);
+	}
+
+	bool LuaUtils::isboolean(int index){
+		return lua_isboolean(sLuaState, index);
+	}
+
+	bool LuaUtils::isboolean(lua_State* L, int index){
+		return lua_isboolean(L, index);
+	}
+
+	bool LuaUtils::isnil(int index){
+		return lua_isnil(sLuaState, index);
+	}
+
+	bool LuaUtils::isnil(lua_State* L, int index){
+		return lua_isnil(L, index);
+	}
+
+	bool LuaUtils::isnumber(int index){
+		return lua_isnumber(sLuaState, index) != 0;
+	}
+
+	bool LuaUtils::isnumber(lua_State* L, int index){
+		return lua_isnumber(L, index) != 0;
+	}
+
+	bool LuaUtils::isstring(int index){
+		return lua_isstring(sLuaState, index) != 0;
+	}
+
+	bool LuaUtils::isstring(lua_State* L, int index){
+		return lua_isstring(L, index) != 0;
+	}
+
+	int LuaUtils::type(int index){
+		return lua_type(sLuaState, index);
+	}
+
+	int LuaUtils::type(lua_State* L, int index){
+		return lua_type(L, index);
+	}
+
+	void LuaUtils::createtable(int narr, int nrec){
+		lua_createtable(sLuaState, narr, nrec);
+	}
+
+	void LuaUtils::createtable(lua_State* L, int narr, int nrec){
+		lua_createtable(L, narr, nrec);
+	}
+
+	/// Does the equivalent to t[key] = v, where t is the value at the given index and v is the value at the top of the stack.
+	void LuaUtils::setfield(int tableindex, const char* key){
+		lua_setfield(sLuaState, tableindex, key);
+	}
+
+	void LuaUtils::setfield(lua_State* L, int tableindex, const char* key){
+		lua_setfield(L, tableindex, key);
+	}
+
+	/// Pushes onto the stack the value t[k], where t is the value at the given index. As in Lua, this function may trigger a metamethod for the "index" event
+	void LuaUtils::getfield(int tableindex, const char* key){
+		lua_getfield(sLuaState, tableindex, key);
+	}
+
+	void LuaUtils::getfield(lua_State* L, int tableindex, const char* key){
+		lua_getfield(L, tableindex, key);
+	}
+
+	/// Pops a value from the stack and sets it as the new value of global name. 
+	void LuaUtils::setglobal(const char* name){
+		lua_setglobal(sLuaState, name);
+	}
+
+	void LuaUtils::setglobal(lua_State* L, const char* name){
+		lua_setglobal(L, name);
+	}
+
+	/// Pushes onto the stack the value of the global \a key. 
+	void LuaUtils::getglobal(const char* name){
+		lua_getglobal(sLuaState, name);
+	}
+
+	void LuaUtils::getglobal(lua_State* L, const char* name){
+		lua_getglobal(L, name);
+	}
+
+	/// Pushes a copy of the element at the given index onto the stack. 
+	void LuaUtils::pushvalue(int index){
+		lua_pushvalue(sLuaState, index);
+	}
+
+	void LuaUtils::pushvalue(lua_State* L, int index){
+		lua_pushvalue(L, index);
+	}
+
+	/// Pops a table from the stack and sets it as the new metatable for the value at the given index. 
+	void LuaUtils::setmetatable(int index){
+		lua_setmetatable(sLuaState, index);
+	}
+
+	void LuaUtils::setmetatable(lua_State* L, int index){
+		lua_setmetatable(L, index);
+	}
+
+	/// Does the equivalent of t[n] = v, where t is the table at the given index and v is the value at the top of the stack. 
+	void LuaUtils::rawseti(int tableindex, int n){
+		lua_rawseti(sLuaState, tableindex, n);
+	}
+
+	void LuaUtils::rawseti(lua_State* L, int tableindex, int n){
+		lua_rawseti(L, tableindex, n);
+	}
+
+	int LuaUtils::gettop(){
+		return lua_gettop(sLuaState);
+	}
+
+	int LuaUtils::gettop(lua_State* L){
+		return lua_gettop(L);
+	}
+
+
 
 	RecursiveSpinLock<true, false> sLuaLock;
 	void LuaUtils::LockLua(){

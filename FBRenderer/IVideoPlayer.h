@@ -29,7 +29,7 @@
 #include <functional>
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(IVideoPlayer);
+	FB_DECLARE_SMART_PTR(IVideoPlayer);
 	class IVideoPlayer{
 	public:
 		typedef std::function<void(IVideoPlayer*)> VideoNotifierFunc;

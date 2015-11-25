@@ -460,7 +460,7 @@ public:
 		//		//mObjectConstants.gWorldView = renderer.GetCamera()->GetViewMat() * mObjectConstants.gWorld;
 		//		//mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetProjMat() * mObjectConstants.gWorldView;
 		//		renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
-		//		mSphereMesh->GetMaterial()->SetMaterialParameters(0, sphere.mColor.GetVec4());
+		//		mSphereMesh->GetMaterial()->SetMaterialParameter(0, sphere.mColor.GetVec4());
 		//		mSphereMesh->GetMaterial()->Bind(true);
 		//		mSphereMesh->RenderSimple();
 		//	}
@@ -482,7 +482,7 @@ public:
 				renderer.UpdateObjectConstantsBuffer(&mObjectConstants);
 				Vec4 color = box.mColor.GetVec4();
 				color.w = box.mAlpha;
-				mBoxMesh->GetMaterial()->SetMaterialParameters(0, color);
+				mBoxMesh->GetMaterial()->SetMaterialParameter(0, color);
 				mBoxMesh->GetMaterial()->Bind(true);
 				mBoxMesh->RenderSimple();
 			}
@@ -546,7 +546,7 @@ public:
 };
 
 //----------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(DebugHud);
+FB_IMPLEMENT_STATIC_CREATE(DebugHud);
 DebugHud::DebugHud()
 	: mImpl(new Impl)
 {

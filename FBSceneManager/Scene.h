@@ -36,15 +36,15 @@ namespace fastbird{
 	class Vec3;
 	class Color;
 	class Ray3;
-	DECLARE_SMART_PTR(ICamera);
-	DECLARE_SMART_PTR(SkySphere);
-	DECLARE_SMART_PTR(SpatialObject);
-	DECLARE_SMART_PTR(SpatialSceneObject);
-	DECLARE_SMART_PTR(SceneObject);
-	DECLARE_SMART_PTR(DirectionalLight);
-	DECLARE_SMART_PTR(Scene);
+	FB_DECLARE_SMART_PTR(ICamera);
+	FB_DECLARE_SMART_PTR(SkySphere);
+	FB_DECLARE_SMART_PTR(SpatialObject);
+	FB_DECLARE_SMART_PTR(SpatialSceneObject);
+	FB_DECLARE_SMART_PTR(SceneObject);
+	FB_DECLARE_SMART_PTR(DirectionalLight);
+	FB_DECLARE_SMART_PTR(Scene);
 	class FB_DLL_SCENEMANAGER Scene : public IScene, public Observable<ISceneObserver>{
-		DECLARE_PIMPL_NON_COPYABLE(Scene);		
+		FB_DECLARE_PIMPL_NON_COPYABLE(Scene);		
 		Scene(const char* name);		
 		
 	public:		

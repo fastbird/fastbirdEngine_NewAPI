@@ -28,9 +28,9 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(AudioManager);
+	FB_DECLARE_SMART_PTR(AudioManager);
 	class FB_DLL_AUDIO AudioManager{
-		DECLARE_PIMPL_NON_COPYABLE(AudioManager);		
+		FB_DECLARE_PIMPL_NON_COPYABLE(AudioManager);		
 		AudioManager();
 	public:
 		static AudioManagerPtr Create();

@@ -30,7 +30,7 @@
 #include "FBRenderer/RenderParam.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IScene);
+	FB_DECLARE_SMART_PTR(IScene);
 	class ISceneObserver
 	{
 	public:

@@ -67,8 +67,8 @@
 namespace fastbird{
 	ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformShader);
 	TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformTexture);
-	DECLARE_SMART_PTR(UI3DObj);
-	DECLARE_SMART_PTR(UIObject);
+	FB_DECLARE_SMART_PTR(UI3DObj);
+	FB_DECLARE_SMART_PTR(UIObject);
 }
 using namespace fastbird;
 
@@ -617,10 +617,11 @@ public:
 		InitFrameProfiler(dt);
 		UpdateFrameConstantsBuffer();
 
-		for (auto pRT : mRenderTargets)
+		for (auto pRT : mRenderTargetsEveryFrame)
 		{
 			auto rt = pRT.lock();
-			rt->Render();
+			if (rt)
+				rt->Render();
 		}
 
 		Render3DUIsToTexture();		
@@ -1505,7 +1506,7 @@ public:
 		pVB->Unmap(0);
 		pVB->Bind();
 		SetPrimitiveTopology(PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		mat->SetMaterialParameters(0, color);
+		mat->SetMaterialParameter(0, color);
 		mat->Bind(true);
 		Draw(3, 0);
 	}
@@ -1728,7 +1729,7 @@ public:
 				continue;
 			}
 			++it;
-			observer->BeforeDebugHudRendered( mMainWindowId, GetMainWindowHandle() );
+			observer->BeforeDebugHudRendering( mMainWindowId, GetMainWindowHandle() );
 		}
 
 		RestoreRenderStates();

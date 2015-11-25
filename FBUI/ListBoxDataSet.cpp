@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "ListBoxDataSet.h"
 #include "ListBoxData.h"
@@ -36,7 +63,7 @@ namespace fastbird
 		auto it = mMap.find(uniqueKey);
 		if (it == mMap.end())
 		{
-			mData.push_back(FB_ARRNEW(ListBoxData, mNumCols));
+			mData.push_back(FB_ARRAY_NEW(ListBoxData, mNumCols));
 			auto& back = mData.back();
 			back[0].SetDataType(ListItemDataType::String);
 			back[0].SetText(uniqueKey.c_str());
@@ -92,7 +119,7 @@ namespace fastbird
 		if (row != -1){
 			return row;
 		}
-		mData.push_back(FB_ARRNEW(ListBoxData, mNumCols));
+		mData.push_back(FB_ARRAY_NEW(ListBoxData, mNumCols));
 		auto& cols = mData.back();
 		cols[0].SetDataType(ListItemDataType::String);
 		cols[0].SetText(uniqueKey.c_str());
@@ -104,14 +131,14 @@ namespace fastbird
 		if (row != -1){
 			return row;
 		}
-		mData.push_back(FB_ARRNEW(ListBoxData, mNumCols));
+		mData.push_back(FB_ARRAY_NEW(ListBoxData, mNumCols));
 		auto& cols = mData.back();
 		cols[0].SetKey(uniqueKey);
 		return mData.size() - 1;
 	}
 
 	unsigned ListBoxDataSet::InsertEmptyData(){
-		mData.push_back(FB_ARRNEW(ListBoxData, mNumCols));
+		mData.push_back(FB_ARRAY_NEW(ListBoxData, mNumCols));
 		auto& cols = mData.back();
 		cols[0].SetKey(-1);
 		return mData.size() - 1;
@@ -164,7 +191,7 @@ namespace fastbird
 		cols[colIndex].SetChecked(checked);
 	}
 
-	void ListBoxDataSet::SetData(const std::wstring& uniqueKey, unsigned colIndex, ITexture* texture){
+	void ListBoxDataSet::SetData(const std::wstring& uniqueKey, unsigned colIndex, TexturePtr texture){
 		colIndex += 1; // due to the unique key
 		if_assert_fail(colIndex < mNumCols)
 			return;
@@ -218,7 +245,7 @@ namespace fastbird
 		cols[colIndex].SetChecked(checked);
 	}
 
-	void ListBoxDataSet::SetData(unsigned uniqueKey, unsigned colIndex, ITexture* texture){
+	void ListBoxDataSet::SetData(unsigned uniqueKey, unsigned colIndex, TexturePtr texture){
 		colIndex += 1; // due to the unique key
 		if_assert_fail(colIndex < mNumCols)
 			return;
@@ -260,7 +287,7 @@ namespace fastbird
 		cols[colIndex].SetChecked(checked);
 	}
 
-	void ListBoxDataSet::SetData(const Vec2I& indexRowCol, ITexture* texture){
+	void ListBoxDataSet::SetData(const Vec2I& indexRowCol, TexturePtr texture){
 		unsigned rowIndex = indexRowCol.x;
 		unsigned colIndex = indexRowCol.y + 1;
 
@@ -329,7 +356,7 @@ namespace fastbird
 			auto cols = *it;
 			if (wcscmp(cols[0].GetText(), uniqueKey.c_str()) == 0)
 			{
-				FB_SAFE_DEL(cols);
+				FB_SAFE_DELETE(cols);
 				mData.erase(it);
 				return index;
 			}
@@ -345,7 +372,7 @@ namespace fastbird
 			auto cols = *it;
 			if (cols[0].GetKey()== uniqueKey)
 			{
-				FB_SAFE_DEL(cols);
+				FB_SAFE_DELETE(cols);
 				mData.erase(it);
 				return index;
 			}
@@ -363,7 +390,7 @@ namespace fastbird
 		}
 		auto it = mData.begin() + index;
 		auto cols = *it;
-		FB_SAFE_DEL(cols);
+		FB_SAFE_DELETE(cols);
 		mData.erase(it);
 		return index;
 	}
@@ -373,7 +400,7 @@ namespace fastbird
 		ClearWithSwap(mMap);
 		for (auto data : mData)
 		{
-			FB_ARRDELETE(data);
+			FB_ARRAY_DELETE(data);
 		}
 		ClearWithSwap(mData);
 	}

@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 
 #include "Container.h"
@@ -5,33 +32,36 @@
 
 namespace fastbird
 {
-class IUIObject;
-class ImageBox;
-class HorizontalGauge;
-class Button : public Container
+FB_DECLARE_SMART_PTR(HorizontalGauge);
+FB_DECLARE_SMART_PTR(ImageBox);
+FB_DECLARE_SMART_PTR(Button);
+class FB_DLL_UI Button : public Container
 {
-public:
+protected:
 	Button();
-	virtual ~Button();
+	~Button();
+
+public:
+	static ButtonPtr Create();
 
 	// IWinBase
-	virtual ComponentType::Enum GetType() const { return ComponentType::Button; }
-	virtual void GatherVisit(std::vector<IUIObject*>& v);
-	virtual bool SetProperty(UIProperty::Enum prop, const char* val);
-	virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
-	virtual bool SetVisible(bool visible);
-	virtual void SetVisibleInternal(bool visible);
+	ComponentType::Enum GetType() const { return ComponentType::Button; }
+	void GatherVisit(std::vector<UIObject*>& v);
+	bool SetProperty(UIProperty::Enum prop, const char* val);
+	bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
+	bool SetVisible(bool visible);
+	void SetVisibleInternal(bool visible);
 
-	virtual void OnPosChanged(bool anim);
-	virtual HorizontalGauge* GetProgressBar()  const { return mProgressBar; }
-	virtual void StartProgress();
-	virtual void SetPercentage(float p); // progress bar
-	virtual void Blink(bool blink); // progress bar
-	virtual void Blink(bool blink, float time); // progress bar
-	virtual void EndProgress();
-	virtual void Highlight(bool highlight);
-	virtual void SetTexture(ButtonImages::Enum type, ITexture* pTexture, bool drawFixedSize);
-	virtual void OnEnableChanged();
+	void OnPosChanged(bool anim);
+	HorizontalGaugePtr GetProgressBar()  const { return mProgressBar.lock(); }
+	void StartProgress();
+	void SetPercentage(float p); // progress bar
+	void Blink(bool blink); // progress bar
+	void Blink(bool blink, float time); // progress bar
+	void EndProgress();
+	void Highlight(bool highlight);
+	void SetTexture(ButtonImages::Enum type, TexturePtr pTexture, bool drawFixedSize);
+	void OnEnableChanged();
 	const static float LEFT_GAP;
 
 	void OnMouseIn(void* arg);
@@ -42,15 +72,15 @@ public:
 	void AlignIconText();
 
 	void UpdateImageSize();
-	virtual void SetEnable(bool enable);
+	void SetEnable(bool enable);
 
 
 protected:
-	virtual void SetUseBorder(bool use);
+	void SetUseBorder(bool use);
 
 private:
 
-	ImageBox* CreateImageBox();
+	ImageBoxPtr CreateImageBox();
 	void SetAlphaRegionTexture();
 	void SetDefaultImageAtlasPathIfNotSet();
 
@@ -62,7 +92,7 @@ private:
 	Color mEdgeColorOver;
 
 	std::string mImageAtlas;
-	ImageBox* mImages[ButtonImages::Num];
+	ImageBoxWeakPtr mImages[ButtonImages::Num];
 	std::string mRegionName;
 	std::string mRegionNames;
 	std::string mTextureFile;
@@ -83,7 +113,7 @@ private:
 	Color mImageColorOverlay;
 	bool mActivatedRot;
 	float mFps;
-	HorizontalGauge* mProgressBar;
+	HorizontalGaugeWeakPtr mProgressBar;
 	int mButtonIconSize;
 	bool mInProgress;
 	bool mNoBackgroundBackup;

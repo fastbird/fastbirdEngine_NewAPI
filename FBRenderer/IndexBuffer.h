@@ -30,9 +30,9 @@
 #include "RendererStructs.h"
 #include "IPlatformIndexBuffer.h"
 namespace fastbird{	
-	DECLARE_SMART_PTR(IndexBuffer);
+	FB_DECLARE_SMART_PTR(IndexBuffer);
 	class FB_DLL_RENDERER IndexBuffer{
-		DECLARE_PIMPL_NON_COPYABLE(IndexBuffer);
+		FB_DECLARE_PIMPL_NON_COPYABLE(IndexBuffer);
 		IndexBuffer(unsigned numIndices, INDEXBUFFER_FORMAT format);
 
 	public:

@@ -28,9 +28,9 @@
 // SpatialComponent
 #pragma once
 namespace fastbird{
-	DECLARE_SMART_PTR(Spatial);
+	FB_DECLARE_SMART_PTR(Spatial);
 	class FB_DLL_RENDERER Spatial{
-		DECLARE_PIMPL_NON_COPYABLE(Spatial);
+		FB_DECLARE_PIMPL_NON_COPYABLE(Spatial);
 
 	};
 }

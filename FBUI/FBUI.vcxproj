@@ -107,8 +107,6 @@
     <ClCompile Include="UIManager.cpp" />
     <ClCompile Include="UIManagerLua.cpp" />
     <ClCompile Include="UIObject.cpp" />
-    <ClCompile Include="UIProp.cpp" />
-    <ClCompile Include="UI_DLLMain.cpp" />
     <ClCompile Include="VerticalGauge.cpp" />
     <ClCompile Include="VisibleStatus.cpp" />
     <ClCompile Include="WinBase.cpp" />
@@ -130,18 +128,8 @@
     <ClInclude Include="FileSelector.h" />
     <ClInclude Include="HexagonalContextMenu.h" />
     <ClInclude Include="HorizontalGauge.h" />
-    <ClInclude Include="ICheckbox.h" />
-    <ClInclude Include="IEventHandler.h" />
-    <ClInclude Include="IFileSelector.h" />
-    <ClInclude Include="IImageBox.h" />
     <ClInclude Include="ImageBox.h" />
-    <ClInclude Include="IRadioBox.h" />
-    <ClInclude Include="IStaticText.h" />
-    <ClInclude Include="ITitleBar.h" />
-    <ClInclude Include="IUIAnimation.h" />
     <ClInclude Include="IUIEditor.h" />
-    <ClInclude Include="IUIManager.h" />
-    <ClInclude Include="IWinBase.h" />
     <ClInclude Include="KeyboardCursor.h" />
     <ClInclude Include="KeyValueDataSet.h" />
     <ClInclude Include="ListBox.h" />
@@ -176,11 +164,17 @@
     <ClInclude Include="Wnd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FBConsole\FBConsole.vcxproj">
+      <Project>{ae082870-0e26-479c-9aab-c7d3c32a55ca}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
       <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBFileMonitor\FBFileMonitor.vcxproj">
       <Project>{288dc950-fe81-430a-ba47-933cb0875e8e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBFileSystem\FBFileSystem.vcxproj">
+      <Project>{970770a8-f3c4-43ad-b4a0-c076ec6fe610}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBInputManager\FBInputManager.vcxproj">
       <Project>{c8797aa0-b737-4f09-a6a4-131350b54bc9}</Project>

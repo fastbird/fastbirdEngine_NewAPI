@@ -29,7 +29,7 @@
 #include "NullPlatformRenderer.h"
 using namespace fastbird;
 
-IMPLEMENT_STATIC_CREATE(NullPlatformRenderer);
+FB_IMPLEMENT_STATIC_CREATE(NullPlatformRenderer);
 
 NullPlatformRenderer::NullPlatformRenderer(){
 

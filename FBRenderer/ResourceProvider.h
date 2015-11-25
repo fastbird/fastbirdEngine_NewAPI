@@ -30,16 +30,16 @@
 #include "ResourceTypes.h"
 
 namespace fastbird{
-	DECLARE_SMART_PTR(SamplerState);
-	DECLARE_SMART_PTR(DepthStencilState);
-	DECLARE_SMART_PTR(BlendState);
-	DECLARE_SMART_PTR(RasterizerState);
-	DECLARE_SMART_PTR(Material);
-	DECLARE_SMART_PTR(Shader);
-	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(ResourceProvider);
+	FB_DECLARE_SMART_PTR(SamplerState);
+	FB_DECLARE_SMART_PTR(DepthStencilState);
+	FB_DECLARE_SMART_PTR(BlendState);
+	FB_DECLARE_SMART_PTR(RasterizerState);
+	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(Shader);
+	FB_DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(ResourceProvider);
 	class ResourceProvider{
-		DECLARE_PIMPL_NON_COPYABLE(ResourceProvider);
+		FB_DECLARE_PIMPL_NON_COPYABLE(ResourceProvider);
 		ResourceProvider();
 
 	protected:

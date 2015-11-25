@@ -33,9 +33,9 @@
 namespace fastbird{
 	struct RenderParamOut;
 	struct RenderParam;
-	DECLARE_SMART_PTR(GeometryRenderer);
+	FB_DECLARE_SMART_PTR(GeometryRenderer);
 	class GeometryRenderer{
-		DECLARE_PIMPL_NON_COPYABLE(GeometryRenderer);
+		FB_DECLARE_PIMPL_NON_COPYABLE(GeometryRenderer);
 		GeometryRenderer();
 
 	public:

@@ -29,15 +29,15 @@
 #include "FBCommonHeaders/Types.h"
 #include "MeshImportDesc.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(TrailObject);
-	DECLARE_SMART_PTR(DustRenderer);
-	DECLARE_SMART_PTR(BillboardQuad);
-	DECLARE_SMART_PTR(SkySphere);
-	DECLARE_SMART_PTR(MeshGroup);
-	DECLARE_SMART_PTR(MeshObject);
-	DECLARE_SMART_PTR(SceneObjectFactory);
+	FB_DECLARE_SMART_PTR(TrailObject);
+	FB_DECLARE_SMART_PTR(DustRenderer);
+	FB_DECLARE_SMART_PTR(BillboardQuad);
+	FB_DECLARE_SMART_PTR(SkySphere);
+	FB_DECLARE_SMART_PTR(MeshGroup);
+	FB_DECLARE_SMART_PTR(MeshObject);
+	FB_DECLARE_SMART_PTR(SceneObjectFactory);
 	class FB_DLL_SCENEOBJECTFACTORY SceneObjectFactory{
-		DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);	
+		FB_DECLARE_PIMPL_NON_COPYABLE(SceneObjectFactory);	
 		SceneObjectFactory();
 		~SceneObjectFactory();
 

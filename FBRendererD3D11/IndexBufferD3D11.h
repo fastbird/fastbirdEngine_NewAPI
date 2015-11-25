@@ -35,10 +35,10 @@
 
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IndexBufferD3D11);
+	FB_DECLARE_SMART_PTR(IndexBufferD3D11);
 	class IndexBufferD3D11 : public IPlatformIndexBuffer
 	{
-		DECLARE_NON_COPYABLE(IndexBufferD3D11);
+		FB_DECLARE_NON_COPYABLE(IndexBufferD3D11);
 		
 		ID3D11BufferPtr mIndexBuffer;
 		DXGI_FORMAT mFormat;

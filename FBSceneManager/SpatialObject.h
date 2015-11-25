@@ -32,10 +32,10 @@
 #include "FBMathLib/Math.h"
 #include "FBMathLib/BoundingVolume.h"
 namespace fastbird{	
-	DECLARE_SMART_PTR(Animation);
-	DECLARE_SMART_PTR(SpatialObject);
+	FB_DECLARE_SMART_PTR(Animation);
+	FB_DECLARE_SMART_PTR(SpatialObject);
 	class FB_DLL_SCENEMANAGER SpatialObject : public ISpatialObject {
-		DECLARE_PIMPL_CLONEABLE(SpatialObject);		
+		FB_DECLARE_PIMPL_CLONEABLE(SpatialObject);		
 
 	protected:
 		SpatialObject();

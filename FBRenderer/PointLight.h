@@ -30,10 +30,10 @@
 #include "FBMathLib/Math.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(PointLight);
+	FB_DECLARE_SMART_PTR(PointLight);
 	class FB_DLL_RENDERER PointLight
 	{
-		DECLARE_PIMPL_NON_COPYABLE(PointLight);
+		FB_DECLARE_PIMPL_NON_COPYABLE(PointLight);
 		friend class PointLightMan;
 		PointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion);
 

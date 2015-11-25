@@ -31,11 +31,11 @@
 namespace fastbird
 {
 	struct POINT_LIGHT_CONSTANTS;
-	DECLARE_SMART_PTR(PointLight);
-	DECLARE_SMART_PTR(PointLightManager);
+	FB_DECLARE_SMART_PTR(PointLight);
+	FB_DECLARE_SMART_PTR(PointLightManager);
 	class PointLightManager
 	{
-		DECLARE_PIMPL_NON_COPYABLE(PointLightManager);
+		FB_DECLARE_PIMPL_NON_COPYABLE(PointLightManager);
 		PointLightManager();
 
 	public:

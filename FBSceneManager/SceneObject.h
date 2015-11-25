@@ -31,10 +31,10 @@
 namespace fastbird{
 	struct RenderParam;
 	struct RenderParamOut;	
-	DECLARE_SMART_PTR(Scene);
-	DECLARE_SMART_PTR(SceneObject);
+	FB_DECLARE_SMART_PTR(Scene);
+	FB_DECLARE_SMART_PTR(SceneObject);
 	class FB_DLL_SCENEMANAGER SceneObject{
-		DECLARE_PIMPL_CLONEABLE(SceneObject);				
+		FB_DECLARE_PIMPL_CLONEABLE(SceneObject);				
 
 	protected:
 		SceneObject();

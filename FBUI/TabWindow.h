@@ -1,27 +1,61 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 #include "Container.h"
 namespace fastbird{
-	class TabWindow: public Container
+	FB_DECLARE_SMART_PTR(Button);
+	FB_DECLARE_SMART_PTR(Wnd);
+	FB_DECLARE_SMART_PTR(TabWindow);
+	class FB_DLL_UI TabWindow: public Container
 	{
 		static const Vec2I sButtonSize;
-		IWinBase* mMainWindow;
-		std::vector<IWinBase*> mButtons;
-		std::vector<IWinBase*> mWindows;
+		WndWeakPtr mMainWindow;
+		std::vector<ButtonWeakPtr> mButtons;
+		std::vector<WndWeakPtr> mWindows;
 		unsigned mNumTabs;
 		std::string mStrTabNames;
 		unsigned mCurTabIndex;
 
-	public:
+	protected:
 		TabWindow();
-		virtual ~TabWindow();
+		~TabWindow();
 
-		virtual ComponentType::Enum GetType() const { return ComponentType::TabWindow; }
-		virtual void OnCreated();
-		virtual bool SetProperty(UIProperty::Enum prop, const char* val);
-		virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
-		virtual bool ParseXML(tinyxml2::XMLElement* pelem);
-		virtual void Save(tinyxml2::XMLElement& elem);
-		virtual bool SetVisible(bool show);
+	public:
+		static TabWindowPtr Create();
+		
+
+		ComponentType::Enum GetType() const { return ComponentType::TabWindow; }
+		void OnCreated();
+		bool SetProperty(UIProperty::Enum prop, const char* val);
+		bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
+		bool ParseXML(tinyxml2::XMLElement* pelem);
+		void Save(tinyxml2::XMLElement& elem);
+		bool SetVisible(bool show);
 		void UpdateTabIndex(unsigned index);
 
 	private:

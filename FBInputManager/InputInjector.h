@@ -30,9 +30,9 @@
 #include "IInputInjector.h"
 
 namespace fastbird{
-	DECLARE_SMART_PTR(InputInjector);
+	FB_DECLARE_SMART_PTR(InputInjector);
 	class InputInjector : public IInputInjector{
-		DECLARE_PIMPL_NON_COPYABLE(InputInjector);
+		FB_DECLARE_PIMPL_NON_COPYABLE(InputInjector);
 		InputInjector();
 		~InputInjector();
 
@@ -43,9 +43,10 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// IInputInjector
 		//-------------------------------------------------------------------
-		bool IsValid(FBInputDevice::Enum type) const;
-		void Invalidate(FBInputDevice::Enum type) const;
-		void InvalidTemporary(FBInputDevice::Enum type, bool invalidate);
+		bool IsValid(InputDevice::Enum type) const;
+		void Invalidate(InputDevice::Enum type) const;
+		void InvalidateClickTime() const;
+		void InvalidTemporary(InputDevice::Enum type, bool invalidate);
 		
 		//-------------------------------------------------------------------
 		// Keyboard

@@ -33,10 +33,10 @@
 #include <set>
 namespace fastbird
 {
-	DECLARE_SMART_PTR(ShaderD3D11);
+	FB_DECLARE_SMART_PTR(ShaderD3D11);
 	class ShaderD3D11 : public IPlatformShader
 	{
-		DECLARE_PIMPL_NON_COPYABLE(ShaderD3D11);
+		FB_DECLARE_PIMPL_NON_COPYABLE(ShaderD3D11);
 		ShaderD3D11();
 
 	public:

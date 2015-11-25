@@ -30,7 +30,7 @@
 #include "FBRenderer/IVideoPlayer.h"
 #include <theora/theoradec.h>
 namespace fastbird{
-	DECLARE_SMART_PTR(VideoPlayerOgg);
+	FB_DECLARE_SMART_PTR(VideoPlayerOgg);
 	class FB_DLL_VIDEOPLAYER VideoPlayerOgg : public IVideoPlayer{		
 	public:
 		class Impl;

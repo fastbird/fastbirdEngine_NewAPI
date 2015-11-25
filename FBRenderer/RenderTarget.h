@@ -37,23 +37,23 @@ namespace fastbird
 	struct RenderTargetParam;
 	class IRenderTargetListener;
 	typedef unsigned RenderTargetId;
-	DECLARE_SMART_PTR(IRenderStrategy);
-	DECLARE_SMART_PTR(IInputInjector);
-	DECLARE_SMART_PTR(GaussianDist);
-	DECLARE_SMART_PTR(RenderPipeline);	
-	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(IScene);
-	DECLARE_SMART_PTR(Camera);
-	DECLARE_SMART_PTR(Mouse);
-	DECLARE_SMART_PTR(Keyboard);
-	DECLARE_SMART_PTR(Renderer);
-	DECLARE_SMART_PTR(RenderTarget);
+	FB_DECLARE_SMART_PTR(IRenderStrategy);
+	FB_DECLARE_SMART_PTR(IInputInjector);
+	FB_DECLARE_SMART_PTR(GaussianDist);
+	FB_DECLARE_SMART_PTR(RenderPipeline);	
+	FB_DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(IScene);
+	FB_DECLARE_SMART_PTR(Camera);
+	FB_DECLARE_SMART_PTR(Mouse);
+	FB_DECLARE_SMART_PTR(Keyboard);
+	FB_DECLARE_SMART_PTR(Renderer);
+	FB_DECLARE_SMART_PTR(RenderTarget);
 	class FB_DLL_RENDERER RenderTarget : public Observable<IRenderTargetObserver>
 	{
 		static const int FB_NUM_BLOOM_TEXTURES = 3;
 		static const int FB_NUM_STAR_TEXTURES = 12;
 		
-		DECLARE_PIMPL_NON_COPYABLE(RenderTarget);		
+		FB_DECLARE_PIMPL_NON_COPYABLE(RenderTarget);		
 		RenderTarget();
 
 	public:

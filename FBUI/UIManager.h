@@ -1,10 +1,38 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 #ifndef _UIManager_header_include__
 #define _UIManager_header_include__
 
-#include "IUIManager.h"
 #include "DragBox.h"
 #include "RegionTestParam.h"
+#include "Styles.h"
+#include "UIProperty.h"
 #include "FBFileMonitor/IFileChangeObserver.h"
 #include "FBRenderer/IRendererObserver.h"
 #include "FBInputManager/IInputConsumer.h"
@@ -13,41 +41,43 @@ namespace fastbird
 {
 	void RegisterLuaFuncs(lua_State* mL);
 	void RegisterLuaEnums(lua_State* mL);
-
-	class IWinBase;
-	class IUIObject;
-	class ListBox;
-	class UICommands;
-	class Container;
-
-	DECLARE_SMART_PTR(UIManager);
+	class IUIEditor;
+	FB_DECLARE_SMART_PTR(UICommands);
+	FB_DECLARE_SMART_PTR(UIAnimation);
+	FB_DECLARE_SMART_PTR(ListBox);
+	FB_DECLARE_SMART_PTR(WinBase);		
+	FB_DECLARE_SMART_PTR(UIManager);
 	class FB_DLL_UI UIManager : public IFileChangeObserver,
 		public IRendererObserver, public IInputConsumer
 	{
-		DECLARE_PIMPL_NON_COPYABLE(UIManager);
+		FB_DECLARE_PIMPL_NON_COPYABLE(UIManager);
+
+	protected:
 		UIManager();
-		~UIManager();
+		~UIManager();		
 
 	public:
 		static UIManagerPtr Create();
 		static bool HasInstance();
 		static UIManager& GetInstance();
 
-		typedef std::vector<IWinBase*> WinBases;
+		typedef std::vector<WinBasePtr> WinBases;
 		enum POPUP_TYPE
 		{
 			POPUP_TYPE_YES_NO
 		};
 
+		virtual WinBasePtr CreateComponent(ComponentType::Enum type);
 		void Shutdown();
 		// IFileChangeListeners
 		bool OnFileChanged(const char* file);
 
-		// IRenderListener
-		void BeforeUIRendering(HWindowId hwndId);
-		void BeforeDebugHudRendered(HWindowId hwndId);
-		void AfterDebugHudRendered(HWindowId hwndId);
-		void OnResolutionChanged(HWindowId hwndId);
+		// IRendererObserver
+		void BeforeUIRendering(HWindowId hwndId, HWindow hwnd);
+		void AfterUIRendered(HWindowId hwndId, HWindow hwnd);
+		void BeforeDebugHudRendering(HWindowId hwndId, HWindow hwnd);
+		void AfterDebugHudRendered(HWindowId hwndId, HWindow hwnd);
+		void OnResolutionChanged(HWindowId hwndId, HWindow hwnd);
 
 		// IUIManager Interfaces
 		void Update(float elapsedTime);
@@ -58,19 +88,19 @@ namespace fastbird
 		void DeleteLuaUI(const char* uiName, bool pending);
 		bool IsLoadedUI(const char* uiName);
 
-		IWinBase* AddWindow(int posX, int posY, int width, int height, ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
-		IWinBase* AddWindow(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
-		IWinBase* AddWindow(float posX, float posY, float width, float height, ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
-		IWinBase* AddWindow(ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
+		WinBasePtr AddWindow(int posX, int posY, int width, int height, ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
+		WinBasePtr AddWindow(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
+		WinBasePtr AddWindow(float posX, float posY, float width, float height, ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
+		WinBasePtr AddWindow(ComponentType::Enum type, HWindowId hwndId = INVALID_HWND_ID);
 
-		void DeleteWindow(IWinBase* pWnd);
+		void DeleteWindow(WinBasePtr pWnd);
 		void DeleteWindowsFor(HWindowId hwndId);
-		void SetFocusUI(IWinBase* pWnd);
-		IWinBase* GetFocusUI() const;
-		IWinBase* GetKeyboardFocusUI() const;
-		IWinBase* GetNewFocusUI() const;
+		void SetFocusUI(WinBasePtr pWnd);
+		WinBasePtr GetFocusUI() const;
+		WinBasePtr GetKeyboardFocusUI() const;
+		WinBasePtr GetNewFocusUI() const;
 		void SetFocusUI(const char* uiName);
-		bool IsFocused(const IWinBase* pWnd) const;
+		bool IsFocused(const WinBasePtr pWnd) const;
 		void DirtyRenderList(HWindowId hwndId);
 
 		void SetUIProperty(const char* uiname, const char* compname, const char* prop, const char* val, bool updatePosSize = false);
@@ -95,10 +125,10 @@ namespace fastbird
 		int GetPopUpResult() const;
 
 		lua_State* GetLuaState() const;
-		IWinBase* FindComp(const char* uiname, const char* compName) const;
+		WinBasePtr FindComp(const char* uiname, const char* compName) const;
 		void FindUIWnds(const char* uiname, WinBases& outV) const;
 		bool CacheListBox(const char* uiname, const char* compName);
-		ListBox* GetCachedListBox() const;
+		ListBoxPtr GetCachedListBox() const;
 		void SetEnablePosSizeEvent(bool enable);
 		bool GetEnablePosSizeEvent() const;
 		void SetVisible(const char* uiname, bool visible);
@@ -107,30 +137,30 @@ namespace fastbird
 		void CloseAllLuaUI();
 
 		void CloneUI(const char* uiname, const char* newUIname);
-		void IgnoreInput(bool ignore, IWinBase* modalWindow);
+		void IgnoreInput(bool ignore, WinBasePtr modalWindow);
 		void ToggleVisibleLuaUI(const char* uisname);
 
-		void RegisterAlwaysOnTopWnd(IWinBase* win);
-		void UnRegisterAlwaysOnTopWnd(IWinBase* win);
+		void RegisterAlwaysOnTopWnd(WinBasePtr win);
+		void UnRegisterAlwaysOnTopWnd(WinBasePtr win);
 
 		void MoveToBottom(const char* moveToBottom);
-		void MoveToBottom(IWinBase* moveToBottom);
-		void MoveToTop(IWinBase* moveToTop);
+		void MoveToBottom(WinBasePtr moveToBottom);
+		void MoveToTop(WinBasePtr moveToTop);
 		void HideUIsExcept(const std::vector<std::string>& excepts);
 
 		void HighlightUI(const char* uiname);
 		void StopHighlightUI(const char* uiname);
 
-		IUIAnimation* GetGlobalAnimation(const char* animName);
-		IUIAnimation* GetGlobalAnimationOrCreate(const char* animName);
+		UIAnimationPtr GetGlobalAnimation(const char* animName);
+		UIAnimationPtr GetGlobalAnimationOrCreate(const char* animName);
 		void PrepareTooltipUI();
 
-		UICommands* GetUICommands() const;
+		UICommandsPtr GetUICommands() const;
 		void SetUIEditorModuleHandle(HMODULE moduleHandle);
 		HMODULE GetUIEditorModuleHandle() const;
 		
-		IWinBase* WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& param);
-		IWinBase* WinBaseWithPointCheckAlways(const Vec2I& pt, const RegionTestParam& param);
+		WinBasePtr WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& param);
+		WinBasePtr WinBaseWithPointCheckAlways(const Vec2I& pt, const RegionTestParam& param);
 		TextManipulator* GetTextManipulator() const;
 		
 		const char* GetUIPath(const char* uiname) const;
@@ -146,8 +176,8 @@ namespace fastbird
 
 		TexturePtr GetBorderAlphaInfoTexture(const Vec2I& size, bool& callmeLater);
 
-		void AddAlwaysMouseOverCheck(IWinBase* comp);
-		void RemoveAlwaysMouseOverCheck(IWinBase* comp);
+		void AddAlwaysMouseOverCheck(WinBasePtr comp);
+		void RemoveAlwaysMouseOverCheck(WinBasePtr comp);
 
 		//-------------------------------------------------------------------
 		// For UI Editing
@@ -156,8 +186,8 @@ namespace fastbird
 		IUIEditor* GetUIEditor() const;
 		void StartLocatingComponent(ComponentType::Enum c);
 		void CancelLocatingComponent();
-		void ChangeFilepath(IWinBase* root, const char* newfile);
-		void CopyCompsAtMousePos(const std::vector<IWinBase*>& src);
+		void ChangeFilepath(WinBasePtr root, const char* newfile);
+		void CopyCompsAtMousePos(const std::vector<WinBasePtr>& src);
 	};
 }
 

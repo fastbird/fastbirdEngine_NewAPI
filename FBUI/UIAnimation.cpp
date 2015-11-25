@@ -1,12 +1,38 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "UIAnimation.h"
 #include "WinBase.h"
 
-
 namespace fastbird
 {
-
 //---------------------------------------------------------------------------
+FB_IMPLEMENT_STATIC_CREATE(UIAnimation);
 UIAnimation::UIAnimation()
 : mLength(1.f)
 , mCurTime(0)
@@ -16,7 +42,6 @@ UIAnimation::UIAnimation()
 , mCurScale(1, 1)
 , mActivate(false)
 , mID(-1)
-, mTargetUI(0)
 , mCurAlpha(0)
 , mGlobalAnim(false)
 {
@@ -107,7 +132,8 @@ void UIAnimation::Update(float deltaTime)
 		{
 			mEnd = true;
 			mCurTime = mLength;
-			if (mTargetUI)
+			auto target = mTargetUI.lock();
+			if (target)
 			{
 				if (HasPosAnim())
 				{
@@ -247,7 +273,7 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 
 	const char* sz = elem->Attribute("id");
 	if (sz)
-		mID = StringConverter::parseInt(sz);
+		mID = StringConverter::ParseInt(sz);
 
 	sz = elem->Attribute("name");
 	if (sz)
@@ -255,7 +281,7 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 
 	sz = elem->Attribute("length");
 	if (sz)
-		mLength = StringConverter::parseReal(sz);
+		mLength = StringConverter::ParseReal(sz);
 
 	sz = elem->Attribute("loop");
 	if (sz)
@@ -272,10 +298,10 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 				Color color;
 				sz = k->Attribute("time");
 				if (sz)
-					time = StringConverter::parseReal(sz);
+					time = StringConverter::ParseReal(sz);
 				sz = k->Attribute("color");
 				if (sz)
-					color = StringConverter::parseColor(sz);
+					color = StringMathConverter::ParseColor(sz);
 				AddTextColor(time, color);
 				k = k->NextSiblingElement("key");
 			}
@@ -293,10 +319,10 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 				Color color;
 				sz = k->Attribute("time");
 				if (sz)
-					time = StringConverter::parseReal(sz);
+					time = StringConverter::ParseReal(sz);
 				sz = k->Attribute("color");
 				if (sz)
-					color = StringConverter::parseColor(sz);
+					color = StringMathConverter::ParseColor(sz);
 				AddBackColor(time, color);
 				k = k->NextSiblingElement("key");
 			}
@@ -314,10 +340,10 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 				Color color;
 				sz = k->Attribute("time");
 				if (sz)
-					time = StringConverter::parseReal(sz);
+					time = StringConverter::ParseReal(sz);
 				sz = k->Attribute("color");
 				if (sz)
-					color = StringConverter::parseColor(sz);
+					color = StringMathConverter::ParseColor(sz);
 				AddMaterialColor(time, color);
 				k = k->NextSiblingElement("key");
 			}
@@ -335,7 +361,7 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 				Vec2 pos;
 				sz = k->Attribute("time");
 				if (sz)
-					time = StringConverter::parseReal(sz);
+					time = StringConverter::ParseReal(sz);
 				sz = k->Attribute("pos");
 				if (sz)
 					pos = StringMathConverter::ParseVec2(sz);
@@ -356,7 +382,7 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 				Vec2 scale;
 				sz = k->Attribute("time");
 				if (sz)
-					time = StringConverter::parseReal(sz);
+					time = StringConverter::ParseReal(sz);
 				sz = k->Attribute("scale");
 				if (sz)
 					scale = StringMathConverter::ParseVec2(sz);
@@ -377,10 +403,10 @@ void UIAnimation::LoadFromXML(tinyxml2::XMLElement* elem)
 				float alpha;
 				sz = k->Attribute("time");
 				if (sz)
-					time = StringConverter::parseReal(sz);
+					time = StringConverter::ParseReal(sz);
 				sz = k->Attribute("alpha");
 				if (sz)
-					alpha = StringConverter::parseReal(sz);
+					alpha = StringConverter::ParseReal(sz);
 				AddAlpha(time, alpha);
 				k = k->NextSiblingElement("key");
 			}
@@ -406,7 +432,7 @@ void UIAnimation::Save(tinyxml2::XMLElement& elem)
 				auto keyelem = textColorElem->GetDocument()->NewElement("key");
 				textColorElem->InsertEndChild(keyelem);
 				keyelem->SetAttribute("time", it.first);
-				keyelem->SetAttribute("color", StringConverter::toString(it.second).c_str());
+				keyelem->SetAttribute("color", StringConverter::ToString(it.second).c_str());
 			}
 		}
 
@@ -418,7 +444,7 @@ void UIAnimation::Save(tinyxml2::XMLElement& elem)
 				auto keyelem = backColorElem->GetDocument()->NewElement("key");
 				backColorElem->InsertEndChild(keyelem);
 				keyelem->SetAttribute("time", it.first);
-				keyelem->SetAttribute("color", StringConverter::toString(it.second).c_str());
+				keyelem->SetAttribute("color", StringConverter::ToString(it.second).c_str());
 			}
 		}
 
@@ -430,7 +456,7 @@ void UIAnimation::Save(tinyxml2::XMLElement& elem)
 				auto keyelem = materialColorElem->GetDocument()->NewElement("key");
 				materialColorElem->InsertEndChild(keyelem);
 				keyelem->SetAttribute("time", it.first);
-				keyelem->SetAttribute("color", StringConverter::toString(it.second).c_str());
+				keyelem->SetAttribute("color", StringMathConverter::ToString(it.second).c_str());
 			}
 		}
 
@@ -442,7 +468,7 @@ void UIAnimation::Save(tinyxml2::XMLElement& elem)
 				auto keyelem = posElem->GetDocument()->NewElement("key");
 				posElem->InsertEndChild(keyelem);
 				keyelem->SetAttribute("time", it.first);
-				keyelem->SetAttribute("pos", StringConverter::toString(it.second).c_str());
+				keyelem->SetAttribute("pos", StringMathConverter::ToString(it.second).c_str());
 			}
 		}
 
@@ -454,7 +480,7 @@ void UIAnimation::Save(tinyxml2::XMLElement& elem)
 				auto keyelem = scaleElem->GetDocument()->NewElement("key");
 				scaleElem->InsertEndChild(keyelem);
 				keyelem->SetAttribute("time", it.first);
-				keyelem->SetAttribute("scale", StringConverter::toString(it.second).c_str());
+				keyelem->SetAttribute("scale", StringMathConverter::ToString(it.second).c_str());
 			}
 		}
 
@@ -466,7 +492,7 @@ void UIAnimation::Save(tinyxml2::XMLElement& elem)
 				auto keyelem = alphaElem->GetDocument()->NewElement("key");
 				alphaElem->InsertEndChild(keyelem);
 				keyelem->SetAttribute("time", it.first);
-				keyelem->SetAttribute("alpha", StringConverter::toString(it.second).c_str());
+				keyelem->SetAttribute("alpha", StringConverter::ToString(it.second).c_str());
 			}
 		}
 	}
@@ -492,7 +518,7 @@ void UIAnimation::ParseLua(LuaObject& data)
 		{
 			auto time = v.GetField("time").GetFloat();
 			auto color = v.GetField("color").GetVec4();
-			AddTextColor(time, color);
+			AddTextColor(time, Color(color));
 		}
 	}
 
@@ -507,7 +533,7 @@ void UIAnimation::ParseLua(LuaObject& data)
 		{
 			auto time = v.GetField("time").GetFloat();
 			auto color = v.GetField("color").GetVec4();
-			AddBackColor(time, color);
+			AddBackColor(time, Color(color));
 		}
 	}
 
@@ -534,15 +560,16 @@ void UIAnimation::SetActivated(bool activate)
 	mEnd = false;
 	mCurTime = 0.f;
 	mCurPos = Vec2::ZERO;
-	if (mTargetUI)
+	auto targetUI = mTargetUI.lock();
+	if (targetUI)
 	{
 		if (!mActivate)
 		{
-			mTargetUI->ClearAnimationResult();
+			targetUI->ClearAnimationResult();
 			if (!mKeyBackColor.empty())
 			{
-				auto backColor = StringConverter::toString(mInitialBackColor);
-				mTargetUI->SetProperty(UIProperty::BACK_COLOR, backColor.c_str());
+				auto backColor = StringConverter::ToString(mInitialBackColor);
+				targetUI->SetProperty(UIProperty::BACK_COLOR, backColor.c_str());
 			}
 		}
 		else if (mActivate)
@@ -550,12 +577,12 @@ void UIAnimation::SetActivated(bool activate)
 			if (!mKeyScale.empty())
 			{
 				mCurScale = mKeyScale.begin()->second;
-				mTargetUI->SetAnimScale(mCurScale);
+				targetUI->SetAnimScale(mCurScale);
 			}
 
 			if (!mKeyBackColor.empty())
 			{
-				mInitialBackColor = mTargetUI->GetBackColor();
+				mInitialBackColor = targetUI->GetBackColor();
 			}
 		}
 	}
@@ -579,9 +606,9 @@ void UIAnimation::ClearData()
 }
 
 
-IUIAnimation* UIAnimation::Clone() const
+UIAnimationPtr UIAnimation::Clone() const
 {
-	UIAnimation* newAnim = FB_NEW(UIAnimation);
+	auto newAnim = UIAnimation::Create();
 	newAnim->mID = mID;
 	newAnim->mName = mName;
 	newAnim->mKeyPos = mKeyPos;

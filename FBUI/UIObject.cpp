@@ -1,12 +1,39 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "UIObject.h"
 #include "ComponentType.h"
-#include "IWinBase.h"
+
 #include "FBRenderer/VertexBuffer.h"
 using namespace fastbird;
 class UIObject::Impl{
 public:	
-	IWinBase* mOwnerUI;
+	WinBase* mOwnerUI;
 	MaterialPtr mMaterial;
 	VertexBufferPtr mVertexBuffer;
 
@@ -140,7 +167,7 @@ public:
 			(float)(mRegion.right - mRegion.left), (float)(mRegion.bottom - mRegion.top),
 			// empty
 			0);
-		mMaterial->SetMaterialParameters(0, val);
+		mMaterial->SetMaterialParameter(0, val);
 	}
 
 	void SetAlpha(float alpha)
@@ -179,7 +206,7 @@ public:
 		{
 			Vec2 uvStep = mTexcoords[0][2] - mTexcoords[0][1];
 			Vec4 val(uvStep.x, uvStep.y, mTexcoords[0][1].x, mTexcoords[0][1].y);
-			mMaterial->SetMaterialParameters(0, val);
+			mMaterial->SetMaterialParameter(0, val);
 		}
 	}
 	
@@ -209,7 +236,7 @@ public:
 		if (mMaterial)
 		{
 			const Vec4& prev = mMaterial->GetMaterialParameter(4);
-			mMaterial->SetMaterialParameters(4, Vec4(prev.x, prev.y, prev.z, mAlpha));
+			mMaterial->SetMaterialParameter(4, Vec4(prev.x, prev.y, prev.z, mAlpha));
 		}
 	}
 
@@ -474,3 +501,136 @@ UIObject::UIObject()
 UIObject::~UIObject()
 {
 }
+
+void UIObject::SetTexCoord(Vec2 coord[], DWORD num, unsigned index) {
+	mImpl->SetTexCoord(coord, num, index);
+}
+
+void UIObject::ClearTexCoord(unsigned index) {
+	mImpl->ClearTexCoord(index);
+}
+
+void UIObject::SetColors(DWORD colors[], DWORD num) {
+	mImpl->SetColors(colors, num);
+}
+
+void UIObject::SetUIPos(const Vec2I& pos) {
+	mImpl->SetUIPos(pos);
+}
+
+const Vec2I& UIObject::GetUIPos() const {
+	return mImpl->GetUIPos();
+}
+
+void UIObject::SetUISize(const Vec2I& size) {
+	mImpl->SetUISize(size);
+}
+
+const Vec2I& UIObject::GetUISize() const {
+	return mImpl->GetUISize();
+}
+
+void UIObject::SetAlpha(float alpha) {
+	mImpl->SetAlpha(alpha);
+}
+
+void UIObject::SetText(const wchar_t* s) {
+	mImpl->SetText(s);
+}
+
+void UIObject::SetTextOffset(const Vec2I& offset) {
+	mImpl->SetTextOffset(offset);
+}
+
+const Vec2I& UIObject::GetTextOffset() const {
+	return mImpl->GetTextOffset();
+}
+
+void UIObject::SetTextOffsetForCursorMovement(const Vec2I& offset) {
+	mImpl->SetTextOffsetForCursorMovement(offset);
+}
+
+Vec2I UIObject::GetTextStartWPos() const {
+	return mImpl->GetTextStartWPos();
+}
+
+void UIObject::SetTextColor(const Color& c) {
+	mImpl->SetTextColor(c);
+}
+
+void UIObject::SetTextSize(float size) {
+	mImpl->SetTextSize(size);
+}
+
+const Rect& UIObject::GetRegion() const {
+	return mImpl->GetRegion();
+}
+
+void UIObject::SetDebugString(const char* string) {
+	mImpl->SetDebugString(string);
+}
+
+void UIObject::SetNoDrawBackground(bool flag) {
+	mImpl->SetNoDrawBackground(flag);
+}
+
+bool UIObject::GetNoDrawBackground() const {
+	return mImpl->GetNoDrawBackground();
+}
+
+void UIObject::SetUseScissor(bool use, const Rect& rect) {
+	mImpl->SetUseScissor(use, rect);
+}
+
+void UIObject::SetSpecialOrder(int order) {
+	mImpl->SetSpecialOrder(order);
+}
+
+int UIObject::GetSpecialOrder() const {
+	return mImpl->GetSpecialOrder();
+}
+
+void UIObject::SetMultiline(bool multiline) {
+	mImpl->SetMultiline(multiline);
+}
+
+void UIObject::SetDoNotDraw(bool doNotDraw) {
+	mImpl->SetDoNotDraw(doNotDraw);
+}
+
+void UIObject::SetRenderTargetSize(const Vec2I& rtSize) {
+	mImpl->SetRenderTargetSize(rtSize);
+}
+
+const Vec2I& UIObject::GetRenderTargetSize() const {
+	return mImpl->GetRenderTargetSize();
+}
+
+bool UIObject::HasTexCoord() const {
+	return mImpl->HasTexCoord();
+}
+
+void UIObject::EnableLinearSampler(bool linear) {
+	mImpl->EnableLinearSampler(linear);
+}
+
+void UIObject::PreRender() {
+	mImpl->PreRender();
+}
+
+void UIObject::Render() {
+	mImpl->Render();
+}
+
+void UIObject::SetMaterial(const char* name) {
+	mImpl->SetMaterial(name);
+}
+
+MaterialPtr UIObject::GetMaterial() const {
+	return mImpl->GetMaterial();
+}
+
+void UIObject::UpdateRegion() {
+	mImpl->UpdateRegion();
+}
+

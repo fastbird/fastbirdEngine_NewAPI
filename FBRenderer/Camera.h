@@ -35,15 +35,15 @@
 
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IInputInjector);
-	DECLARE_SMART_PTR(IMouse);
-	DECLARE_SMART_PTR(IKeyboard);
-	DECLARE_SMART_PTR(ISpatialObject);
-	DECLARE_SMART_PTR(ICameraObserver);
-	DECLARE_SMART_PTR(Camera);
+	FB_DECLARE_SMART_PTR(IInputInjector);
+	FB_DECLARE_SMART_PTR(IMouse);
+	FB_DECLARE_SMART_PTR(IKeyboard);
+	FB_DECLARE_SMART_PTR(ISpatialObject);
+	FB_DECLARE_SMART_PTR(ICameraObserver);
+	FB_DECLARE_SMART_PTR(Camera);
 	class FB_DLL_RENDERER Camera : public ICamera, public Observable<ICameraObserver>
 	{
-		DECLARE_PIMPL(Camera);
+		FB_DECLARE_PIMPL(Camera);
 		Camera();
 
 	public:

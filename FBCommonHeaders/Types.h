@@ -113,38 +113,38 @@ bool operator == (const std::weak_ptr<T>& a, const std::weak_ptr<T>& b)
 	return a.lock() == b.lock();
 }
 
-#define DECLARE_NON_COPYABLE(className) \
+#define FB_DECLARE_NON_COPYABLE(className) \
 	className(const className&) = delete;\
 	className& operator= (const className&) = delete
 
-#define DECLARE_PIMPL(className) \
+#define FB_DECLARE_PIMPL(className) \
 	class Impl; \
 	std::shared_ptr<Impl> mImpl
 
-#define DECLARE_PIMPL_NON_COPYABLE(className) \
-	DECLARE_PIMPL(className); \
-	DECLARE_NON_COPYABLE(className)
+#define FB_DECLARE_PIMPL_NON_COPYABLE(className) \
+	FB_DECLARE_PIMPL(className); \
+	FB_DECLARE_NON_COPYABLE(className)
 
-#define DECLARE_PIMPL_CLONEABLE(className) \
-	DECLARE_PIMPL(className); \
+#define FB_DECLARE_PIMPL_CLONEABLE(className) \
+	FB_DECLARE_PIMPL(className); \
 protected:\
 	className(const className&);\
 	className& operator= (const className&) = delete;\
 private:\
 
 
-#define DECLARE_SMART_PTR(className) \
+#define FB_DECLARE_SMART_PTR(className) \
 	class className;\
 	typedef std::shared_ptr<className> className##Ptr;\
 	typedef std::shared_ptr<const className> className##ConstPtr;\
 	typedef std::weak_ptr<className> className##WeakPtr
 
-#define DECLARE_SMART_PTR_STRUCT(className) \
+#define FB_DECLARE_SMART_PTR_STRUCT(className) \
 	struct className;\
 	typedef std::shared_ptr<className> className##Ptr;\
 	typedef std::weak_ptr<className> className##WeakPtr
 
-#define IMPLEMENT_STATIC_CREATE(className)\
+#define FB_IMPLEMENT_STATIC_CREATE(className)\
 	className##Ptr className##::Create(){\
 		return className##Ptr(new className, [](className* obj){delete obj;});\
 	}

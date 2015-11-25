@@ -28,9 +28,9 @@
 #pragma once
 #include "IPlatformInputLayout.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(InputLayout);
+	FB_DECLARE_SMART_PTR(InputLayout);
 	class FB_DLL_RENDERER InputLayout{
-		DECLARE_PIMPL_NON_COPYABLE(InputLayout);
+		FB_DECLARE_PIMPL_NON_COPYABLE(InputLayout);
 		InputLayout();
 
 	public:

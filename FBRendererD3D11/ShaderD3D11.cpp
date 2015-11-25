@@ -218,7 +218,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(ShaderD3D11);
+FB_IMPLEMENT_STATIC_CREATE(ShaderD3D11);
 
 ShaderD3D11::ShaderD3D11()
 	: mImpl(new Impl(this))

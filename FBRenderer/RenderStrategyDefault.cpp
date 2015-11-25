@@ -60,7 +60,7 @@ static StarDef* starGlareDef = 0;
 //IRenderStrategyPtr RenderStrategyDefault::Create(){
 //	return IRenderStrategyPtr(FB_NEW(RenderStrategyDefault), [](RenderStrategyDefault* obj){FB_DELETE(obj); });
 //}
-IMPLEMENT_STATIC_CREATE(RenderStrategyDefault);
+FB_IMPLEMENT_STATIC_CREATE(RenderStrategyDefault);
 
 class RenderStrategyDefault::Impl{
 public:

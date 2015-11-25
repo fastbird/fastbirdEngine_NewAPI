@@ -1,14 +1,48 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "CardScroller.h"
 #include "Scroller.h"
 #include "CardData.h"
 #include "Wnd.h"
-#include "IUIManager.h"
+#include "UIManager.h"
 #include "ImageBox.h"
 #include "NamedPortrait.h"
 #include "Button.h"
+#include "UIObject.h"
 
 using namespace fastbird;
+
+CardScrollerPtr CardScroller::Create(){
+	CardScrollerPtr p(new CardScroller, [](CardScroller* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
 
 CardScroller::CardScroller()
 : mRatio(1)
@@ -30,9 +64,6 @@ CardScroller::CardScroller()
 CardScroller::~CardScroller()
 {
 	FB_DELETE(mCardData);
-	for (auto ui : mRecycleBin){
-		gFBUIManager->DeleteComponent(ui);
-	}
 }
 
 void CardScroller::OnSizeChanged()
@@ -51,19 +82,19 @@ bool CardScroller::SetProperty(UIProperty::Enum prop, const char* val)
 	{
 	case UIProperty::CARD_SIZEX:
 	{
-		mCardSizeX = StringConverter::parseInt(val);
+		mCardSizeX = StringConverter::ParseInt(val);
 		SetCardSizeX(mCardSizeX);
 		return true;
 	}
 	case UIProperty::CARD_SIZEY:
 	{
-		mCardSizeY = StringConverter::parseInt(val);
+		mCardSizeY = StringConverter::ParseInt(val);
 		SetCardSizeY(mCardSizeY);
 		return true;
 	}
 	case UIProperty::CARD_OFFSETY:
 	{
-		mCardOffsetY = StringConverter::parseInt(val);
+		mCardOffsetY = StringConverter::ParseInt(val);
 		SetCardOffset(mCardOffsetY);
 		return true;
 	}
@@ -82,7 +113,7 @@ bool CardScroller::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsi
 			if (mCardSizeX == UIProperty::GetDefaultValueInt(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mCardSizeX);
+		auto data = StringConverter::ToString(mCardSizeX);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -93,7 +124,7 @@ bool CardScroller::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsi
 			if (mCardSizeY == UIProperty::GetDefaultValueInt(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mCardSizeY);
+		auto data = StringConverter::ToString(mCardSizeY);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -104,7 +135,7 @@ bool CardScroller::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsi
 			if (mCardOffsetY == UIProperty::GetDefaultValueInt(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mCardOffsetY);
+		auto data = StringConverter::ToString(mCardOffsetY);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -168,7 +199,7 @@ unsigned CardScroller::AddCard(unsigned key, LuaObject& data)
 {
 	unsigned index = mCardData->AddData(key, data);
 	if (mItems.size() <= index){
-		mItems.push_back(0);
+		mItems.push_back(WndWeakPtr());
 	}
 	VisualizeData(index);
 	return index;
@@ -189,13 +220,11 @@ void CardScroller::DeleteCardWithIndex(unsigned index){
 
 void CardScroller::DeleteAllCard(){
 	mCardData->Clear();
-	for (auto ui : mRecycleBin){
-		gFBUIManager->DeleteComponent(ui);
-	}
 	VisualizeData(0);
+	mRecycleBin.clear();
 }
 
-void CardScroller::SetTexture(unsigned key, const char* comp, ITexture* texture){
+void CardScroller::SetTexture(unsigned key, const char* comp, TexturePtr texture){
 	mCardData->SetTexture(key, comp, texture);
 	unsigned index = mCardData->GetIndex(key);
 	if (index != -1)
@@ -205,7 +234,7 @@ void CardScroller::SetTexture(unsigned key, const char* comp, ITexture* texture)
 void CardScroller::VisualizeData(unsigned index){
 	auto numData = mCardData->GetNumData();
 	if ( numData == 0){
-		RemoveAllChild();
+		RemoveAllChildren();
 		mItems.clear();
 		return;
 	}
@@ -217,7 +246,7 @@ void CardScroller::VisualizeData(unsigned index){
 	
 	if (index < mStartIndex || index > mEndIndex)
 	{
-		if (mItems[index])
+		if (!mItems[index].expired())
 		{
 			MoveToRecycle(index);
 		}
@@ -225,9 +254,10 @@ void CardScroller::VisualizeData(unsigned index){
 
 	int hgap = mCardSizeY + mCardOffsetY;
 	Vec2 offset(0, 0);
-	if (mScrollerV)
+	auto scrollerV = mScrollerV.lock();
+	if (scrollerV)
 	{
-		offset = mScrollerV->GetOffset();
+		offset = scrollerV->GetOffset();
 	}
 
 	const auto data = mCardData->GetDataWithIndex(index);
@@ -237,17 +267,17 @@ void CardScroller::VisualizeData(unsigned index){
 		return;
 	}
 
-	if (mItems[index])
+	if (!mItems[index].expired())
 	{
+		auto item = mItems[index].lock();
 		auto it = mKeys.Find(index);
 		if (it == mKeys.end() || it->second != key){
-			mItems[index]->SetVisible(false);
-			mItems[index]->RemoveAllChild(true);
-			mItems[index]->ParseLua(data);
-			mItems[index]->SetVisible(true);
+			item->SetVisible(false);
+			item->RemoveAllChildren(true);
+			item->ParseLua(data);
+			item->SetVisible(true);
 			RefreshTextures(index);
 			RefreshProps(index);
-			
 		}
 	}
 	else
@@ -286,10 +316,10 @@ void CardScroller::Scrolled()
 	unsigned prevStart = mStartIndex;
 	unsigned prevEnd = mEndIndex;
 	int hgap = mCardSizeY + mCardOffsetY;
-
-	if (mScrollerV)
+	auto scrollerV = mScrollerV.lock();
+	if (scrollerV)
 	{
-		Vec2 offset = mScrollerV->GetOffset();
+		Vec2 offset = scrollerV->GetOffset();
 		int scrolledLen = -Round(offset.y * GetRenderTargetSize().y) - mCardOffsetY;
 		int topToBottom = mSize.y + scrolledLen - mCardOffsetY;
 
@@ -345,27 +375,27 @@ void CardScroller::Scrolled()
 void CardScroller::MoveToRecycle(unsigned index){
 	if (index < mItems.size())
 	{
-		if (mItems[index])
+		auto target = mItems[index].lock();
+		if (target)
 		{
-			if (mItems[index]->IsKeyboardFocused())
+			if (target->IsKeyboardFocused())
 				return;
-
-			auto target = mItems[index];
-			target->RemoveAllChild(true);
+			
+			target->RemoveAllChildren(true);
 			mRecycleBin.push_back(target);
-			RemoveChildNotDelete(target);
-			mItems[index] = 0;			
-			gFBUIManager->DirtyRenderList(mHwndId);
+			RemoveChild(target);
+			mItems[index].reset();
+			UIManager::GetInstance().DirtyRenderList(mHwndId);
 		}
 	}
 }
 
-Wnd* CardScroller::CreateNewCard(unsigned index){
+WndPtr CardScroller::CreateNewCard(unsigned index){
 	int hgap = mCardSizeY + mCardOffsetY;
 	int x = 0;
 	int y = hgap * index + mCardOffsetY;
 	
-	auto item = (Wnd*)AddChild(Vec2I(x, y), Vec2I(mCardSizeX, mCardSizeY), ComponentType::Window);
+	auto item = std::static_pointer_cast<Wnd>(AddChild(Vec2I(x, y), Vec2I(mCardSizeX, mCardSizeY), ComponentType::Window));
 	item->SetRuntimeChild(true);
 	item->SetRuntimeChildRecursive(true);
 	return item;
@@ -387,18 +417,18 @@ void CardScroller::RefreshTextures(unsigned index){
 			auto texture = t.texture;
 			if (comp->GetType() == ComponentType::ImageBox)
 			{
-				ImageBox* imgBox = (ImageBox*)comp;
+				auto imgBox = std::static_pointer_cast<ImageBox>(comp);
 				imgBox->SetTexture(texture);
 
 			}
 			else if (comp->GetType() == ComponentType::NamedPortrait)
 			{
-				NamedPortrait* portrait = (NamedPortrait*)comp;
+				auto portrait = std::static_pointer_cast<NamedPortrait>(comp);
 				portrait->SetTexture(texture);
 			}
 			else if (comp->GetType() == ComponentType::Button)
 			{
-				Button* btn = (Button*)comp;
+				auto btn = std::static_pointer_cast<Button>(comp);
 				btn->SetTexture(ButtonImages::Image, texture, true);
 			}
 		}
@@ -441,8 +471,9 @@ void CardScroller::SetItemProperty(unsigned key, const char* comp, const char* p
 
 	unsigned idx = mCardData->GetIndex(key);
 	if (idx != -1){		
-		if (mItems[idx]){
-			auto c = mItems[idx]->GetChild(comp, true);
+		if (!mItems[idx].expired()){
+			auto item = mItems[idx].lock();
+			auto c = item->GetChild(comp, true);
 			if (c)
 				c->SetProperty(p, val);
 			else

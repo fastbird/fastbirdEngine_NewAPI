@@ -1,25 +1,51 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "Container.h"
 #include "RadioBox.h"
-#include "IUIManager.h"
 #include "Scroller.h"
 #include "DropDown.h"
 #include "TextField.h"
+#include "UIManager.h"
 
 namespace fastbird
 {
 
 Container::Container()
-	: mScrollerV(0)
-	, mUseScrollerH(false), mUseScrollerV(false), mChildrenPosSizeChanged(false)
-	, mWndContentUI(0), mChildrenChanged(false), mMatchHeight(false)
+	: mUseScrollerH(false), mUseScrollerV(false), mChildrenPosSizeChanged(false)
+	, mChildrenChanged(false), mMatchHeight(false)
 	, mCurInputHandlingChanged(false), mHandlingInput(false), mSendEventToChildren(false)
 {
 }
 
 Container::~Container()
 {
-	for (auto winBase : mPendingDelete)
+	/*for (auto winBase : mPendingDelete)
 	{
 		COMPONENTS::iterator it = std::find(mChildren.begin(), mChildren.end(), winBase);
 		if (it != mChildren.end())
@@ -40,7 +66,7 @@ Container::~Container()
 	for (; it!=itEnd; it++)
 	{
 		gFBEnv->pUIManager->DeleteComponent(*it);
-	}
+	}*/
 }
 
 void Container::OnResolutionChanged(HWindowId hwndId){
@@ -50,14 +76,15 @@ void Container::OnResolutionChanged(HWindowId hwndId){
 	}
 }
 
-IWinBase* Container::AddChild(ComponentType::Enum type)
+WinBasePtr Container::AddChild(ComponentType::Enum type)
 {
 	mChildrenChanged = true; // only detecting addition. not deletion.
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->AddChild(type);
+		return contentUI->AddChild(type);
 	}
-	WinBase* pWinBase = (WinBase*)gFBEnv->pUIManager->CreateComponent(type);
+	auto pWinBase = UIManager::GetInstance().CreateComponent(type);
 	if (pWinBase)
 	{
 		pWinBase->SetHwndId(GetHwndId());
@@ -67,19 +94,20 @@ IWinBase* Container::AddChild(ComponentType::Enum type)
 		{
 			pWinBase->SetProperty(UIProperty::NO_MOUSE_EVENT, "true");
 		}
-		pWinBase->SetParent(this);
-		gFBEnv->pUIManager->DirtyRenderList(GetHwndId());
+		pWinBase->SetParent(std::dynamic_pointer_cast<Container>(mSelfPtr.lock()));
+		UIManager::GetInstance().DirtyRenderList(GetHwndId());
 	}
 	SetChildrenPosSizeChanged();
 	return pWinBase;
 }
 
-IWinBase* Container::AddChild(float posX, float posY, float width, float height, ComponentType::Enum type)
+WinBasePtr Container::AddChild(float posX, float posY, float width, float height, ComponentType::Enum type)
 {
 	mChildrenChanged = true; // only detecting addition. not deletion.
-	if (mWndContentUI && type != ComponentType::Scroller)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI && type != ComponentType::Scroller)
 	{
-		return mWndContentUI->AddChild(posX, posY, width, height, type);
+		return contentUI->AddChild(posX, posY, width, height, type);
 	}
 
 	auto child = AddChild(type);
@@ -93,12 +121,13 @@ IWinBase* Container::AddChild(float posX, float posY, float width, float height,
 	return child;
 }
 
-IWinBase* Container::AddChild(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type)
+WinBasePtr Container::AddChild(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type)
 {
 	mChildrenChanged = true; // only detecting addition. not deletion.
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->AddChild(pos, size, type);
+		return contentUI->AddChild(pos, size, type);
 	}
 
 	auto child = AddChild(type);
@@ -112,12 +141,13 @@ IWinBase* Container::AddChild(const Vec2I& pos, const Vec2I& size, ComponentType
 	return child;
 }
 
-IWinBase* Container::AddChild(float posX, float posY, const Vec2& width_aspectRatio, ComponentType::Enum type)
+WinBasePtr Container::AddChild(float posX, float posY, const Vec2& width_aspectRatio, ComponentType::Enum type)
 {
 	mChildrenChanged = true;
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->AddChild(posX, posY, width_aspectRatio, type);
+		return contentUI->AddChild(posX, posY, width_aspectRatio, type);
 	}
 
 	float width = width_aspectRatio.x;
@@ -126,46 +156,45 @@ IWinBase* Container::AddChild(float posX, float posY, const Vec2& width_aspectRa
 	float iWidth = localRT.x * width;
 	float iHeight = iWidth / ratio;
 	float height = iHeight / (float)localRT.y;
-	WinBase* winbase = (WinBase*)AddChild(posX, posY, width, height, type);
+	auto winbase = AddChild(posX, posY, width, height, type);
 	if (winbase)
 		winbase->SetAspectRatio(ratio);
 	return winbase;
 }
 
-IWinBase* Container::AddChild(const fastbird::LuaObject& compTable)
+WinBasePtr Container::AddChild(const fastbird::LuaObject& compTable)
 {
 	mChildrenChanged = true;
 	std::string typeText = compTable.GetField("type_").GetString();
 	auto type = ComponentType::ConvertToEnum(typeText.c_str());
 	bool dropdown = GetType() == ComponentType::DropDown;
-	IWinBase* p = AddChild(type);
+	WinBasePtr p = AddChild(type);
 	assert(p);
 	p->ParseLua(compTable);
 
 	if (dropdown)
 	{
-		DropDown* dd = (DropDown*)this;
+		auto dd = std::dynamic_pointer_cast<DropDown>(mSelfPtr.lock());		
 		dd->AddDropDownItem(p);
 	}
 	SetChildrenPosSizeChanged();
 	return p;
 }
 
-void Container::RemoveChild(IWinBase* child, bool immediately)
+void Container::RemoveChild(WinBasePtr child, bool immediately)
 {
 	if (child == 0)
 		return;
-
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->RemoveChild(child, immediately);
+		return contentUI->RemoveChild(child, immediately);
 	}
 
 	if (immediately)
 	{
-		if (mScrollerV == child)
-			mScrollerV = 0;
-		gFBEnv->pUIManager->DeleteComponent(child);
+		if (mScrollerV.lock() == child)
+			mScrollerV.reset();
 		DeleteValuesInList(mChildren, child);
 	}
 	else
@@ -176,91 +205,84 @@ void Container::RemoveChild(IWinBase* child, bool immediately)
 	SetChildrenPosSizeChanged();
 }
 
-void Container::RemoveChildNotDelete(IWinBase* child)
+//void Container::RemoveChildNotDelete(WinBasePtr child)
+//{
+//	if (mWndContentUI)
+//	{
+//		return mWndContentUI->RemoveChildNotDelete(child);
+//	}
+//	if (mScrollerV == child)
+//		mScrollerV = 0;
+//	if (mHandlingInput &&  mChildren.rend() != mCurInputHandling  &&  *mCurInputHandling == child)
+//	{
+//		auto nextIt = mChildren.erase(--mCurInputHandling.base());
+//		if (nextIt == mChildren.end())	{
+//			mCurInputHandling = mChildren.rbegin();
+//		}
+//		else{
+//			++nextIt;
+//			if (nextIt == mChildren.end())	{
+//				mCurInputHandling = mChildren.rbegin();
+//			}
+//			else
+//			{
+//				mCurInputHandling = COMPONENTS::reverse_iterator(nextIt);
+//			}
+//			auto temp = (*mCurInputHandling) == child;
+//			assert(!temp);
+//		}
+//		
+//		mCurInputHandlingChanged = true;
+//	}
+//	else if (mHandlingInput && mCurInputHandling.base() != mChildren.end() && *mCurInputHandling.base() == child){
+//		auto nextIt = mChildren.erase(mCurInputHandling.base());
+//		if (nextIt == mChildren.end())	{
+//			mCurInputHandling = mChildren.rbegin();
+//		}
+//		else{
+//			++nextIt;
+//			if (nextIt == mChildren.end())	{
+//				mCurInputHandling = mChildren.rbegin();
+//			}
+//			else
+//			{
+//				mCurInputHandling = COMPONENTS::reverse_iterator(nextIt);
+//			}
+//			auto temp = (*mCurInputHandling) == child;
+//			assert(!temp);
+//		}
+//
+//		mCurInputHandlingChanged = true;
+//	}
+//	else
+//	{
+//		DeleteValuesInList(mChildren, child);
+//	}
+//	if (UIManager::GetInstance().GetKeyboardFocusUI() == child)
+//		UIManager::GetInstance().SetFocusUI(mSelfPtr.lock());
+//
+//	UIManager::GetInstance().DirtyRenderList(GetHwndId());
+//}
+
+void Container::RemoveAllChildren(bool immediately)
 {
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->RemoveChildNotDelete(child);
-	}
-	if (mScrollerV == child)
-		mScrollerV = 0;
-	if (mHandlingInput &&  mChildren.rend() != mCurInputHandling  &&  *mCurInputHandling == child)
-	{
-		auto nextIt = mChildren.erase(--mCurInputHandling.base());
-		if (nextIt == mChildren.end())	{
-			mCurInputHandling = mChildren.rbegin();
-		}
-		else{
-			++nextIt;
-			if (nextIt == mChildren.end())	{
-				mCurInputHandling = mChildren.rbegin();
-			}
-			else
-			{
-				mCurInputHandling = COMPONENTS::reverse_iterator(nextIt);
-			}
-			auto temp = (*mCurInputHandling) == child;
-			assert(!temp);
-		}
-		
-		mCurInputHandlingChanged = true;
-	}
-	else if (mHandlingInput && mCurInputHandling.base() != mChildren.end() && *mCurInputHandling.base() == child){
-		auto nextIt = mChildren.erase(mCurInputHandling.base());
-		if (nextIt == mChildren.end())	{
-			mCurInputHandling = mChildren.rbegin();
-		}
-		else{
-			++nextIt;
-			if (nextIt == mChildren.end())	{
-				mCurInputHandling = mChildren.rbegin();
-			}
-			else
-			{
-				mCurInputHandling = COMPONENTS::reverse_iterator(nextIt);
-			}
-			auto temp = (*mCurInputHandling) == child;
-			assert(!temp);
-		}
-
-		mCurInputHandlingChanged = true;
-	}
-	else
-	{
-		DeleteValuesInList(mChildren, child);
-	}
-	if (gFBUIManager->GetKeyboardFocusUI() == child)
-		gFBUIManager->SetFocusUI(this);
-
-	gFBUIManager->DirtyRenderList(GetHwndId());
-}
-
-void Container::RemoveAllChild(bool immediately)
-{
-	if (mWndContentUI)
-	{
-		return mWndContentUI->RemoveAllChild(immediately);
+		return contentUI->RemoveAllChildren(immediately);
 	}
 	if (immediately)
 	{
-		while (!mChildren.empty())
-		{
-			if (mScrollerV == *mChildren.begin())
-			{
-				mScrollerV = 0;
-			}
-			gFBEnv->pUIManager->DeleteComponent(*mChildren.begin());
-			mChildren.erase(mChildren.begin());
-		}
+		mChildren.clear();
 		mChildrenChanged = true;
 	}
 	else
 	{
 		for (auto child : mChildren)
 		{
-			Container* childCont = dynamic_cast<Container*>(child);
+			auto childCont = std::dynamic_pointer_cast<Container>(child);
 			if (childCont)
-				childCont->RemoveAllChild(false);
+				childCont->RemoveAllChildren(false);
 			child->ClearName();
 			if (!ValueExistsInVector(mPendingDelete, child)){
 				mPendingDelete.push_back(child);				
@@ -271,8 +293,9 @@ void Container::RemoveAllChild(bool immediately)
 }
 
 void Container::RemoveAllChildExceptRuntime(){
-	if (mWndContentUI){
-		mWndContentUI->RemoveAllChildExceptRuntime();
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI){
+		contentUI->RemoveAllChildExceptRuntime();
 		return;
 	}
 
@@ -289,11 +312,12 @@ void Container::RemoveAllChildExceptRuntime(){
 	mChildrenChanged = true;
 }
 
-IWinBase* Container::GetChild(const std::string& name, bool includeSubChildren/*= false*/)
+WinBasePtr Container::GetChild(const std::string& name, bool includeSubChildren/*= false*/)
 {
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->GetChild(name, includeSubChildren);
+		return contentUI->GetChild(name, includeSubChildren);
 	}
 
 	for (auto var : mChildren)
@@ -307,7 +331,7 @@ IWinBase* Container::GetChild(const std::string& name, bool includeSubChildren/*
 	}
 	if (includeSubChildren)
 	{
-		IWinBase* sub = 0;
+		WinBasePtr sub = 0;
 		for (auto var : mChildren)
 		{
 			sub = var->GetChild(name, true);
@@ -318,11 +342,12 @@ IWinBase* Container::GetChild(const std::string& name, bool includeSubChildren/*
 	return 0;
 }
 
-IWinBase* Container::GetChild(unsigned idx)
+WinBasePtr Container::GetChild(unsigned idx)
 {
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->GetChild(idx);
+		return contentUI->GetChild(idx);
 	}
 	if (mChildren.empty())
 		return 0;
@@ -339,9 +364,10 @@ IWinBase* Container::GetChild(unsigned idx)
 
 unsigned Container::GetNumChildren(bool excludeRunTimeChild) const
 {
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		return mWndContentUI->GetNumChildren();
+		return contentUI->GetNumChildren();
 	}
 	if (excludeRunTimeChild)
 	{
@@ -372,13 +398,10 @@ void Container::OnStartUpdate(float elapsedTime)
 	bool deleted = false;
 	for (auto winBase : mPendingDelete)
 	{
-		COMPONENTS::iterator it = std::find(mChildren.begin(), mChildren.end(), winBase);
+		ComponentPtrs::iterator it = std::find(mChildren.begin(), mChildren.end(), winBase);
 		if (it != mChildren.end())
 		{
-			if (*it == mScrollerV)
-				mScrollerV = 0;
 			mChildren.erase(it);
-			gFBEnv->pUIManager->DeleteComponent(winBase);
 			deleted = true;
 		}
 		else
@@ -389,7 +412,7 @@ void Container::OnStartUpdate(float elapsedTime)
 	}
 	mPendingDelete.clear();
 	if (deleted)
-		gFBEnv->pUIManager->DirtyRenderList(GetHwndId());
+		UIManager::GetInstance().DirtyRenderList(GetHwndId());
 
 	if (mChildrenPosSizeChanged)
 	{
@@ -407,9 +430,9 @@ void Container::OnClickRadio(RadioBox* pRadio)
 	int groupID = pRadio->GetGroupID();
 	for (auto winBase : mChildren)
 	{
-		if ((void*)winBase != (void*)pRadio && winBase->GetType() == ComponentType::RadioBox)
+		if ((void*)winBase.get() != (void*)pRadio && winBase->GetType() == ComponentType::RadioBox)
 		{
-			RadioBox* pRadio = (RadioBox*)winBase;
+			auto pRadio = std::static_pointer_cast<RadioBox>(winBase);
 			if (pRadio->GetGroupID()==groupID)
 				pRadio->SetCheck(false);
 		}
@@ -438,12 +461,12 @@ void Container::OnAlphaChanged()
 	}
 }
 
-void Container::GatherVisit(std::vector<IUIObject*>& v)
+void Container::GatherVisit(std::vector<UIObject*>& v)
 {
 	//char buf[512];
 	//sprintf_s(buf, "Container::GatherVisit (%s)", mName.c_str());
 	//Profiler p(buf);
-	COMPONENTS::iterator it = mChildren.begin(), itEnd = mChildren.end();
+	ComponentPtrs::iterator it = mChildren.begin(), itEnd = mChildren.end();
 	for (; it!=itEnd; it++)
 	{
 		if ((*it)->GetVisible() && !(*it)->GetGatheringException())
@@ -515,7 +538,7 @@ bool Container::GetFocus(bool includeChildren /*= false*/) const
 
 	if (!focused && includeChildren)
 	{
-		COMPONENTS::const_iterator it = mChildren.begin(), itEnd = mChildren.end();
+		ComponentPtrs::const_iterator it = mChildren.begin(), itEnd = mChildren.end();
 		for (; it!=itEnd && !focused; it++)
 		{
 			focused = (*it)->GetFocus(includeChildren);
@@ -527,12 +550,14 @@ bool Container::GetFocus(bool includeChildren /*= false*/) const
 
 void Container::RefreshVScrollbar()
 {
-	if (mWndContentUI){
-		mWndContentUI->RefreshVScrollbar();
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI){
+		contentUI->RefreshVScrollbar();
 		return;
 	}
 
-	if (!mScrollerV && !mUseScrollerV)
+	auto scrollerV = mScrollerV.lock();
+	if (!scrollerV && !mUseScrollerV)
 		return;
 
 	// find last wn
@@ -546,38 +571,38 @@ void Container::RefreshVScrollbar()
 	{
 		float visableRatio = wnSizeY / contentHeight;
 
-		if (!mScrollerV && mUseScrollerV)
+		if (!scrollerV && mUseScrollerV)
 		{
-			mScrollerV = static_cast<Scroller*>(AddChild(1.0f, 0.0f, 0.01f, 1.0f, ComponentType::Scroller));
-			mScrollerV->SetRuntimeChild(true);
-			mScrollerV->SetRender3D(mRender3D, GetRenderTargetSize());
-			mScrollerV->ChangeSizeX(4);
+			scrollerV = std::static_pointer_cast<Scroller>(AddChild(1.0f, 0.0f, 0.01f, 1.0f, ComponentType::Scroller));
+			mScrollerV = scrollerV;
+			scrollerV->SetRuntimeChild(true);
+			scrollerV->SetRender3D(mRender3D, GetRenderTargetSize());
+			scrollerV->ChangeSizeX(4);
 			if (!mBorders.empty())
 			{
-				mScrollerV->SetProperty(UIProperty::OFFSETX, "-4");
+				scrollerV->SetProperty(UIProperty::OFFSETX, "-4");
 			}
-			mScrollerV->SetAlign(ALIGNH::RIGHT, ALIGNV::TOP);
-			mScrollerV->SetUseAbsPos(false);
-			mScrollerV->SetProperty(UIProperty::BACK_COLOR, "0.46f, 0.46f, 0.36f, 0.7f");
-			mScrollerV->SetOwner(this);
-			mScrollerV->SetVisible(true);
+			scrollerV->SetAlign(ALIGNH::RIGHT, ALIGNV::TOP);
+			scrollerV->SetUseAbsPos(false);
+			scrollerV->SetProperty(UIProperty::BACK_COLOR, "0.46f, 0.46f, 0.36f, 0.7f");			
+			scrollerV->SetVisible(true);
 		}
 
-		if (mScrollerV)
+		if (scrollerV)
 		{
-			mScrollerV->SetVisible(true);
-			mScrollerV->ChangeNSizeY(visableRatio);
-			//mScrollerV->OnPosChanged(false);			
-			mScrollerV->SetMaxOffset(Vec2(0, length));
+			scrollerV->SetVisible(true);
+			scrollerV->ChangeNSizeY(visableRatio);
+			//scrollerV->OnPosChanged(false);			
+			scrollerV->SetMaxOffset(Vec2(0, length));
 		}
 	}
 	else
 	{
-		if (mScrollerV)
+		if (scrollerV)
 		{
-			mScrollerV->SetVisible(false);
-			mScrollerV->ResetScroller();
-			if (mScrollerV->GetVisible())
+			scrollerV->SetVisible(false);
+			scrollerV->ResetScroller();
+			if (scrollerV->GetVisible())
 			{
 				for (auto child : mChildren)
 				{
@@ -598,9 +623,8 @@ float Container::GetContentHeight() const
 	if (mChildren.empty())
 		return GetFinalSize().y / (float)GetRenderTargetSize().y;
 
-	for (auto i : mChildren)
-	{
-		WinBase* pWinBase = (WinBase*)i;
+	for (auto& pWinBase : mChildren)
+	{		
 		float wnEnd = pWinBase->GetWNPos().y + pWinBase->GetContentHeight();
 		contentWNEnd = std::max(wnEnd, contentWNEnd);
 	}
@@ -613,8 +637,7 @@ float Container::GetContentEnd() const{
 		return end;
 	}
 
-	for (auto i : mChildren){
-		WinBase* winbase = (WinBase*)i;
+	for (auto& winbase : mChildren){		
 		float cend = winbase->GetContentEnd();
 		end = std::max(end, cend);		
 	}
@@ -631,8 +654,7 @@ float Container::GetChildrenContentEnd() const{
 	}
 
 	float end = 0;
-	for (auto i : mChildren){
-		WinBase* winbase = (WinBase*)i;
+	for (auto& winbase : mChildren){		
 		float cend = winbase->GetContentEnd();
 		end = std::max(end, cend);
 	}
@@ -705,15 +727,17 @@ void Container::Scrolled()
 		mScrolledFunc();
 	}
 
-	if (mScrollerV)
+	auto scrollerV = mScrollerV.lock();
+	auto contentUI = mWndContentUI.lock();
+	if (scrollerV)
 	{
-		float visableRatio = mScrollerV->GetNSize().y;
+		float visableRatio = scrollerV->GetNSize().y;
 		float movable = 1.0f - visableRatio;
-		float maxOffset = mScrollerV->GetMaxOffset().y;
-		const Vec2& offset = mScrollerV->GetOffset();
+		float maxOffset = scrollerV->GetMaxOffset().y;
+		const Vec2& offset = scrollerV->GetOffset();
 		float curPos = -offset.y / maxOffset;
 		float nPosY = movable * curPos;
-		mScrollerV->ChangeNPosY(nPosY);
+		scrollerV->ChangeNPosY(nPosY);
 		{
 			for (auto child : mChildren)
 			{
@@ -721,14 +745,13 @@ void Container::Scrolled()
 				{
 					child->SetWNScollingOffset(offset);
 				}
-					
 			}
 		}
 		TriggerRedraw();
 	}
-	else if (mWndContentUI && !mWndContentUI->SetScrolledFunc())
+	else if (contentUI && !contentUI->SetScrolledFunc())
 	{
-		mWndContentUI->Scrolled();
+		contentUI->Scrolled();
 	}
 }
 
@@ -759,7 +782,7 @@ void Container::ParseXMLChildren(tinyxml2::XMLElement* pelem){
 			break;
 		}
 		ComponentType::Enum type = ComponentType::ConvertToEnum(sz);
-		IWinBase* p = AddChild(type);
+		WinBasePtr p = AddChild(type);
 		assert(p);
 		p->SetRender3D(mRender3D, GetRenderTargetSize());
 		p->ParseXML(pchild);
@@ -783,7 +806,7 @@ void Container::Save(tinyxml2::XMLElement& elem)
 }
 
 void Container::SaveChildren(tinyxml2::XMLElement& elem){
-	for (auto child : mChildren)
+	for (auto& child : mChildren)
 	{
 		if (!child->IsRuntimeChild())
 		{
@@ -792,7 +815,7 @@ void Container::SaveChildren(tinyxml2::XMLElement& elem){
 			child->Save(*compElem);
 		}
 		else if(!child->IsRuntimeChildRecursive()){
-			auto childCont = dynamic_cast<Container*>(child);
+			auto childCont = std::dynamic_pointer_cast<Container>(child);
 			if (childCont){
 				childCont->SaveChildren(elem);
 			}
@@ -821,7 +844,7 @@ bool Container::ParseLua(const fastbird::LuaObject& compTable)
 			auto typee = ComponentType::ConvertToEnum(type.c_str());
 			if (typee != ComponentType::NUM)
 			{
-				IWinBase* p = AddChild(typee);
+				WinBasePtr p = AddChild(typee);
 				assert(p);
 				p->SetRender3D(mRender3D, GetRenderTargetSize());
 				p->ParseLua(child);				
@@ -846,9 +869,8 @@ bool Container::ParseLua(const fastbird::LuaObject& compTable)
 void Container::MatchHeight(bool checkName)
 {
 	int contentWNEnd = 0;
-	for (auto i : mChildren)
+	for (auto& pWinBase : mChildren)
 	{
-		WinBase* pWinBase = (WinBase*)i;
 		if (pWinBase->GetVisible())
 		{
 			if (checkName && strlen(pWinBase->GetName())==0)
@@ -876,11 +898,12 @@ bool Container::SetProperty(UIProperty::Enum prop, const char* val)
 	case UIProperty::SCROLLERV_OFFSET:
 	{
 		RefreshVScrollbar();
-		if (mScrollerV)
+		auto scrollerV = mScrollerV.lock();
+		if (scrollerV)
 		{
-			auto offset = mScrollerV->GetOffset();
-			offset.y = StringConverter::parseReal(val);
-			mScrollerV->SetOffset(offset);
+			auto offset = scrollerV->GetOffset();
+			offset.y = StringConverter::ParseReal(val);
+			scrollerV->SetOffset(offset);
 		}
 	}
 	case UIProperty::SCROLLERH:
@@ -918,7 +941,7 @@ bool Container::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize,
 			if (mUseScrollerV == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mUseScrollerV);
+		auto data = StringConverter::ToString(mUseScrollerV);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -926,10 +949,11 @@ bool Container::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize,
 	{
 		if (notDefaultOnly)
 			return false;
-
-		if (mScrollerV)
+		
+		auto scrollerV = mScrollerV.lock();
+		if (scrollerV)
 		{
-			sprintf_s(val, 256, "%.4f", mScrollerV->GetOffset().y);
+			sprintf_s(val, 256, "%.4f", scrollerV->GetOffset().y);
 			return true;
 		}
 		else
@@ -945,7 +969,7 @@ bool Container::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize,
 			if (mUseScrollerH == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mUseScrollerH);
+		auto data = StringConverter::ToString(mUseScrollerH);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;		
 	}
@@ -956,7 +980,7 @@ bool Container::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize,
 			if (mMatchHeight == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mMatchHeight);
+		auto data = StringConverter::ToString(mMatchHeight);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -966,7 +990,7 @@ bool Container::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize,
 			if (mSendEventToChildren == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		strcpy_s(val, bufsize, StringConverter::toString(mSendEventToChildren).c_str());		
+		strcpy_s(val, bufsize, StringConverter::ToString(mSendEventToChildren).c_str());		
 		return true;
 	}
 	}
@@ -999,8 +1023,9 @@ void Container::RemoveAllEvents(bool includeChildren)
 
 const Vec2& Container::GetScrollOffset() const
 {
-	assert(mScrollerV);
-	return mScrollerV->GetOffset();
+	auto scrollerV = mScrollerV.lock();
+	assert(scrollerV);
+	return scrollerV->GetOffset();
 }
 
 void Container::SetRender3D(bool render3D, const Vec2I& renderTargetSize)
@@ -1039,7 +1064,7 @@ void Container::SetHwndId(HWindowId hwndId)
 	}
 }
 
-IWinBase* Container::WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& param) const
+WinBasePtr Container::WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& param) const
 {
 	auto in = IsIn(pt, param.mIgnoreScissor);
 	bool hasScissorIgnoringChild = HasScissorIgnoringChild();
@@ -1058,7 +1083,7 @@ IWinBase* Container::WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& pa
 
 				if (param.mOnlyContainer)
 				{
-					auto cont = dynamic_cast<Container*>(child);
+					auto cont = std::dynamic_pointer_cast<Container>(child);
 					if (!cont)
 						continue;
 				}
@@ -1078,22 +1103,21 @@ IWinBase* Container::WinBaseWithPoint(const Vec2I& pt, const RegionTestParam& pa
 		return 0;
 
 	if (in && GetVisible()){
-		auto it = std::find(param.mExceptions.begin(), param.mExceptions.end(), this);
+		auto it = std::find(param.mExceptions.begin(), param.mExceptions.end(), mSelfPtr.lock());
 		if (it == param.mExceptions.end())
-			return (IWinBase*)this;
+			return mSelfPtr.lock();
 	}
 	return 0;
 }
 
-IWinBase* Container::WinBaseWithTabOrder(unsigned tabOrder) const
+WinBasePtr Container::WinBaseWithTabOrder(unsigned tabOrder) const
 {
-	VectorMap<unsigned, IWinBase*> winbases;
+	VectorMap<unsigned, WinBasePtr> winbases;
 	GetRootWnd()->GatherTabOrder(winbases);
 	if (winbases.empty())
 		return 0;
-
-	auto keyboard = gFBEnv->pEngine->GetKeyboard();
-	if (keyboard->IsKeyDown(VK_SHIFT)){
+	auto injector = InputManager::GetInstance().GetInputInjector();	
+	if (injector->IsKeyDown(VK_SHIFT)){
 		for (auto rit = winbases.rbegin(); rit != winbases.rend(); ++rit){
 			if ((*rit).first <= tabOrder)
 			{
@@ -1114,7 +1138,7 @@ IWinBase* Container::WinBaseWithTabOrder(unsigned tabOrder) const
 	return 0;
 }
 
-void Container::GatherTabOrder(VectorMap<unsigned, IWinBase*>& winbases) const
+void Container::GatherTabOrder(VectorMap<unsigned, WinBasePtr>& winbases) const
 {
 	if (!mEnable)
 		return;
@@ -1137,18 +1161,18 @@ void Container::GetBiggestTabOrder(int& curBiggest) const{
 void Container::TabPressed()
 {
 		int nextOrder = 0;
-	auto keyfocusWnd = gFBUIManager->GetKeyboardFocusUI();
+	auto keyfocusWnd = UIManager::GetInstance().GetKeyboardFocusUI();
 	if (keyfocusWnd)
 	{
 		auto tabOrder = keyfocusWnd->GetTabOrder();
-		auto keyboard = gFBEnv->pEngine->GetKeyboard();
+		auto injector = InputManager::GetInstance().GetInputInjector();		
 		if (tabOrder == -1){
 			nextOrder = 0;
 		}
 		else{
 			int biggest = -1;
 			GetRootWnd()->GetBiggestTabOrder(biggest);
-			if (keyboard->IsKeyDown(VK_SHIFT)) {
+			if (injector->IsKeyDown(VK_SHIFT)) {
 				nextOrder = tabOrder - 1;
 				if (nextOrder == -1)
 				{					
@@ -1167,9 +1191,9 @@ void Container::TabPressed()
 		auto win = WinBaseWithTabOrder(nextOrder);
 		if (win)
 		{
-			gFBUIManager->SetFocusUI(win);
+			UIManager::GetInstance().SetFocusUI(win);
 			if (win->GetType() == ComponentType::TextField){
-				TextField* tf = (TextField*)win;
+				auto tf = std::static_pointer_cast<TextField>(win);
 				tf->SelectAll();
 			}
 		}
@@ -1180,11 +1204,12 @@ void Container::TabPressed()
 	}
 }
 
-void Container::TransferChildrenTo(Container* destContainer){
-	COMPONENTS remained;
-	for (auto child : mChildren){
-		bool transferred = false;
-		if (child != destContainer && child != mWndContentUI){
+void Container::TransferChildrenTo(ContainerPtr destContainer){
+	ComponentPtrs remained;
+	auto contentUI = mWndContentUI.lock();
+	for (auto& child : mChildren){
+		bool transferred = false;		
+		if (child != destContainer && child != contentUI){
 			auto found = mDoNotTransfer.find(child);
 			if (found == mDoNotTransfer.end()){
 				destContainer->AddChild(child);
@@ -1198,18 +1223,19 @@ void Container::TransferChildrenTo(Container* destContainer){
 	mChildren = remained;
 	/*if (mWndContentUI == destContainer)
 		mChildren.push_back(destContainer);*/
-	mScrollerV = 0;
+	mScrollerV.reset();
 	SetChildrenPosSizeChanged();
 }
 
-void Container::AddChild(IWinBase* child){
+void Container::AddChild(WinBasePtr child){
 	if (!child)
 		return;
 
 	mChildrenChanged = true; // only detecting addition. not deletion.
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		mWndContentUI->AddChild(child);
+		contentUI->AddChild(child);
 		return;
 	}
 
@@ -1220,28 +1246,28 @@ void Container::AddChild(IWinBase* child){
 	{
 		child->SetProperty(UIProperty::NO_MOUSE_EVENT, "true");
 	}
-	WinBase* winbase = (WinBase*)child;
-	winbase->SetParent(this);
-	gFBEnv->pUIManager->DirtyRenderList(GetHwndId());
-	winbase->OnParentSizeChanged();
-	winbase->OnParentPosChanged();
+	child->SetParent(std::dynamic_pointer_cast<Container>(mSelfPtr.lock()));
+	UIManager::GetInstance().DirtyRenderList( GetHwndId() );
+	child->OnParentSizeChanged();
+	child->OnParentPosChanged();
 
 	SetChildrenPosSizeChanged();	
 }
 
-void Container::AddChildSimple(IWinBase* child){
+void Container::AddChildSimple(WinBasePtr child){
 	if (!child)
 		return;
 
-	if (mWndContentUI)
+	auto contentUI = mWndContentUI.lock();
+	if (contentUI)
 	{
-		mWndContentUI->AddChildSimple(child);
+		contentUI->AddChildSimple(child);
 		return;
 	}
 	mChildren.push_back(child);
 }
 
-void Container::DoNotTransfer(IWinBase* child){
+void Container::DoNotTransfer(WinBasePtr child){
 	mDoNotTransfer.insert(child);
 }
 
@@ -1253,32 +1279,32 @@ bool Container::HasScissorIgnoringChild() const{
 	return false;
 }
 
-void Container::OnMouseIn(IMouse* mouse, IKeyboard* keyboard, bool propergated){
-	__super::OnMouseIn(mouse, keyboard, propergated);
+void Container::OnMouseIn(IInputInjectorPtr injector, bool propergated){
+	__super::OnMouseIn(injector, propergated);
 	if (mSendEventToChildren){
 		for (auto& it : mChildren){
 			if (it->GetReceiveEventFromParent()){
-				it->OnMouseIn(mouse, keyboard, true);
+				it->OnMouseIn(injector, true);
 			}
 		}
 	}
 }
-void Container::OnMouseOut(IMouse* mouse, IKeyboard* keyboard, bool propergated){
-	__super::OnMouseOut(mouse, keyboard, propergated);
+void Container::OnMouseOut(IInputInjectorPtr injector, bool propergated){
+	__super::OnMouseOut(injector, propergated);
 	if (mSendEventToChildren){
 		for (auto& it : mChildren){
 			if (it->GetReceiveEventFromParent()){
-				it->OnMouseOut(mouse, keyboard, true);
+				it->OnMouseOut(injector, true);
 			}
 		}
 	}
 }
-void Container::OnMouseHover(IMouse* mouse, IKeyboard* keyboard, bool propergated){
-	__super::OnMouseHover(mouse, keyboard, propergated);
+void Container::OnMouseHover(IInputInjectorPtr injector, bool propergated){
+	__super::OnMouseHover(injector, propergated);
 	if (mSendEventToChildren){
 		for (auto& it : mChildren){
 			if (it->GetReceiveEventFromParent()){
-				it->OnMouseHover(mouse, keyboard, true);
+				it->OnMouseHover(injector, true);
 			}
 		}
 	}

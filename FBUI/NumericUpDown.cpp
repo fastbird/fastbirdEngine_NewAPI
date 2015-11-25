@@ -1,19 +1,50 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "NumericUpDown.h"
 #include "Button.h"
 #include "StaticText.h"
-#include "IUIManager.h"
-
-
+#include "UIManager.h"
+#include "UIObject.h"
 
 namespace fastbird
 {
+
+	NumericUpDownPtr NumericUpDown::Create(){
+		NumericUpDownPtr p(new NumericUpDown, [](NumericUpDown* obj){ delete obj; });
+		p->mSelfPtr = p;
+		return p;
+	}
+
 	NumericUpDown::NumericUpDown()
 		:mValue(0)
 		, mMin(0)
-		, mMax(100)
-		, mUp(0)
-		, mDown(0)
+		, mMax(100)		
 		, mShiftStep(5)
 		, mStep(1)
 	{
@@ -28,11 +59,11 @@ namespace fastbird
 	{
 	}
 
-	void NumericUpDown::GatherVisit(std::vector<IUIObject*>& v)
+	void NumericUpDown::GatherVisit(std::vector<UIObject*>& v)
 	{
 		if (!mVisibility.IsVisible())
 			return;
-		v.push_back(mUIObject);
+		v.push_back(mUIObject.get());
 
 		__super::GatherVisit(v);
 	}
@@ -45,38 +76,40 @@ namespace fastbird
 	void NumericUpDown::InitializeButtons()
 	{
 		//mDown = (Button*)AddChild(0.0, 0.0, 0.33333f, 1.0f, ComponentType::Button);
-		assert(!mDown);
-		mDown = (Button*)AddChild(ComponentType::Button);
-		mDown->SetName("down");
-		mDown->SetRuntimeChild(true);
+		assert(mDown.expired());
+		auto down = std::static_pointer_cast<Button>(AddChild(ComponentType::Button));
+		mDown = down;
+		down->SetName("down");
+		down->SetRuntimeChild(true);
 
 
 		//mUp = (Button*)AddChild(1.0, 0.0, 0.33333f, 1.0f, ComponentType::Button);
-		mUp = (Button*)AddChild(ComponentType::Button);
-		mUp->SetName("up");
-		mUp->SetRuntimeChild(true);
+		auto up = std::static_pointer_cast<Button>(AddChild(ComponentType::Button));
+		mUp = up;
+		up->SetName("up");
+		up->SetRuntimeChild(true);
 
-		mDown->ChangeSize(Vec2I(20, 20));
-		mDown->ChangeNPos(Vec2(0, 0));
-		mDown->SetUseAbsPos(false);
+		down->ChangeSize(Vec2I(20, 20));
+		down->ChangeNPos(Vec2(0, 0));
+		down->SetUseAbsPos(false);
 
-		mDown->SetProperty(UIProperty::REGION, "DownTriangle");
-		mDown->SetProperty(UIProperty::IMAGE_COLOR_OVERLAY, "1, 1, 0, 1");
-		mDown->SetProperty(UIProperty::NO_BACKGROUND, "true");
-		mDown->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+		down->SetProperty(UIProperty::REGION, "DownTriangle");
+		down->SetProperty(UIProperty::IMAGE_COLOR_OVERLAY, "1, 1, 0, 1");
+		down->SetProperty(UIProperty::NO_BACKGROUND, "true");
+		down->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 				std::bind(&NumericUpDown::OnDown, this, std::placeholders::_1));
-		mDown->SetEnable(mValue > mMin && mEnable);
+		down->SetEnable(mValue > mMin && mEnable);
 
-		mUp->ChangeSize(Vec2I(20, 20));
-		mUp->ChangeNPos(Vec2(1, 0));
-		mUp->SetUseAbsPos(false);
-		mUp->SetProperty(UIProperty::REGION, "UpTriangle");
-		mUp->SetProperty(UIProperty::IMAGE_COLOR_OVERLAY, "1, 1, 0, 1");
-		mUp->SetProperty(UIProperty::ALIGNH, "right");
-		mUp->SetProperty(UIProperty::NO_BACKGROUND, "true");
-		mUp->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+		up->ChangeSize(Vec2I(20, 20));
+		up->ChangeNPos(Vec2(1, 0));
+		up->SetUseAbsPos(false);
+		up->SetProperty(UIProperty::REGION, "UpTriangle");
+		up->SetProperty(UIProperty::IMAGE_COLOR_OVERLAY, "1, 1, 0, 1");
+		up->SetProperty(UIProperty::ALIGNH, "right");
+		up->SetProperty(UIProperty::NO_BACKGROUND, "true");
+		up->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 				std::bind(&NumericUpDown::OnUp, this, std::placeholders::_1));
-		mUp->SetEnable(mValue < mMax && mEnable);
+		up->SetEnable(mValue < mMax && mEnable);
 
 		SetProperty(UIProperty::TEXT_ALIGN, "center");
 
@@ -84,7 +117,7 @@ namespace fastbird
 		swprintf_s(buffer, L"%d", mValue);
 		SetText(buffer);
 
-		if (mUp && mDown){
+		if (up && down){
 			mValue = std::min(mValue, mMax);
 			mValue = std::max(mValue, mMin);
 			SetNumber(mValue);			
@@ -99,10 +132,12 @@ namespace fastbird
 		WCHAR buffer[100];
 		swprintf_s(buffer, L"%d", mValue);
 		SetText(buffer);
-		if (mUp)
-			mUp->SetEnable(mValue < mMax && mEnable);
-		if (mDown)
-			mDown->SetEnable(mValue > mMin && mEnable);
+		auto up = mUp.lock();
+		if (up)
+			up->SetEnable(mValue < mMax && mEnable);
+		auto down = mDown.lock();
+		if (down)
+			down->SetEnable(mValue > mMin && mEnable);
 		OnEvent(UIEvents::EVENT_NUMERIC_SET);
 	}
 	
@@ -110,10 +145,11 @@ namespace fastbird
 	{
 		mMin = min;
 		mMax = max;
-
-		if (mUp && mDown){
-			mUp->SetEnable(mValue < mMax && mEnable);
-			mDown->SetEnable(mValue > mMin && mEnable);
+		auto up = mUp.lock();
+		auto down = mDown.lock();
+		if (up && down){
+			up->SetEnable(mValue < mMax && mEnable);
+			down->SetEnable(mValue > mMin && mEnable);
 		}
 	}
 
@@ -121,7 +157,8 @@ namespace fastbird
 	{
 		if (mValue > mMin)
 		{
-			if (gFBEnv->pEngine->GetKeyboard()->IsKeyDown(VK_SHIFT)){
+			auto injector = InputManager::GetInstance().GetInputInjector();
+			if (injector->IsKeyDown(VK_SHIFT)){
 				SetNumber(mValue - mShiftStep);
 			}
 			else{
@@ -136,7 +173,8 @@ namespace fastbird
 	{
 		if (mValue < mMax)
 		{
-			if (gFBEnv->pEngine->GetKeyboard()->IsKeyDown(VK_SHIFT)){
+			auto injector = InputManager::GetInstance().GetInputInjector();
+			if (injector->IsKeyDown(VK_SHIFT)){
 				SetNumber(mValue + mShiftStep);
 			}
 			else{
@@ -148,21 +186,26 @@ namespace fastbird
 
 	void NumericUpDown::SetEnableUp(bool enable)
 	{
-		if (mUp)
-			mUp->SetEnable(enable&& mEnable);
+		auto up = mUp.lock();
+		if (up)
+			up->SetEnable(enable&& mEnable);
 	}
 
 	void NumericUpDown::SetEnableDown(bool enable)
 	{
-		if (mDown)
-			mDown->SetEnable(enable&& mEnable);
+		auto down = mDown.lock();
+		if (down)
+			down->SetEnable(enable&& mEnable);
 	}
 	void NumericUpDown::SetEnable(bool enable){
 		__super::SetEnable(enable);
-		if (mUp)
-			mUp->SetEnable(mValue < mMax && enable);
-		if (mDown)
-			mDown->SetEnable(mValue > mMin && enable);
+		auto up = mUp.lock();
+		if (up)
+			up->SetEnable(mValue < mMax && enable);
+
+		auto down = mDown.lock();
+		if (down)
+			down->SetEnable(mValue > mMin && enable);
 	}
 
 	bool NumericUpDown::SetProperty(UIProperty::Enum prop, const char* val)
@@ -177,19 +220,19 @@ namespace fastbird
 		}
 		case UIProperty::NUMERIC_UPDOWN_NUMBER:
 		{
-			int num = StringConverter::parseInt(val);
+			int num = StringConverter::ParseInt(val);
 			SetNumber(num);
 			return true;
 		}
 
 		case UIProperty::NUMERIC_UPDOWN_SHIFT_STEP:
 		{
-			mShiftStep = StringConverter::parseInt(val);
+			mShiftStep = StringConverter::ParseInt(val);
 			return true;
 		}
 		case UIProperty::NUMERIC_UPDOWN_STEP:
 		{
-			mStep = StringConverter::parseInt(val);
+			mStep = StringConverter::ParseInt(val);
 			return true;
 		}
 		}
@@ -208,7 +251,7 @@ namespace fastbird
 				if (Vec2I(mMin, mMax)== UIProperty::GetDefaultValueVec2I(prop))
 					return false;
 			}
-			auto data = StringConverter::toString(Vec2I(mMin, mMax));
+			auto data = StringMathConverter::ToString(Vec2I(mMin, mMax));
 			strcpy_s(val, bufsize, data.c_str());
 			return true;
 		}
@@ -219,7 +262,7 @@ namespace fastbird
 				if (mValue == UIProperty::GetDefaultValueInt(prop))
 					return false;
 			}
-			auto data = StringConverter::toString(mValue);
+			auto data = StringConverter::ToString(mValue);
 			strcpy_s(val, bufsize, data.c_str());
 			return true;
 		}
@@ -229,7 +272,7 @@ namespace fastbird
 				if (mShiftStep == UIProperty::GetDefaultValueInt(prop))
 					return false;
 			}
-			strcpy_s(val, bufsize, StringConverter::toString(mShiftStep).c_str());
+			strcpy_s(val, bufsize, StringConverter::ToString(mShiftStep).c_str());
 			return true;
 		}
 		case UIProperty::NUMERIC_UPDOWN_STEP:
@@ -238,7 +281,7 @@ namespace fastbird
 				if (mStep == UIProperty::GetDefaultValueInt(prop))
 					return false;
 			}
-			strcpy_s(val, bufsize, StringConverter::toString(mStep).c_str());
+			strcpy_s(val, bufsize, StringConverter::ToString(mStep).c_str());
 			return true;
 		}
 		}

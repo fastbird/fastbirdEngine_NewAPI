@@ -1,13 +1,47 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "FileSelector.h"
-#include "IUIManager.h"
+#include "UIManager.h"
 #include "TextField.h"
 #include "ListBox.h"
 #include "StaticText.h"
 #include "Button.h"
+#include "UIObject.h"
 
 namespace fastbird
 {
+FileSelectorPtr FileSelector::Create(){
+	FileSelectorPtr p(new FileSelector, [](FileSelector* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
+
 FileSelector::FileSelector()
 {	
 }
@@ -18,10 +52,10 @@ FileSelector::~FileSelector()
 
 void FileSelector::OnCreated(){
 	SetProperty(UIProperty::BACK_COLOR, "0.15, 0.15, 0.15, 1.0");
-	mStaticText = static_cast<StaticText*>(
-		AddChild(0.05f, 0.01f, 0.9f, 0.05f, ComponentType::StaticText));
-	mStaticText->SetRuntimeChild(true);
-	mStaticText->SetText(L"Select a file:");
+	auto staticText = std::static_pointer_cast<StaticText>(AddChild(0.05f, 0.01f, 0.9f, 0.05f, ComponentType::StaticText));
+	mStaticText = staticText;
+	staticText->SetRuntimeChild(true);
+	staticText->SetText(L"Select a file:");
 	char buf[256];
 	DWORD size = GetLogicalDriveStrings(256, buf);
 	StringVector drives;
@@ -39,52 +73,56 @@ void FileSelector::OnCreated(){
 	size_t numDrives = std::min((size_t)6, drives.size());
 	for (size_t i = 0; i<numDrives; i++)
 	{
-		mDriveButtons.push_back(static_cast<Button*>(
-			AddChild(xpos, 0.07f, 0.08f, 0.05f, ComponentType::Button)));
-		mDriveButtons.back()->SetRuntimeChild(true);
-		mDriveButtons.back()->SetProperty(UIProperty::BACK_COLOR, "0.30f, 0.30f, 0.30f, 1.0f");
-		mDriveButtons.back()->SetProperty(UIProperty::BACK_COLOR_OVER, "0.2, 0.2, 0.2, 1.0f");
-		mDriveButtons.back()->SetText(AnsiToWide(drives[i].c_str(), drives[i].size()));
-		mDriveButtons.back()->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+		auto button = std::static_pointer_cast<Button>(AddChild(xpos, 0.07f, 0.08f, 0.05f, ComponentType::Button));
+		mDriveButtons.push_back(button);
+		button->SetRuntimeChild(true);
+		button->SetProperty(UIProperty::BACK_COLOR, "0.30f, 0.30f, 0.30f, 1.0f");
+		button->SetProperty(UIProperty::BACK_COLOR_OVER, "0.2, 0.2, 0.2, 1.0f");
+		button->SetText(AnsiToWide(drives[i].c_str(), drives[i].size()));
+		button->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 			std::bind(&FileSelector::OnDriveClick, this, std::placeholders::_1));
 		xpos += 0.082f;
 	}
-	mFileTextField = static_cast<TextField*>(
+	auto textField = std::static_pointer_cast<TextField>(
 		AddChild(0.05f, 0.13f, 0.9f, 0.05f, ComponentType::TextField));
-	mFileTextField->SetRuntimeChild(true);
-	mFileTextField->SetProperty(UIProperty::BACK_COLOR, "0.10, 0.10, 0.10, 1.0");
+	mFileTextField = textField;
+	textField->SetRuntimeChild(true);
+	textField->SetProperty(UIProperty::BACK_COLOR, "0.10, 0.10, 0.10, 1.0");
 
-	mListBox = static_cast<ListBox*>(
+	auto listBox = std::static_pointer_cast<ListBox>(
 		AddChild(0.05f, 0.19f, 0.9f, 0.70f, ComponentType::ListBox));
-	mListBox->SetRuntimeChild(true);
-	mListBox->SetProperty(UIProperty::BACK_COLOR, "0.10, 0.10, 0.10, 1.0");
-	mListBox->SetProperty(UIProperty::LISTBOX_COL, "1");
-	mListBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+	mListBox = listBox;
+	listBox->SetRuntimeChild(true);
+	listBox->SetProperty(UIProperty::BACK_COLOR, "0.10, 0.10, 0.10, 1.0");
+	listBox->SetProperty(UIProperty::LISTBOX_COL, "1");
+	listBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 		std::bind(&FileSelector::OnListClick, this, std::placeholders::_1));
-	mListBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_DOUBLE_CLICK,
+	listBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_DOUBLE_CLICK,
 		std::bind(&FileSelector::OnListDoubleClick, this, std::placeholders::_1));
 
-	mOKButton = static_cast<Button*>(
+	auto button = std::static_pointer_cast<Button>(
 		AddChild(0.2f, 0.93f, 0.3f, 0.05f, ComponentType::Button));
-	mOKButton->SetRuntimeChild(true);
-	mOKButton->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+	mOKButton = button;
+	button->SetRuntimeChild(true);
+	button->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 		std::bind(&FileSelector::OnOK, this, std::placeholders::_1));
-	mOKButton->SetProperty(UIProperty::TEXT_ALIGN, "center");
-	mOKButton->SetText(L"OK");
+	button->SetProperty(UIProperty::TEXT_ALIGN, "center");
+	button->SetText(L"OK");
 
-	mCancelButton = static_cast<Button*>(
+	button = std::static_pointer_cast<Button>(
 		AddChild(0.51f, 0.93f, 0.3f, 0.05f, ComponentType::Button));
-	mCancelButton->SetRuntimeChild(true);
-	mCancelButton->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+	mCancelButton = button;
+	button->SetRuntimeChild(true);
+	button->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 		std::bind(&FileSelector::OnCancel, this, std::placeholders::_1));
-	mCancelButton->SetProperty(UIProperty::TEXT_ALIGN, "center");
-	mCancelButton->SetText(L"Cancel");
+	button->SetProperty(UIProperty::TEXT_ALIGN, "center");
+	button->SetText(L"Cancel");
 
 	mUIObject->mOwnerUI = this;
 	mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 }
 
-void FileSelector::GatherVisit(std::vector<IUIObject*>& v)
+void FileSelector::GatherVisit(std::vector<UIObject*>& v)
 {
 	if (!mVisibility.IsVisible())
 		return;
@@ -105,27 +143,25 @@ void FileSelector::OnCancel(void* pButton)
 void FileSelector::OnListClick(void* pList)
 {
 	ListBox* pListBox = (ListBox*)pList;
-	mFile = ConcatFilepath(mFolder.c_str(), pListBox->GetSelectedString().c_str());
-	char unifiedPath[MAX_PATH] = {0};
-	UnifyFilepath(unifiedPath, mFile.c_str());
-	// if dir
-	if (!tinydir_isdir(unifiedPath))
+	mFile = FileSystem::ConcatPath(mFolder.c_str(), pListBox->GetSelectedString().c_str());	
+	std::string unifiedPath = FileSystem::UnifyFilepath(mFile.c_str());
+	
+	if (!FileSystem::IsDirectory(unifiedPath.c_str()))
 	{
 		OnEvent(UIEvents::EVENT_FILE_SELECTOR_SELECTED);
-		mFileTextField->SetText( AnsiToWide(unifiedPath, strlen(unifiedPath)) );
+		mFileTextField.lock()->SetText( AnsiToWide(unifiedPath.c_str()) );
 	}
 }
 
 void FileSelector::OnListDoubleClick(void* pList)
 {
 	ListBox* pListBox = (ListBox*)pList;
-	std::string strFilepath = ConcatFilepath(mFolder.c_str(), pListBox->GetSelectedString().c_str());
-	char unifiedPath[MAX_PATH] = {0};
-	UnifyFilepath(unifiedPath, strFilepath.c_str());
-	if ( tinydir_isdir(unifiedPath) )
+	std::string strFilepath = FileSystem::ConcatPath(mFolder.c_str(), pListBox->GetSelectedString().c_str());
+	std::string unifiedPath = FileSystem::UnifyFilepath(strFilepath.c_str());
+	if ( FileSystem::IsDirectory(unifiedPath.c_str()) )
 	{
-		ListFiles( unifiedPath, std::string(mFilter.c_str()).c_str() );
-		gFBEnv->pUIManager->SetFocusUI(mListBox);
+		ListFiles( unifiedPath.c_str(), std::string(mFilter.c_str()).c_str() );
+		UIManager::GetInstance().SetFocusUI(mListBox.lock());
 	}
 	else
 	{
@@ -133,13 +169,13 @@ void FileSelector::OnListDoubleClick(void* pList)
 		mFile = unifiedPath;
 	}
 
-	mFileTextField->SetText(AnsiToWide(unifiedPath, strlen(unifiedPath)));
+	mFileTextField.lock()->SetText(AnsiToWide(unifiedPath.c_str()));
 }
 
 void FileSelector::SetTitle(const wchar_t* szTitle)
 {
 	assert(szTitle);
-	mStaticText->SetText(szTitle);
+	mStaticText.lock()->SetText(szTitle);
 }
 
 void FileSelector::ListFiles(const char* folder, const char* filter)
@@ -153,23 +189,20 @@ void FileSelector::ListFiles(const char* folder, const char* filter)
 	mFolder = folder;
 	char buf[MAX_PATH] = {0};
 	strcpy_s(buf, "haha");
-	mFolder = ToAbsolutePath(buf, mFolder.c_str());
-	mFolder = UnifyFilepath(buf, mFolder.c_str());
+	mFolder = FileSystem::Absolute(mFolder.c_str());	
 	if (filter && strlen(filter)!=0)
 	{
 		mFilter = filter;
 		ToLowerCase(mFilter);
 	}	
-	tinydir_dir dir;
-	if (tinydir_open(&dir, folder) == -1)
-	{
+	if (!FileSystem::Exists(folder)){
 		Error("Iterating dir is failed!");
-		gFBEnv->pUIManager->DisplayMsg("Cannot open the directory.");
+		UIManager::GetInstance().DisplayMsg("Cannot open the directory.");
 		mFolder = folderBackup;
 		return;
-	}
-	mFileTextField->SetText( AnsiToWide(mFolder.c_str(), mFolder.size() ) );
-	mListBox->Clear();
+	}	
+	mFileTextField.lock()->SetText( AnsiToWide(mFolder.c_str(), mFolder.size() ) );
+	mListBox.lock()->Clear();
 
 	if (mFolder.size()<=3)
 	{
@@ -182,18 +215,14 @@ void FileSelector::ListFiles(const char* folder, const char* filter)
 	WStringVector svDirs, svFiles;
 	svDirs.reserve(100);
 	svFiles.reserve(100);
-	while(dir.has_next)
-	{
-		tinydir_file file;
-		if (tinydir_readfile(&dir, &file)==-1)
-		{
-			Error("tinydir readfile failed!");
-			break;
-		}
 
+	auto iterator = FileSystem::GetDirectoryIterator(folder, false);
+	while(iterator->HasNext())
+	{
 		ListItem* pNewListItem = 0;
-		std::string filename = file.name;
-		if (file.is_dir)
+		bool isDir;
+		std::string filename = FileSystem::GetFileName(iterator->GetNextFilePath(&isDir));
+		if (isDir)
 		{
 			if (filename!=".")
 			{
@@ -205,7 +234,7 @@ void FileSelector::ListFiles(const char* folder, const char* filter)
 		{
 			if (!mFilter.empty())
 			{
-				const char* szExt = GetFileExtension(filename.c_str());
+				const char* szExt = FileSystem::GetExtensionWithOutDot(filename.c_str());
 				if (szExt!=0)
 				{
 					std::string ext(szExt);
@@ -221,21 +250,18 @@ void FileSelector::ListFiles(const char* folder, const char* filter)
 				svFiles.push_back( AnsiToWide(filename.c_str(), filename.size()) );
 			}
 		}
-		tinydir_next(&dir);
 	}
 
-	tinydir_close(&dir);
-
-	FB_FOREACH(itDir, svDirs)
+	for(auto& itDir: svDirs)
 	{
-		auto row = mListBox->InsertItem(itDir->c_str());
-		mListBox->SetItem(Vec2I(row, 0), itDir->c_str(), ListItemDataType::String);
+		auto row = mListBox.lock()->InsertItem(itDir.c_str());
+		mListBox.lock()->SetItem(Vec2I(row, 0), itDir.c_str(), ListItemDataType::String);
 	}
 
-	FB_FOREACH(itFile, svFiles)
+	for(auto& itFile: svFiles)
 	{
-		auto row = mListBox->InsertItem(itFile->c_str());
-		mListBox->SetItem(Vec2I(row, 0), itFile->c_str(), ListItemDataType::String);
+		auto row = mListBox.lock()->InsertItem(itFile.c_str());
+		mListBox.lock()->SetItem(Vec2I(row, 0), itFile.c_str(), ListItemDataType::String);
 	}
 }
 

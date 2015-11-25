@@ -32,8 +32,24 @@
 #include "FBCommonHeaders/Types.h"
 #include <assert.h>
 
-struct lua_State;
+#if !defined(LUA_TNONE)
+#define LUA_TNONE		(-1)
 
+#define LUA_TNIL		0
+#define LUA_TBOOLEAN		1
+#define LUA_TLIGHTUSERDATA	2
+#define LUA_TNUMBER		3
+#define LUA_TSTRING		4
+#define LUA_TTABLE		5
+#define LUA_TFUNCTION		6
+#define LUA_TUSERDATA		7
+#define LUA_TTHREAD		8
+
+#define LUA_NUMTAGS		9
+#endif
+
+struct lua_State;
+typedef int (*lua_CFunction) (lua_State *L);
 namespace fastbird
 { 
 	const char* GetCWD();
@@ -47,8 +63,8 @@ if (numLuaArgs != (x)) \
 	return luaL_error(L, "Got %d arguments, expected %d", numLuaArgs, (x)); \
 }
 
-#define LUA_SETCFUNCTION(lua, name) lua_pushcfunction((lua), (name));\
-	lua_setglobal((lua), (#name));
+#define LUA_SETCFUNCTION(lua, name) LuaUtils::pushcfunction((lua), (name));\
+	LuaUtils::setglobal((lua), (#name));
 
 #define LUA_PCALL(lua, arg, ret) if(int error = lua_pcall((lua), (arg), ret, 0)) \
 {\
@@ -90,29 +106,29 @@ else{\
 #define REGISTER_ENUM_TO_LUA(endIdx, enumName) \
 	inline void RegisterToLua(lua_State* L)\
 {\
-	lua_createtable(L, 0, (endIdx)); \
+	LuaUtils::createtable(L, 0, (endIdx)); \
 for (int i = 0; i <= (endIdx); ++i)\
 {\
-	lua_pushinteger(L, i); \
-	lua_setfield(L, -2, ConvertToString(Enum(i))); \
+	LuaUtils::pushinteger(L, i); \
+	LuaUtils::setfield(L, -2, ConvertToString(Enum(i))); \
 }\
-	lua_getglobal(L, "NoNewMethod"); \
-	lua_setfield(L, -2, "__newindex"); \
-	lua_pushvalue(L, -1); \
-	lua_setmetatable(L, -2); \
-	lua_setglobal(L, #enumName); \
+	LuaUtils::getglobal(L, "NoNewMethod"); \
+	LuaUtils::setfield(L, -2, "__newindex"); \
+	LuaUtils::pushvalue(L, -1); \
+	LuaUtils::setmetatable(L, -2); \
+	LuaUtils::setglobal(L, #enumName); \
 	\
-	lua_createtable(L, 0, (endIdx)); \
+	LuaUtils::createtable(L, 0, (endIdx)); \
 for (int i = 0; i <= (endIdx); ++i)\
 {\
-	lua_pushstring(L, ConvertToString(Enum(i))); \
-	lua_rawseti(L, -2, i); \
+	LuaUtils::pushstring(L, ConvertToString(Enum(i))); \
+	LuaUtils::rawseti(L, -2, i); \
 }\
-	lua_getglobal(L, "NoNewMethod"); \
-	lua_setfield(L, -2, "__newindex"); \
-	lua_pushvalue(L, -1); \
-	lua_setmetatable(L, -2); \
-	lua_setglobal(L, #enumName "String");\
+	LuaUtils::getglobal(L, "NoNewMethod"); \
+	LuaUtils::setfield(L, -2, "__newindex"); \
+	LuaUtils::pushvalue(L, -1); \
+	LuaUtils::setmetatable(L, -2); \
+	LuaUtils::setglobal(L, #enumName "String");\
 }
 
 #define REGISTER_CLASS_ENUM_TO_LUA(classname, enumName, endIdx) \
@@ -194,17 +210,99 @@ namespace fastbird
 		static bool DoFile(const char* filepath);
 		static int Traceback(lua_State *L);
 
+		/// push nil
+		static void pushnil();
+		static void pushnil(lua_State* L);
 		/** Pushes the zero-terminated string pointed to by s onto the stack. 
 		Lua makes (or reuses) an internal copy of the given string, so the memory 
 		at str can be freed or reused immediately after the function returns.
 		Returns a pointer to the internal copy of the string. If s is NULL, 
 		pushes nil and returns NULL. 
 		*/
-		static const char* Push(lua_State* L, const char* str);
-		static const char* Push(const char* str);
+		static const char* pushstring(const char* str);
+		static const char* pushstring(lua_State* L, const char* str);
+		static void pushnumber(double number);
+		static void pushnumber(lua_State* L, double number);
+		static void pushinteger(int i);
+		static void pushinteger(lua_State* L, int i);
+		static void pushunsigned(unsigned u);
+		static void pushunsigned(lua_State* L, unsigned u);
+		static void pushboolean(bool b);
+		static void pushboolean(lua_State* L, bool b);
+		static void pushcfunction(lua_CFunction f);
+		static void pushcfunction(lua_State* L, lua_CFunction f);
 
-		static const char* ToString(lua_State* L, int idx);
-		static const char* ToString(int idx);
+		static const char* tostring(int index);
+		static const char* tostring(lua_State* L, int index);
+		static bool toboolean(int index);
+		static bool toboolean(lua_State* L, int index);
+		static int tointeger(int index);
+		static int tointeger(lua_State* L, int index);
+		static unsigned tounsigned(int index);
+		static unsigned tounsigned(lua_State* L, int index);
+		static double tonumber(int index);
+		static double tonumber(lua_State* L, int index);
+
+		static const char* checkstring(int index);		
+		static const char* checkstring(lua_State* L, int index);
+		static int checkint(int index);
+		static int checkint(lua_State* L, int index);
+		static unsigned checkunsigned(int index);
+		static unsigned checkunsigned(lua_State* L, int index);
+		static double checknumber(int index);
+		static double checknumber(lua_State* L, int index);
+		static void checktype(int index, int luaType);
+		static void checktype(lua_State* L, int index, int luaType);
+		static Vec2ITuple checkVec2I(int index);
+		static Vec2ITuple checkVec2I(lua_State* L, int index);
+
+		static bool isboolean(int index);
+		static bool isboolean(lua_State* L, int index);
+		static bool isnil(int index);
+		static bool isnil(lua_State* L, int index);
+		static bool isnumber(int index);
+		static bool isnumber(lua_State* L, int index);
+		static bool isstring(int index);
+		static bool isstring(lua_State* L, int index);
+		static int type(int index);
+		static int type(lua_State* L, int index);
+
+		/// Creates a new empty table and pushes it onto the stack. It is equivalent to lua_createtable(L, 0, 0). 
+		static void newtable();
+		static void newtable(lua_State* L);
+		/**	Creates a new empty table and pushes it onto the stack. 
+		Parameter \a narr is a hint for how many elements the table will have as a sequence; 
+		parameter \a nrec is a hint for how many other elements the table will have. 
+		Lua may use these hints to preallocate memory for the new table. 
+		This pre-allocation is useful for performance when you know in advance how many elements the table will have. 
+		Otherwise you can use the function lua_newtable.
+		*/
+		static void createtable(int narr, int nrec);
+		static void createtable(lua_State* L, int narr, int nrec);
+		/// Does the equivalent to t[key] = v, where t is the value at the given index and v is the value at the top of the stack.
+		static void setfield(int tableindex, const char* key);
+		static void setfield(lua_State* L, int tableindex, const char* key);
+		/// Pushes onto the stack the value t[k], where t is the value at the given index. As in Lua, this function may trigger a metamethod for the "index" event
+		static void getfield(int tableindex, const char* key);
+		static void getfield(lua_State* L, int tableindex, const char* key);
+		/// Pops a value from the stack and sets it as the new value of global name. 
+		static void setglobal(const char* name);
+		static void setglobal(lua_State* L, const char* name);
+		/// Pushes onto the stack the value of the global \a key. 
+		static void getglobal(const char* name);
+		static void getglobal(lua_State* L, const char* name);
+		/// Pushes a copy of the element at the given index onto the stack. 
+		static void pushvalue(int index);
+		static void pushvalue(lua_State* L, int index);
+		/// Pops a table from the stack and sets it as the new metatable for the value at the given index. 
+		static void setmetatable(int index);
+		static void setmetatable(lua_State* L, int index);
+		/// Does the equivalent of t[n] = v, where t is the table at the given index and v is the value at the top of the stack. 
+		static void rawseti(int tableindex, int n);
+		static void rawseti(lua_State* L, int tableindex, int n);
+		/// Returns the index of the top element in the stack. Because indices start at 1, this result is equal to the number of elements in the stack (and so 0 means an empty stack). 
+		static int gettop();
+		static int gettop(lua_State* L);
 
 		static void LockLua();
 		static void UnlockLua();

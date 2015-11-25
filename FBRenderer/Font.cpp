@@ -927,7 +927,7 @@ public:
 };
 
 //----------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(Font);
+FB_IMPLEMENT_STATIC_CREATE(Font);
 Font::Font()
 	: mImpl(new Impl)
 {

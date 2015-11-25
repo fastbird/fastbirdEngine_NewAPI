@@ -63,6 +63,7 @@ namespace fastbird{
 		// File Operataions
 		//---------------------------------------------------------------------------
 		static bool Exists(const char* path);
+		static bool IsDirectory(const char* path);
 		/** Rename a file.
 		@remark  If \a path and \a newpath resolve to the same existing file, no action is taken. 
 		Otherwise, if \a newpath resolves to an existing non-directory file, it is removed, 
@@ -99,6 +100,7 @@ namespace fastbird{
 		// System Folders
 		//---------------------------------------------------------------------------
 		static std::string GetAppDataFolder();
+		static std::string GetCurrentDir();
 
 		//---------------------------------------------------------------------------
 		// File Path Manifulation
@@ -111,6 +113,7 @@ namespace fastbird{
 		If the extension is found, '.' is included in the returned string.
 		*/
 		static const char* GetExtension(const char* path);	
+		static const char* GetExtensionWithOutDot(const char* path);
 		/** Get filename + extension*/
 		static std::string GetFileName(const char* path);
 		/** Get file name.
@@ -123,5 +126,6 @@ namespace fastbird{
 		static std::string GetParentPath(const char* path);
 		static std::string ConcatPath(const char* path1, const char* path2);
 		static std::string UnifyFilepath(const char* path);
+		static std::string Absolute(const char* path);
 	};
 }

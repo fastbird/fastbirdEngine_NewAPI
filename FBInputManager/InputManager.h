@@ -31,11 +31,11 @@
 #include "FBInputDevice.h"
 #include "FBTimer/Timer.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(IMouse);
-	DECLARE_SMART_PTR(IKeyboard);
-	DECLARE_SMART_PTR(IInputConsumer);
-	DECLARE_SMART_PTR(IInputInjector);
-	DECLARE_SMART_PTR(InputManager);
+	FB_DECLARE_SMART_PTR(IMouse);
+	FB_DECLARE_SMART_PTR(IKeyboard);
+	FB_DECLARE_SMART_PTR(IInputConsumer);
+	FB_DECLARE_SMART_PTR(IInputInjector);
+	FB_DECLARE_SMART_PTR(InputManager);
 	/** Handles user input. 
 	You can register your objects which need to receive user input, 
 	inherit the object from IInputConsumer and register it to 
@@ -44,7 +44,7 @@ namespace fastbird{
 	\ingroup FBInputManager
 	*/
 	class FB_DLL_INPUTMANAGER InputManager{
-		DECLARE_PIMPL_NON_COPYABLE(InputManager);
+		FB_DECLARE_PIMPL_NON_COPYABLE(InputManager);
 		InputManager();
 		~InputManager();
 	public:
@@ -78,9 +78,9 @@ namespace fastbird{
 		*/
 		void Update();
 
-		void Invalidate(FBInputDevice::Enum type, bool includeButtonClicks = false);
-		void InvalidTemporary(FBInputDevice::Enum type, bool invalidate);
-		bool IsValid(FBInputDevice::Enum type) const;
+		void Invalidate(InputDevice::Enum type, bool includeButtonClicks = false);
+		void InvalidTemporary(InputDevice::Enum type, bool invalidate);
+		bool IsValid(InputDevice::Enum type) const;
 		void EndFrame(TIME_PRECISION gameTimeInSecond);
 
 		//-------------------------------------------------------------------

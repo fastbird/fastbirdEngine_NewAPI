@@ -48,29 +48,29 @@ namespace fastbird{
 	struct POINT_LIGHT_CONSTANTS;
 	class RenderOptions;
 	typedef unsigned RenderTargetId;
-	DECLARE_SMART_PTR(ResourceProvider);
-	DECLARE_SMART_PTR(IVideoPlayer);
-	DECLARE_SMART_PTR(Camera);
-	DECLARE_SMART_PTR(PointLightManager);
-	DECLARE_SMART_PTR(Font);
-	DECLARE_SMART_PTR(DirectionalLight);
-	DECLARE_SMART_PTR(PointLight);	
-	DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
-	DECLARE_SMART_PTR(TextureAtlas);	
-	DECLARE_SMART_PTR(Material);
-	DECLARE_SMART_PTR(Shader);
-	DECLARE_SMART_PTR(IndexBuffer);
-	DECLARE_SMART_PTR(VertexBuffer);
-	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(RenderTarget);
-	DECLARE_SMART_PTR(Renderer);
+	FB_DECLARE_SMART_PTR(ResourceProvider);
+	FB_DECLARE_SMART_PTR(IVideoPlayer);
+	FB_DECLARE_SMART_PTR(Camera);
+	FB_DECLARE_SMART_PTR(PointLightManager);
+	FB_DECLARE_SMART_PTR(Font);
+	FB_DECLARE_SMART_PTR(DirectionalLight);
+	FB_DECLARE_SMART_PTR(PointLight);	
+	FB_DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
+	FB_DECLARE_SMART_PTR(TextureAtlas);	
+	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(Shader);
+	FB_DECLARE_SMART_PTR(IndexBuffer);
+	FB_DECLARE_SMART_PTR(VertexBuffer);
+	FB_DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(RenderTarget);
+	FB_DECLARE_SMART_PTR(Renderer);
 	/** Render vertices with a specified material	
 	Rednerer handles vertex/index data, materials, textures, shaders,
 	render states, lights and render targets.
 	\ingroup FBRenderer
 	*/
 	class FB_DLL_RENDERER Renderer : public Observable<IRendererObserver>, public ISceneObserver, public IInputConsumer{
-		DECLARE_PIMPL_NON_COPYABLE(Renderer);
+		FB_DECLARE_PIMPL_NON_COPYABLE(Renderer);
 		Renderer();		
 
 	public:

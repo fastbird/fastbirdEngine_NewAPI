@@ -53,7 +53,7 @@ public:
 	{
 		
 		gpTimer = Timer::GetMainTimer().get();
-		for (int i = 0; i < FBInputDevice::DeviceNum; ++i){
+		for (int i = 0; i < InputDevice::DeviceNum; ++i){
 			mValid += 1 << i;
 		}
 		SetInputInjector(InputInjector::Create());
@@ -80,14 +80,14 @@ public:
 
 	void Update(InputManager* inputManager){
 		mValid = 0;
-		mValid = FBInputDevice::AllMask;		
+		mValid = InputDevice::AllMask;		
 		for (auto& it : mConsumers){
 			for (auto weak = it.second.begin(); weak != it.second.end();){
 
 				auto consumer = weak->lock();
 				if (consumer){
 					consumer->ConsumeInput(mInjector);
-					if (!(mValid & FBInputDevice::AllMask))
+					if (!(mValid & InputDevice::AllMask))
 						return;
 					++weak;
 				}
@@ -98,7 +98,7 @@ public:
 		}
 	}
 
-	void Invalidate(FBInputDevice::Enum type, bool includeButtonClicks){
+	void Invalidate(InputDevice::Enum type, bool includeButtonClicks){
 		if (mValid & type)
 			mValid -= mValid & type;
 		if (type & InputDevice::Keyboard){
@@ -113,7 +113,7 @@ public:
 		}		
 	}
 
-	void InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
+	void InvalidTemporary(InputDevice::Enum type, bool invalidate){
 		switch (type){
 		case InputDevice::Keyboard:
 			if (mKeyboard){
@@ -130,7 +130,7 @@ public:
 		}
 	}
 
-	bool IsValid(FBInputDevice::Enum type) const{
+	bool IsValid(InputDevice::Enum type) const{
 		switch (type){
 		case InputDevice::Keyboard:
 			if (mKeyboard){
@@ -235,15 +235,15 @@ void InputManager::Update(){
 	mImpl->Update(this);
 }
 
-void InputManager::Invalidate(FBInputDevice::Enum type, bool includeButtonClicks){
+void InputManager::Invalidate(InputDevice::Enum type, bool includeButtonClicks){
 	mImpl->Invalidate(type, includeButtonClicks);
 }
 
-void InputManager::InvalidTemporary(FBInputDevice::Enum type, bool invalidate){
+void InputManager::InvalidTemporary(InputDevice::Enum type, bool invalidate){
 	mImpl->InvalidTemporary(type, invalidate);
 }
 
-bool InputManager::IsValid(FBInputDevice::Enum type) const{
+bool InputManager::IsValid(InputDevice::Enum type) const{
 	return mImpl->IsValid(type);
 }
 

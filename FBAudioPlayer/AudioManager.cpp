@@ -92,7 +92,7 @@ public:
 LPALGETSOURCEDVSOFT AudioManager::Impl::alGetSourcedvSOFT = 0;
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(AudioManager);
+FB_IMPLEMENT_STATIC_CREATE(AudioManager);
 AudioManager::AudioManager()
 	: mImpl(new Impl)
 {

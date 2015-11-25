@@ -30,7 +30,7 @@
 #include "FBMathLib/Vec4.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(GaussianDist);
+	FB_DECLARE_SMART_PTR(GaussianDist);
 	class GaussianDist
 	{
 	public:

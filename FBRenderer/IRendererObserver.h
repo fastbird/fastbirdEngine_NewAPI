@@ -35,10 +35,10 @@ namespace fastbird{
 		};
 		/// All defined at event DefaultRenderEvent
 		/// renderer->AddObserver(DefaultRenderEvent, observer);
-		virtual void BeforeUIRendering(HWindowId hwndId, HWindow hwnd) {}
-		virtual void AfterUIRendered(HWindowId hwndId, HWindow hwnd) {}
-		virtual void BeforeDebugHudRendered(HWindowId hwndId, HWindow hwnd) {}
-		virtual void AfterDebugHudRendered(HWindowId hwndId, HWindow hwnd) {}
-		virtual void OnResolutionChanged(HWindowId hwndId, HWindow hwnd) {}		
+		virtual void BeforeUIRendering(HWindowId hwndId, HWindow hwnd) = 0;
+		virtual void AfterUIRendered(HWindowId hwndId, HWindow hwnd) = 0;
+		virtual void BeforeDebugHudRendering(HWindowId hwndId, HWindow hwnd) = 0;
+		virtual void AfterDebugHudRendered(HWindowId hwndId, HWindow hwnd) = 0;
+		virtual void OnResolutionChanged(HWindowId hwndId, HWindow hwnd) = 0;
 	};
 }

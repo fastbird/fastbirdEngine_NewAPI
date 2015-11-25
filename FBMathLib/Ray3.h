@@ -33,7 +33,7 @@
 
 namespace fastbird
 {
-	DECLARE_SMART_PTR(BoundingVolume);
+	FB_DECLARE_SMART_PTR(BoundingVolume);
 	class AABB;
 	class Ray3
 	{

@@ -1,10 +1,44 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "HexagonalContextMenu.h"
 #include "StaticText.h"
 #include "ImageBox.h"
+#include "UIObject.h"
 
 namespace fastbird
 {
+	HexagonalContextMenuPtr HexagonalContextMenu::Create(){
+		HexagonalContextMenuPtr p(new HexagonalContextMenu, [](HexagonalContextMenu* obj){ delete obj; });
+		p->mSelfPtr = p;
+		return p;
+	}
+
 	HexagonalContextMenu::HexagonalContextMenu()
 		: mUpdateMaterialParams(true)
 		, mMouseInHexaIdx(-1)
@@ -21,9 +55,7 @@ namespace fastbird
 
 		for (int i = 0; i < 6; i++)
 		{
-			mHexaEnabled[i] = false;
-			mHexaImages[i] = 0;
-			mHexaStaticTexts[i] = 0;
+			mHexaEnabled[i] = false;			
 		}
 
 		mHexaOrigins[0] = Vec2(0.0f, 0.61f);
@@ -46,15 +78,14 @@ namespace fastbird
 
 	HexagonalContextMenu::~HexagonalContextMenu()
 	{
-
 	}
 
-	void HexagonalContextMenu::GatherVisit(std::vector<IUIObject*>& v)
+	void HexagonalContextMenu::GatherVisit(std::vector<UIObject*>& v)
 	{
 		if (!mVisibility.IsVisible())
 			return;
 		/*__super::GatherVisitAlpha(v);*/
-		v.push_back(mUIObject);
+		v.push_back(mUIObject.get());
 		__super::GatherVisit(v);
 	}
 
@@ -86,27 +117,29 @@ namespace fastbird
 		assert(index < 6);
 		if (!mHexaEnabled[index])
 			return;
-		if (!mHexaStaticTexts[index])
+		StaticTextPtr staticText = mHexaStaticTexts[index].lock();
+		if (!staticText)
 		{
-			mHexaStaticTexts[index] = (StaticText*)AddChild(
-				mHexaOrigins[index].x*.5f + .5f, mHexaOrigins[index].y*-.5f + .5f, 0.16f, 0.16f, ComponentType::StaticText);
-			mHexaStaticTexts[index]->SetRuntimeChild(true);
+			staticText = std::static_pointer_cast<StaticText>(AddChild(
+				mHexaOrigins[index].x*.5f + .5f, mHexaOrigins[index].y*-.5f + .5f, 0.16f, 0.16f, ComponentType::StaticText));
+			mHexaStaticTexts[index] = staticText;
+			staticText->SetRuntimeChild(true);
 		}
-
-		mHexaStaticTexts[index]->SetVisible(true);
-		mHexaStaticTexts[index]->SetAlign(ALIGNH::CENTER, ALIGNV::MIDDLE);
-		mHexaStaticTexts[index]->SetProperty(UIProperty::TEXT_ALIGN, "center");
-		mHexaStaticTexts[index]->SetProperty(UIProperty::TEXT_COLOR, "0.86667, 1.0, 0.1843, 1");
-		mHexaStaticTexts[index]->SetProperty(UIProperty::USE_SCISSOR, "false");
-		mHexaStaticTexts[index]->SetText(text);
-		mHexaStaticTexts[index]->DisableEvent(UIEvents::EVENT_MOUSE_LEFT_CLICK);
+		staticText->SetVisible(true);
+		staticText->SetAlign(ALIGNH::CENTER, ALIGNV::MIDDLE);
+		staticText->SetProperty(UIProperty::TEXT_ALIGN, "center");
+		staticText->SetProperty(UIProperty::TEXT_COLOR, "0.86667, 1.0, 0.1843, 1");
+		staticText->SetProperty(UIProperty::USE_SCISSOR, "false");
+		staticText->SetText(text);
+		staticText->DisableEvent(UIEvents::EVENT_MOUSE_LEFT_CLICK);
 	}
 
 	void HexagonalContextMenu::SetHexaImageIcon(unsigned index, const char* atlas, const char* region)
 	{
-		mHexaImages[index] = (ImageBox*)AddChild(mHexaOrigins[index].x*.5f + .5f, mHexaOrigins[index].y*-.5f + .5f, 0.2f, 0.2f, ComponentType::ImageBox);
-		mHexaImages[index]->SetRuntimeChild(true);
-		mHexaImages[index]->SetProperty(UIProperty::USE_SCISSOR, "false");
+		auto image = std::static_pointer_cast<ImageBox>(AddChild(mHexaOrigins[index].x*.5f + .5f, mHexaOrigins[index].y*-.5f + .5f, 0.2f, 0.2f, ComponentType::ImageBox));
+		mHexaImages[index] = image;
+		image->SetRuntimeChild(true);
+		image->SetProperty(UIProperty::USE_SCISSOR, "false");
 	}
 
 	void HexagonalContextMenu::ClearHexa()
@@ -114,13 +147,15 @@ namespace fastbird
 		for (int i = 0; i < 6; i++)
 		{
 			mHexaEnabled[i] = false;
-			if (mHexaStaticTexts[i])
+			auto staticText = mHexaStaticTexts[i].lock();
+			if (staticText)
 			{
-				mHexaStaticTexts[i]->SetVisible(false);
+				staticText->SetVisible(false);
 			}
-			if (mHexaImages[i])
+			auto image = mHexaImages[i].lock();
+			if (image)
 			{
-				mHexaImages[i]->SetVisible(false);
+				image->SetVisible(false);
 			}
 			
 			mCmdID[i] = -1;		
@@ -142,7 +177,7 @@ namespace fastbird
 		if (mUpdateMaterialParams)
 		{
 			mUpdateMaterialParams = false;
-			IMaterial* mat = mUIObject->GetMaterial();
+			auto mat = mUIObject->GetMaterial();
 			assert(mat);
 			const auto& finalSize = GetFinalSize();
 			const auto& finalPos = GetFinalPos();
@@ -155,13 +190,13 @@ namespace fastbird
 				wnSize.x, wnSize.y);
 			param[2] = Vec4(wnPos.x, wnPos.y, 0.0f, 0.0f);
 			for (int i = 1; i < 4; ++i)
-				mat->SetMaterialParameters(i, param[i-1]);
+				mat->SetMaterialParameter(i, param[i-1]);
 		}
 	}
 
-	bool HexagonalContextMenu::IsIn(IMouse* mouse)
+	bool HexagonalContextMenu::IsIn(IInputInjectorPtr injector)
 	{
-		bool isIn = __super::IsIn(mouse);
+		bool isIn = __super::IsIn(injector);
 
 		mMouseInHexaIdx = -1;
 		if (isIn)
@@ -170,7 +205,7 @@ namespace fastbird
 			const auto& finalPos = GetFinalPos();
 			auto wnPos = finalPos / Vec2(GetRenderTargetSize());
 			auto wnSize = finalSize / Vec2(GetRenderTargetSize());
-			Vec2 localMousePos = (mouse->GetNPos() - wnPos) / wnSize;
+			Vec2 localMousePos = (Vec2(injector->GetMouseNPos()) - wnPos) / wnSize;
 			localMousePos = localMousePos*2.0f - 1.0f;
 			localMousePos.y = -localMousePos.y;
 			

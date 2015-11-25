@@ -28,12 +28,12 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{	
-	DECLARE_SMART_PTR(Camera);
-	DECLARE_SMART_PTR(IScene);
-	DECLARE_SMART_PTR(Scene);
-	DECLARE_SMART_PTR(SceneManager);
+	FB_DECLARE_SMART_PTR(Camera);
+	FB_DECLARE_SMART_PTR(IScene);
+	FB_DECLARE_SMART_PTR(Scene);
+	FB_DECLARE_SMART_PTR(SceneManager);
 	class FB_DLL_SCENEMANAGER SceneManager{
-		DECLARE_PIMPL_NON_COPYABLE(SceneManager);
+		FB_DECLARE_PIMPL_NON_COPYABLE(SceneManager);
 		SceneManager();		
 		
 	public:

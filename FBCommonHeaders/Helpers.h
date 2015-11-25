@@ -60,6 +60,16 @@ Convenent macros for manipulating stl containers.
 		}\
 	unsigned arr ## SizeAfter = arr.size();
 
+#define IteratingWeakContainer(container, it, var)\
+	auto (var) = (it)->lock();\
+	if (!(var)){\
+		(it) = (container).erase((it));\
+		continue;\
+	}\
+	++it;\
+
+	
+
 #define ValidCStringLength(szStr) szStr && strlen((szStr))
 
 #define ARRAYCOUNT(A)       (sizeof(A) / sizeof(A[0]))

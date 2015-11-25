@@ -29,9 +29,9 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	
-	DECLARE_SMART_PTR(Audio);
+	FB_DECLARE_SMART_PTR(Audio);
 	class FB_DLL_AUDIO Audio{
-		DECLARE_PIMPL_NON_COPYABLE(Audio);
+		FB_DECLARE_PIMPL_NON_COPYABLE(Audio);
 		Audio();
 
 	public:	

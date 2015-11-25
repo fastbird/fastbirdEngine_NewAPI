@@ -31,11 +31,11 @@ namespace fastbird{
 	class Transformation;
 	class Vec3;
 	class Quat;
-	DECLARE_SMART_PTR(AnimationData);
+	FB_DECLARE_SMART_PTR(AnimationData);
 	/** Represents an unique animation set.
 	*/
 	class FB_DLL_ANIMATION AnimationData{
-		DECLARE_PIMPL_NON_COPYABLE(AnimationData);
+		FB_DECLARE_PIMPL_NON_COPYABLE(AnimationData);
 		AnimationData();
 
 	public:

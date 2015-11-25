@@ -1,26 +1,54 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 
 #include "Container.h"
-#include "ICheckbox.h"
 namespace fastbird
 {
-class IUIObject;
-class ImageBox;
-class StaticText;
-class CheckBox : public Container, public ICheckbox
+FB_DECLARE_SMART_PTR(ImageBox);
+FB_DECLARE_SMART_PTR(CheckBox);
+class FB_DLL_UI CheckBox : public Container
 {
-public:
+protected:
 	CheckBox();
-	virtual ~CheckBox();
+	~CheckBox();
+
+public:
+	static CheckBoxPtr Create();	
 
 	// IWinBase
-	virtual void OnCreated();
-	virtual ComponentType::Enum GetType() const { return ComponentType::CheckBox; }
-	virtual void GatherVisit(std::vector<IUIObject*>& v);
-
-	// ICheckBox
-	virtual void SetCheck(bool check);
-	virtual bool GetCheck() const;
+	void OnCreated();
+	ComponentType::Enum GetType() const { return ComponentType::CheckBox; }
+	void GatherVisit(std::vector<UIObject*>& v);
+	
+	// own
+	void SetCheck(bool check);
+	bool GetCheck() const;
 
 	// event
 	void OnClicked(void* arg);
@@ -28,14 +56,14 @@ public:
 
 	void OnMouseHover(void* arg);
 
-	virtual bool SetProperty(UIProperty::Enum, const char*);
-	virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
+	bool SetProperty(UIProperty::Enum, const char*);
+	bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
 
 private:
 	void UpdateImage();
 
 private:
-	ImageBox* mCheckImageBox;
+	ImageBoxWeakPtr mCheckImageBox;
 	bool mChecked;
 };
 

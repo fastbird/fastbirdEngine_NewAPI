@@ -29,7 +29,7 @@
 #include "RendererStructs.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IPlatformVertexBuffer);
+	FB_DECLARE_SMART_PTR(IPlatformVertexBuffer);
 	class IPlatformVertexBuffer
 	{
 	public:		

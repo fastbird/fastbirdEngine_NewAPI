@@ -32,10 +32,10 @@
 
 namespace fastbird
 {
-	DECLARE_SMART_PTR(RasterizerStateD3D11);
+	FB_DECLARE_SMART_PTR(RasterizerStateD3D11);
 	class RasterizerStateD3D11 : public IPlatformRasterizerState
 	{
-		DECLARE_NON_COPYABLE(RasterizerStateD3D11);
+		FB_DECLARE_NON_COPYABLE(RasterizerStateD3D11);
 
 		ID3D11RasterizerStatePtr mRasterizerState;
 
@@ -57,10 +57,10 @@ namespace fastbird
 	};
 
 	//-------------------------------------------------------------------------
-	DECLARE_SMART_PTR(BlendStateD3D11);
+	FB_DECLARE_SMART_PTR(BlendStateD3D11);
 	class BlendStateD3D11 : public IPlatformBlendState
 	{
-		DECLARE_NON_COPYABLE(BlendStateD3D11);
+		FB_DECLARE_NON_COPYABLE(BlendStateD3D11);
 
 		ID3D11BlendStatePtr mBlendState;
 
@@ -91,10 +91,10 @@ namespace fastbird
 		DWORD GetSampleMask() const { return 0xffffffff;}
 	};
 
-	DECLARE_SMART_PTR(DepthStencilStateD3D11);
+	FB_DECLARE_SMART_PTR(DepthStencilStateD3D11);
 	class DepthStencilStateD3D11 : public IPlatformDepthStencilState
 	{
-		DECLARE_NON_COPYABLE(DepthStencilStateD3D11);
+		FB_DECLARE_NON_COPYABLE(DepthStencilStateD3D11);
 
 		ID3D11DepthStencilStatePtr mDepthStencilState;
 
@@ -115,10 +115,10 @@ namespace fastbird
 		ID3D11DepthStencilState* GetHardwareDSState() const;
 	};
 
-	DECLARE_SMART_PTR(SamplerStateD3D11);
+	FB_DECLARE_SMART_PTR(SamplerStateD3D11);
 	class SamplerStateD3D11 : public IPlatformSamplerState
 	{
-		DECLARE_NON_COPYABLE(SamplerStateD3D11);
+		FB_DECLARE_NON_COPYABLE(SamplerStateD3D11);
 
 		ID3D11SamplerStatePtr mSamplerState;
 

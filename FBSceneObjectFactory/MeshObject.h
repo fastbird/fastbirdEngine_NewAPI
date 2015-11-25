@@ -35,11 +35,11 @@
 #include "FBRenderer/RendererEnums.h"
 #include "FBRenderer/RendererStructs.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(IndexBuffer);
-	DECLARE_SMART_PTR(Material);
-	DECLARE_SMART_PTR(MeshObject);
+	FB_DECLARE_SMART_PTR(IndexBuffer);
+	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(MeshObject);
 	class FB_DLL_SCENEOBJECTFACTORY MeshObject : public SpatialSceneObject{
-		DECLARE_PIMPL_CLONEABLE(MeshObject);		
+		FB_DECLARE_PIMPL_CLONEABLE(MeshObject);		
 		static MeshObjectPtr Create(const MeshObject& other);
 	protected:
 		MeshObject();

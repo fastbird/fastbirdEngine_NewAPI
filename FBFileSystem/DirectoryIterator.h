@@ -40,12 +40,13 @@ namespace fastbird{
 	all file names. This function is not thread safe.
 	*/
 	class FB_DLL_FILESYSTEM DirectoryIterator{
-		DECLARE_PIMPL_NON_COPYABLE(DirectoryIterator);
+		FB_DECLARE_PIMPL_NON_COPYABLE(DirectoryIterator);
 
 	public:
 		DirectoryIterator(const char* directoryPath, bool recursive);
 		~DirectoryIterator();
 
+		bool IsOpen() const;
 		bool HasNext() const;
 		/** Get next file name
 		Order is undefined.

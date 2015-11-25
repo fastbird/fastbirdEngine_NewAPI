@@ -66,7 +66,7 @@ namespace fastbird{
 		CVar(const char* _name, const std::string& _def, std::string& _storage,
 			CVAR_CATEGORY _category, const std::string& _desc);
 		CVar(const char* _name, const Vec2I& _def, Vec2I& _storage,
-			CVAR_CATEGORY _category, const std::string& _desc);
+			CVAR_CATEGORY _category, const std::string& _desc);		
 
 		int GetInt() const;
 		float GetFloat() const;

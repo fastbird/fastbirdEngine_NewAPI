@@ -36,16 +36,16 @@
 
 namespace fastbird{
 	class IPlatformShader;	
-	DECLARE_SMART_PTR(IPlatformSamplerState);
-	DECLARE_SMART_PTR(IPlatformRasterizerState);
-	DECLARE_SMART_PTR(IPlatformDepthStencilState);
-	DECLARE_SMART_PTR(IPlatformBlendState);
-	DECLARE_SMART_PTR(IPlatformTexture);
-	DECLARE_SMART_PTR(IPlatformShader);	
-	DECLARE_SMART_PTR(IPlatformInputLayout);
-	DECLARE_SMART_PTR(IPlatformIndexBuffer);
-	DECLARE_SMART_PTR(IPlatformVertexBuffer);		
-	DECLARE_SMART_PTR(IPlatformRenderer);
+	FB_DECLARE_SMART_PTR(IPlatformSamplerState);
+	FB_DECLARE_SMART_PTR(IPlatformRasterizerState);
+	FB_DECLARE_SMART_PTR(IPlatformDepthStencilState);
+	FB_DECLARE_SMART_PTR(IPlatformBlendState);
+	FB_DECLARE_SMART_PTR(IPlatformTexture);
+	FB_DECLARE_SMART_PTR(IPlatformShader);	
+	FB_DECLARE_SMART_PTR(IPlatformInputLayout);
+	FB_DECLARE_SMART_PTR(IPlatformIndexBuffer);
+	FB_DECLARE_SMART_PTR(IPlatformVertexBuffer);		
+	FB_DECLARE_SMART_PTR(IPlatformRenderer);
 	
 	/** Plug-in interface for render engine like D3D11, OpenGL.	
 	*/

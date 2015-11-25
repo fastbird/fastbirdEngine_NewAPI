@@ -31,16 +31,18 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBInputManager/KeyCodes.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(IKeyboard);
-	DECLARE_SMART_PTR(IMouse);
-	DECLARE_SMART_PTR(IInputInjector);
+	FB_DECLARE_SMART_PTR(IKeyboard);
+	FB_DECLARE_SMART_PTR(IMouse);
+	FB_DECLARE_SMART_PTR(IInputInjector);
 	class IInputInjector{
 	public:
 		virtual ~IInputInjector(){}
 		
-		virtual bool IsValid(FBInputDevice::Enum type) const = 0;
-		virtual void Invalidate(FBInputDevice::Enum type) const = 0;
-		virtual void InvalidTemporary(FBInputDevice::Enum type, bool invalidate) = 0;
+		virtual bool IsValid(InputDevice::Enum type) const = 0;
+		virtual void Invalidate(InputDevice::Enum type) const = 0;
+		/// Invalidate(InputDevice::Mouse) + Invalidate mouse click time.
+		virtual void InvalidateClickTime() const = 0;
+		virtual void InvalidTemporary(InputDevice::Enum type, bool invalidate) = 0;
 
 		//-------------------------------------------------------------------
 		// Keyboard

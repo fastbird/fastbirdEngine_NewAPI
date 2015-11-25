@@ -1,14 +1,47 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "PropertyList.h"
 #include "Scroller.h"
-#include "IUIManager.h"
+#include "UIManager.h"
+#include "UIObject.h"
 #include "TextField.h"
 #include "ListItem.h"
 #include "ListBoxData.h"
-#include <Engine/TextManipulator.h>
+#include "FBInputManager/TextManipulator.h"
 
 namespace fastbird
 {
+PropertyListPtr PropertyList::Create(){
+	PropertyListPtr p(new PropertyList, [](PropertyList* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
 PropertyList::PropertyList()
 	: ListBox()
 	, mFocusRow(-1)
@@ -49,9 +82,9 @@ unsigned PropertyList::InsertItem(const wchar_t* key, const wchar_t* value)
 	unsigned index = mData->AddPropertyListData(key, key, value);
 	while (mItems.size() <= index)
 	{
-		mItems.push_back(ROW());
-		mItems.back().push_back(0);
-		mItems.back().push_back(0);
+		mItems.push_back(ROW_WEAK());
+		mItems.back().push_back(ListItemWeakPtr());
+		mItems.back().push_back(ListItemWeakPtr());
 	}
 	VisualizeData(index);
 	return index;
@@ -89,22 +122,24 @@ void PropertyList::MoveFocusToEdit(unsigned index)
 	else{
 
 	}
-		//scroll
-	if (mScrollerV)
+	auto scroll = mScrollerV.lock();
+	//scroll
+	if (scroll)
 	{
 		if (index < mStartIndex+1 || index >(mEndIndex>=3 ? mEndIndex - 3 : mEndIndex))
 		{
 			unsigned hgap = mRowHeight + mRowGap;
 			unsigned destY = hgap * index + mRowGap;
 
-			mScrollerV->SetOffset(Vec2(0.f, -(destY / (float)GetRenderTargetSize().y)));
+			scroll->SetOffset(Vec2(0.f, -(destY / (float)GetRenderTargetSize().y)));
 		}
 	}
 
-	if (mItems[index][1])
+	auto second = mItems[index][1].lock();
+	if (second)
 	{
-		gFBUIManager->SetFocusUI(mItems[index][1]->GetChild((unsigned)0));
-		gFBUIManager->GetTextManipulator()->SelectAll();
+		UIManager::GetInstance().SetFocusUI(second->GetChild((unsigned)0));
+		UIManager::GetInstance().GetTextManipulator()->SelectAll();
 		TriggerRedraw();
 	}
 }
@@ -125,7 +160,8 @@ void PropertyList::MoveLine(bool applyInput, bool next)
 		nextLine = 0;
 	}
 	//scroll
-	if (mScrollerV)
+	auto scroll = mScrollerV.lock();
+	if (scroll)
 	{
 		if (nextLine < mStartIndex+1 ||
 			(nextLine >(mEndIndex >= 3 ? mEndIndex - 3 : mEndIndex))
@@ -134,13 +170,14 @@ void PropertyList::MoveLine(bool applyInput, bool next)
 			unsigned hgap = mRowHeight + mRowGap;
 			unsigned destY = hgap * nextLine + mRowGap;
 
-				mScrollerV->SetOffset(Vec2(0.f, -(destY / (float)GetRenderTargetSize().y)));
+			scroll->SetOffset(Vec2(0.f, -(destY / (float)GetRenderTargetSize().y)));
 		}
 	}
 
-	if (mItems[nextLine][0])
+	auto item = mItems[nextLine][0].lock();
+	if (item)
 	{
-		gFBUIManager->SetFocusUI(mItems[nextLine][0]);
+		UIManager::GetInstance().SetFocusUI(item);
 	}
 
 	mFocusRow = nextLine;	
@@ -149,17 +186,19 @@ void PropertyList::MoveLine(bool applyInput, bool next)
 
 void PropertyList::RemoveHighlight(unsigned index)
 {
-	if (mItems[index][0])
+	auto item = mItems[index][0].lock();
+	if (item)
 	{
-		mItems[index][0]->SetProperty(UIProperty::NO_BACKGROUND, "true");
+		item->SetProperty(UIProperty::NO_BACKGROUND, "true");
 	}
 }
 
 void PropertyList::MoveFocusToKeyItem()
 {
-	if (mItems[mFocusRow][0])
+	auto item = mItems[mFocusRow][0].lock();
+	if (item)
 	{
-		gFBUIManager->SetFocusUI(mItems[mFocusRow][0]);
+		UIManager::GetInstance().SetFocusUI(item);
 	}
 }
 //

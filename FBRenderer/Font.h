@@ -34,16 +34,16 @@
 #include  "TextTags.h"
 
 namespace fastbird{
-	DECLARE_SMART_PTR(Texture);
-	DECLARE_SMART_PTR(VertexBuffer);
-	DECLARE_SMART_PTR(Shader);
-	DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(VertexBuffer);
+	FB_DECLARE_SMART_PTR(Shader);
+	FB_DECLARE_SMART_PTR(Material);
 	struct SCharDescr;
 	typedef DEFAULT_INPUTS::V_PCTB  FontVertex;
-	DECLARE_SMART_PTR(Font);
+	FB_DECLARE_SMART_PTR(Font);
 	class FB_DLL_RENDERER Font
 	{
-		DECLARE_PIMPL_NON_COPYABLE(Font);
+		FB_DECLARE_PIMPL_NON_COPYABLE(Font);
 		Font();
 
 	public:

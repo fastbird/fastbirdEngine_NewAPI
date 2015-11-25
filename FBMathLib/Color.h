@@ -64,6 +64,7 @@ namespace fastbird
 		Color(Real r, Real g, Real b);
 		Color(LPCTSTR str);
 		explicit Color(unsigned int c);
+		explicit Color(const Vec4Tuple& t);
 
 		// when you want to send the data to gpu
 		unsigned int Get4Byte() const;
@@ -77,6 +78,7 @@ namespace fastbird
 		Color& operator*= (const Color& c);
 		Color operator+ (const Color& r) const;
 		bool operator== (const Color& other) const;
+		operator Vec4Tuple() const;
 		void SetColor(Real r, Real g, Real b, Real a = 1.f);
 		Real r() const;
 		Real g() const;

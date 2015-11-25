@@ -338,7 +338,7 @@ public:
 	}
 };
 
-IMPLEMENT_STATIC_CREATE(Audio);
+FB_IMPLEMENT_STATIC_CREATE(Audio);
 
 Audio::Audio()
 	: mImpl(new Impl)

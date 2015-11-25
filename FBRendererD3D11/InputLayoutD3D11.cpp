@@ -33,7 +33,7 @@
 using namespace fastbird;
 
 //----------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(InputLayoutD3D11);
+FB_IMPLEMENT_STATIC_CREATE(InputLayoutD3D11);
 InputLayoutD3D11::InputLayoutD3D11()
 	: mInputLayout(0)
 {

@@ -53,7 +53,7 @@ namespace fastbird{
 	}
 
 	//-----------------------------------------------------------------------
-	IMPLEMENT_STATIC_CREATE(TextureAtlas);
+	FB_IMPLEMENT_STATIC_CREATE(TextureAtlas);
 	TextureAtlas::TextureAtlas(){
 
 	}

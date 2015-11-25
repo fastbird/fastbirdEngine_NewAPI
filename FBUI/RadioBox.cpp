@@ -1,18 +1,48 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "RadioBox.h"
 #include "ImageBox.h"
 #include "StaticText.h"
-
+#include "UIObject.h"
 namespace fastbird
 {
 
+RadioBoxPtr RadioBox::Create(){
+	RadioBoxPtr p(new RadioBox, [](RadioBox* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
+
 RadioBox::RadioBox()
 	: mChecked(false)
-	, mGroupID(-1)
-	, mStaticText(0)
-	, mRadioImageBox(0)
-{
-	
+	, mGroupID(-1)	
+{	
 }
 
 RadioBox::~RadioBox()
@@ -20,33 +50,35 @@ RadioBox::~RadioBox()
 }
 
 void RadioBox::OnCreated(){
-	mRadioImageBox = static_cast<ImageBox*>(
+	auto imageBox = std::static_pointer_cast<ImageBox>(
 		AddChild(Vec2I(0, 0), Vec2I(mSize.y, mSize.y), ComponentType::ImageBox));
-	mRadioImageBox->SetRuntimeChild(true);	
-	mRadioImageBox->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_unchecked");
-	mRadioImageBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+	mRadioImageBox = imageBox;
+	imageBox->SetRuntimeChild(true);	
+	imageBox->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_unchecked");
+	imageBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 		std::bind(&RadioBox::OnChildrenClicked, this, std::placeholders::_1));
-	mRadioImageBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_HOVER,
+	imageBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_HOVER,
 		std::bind(&RadioBox::OnMouseHover, this, std::placeholders::_1));
-	mRadioImageBox->SetUseAbsPos(false);
-	mRadioImageBox->SetUseAbsSize(false);
-	mRadioImageBox->SetProperty(UIProperty::KEEP_UI_RATIO, "false");
-	mRadioImageBox->SetProperty(UIProperty::IMAGE_LINEAR_SAMPLER, "true");
+	imageBox->SetUseAbsPos(false);
+	imageBox->SetUseAbsSize(false);
+	imageBox->SetProperty(UIProperty::KEEP_UI_RATIO, "false");
+	imageBox->SetProperty(UIProperty::IMAGE_LINEAR_SAMPLER, "true");
 	UpdateImage();
 
-	mStaticText = static_cast<StaticText*>(
+	auto staticText = std::static_pointer_cast<StaticText>(
 		AddChild(0.06f, 0.f, 0.79f, 1.0f, ComponentType::StaticText));
-	mStaticText->ChangePosX(24);
-	mStaticText->SetRuntimeChild(true);
-	mStaticText->SetProperty(UIProperty::BACK_COLOR, "0.1, 0.1, 0.1, 0.5");
-	mStaticText->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
+	mStaticText = staticText;
+	staticText->ChangePosX(24);
+	staticText->SetRuntimeChild(true);
+	staticText->SetProperty(UIProperty::BACK_COLOR, "0.1, 0.1, 0.1, 0.5");
+	staticText->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 		std::bind(&RadioBox::OnChildrenClicked, this, std::placeholders::_1));
-	mStaticText->RegisterEventFunc(UIEvents::EVENT_MOUSE_HOVER,
+	staticText->RegisterEventFunc(UIEvents::EVENT_MOUSE_HOVER,
 		std::bind(&RadioBox::OnMouseHover, this, std::placeholders::_1));
-	mStaticText->SetUseAbsPos(false);
-	mStaticText->SetUseAbsSize(false);
+	staticText->SetUseAbsPos(false);
+	staticText->SetUseAbsSize(false);
 	if (!mTempString.empty()){
-		mStaticText->SetText(mTempString.c_str());
+		staticText->SetText(mTempString.c_str());
 		ClearWithSwap(mTempString);		
 	}
 
@@ -59,7 +91,7 @@ void RadioBox::OnCreated(){
 		std::bind(&RadioBox::OnMouseHover, this, std::placeholders::_1));
 }
 
-void RadioBox::GatherVisit(std::vector<IUIObject*>& v)
+void RadioBox::GatherVisit(std::vector<UIObject*>& v)
 {
 	__super::GatherVisit(v);
 }
@@ -70,7 +102,7 @@ bool RadioBox::SetProperty(UIProperty::Enum prop, const char* val)
 	{
 	case UIProperty::RADIO_GROUP:
 	{
-		SetGroupID(StringConverter::parseUnsignedInt(val));
+		SetGroupID(StringConverter::ParseUnsignedInt(val));
 		return true;
 	}
 	case UIProperty::RADIO_CHECK:
@@ -93,7 +125,7 @@ bool RadioBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 			if (mGroupID == UIProperty::GetDefaultValueInt(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mGroupID);
+		auto data = StringConverter::ToString(mGroupID);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -104,7 +136,7 @@ bool RadioBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 			if (mChecked == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mChecked);
+		auto data = StringConverter::ToString(mChecked);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -114,14 +146,16 @@ bool RadioBox::GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, 
 
 void RadioBox::OnSizeChanged(){
 	__super::OnSizeChanged();
-	if (mRadioImageBox)
-		mRadioImageBox->ChangeSize(Vec2I(mSize.y, mSize.y));
+	auto image = mRadioImageBox.lock();
+	if (image)
+		image->ChangeSize(Vec2I(mSize.y, mSize.y));
 }
 
 void RadioBox::SetText(const wchar_t* szText)
 {
-	if (mStaticText)
-		mStaticText->SetText(szText);
+	auto staticText = mStaticText.lock();
+	if (staticText)
+		staticText->SetText(szText);
 	else
 		mTempString = szText;
 }
@@ -143,8 +177,9 @@ bool RadioBox::GetCheck() const
 void RadioBox::OnChildrenClicked(void* arg)
 {
 	SetCheck(!mChecked);
-	if (mParent)
-		mParent->OnClickRadio(this);
+	auto parent = GetParent();
+	if (parent)
+		parent->OnClickRadio(this);
 
 	OnEvent(UIEvents::EVENT_MOUSE_LEFT_CLICK);
 }
@@ -152,18 +187,20 @@ void RadioBox::OnChildrenClicked(void* arg)
 void RadioBox::OnClicked(void* arg)
 {
 	SetCheck(!mChecked);
-	if (mParent)
-		mParent->OnClickRadio(this);
+	auto parent = GetParent();
+	if (parent)
+		parent->OnClickRadio(this);
 }
 
 void RadioBox::UpdateImage()
 {
-	if (!mRadioImageBox)
+	auto image = mRadioImageBox.lock();
+	if (!image)
 		return;
 	if (mChecked)
-		mRadioImageBox->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_checked");
+		image->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_checked");
 	else
-		mRadioImageBox->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_unchecked");
+		image->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_unchecked");
 }
 
 void RadioBox::OnMouseHover(void* arg)

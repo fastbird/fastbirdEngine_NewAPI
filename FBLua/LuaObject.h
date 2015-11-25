@@ -217,6 +217,6 @@ namespace fastbird
 		void CheckType();
 	};
 
-	LuaObject GetLuaVar(lua_State* L, const char* var, const char* file = 0);
+	FB_DLL_LUA LuaObject GetLuaVar(lua_State* L, const char* var, const char* file = 0);
 
 }

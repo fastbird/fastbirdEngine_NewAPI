@@ -30,11 +30,11 @@
 #include "FBMathLib/Math.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(DirectionalLight);
+	FB_DECLARE_SMART_PTR(DirectionalLight);
 	//------------------------------------------------------------------------
 	class FB_DLL_SCENEMANAGER DirectionalLight
 	{
-		DECLARE_PIMPL_NON_COPYABLE(DirectionalLight);
+		FB_DECLARE_PIMPL_NON_COPYABLE(DirectionalLight);
 		DirectionalLight();
 
 

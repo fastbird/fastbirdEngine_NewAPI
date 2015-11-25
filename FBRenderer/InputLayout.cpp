@@ -48,7 +48,7 @@ public:
 InputLayout::Impl* InputLayout::Impl::sLastBinded = 0;
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(InputLayout);
+FB_IMPLEMENT_STATIC_CREATE(InputLayout);
 InputLayout::InputLayout()
 	:mImpl(new Impl)
 {

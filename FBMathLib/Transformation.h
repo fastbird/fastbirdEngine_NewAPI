@@ -50,7 +50,7 @@ namespace fastbird
 		Real, Real, Real, 
 		// itentity, RSSeperated, UniformScale
 		bool, bool, bool> TransformationTuple;
-	DECLARE_SMART_PTR(Transformation);
+	FB_DECLARE_SMART_PTR(Transformation);
 	class Transformation
 	{
 	private:

@@ -29,10 +29,10 @@
 #include "Color.h"
 namespace fastbird{
 
-	DECLARE_SMART_PTR(ColorRamp);
+	FB_DECLARE_SMART_PTR(ColorRamp);
 	class ColorRamp
 	{
-		DECLARE_PIMPL(ColorRamp);		
+		FB_DECLARE_PIMPL(ColorRamp);		
 
 	public:
 		ColorRamp();

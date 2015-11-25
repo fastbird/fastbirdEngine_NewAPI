@@ -37,16 +37,16 @@ namespace fastbird
 {
 	struct RenderParam;
 	struct RenderParamOut;
-	DECLARE_SMART_PTR(MeshObject);
-	DECLARE_SMART_PTR(Shader);
-	DECLARE_SMART_PTR(Material);
-	DECLARE_SMART_PTR(RenderStates);
-	DECLARE_SMART_PTR(VertexBuffer);
-	DECLARE_SMART_PTR(IScene);
-	DECLARE_SMART_PTR(DebugHud);
+	FB_DECLARE_SMART_PTR(MeshObject);
+	FB_DECLARE_SMART_PTR(Shader);
+	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(RenderStates);
+	FB_DECLARE_SMART_PTR(VertexBuffer);
+	FB_DECLARE_SMART_PTR(IScene);
+	FB_DECLARE_SMART_PTR(DebugHud);
 	class DebugHud
 	{
-		DECLARE_PIMPL(DebugHud);
+		FB_DECLARE_PIMPL(DebugHud);
 		DebugHud();
 
 	public:

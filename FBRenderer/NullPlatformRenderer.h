@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "IPlatformRenderer.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(NullPlatformRenderer);
+	FB_DECLARE_SMART_PTR(NullPlatformRenderer);
 	class NullPlatformRenderer : public IPlatformRenderer {
 		NullPlatformRenderer();
 		~NullPlatformRenderer();

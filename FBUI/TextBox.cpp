@@ -1,19 +1,52 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "TextBox.h"
 #include "KeyboardCursor.h"
-#include "IUIManager.h"
+#include "UIManager.h"
 #include "ImageBox.h"
+#include "UIObject.h"
 
 
 namespace fastbird
 {
 
+	TextBoxPtr TextBox::Create(){
+		TextBoxPtr p(new TextBox, [](TextBox* obj){ delete obj; });
+		p->mSelfPtr = p;
+		return p;
+	}
+
 	const float TextBox::LEFT_GAP = 0.001f;
 
 	TextBox::TextBox()
 		: mCursorPos(0)
-		, mPasswd(false)
-		, mImage(0)
+		, mPasswd(false)		
 		, mMatchHeight(false)
 	{
 		mUIObject = UIObject::Create(GetRenderTargetSize());
@@ -28,10 +61,9 @@ namespace fastbird
 
 	TextBox::~TextBox()
 	{
-		FB_DELETE(mImage);
 	}
 
-	void TextBox::GatherVisit(std::vector<IUIObject*>& v)
+	void TextBox::GatherVisit(std::vector<UIObject*>& v)
 	{
 		if (!mVisibility.IsVisible())
 			return;
@@ -39,7 +71,7 @@ namespace fastbird
 		if (mImage)
 			mImage->GatherVisit(v);
 
-		v.push_back(mUIObject);
+		v.push_back(mUIObject.get());
 
 		__super::GatherVisit(v);
 	}
@@ -81,7 +113,7 @@ namespace fastbird
 	void TextBox::CalcTextWidth()
 	{
 		// analyze the text length
-		IFont* pFont = gFBEnv->pRenderer->GetFont(mTextSize);
+		FontPtr pFont = Renderer::GetInstance().GetFont(mTextSize);
 		unsigned width = mSize.x;		
 		float textWidth;
 		mMultiLineText = pFont->InsertLineFeed((const char*)mTextw.c_str(), mTextw.size() * 2, width, &textWidth, &mNumTextLines);
@@ -99,14 +131,14 @@ namespace fastbird
 			mStrBackImage = val;
 			if (!mImage)
 			{
-				mImage = FB_NEW(ImageBox);
+				mImage = ImageBox::Create();
 				mImage->SetHwndId(GetHwndId());
 				mImage->SetRender3D(mRender3D, GetRenderTargetSize());
-				mImage->SetManualParent(this);
+				mImage->SetManualParent(mSelfPtr.lock());
 				mImage->ChangePos(GetFinalPos());
 				mImage->ChangeSize(GetFinalSize());
 			}
-			gFBEnv->pUIManager->DirtyRenderList(GetHwndId());
+			UIManager::GetInstance().DirtyRenderList(GetHwndId());
 
 			mImage->SetTexture(val);
 			return true;
@@ -117,14 +149,14 @@ namespace fastbird
 			mStrKeepRatio = val;
 			if (!mImage)
 			{
-				mImage = FB_NEW(ImageBox);
+				mImage = ImageBox::Create();
 				mImage->SetHwndId(GetHwndId());
 				mImage->SetRender3D(mRender3D, GetRenderTargetSize());
-				mImage->SetManualParent(this);
+				mImage->SetManualParent(mSelfPtr.lock());
 				mImage->ChangePos(GetFinalPos());
 				mImage->ChangeSize(GetFinalSize());
 			}
-			gFBEnv->pUIManager->DirtyRenderList(GetHwndId());
+			UIManager::GetInstance().DirtyRenderList(GetHwndId());
 			mImage->SetKeepImageRatio(StringConverter::ParseBool(val, true));
 											 
 			return true;
@@ -182,7 +214,7 @@ namespace fastbird
 					return false;
 			}
 
-			auto data = StringConverter::toString(mMatchHeight);
+			auto data = StringConverter::ToString(mMatchHeight);
 			strcpy_s(val, bufsize, data.c_str());
 			return true;
 		}
@@ -196,7 +228,7 @@ namespace fastbird
 
 	unsigned TextBox::GetTextBoxHeight() const
 	{
-		IFont* pFont = gFBEnv->pRenderer->GetFont(mTextSize);		
+		FontPtr pFont = Renderer::GetInstance().GetFont(mTextSize);		
 		float height = pFont->GetHeight();
 		pFont->SetBackToOrigHeight();
 		return Round(height * mNumTextLines) + 16;

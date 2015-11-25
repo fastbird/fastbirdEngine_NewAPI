@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "UIManager.h"
 #include "StaticText.h"
@@ -15,6 +42,8 @@
 #include "CardScroller.h"
 #include "HorizontalGauge.h"
 #include "RadioBox.h"
+#include "UIAnimation.h"
+#include "FBLua/LuaUtils.h"
 //--------------------------------------------------------------------------------
 
 namespace fastbird
@@ -233,115 +262,115 @@ namespace fastbird
 
 	int LoadLuaUI(lua_State* L)
 	{
-		const char* uiFile = luaL_checkstring(L, 1);
+		const char* uiFile = LuaUtils::checkstring(L, 1);
 		HWindowId id = INVALID_HWND_ID;
-		if (lua_gettop(L) == 2)
+		if (LuaUtils::gettop(L) == 2)
 		{
-			id = luaL_checkunsigned(L, 2);
+			id = LuaUtils::checkunsigned(L, 2);
 		}
 		else
 		{
-			id = gFBEnv->pEngine->GetMainWndHandleId();
+			id = Renderer::GetInstance().GetMainWindowHandleId();
 		}
-		std::vector<IWinBase*> temp;
+		std::vector<WinBasePtr> temp;
 		std::string name;
-		UIManager::GetUIManagerStatic()->ParseUI(uiFile, temp, name, id, true);
-		UIManager::GetUIManagerStatic()->SetVisible(name.c_str(), false);
+		UIManager::GetInstance().ParseUI(uiFile, temp, name, id, true);
+		UIManager::GetInstance().SetVisible(name.c_str(), false);
 		return 0;
 	}
 
 	int IsLoadedUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		bool loaded = UIManager::GetUIManagerStatic()->IsLoadedUI(uiname);
-		lua_pushboolean(L, loaded);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		bool loaded = UIManager::GetInstance().IsLoadedUI(uiname);
+		LuaUtils::pushboolean(L, loaded);
 		return 1;
 	}
 
 	int AddLuaUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
+		const char* uiname = LuaUtils::checkstring(L, 1);
 		LuaObject ui(L, 2);
 		HWindowId hwndId = INVALID_HWND_ID;
-		if (lua_gettop(L) == 3)
+		if (LuaUtils::gettop(L) == 3)
 		{
-			hwndId = luaL_checkunsigned(L, 2);
+			hwndId = LuaUtils::checkunsigned(L, 2);
 		}
 		else
 		{
-			hwndId = gFBEnv->pEngine->GetMainWndHandleId();
+			hwndId = Renderer::GetInstance().GetMainWindowHandleId();
 		}
-		UIManager::GetUIManagerStatic()->AddLuaUI(uiname, ui, hwndId);
-		UIManager::GetUIManagerStatic()->SetVisible(uiname, false);
+		UIManager::GetInstance().AddLuaUI(uiname, ui, hwndId);
+		UIManager::GetInstance().SetVisible(uiname, false);
 		return 0;
 	}
 
 	int DeleteLuaUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
+		const char* uiname = LuaUtils::checkstring(L, 1);
 		bool pending = false;
-		if (lua_gettop(L) == 2){
-			pending = lua_toboolean(L, 2)!=0;
+		if (LuaUtils::gettop(L) == 2){
+			pending = LuaUtils::toboolean(L, 2);
 		}
-		UIManager::GetUIManagerStatic()->DeleteLuaUI(uiname, pending);
+		UIManager::GetInstance().DeleteLuaUI(uiname, pending);
 		return 0;
 	}
 
 	int SetStaticText(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compoName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compoName);
-		auto staticText = dynamic_cast<StaticText*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compoName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compoName);
+		auto staticText = std::dynamic_pointer_cast<StaticText>(comp);
 		if (staticText)
 		{
-			staticText->SetText(AnsiToWide(luaL_checkstring(L, 3)));
-			lua_pushboolean(L, 1);
+			staticText->SetText(AnsiToWide(LuaUtils::checkstring(L, 3)));
+			LuaUtils::pushboolean(L, 1);
 		}
 		else
 		{
-			lua_pushboolean(L, 0);
+			LuaUtils::pushboolean(L, 0);
 		}
 		return 1;
 	}
 
 	int SetVisibleLuaUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		luaL_checktype(L, 2, LUA_TBOOLEAN);
-		bool visible = lua_toboolean(L, 2) != 0;
-		UIManager::GetUIManagerStatic()->SetVisible(uiname, visible);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		LuaUtils::checktype(L, 2, LUA_TBOOLEAN);
+		bool visible = LuaUtils::toboolean(L, 2);
+		UIManager::GetInstance().SetVisible(uiname, visible);
 		return 0;
 	}
 
 	int ToggleVisibleLuaUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		UIManager::GetUIManagerStatic()->ToggleVisibleLuaUI(uiname);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		UIManager::GetInstance().ToggleVisibleLuaUI(uiname);
 		return 0;
 	}
 
 	int CloseAllLuaUI(lua_State* L)
 	{
-		UIManager::GetUIManagerStatic()->CloseAllLuaUI();
+		UIManager::GetInstance().CloseAllLuaUI();
 		return 0;
 	}
 
 	int GetVisibleLuaUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		bool visible = UIManager::GetUIManagerStatic()->GetVisible(uiname);
-		lua_pushboolean(L, visible);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		bool visible = UIManager::GetInstance().GetVisible(uiname);
+		LuaUtils::pushboolean(L, visible);
 		return 1;
 	}
 
 	int SetVisibleComponent(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		bool visible = lua_toboolean(L, 3) != 0;
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		LuaUtils::checktype(L, 3, LUA_TBOOLEAN);
+		bool visible = LuaUtils::toboolean(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
 			comp->SetVisible(visible);
@@ -353,11 +382,11 @@ namespace fastbird
 
 	int SetVisibleChildrenComponent(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		bool visible = lua_toboolean(L, 3) != 0;
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		LuaUtils::checktype(L, 3, LUA_TBOOLEAN);
+		bool visible = LuaUtils::toboolean(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
 			comp->SetVisibleChildren(visible);
@@ -369,31 +398,31 @@ namespace fastbird
 
 	int RemoveAllChildrenOf(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
 		bool immedi = false;
-		if (lua_gettop(L) == 3){
-			immedi = lua_toboolean(L, 3) != 0;
+		if (LuaUtils::gettop(L) == 3){
+			immedi = LuaUtils::toboolean(L, 3) != 0;
 		}
 
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			comp->RemoveAllChild(immedi);
-			lua_pushboolean(L, 1);
+			comp->RemoveAllChildren(immedi);
+			LuaUtils::pushboolean(L, 1);
 		}
 		else
 		{
-			lua_pushboolean(L, 0);
+			LuaUtils::pushboolean(L, 0);
 		}
 		return 1;
 	}
 
 	int RemoveComponent(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
 			auto parent = comp->GetParent();
@@ -411,109 +440,109 @@ namespace fastbird
 
 	int AddComponent(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		LuaObject compTable(L, 3);
 		if (comp)
 		{
-			//UIManager::GetUIManagerStatic()->SetEnablePosSizeEvent(false);
+			//UIManager::GetInstance().SetEnablePosSizeEvent(false);
 			auto winbase = comp->AddChild(compTable);
-			//UIManager::GetUIManagerStatic()->SetEnablePosSizeEvent(true);
+			//UIManager::GetInstance().SetEnablePosSizeEvent(true);
 			if (winbase)
 			{
 				//winbase->OnSizeChanged();
-				lua_pushboolean(L, 1);
+				LuaUtils::pushboolean(L, 1);
 				winbase->SetVisible(true);
 				return 1;
 			}
 		}
 
-		lua_pushboolean(L, 0);
+		LuaUtils::pushboolean(L, 0);
 		return 1;
 	}
 
 	int CreateNewCard(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* cardScrollerName = luaL_checkstring(L, 2);
-		unsigned key = luaL_checkunsigned(L, 3);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* cardScrollerName = LuaUtils::checkstring(L, 2);
+		unsigned key = LuaUtils::checkunsigned(L, 3);
 		LuaObject card(L, 4);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, cardScrollerName);
+		auto comp = UIManager::GetInstance().FindComp(uiname, cardScrollerName);
 		if (!comp)
 		{
 			Error(FB_ERROR_LOG_ARG, "No card scroller found!");
 			return 0;
 		}
 
-		CardScroller* cardScroller = (CardScroller*)comp;
+		CardScroller* cardScroller = (CardScroller*)comp.get();
 		cardScroller->AddCard(key, card);
 		return 0;
 	}
 
 	int DeleteCard(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* cardScrollerName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, cardScrollerName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* cardScrollerName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, cardScrollerName);
 		if (!comp)
 		{
 			Error(FB_ERROR_LOG_ARG, "No card scroller found!");
 			return 0;
 		}
 
-		CardScroller* cardScroller = (CardScroller*)comp;
-		unsigned key = luaL_checkunsigned(L, 3);
+		CardScroller* cardScroller = (CardScroller*)comp.get();
+		unsigned key = LuaUtils::checkunsigned(L, 3);
 		cardScroller->DeleteCard(key);
 		return 0;
 	}
 
 	int DeleteAllCard(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* cardScrollerName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, cardScrollerName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* cardScrollerName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, cardScrollerName);
 		if (!comp)
 		{
 			Error(FB_ERROR_LOG_ARG, "No card scroller found!");
 			return 0;
 		}
 
-		CardScroller* cardScroller = (CardScroller*)comp;
+		CardScroller* cardScroller = (CardScroller*)comp.get();
 		cardScroller->DeleteAllCard();
 		return 0;
 	}
 
 	int IsExistingCard(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* cardScrollerName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, cardScrollerName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* cardScrollerName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, cardScrollerName);
 		if (!comp)
 		{
 			Error(FB_ERROR_LOG_ARG, "No card scroller found!");
 			return 0;
 		}
 
-		CardScroller* cardScroller = (CardScroller*)comp;
-		unsigned key = luaL_checkunsigned(L, 3);
+		CardScroller* cardScroller = (CardScroller*)comp.get();
+		unsigned key = LuaUtils::checkunsigned(L, 3);
 		bool exist = cardScroller->IsExisting(key);
-		lua_pushboolean(L, exist);
+		LuaUtils::pushboolean(L, exist);
 		return 1;
 
 	}
 
 	int BlinkButton(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		luaL_checktype(L, 3, LUA_TBOOLEAN);
-		bool blink = lua_toboolean(L, 3) != 0;
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		LuaUtils::checktype(L, 3, LUA_TBOOLEAN);
+		bool blink = LuaUtils::toboolean(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			auto button = dynamic_cast<Button*>(comp);
+			auto button = dynamic_cast<Button*>(comp.get());
 			if (button)
 			{
-				if (lua_gettop(L) == 4){
-					float time = (float)luaL_checknumber(L, 4);
+				if (LuaUtils::gettop(L) == 4){
+					float time = (float)LuaUtils::checknumber(L, 4);
 					button->Blink(blink, time);
 				}
 				else{
@@ -524,10 +553,10 @@ namespace fastbird
 			}
 			else
 			{
-				auto bar = dynamic_cast<HorizontalGauge*>(comp);
+				auto bar = dynamic_cast<HorizontalGauge*>(comp.get());
 				if (bar){
-					if (lua_gettop(L) == 4){
-						float time = (float)luaL_checknumber(L, 4);
+					if (LuaUtils::gettop(L) == 4){
+						float time = (float)LuaUtils::checknumber(L, 4);
 						bar->Blink(blink, time);
 					}
 					else{
@@ -544,13 +573,13 @@ namespace fastbird
 
 	int UpdateButtonProgressBar(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		float percent = (float)luaL_checknumber(L, 3);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		float percent = (float)LuaUtils::checknumber(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			auto button = dynamic_cast<Button*>(comp);
+			auto button = dynamic_cast<Button*>(comp.get());
 			if (button)
 			{
 				button->SetPercentage(percent);
@@ -563,12 +592,12 @@ namespace fastbird
 
 	int StartButtonProgressBar(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			auto button = dynamic_cast<Button*>(comp);
+			auto button = dynamic_cast<Button*>(comp.get());
 			if (button)
 			{
 				button->StartProgress();
@@ -581,12 +610,12 @@ namespace fastbird
 
 	int EndButtonProgressBar(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			auto button = dynamic_cast<Button*>(comp);
+			auto button = dynamic_cast<Button*>(comp.get());
 			if (button)
 			{
 				button->EndProgress();
@@ -599,13 +628,13 @@ namespace fastbird
 
 	int SetTextBoxText(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		const char* text = luaL_checkstring(L, 3);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		const char* text = LuaUtils::checkstring(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			auto textBox = dynamic_cast<TextBox*>(comp);
+			auto textBox = dynamic_cast<TextBox*>(comp.get());
 			if (textBox)
 			{
 				textBox->SetText(AnsiToWide(text));
@@ -618,10 +647,10 @@ namespace fastbird
 
 	int SetUIBackground(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		const char* image = luaL_checkstring(L, 3);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		const char* image = LuaUtils::checkstring(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
 			comp->SetProperty(UIProperty::BACKGROUND_IMAGE_NOATLAS, image);
@@ -633,15 +662,15 @@ namespace fastbird
 
 	int SetUIProperty(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		const char* prop = luaL_checkstring(L, 3);
-		const char* val = luaL_checkstring(L, 4);		
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		const char* prop = LuaUtils::checkstring(L, 3);
+		const char* val = LuaUtils::checkstring(L, 4);		
 		bool updatePosSize = false;
-		if (lua_gettop(L) == 5){
-			updatePosSize = lua_toboolean(L, 5) != 0;			
+		if (LuaUtils::gettop(L) == 5){
+			updatePosSize = LuaUtils::toboolean(L, 5);			
 		}
-		UIManager::GetUIManagerStatic()->SetUIProperty(uiname, compName, prop, val, updatePosSize);
+		UIManager::GetInstance().SetUIProperty(uiname, compName, prop, val, updatePosSize);
 		
 		return 0;
 
@@ -649,10 +678,10 @@ namespace fastbird
 
 	int GetUIProperty(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		const char* prop = luaL_checkstring(L, 3);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		const char* prop = LuaUtils::checkstring(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
 			char buf[256];
@@ -660,7 +689,7 @@ namespace fastbird
 			bool result = comp->GetProperty(UIProperty::ConvertToEnum(prop), buf, 256, false);
 			if (result)
 			{
-				lua_pushstring(L, buf);
+				LuaUtils::pushstring(L, buf);
 				return 1;
 			}
 		}
@@ -672,13 +701,13 @@ namespace fastbird
 
 	int SetCardUIProperty(lua_State* L){
 		int li = 1;
-		const char* uiname = luaL_checkstring(L, li++);
-		const char* scrollerName = luaL_checkstring(L, li++);
-		unsigned key = luaL_checkunsigned(L, li++);
-		const char* compName = luaL_checkstring(L, li++);
-		const char* prop = luaL_checkstring(L, li++);
-		const char* val = luaL_checkstring(L, li++);
-		auto card = (CardScroller*)gFBUIManager->FindComp(uiname, scrollerName);
+		const char* uiname = LuaUtils::checkstring(L, li++);
+		const char* scrollerName = LuaUtils::checkstring(L, li++);
+		unsigned key = LuaUtils::checkunsigned(L, li++);
+		const char* compName = LuaUtils::checkstring(L, li++);
+		const char* prop = LuaUtils::checkstring(L, li++);
+		const char* val = LuaUtils::checkstring(L, li++);
+		auto card = (CardScroller*)UIManager::GetInstance().FindComp(uiname, scrollerName).get();
 		if (card){
 			card->SetItemProperty(key, compName, prop, val);
 		}
@@ -688,13 +717,13 @@ namespace fastbird
 
 	int RemoveUIEventhandler(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		const char* eventName = luaL_checkstring(L, 3);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		const char* eventName = LuaUtils::checkstring(L, 3);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			auto eventHandler = dynamic_cast<EventHandler*>(comp);
+			auto eventHandler = dynamic_cast<EventHandler*>(comp.get());
 			if (eventHandler)
 			{
 				eventHandler->UnregisterEventLuaFunc(UIEvents::ConvertToEnum(eventName));
@@ -709,50 +738,51 @@ namespace fastbird
 	int GetMousePos(lua_State* L)
 	{
 		long x, y;
-		gFBEnv->pEngine->GetMousePos(x, y);
+		auto injector = InputManager::GetInstance().GetInputInjector();
+		injector->GetMousePos(x, y);		
 
-		lua_pushnumber(L, x);
-		lua_pushnumber(L, y);
+		LuaUtils::pushnumber(L, x);
+		LuaUtils::pushnumber(L, y);
 		return 2;
 	}
 
 	int GetComponentWidth(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			lua_pushinteger(L, comp->GetSize().x);
+			LuaUtils::pushinteger(L, comp->GetSize().x);
 			return 1;
 		}
 		assert(0);
 		Error("UI component not found! (%s, %s)", uiname, compName);
-		lua_pushinteger(L, 0);
+		LuaUtils::pushinteger(L, 0);
 		return 1;
 	}
-	IWinBase* gRememberedComp = 0;
+	WinBase* gRememberedComp = 0;
 	int FindAndRememberComponent(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		gRememberedComp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
-		lua_pushboolean(L, gRememberedComp != 0);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		gRememberedComp = UIManager::GetInstance().FindComp(uiname, compName).get();
+		LuaUtils::pushboolean(L, gRememberedComp != 0);
 		return 1;
 	}
 
 	int SetActivationUIAnim(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (!comp)
 		{
 			Error(FB_ERROR_LOG_ARG, "no comp found");
 			return 0;
 		}
-		const char* animName = luaL_checkstring(L, 3);
-		bool active = lua_toboolean(L, 4) != 0;
+		const char* animName = LuaUtils::checkstring(L, 3);
+		bool active = LuaUtils::toboolean(L, 4);
 
 		auto anim = comp->GetOrCreateUIAnimation(animName);
 		anim->SetActivated(active);
@@ -761,29 +791,29 @@ namespace fastbird
 
 	int SetFocusUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		UIManager::GetUIManagerStatic()->SetFocusUI(uiname);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		UIManager::GetInstance().SetFocusUI(uiname);
 		return 0;
 	}
 
 	int CloneLuaUI(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* newUIname = luaL_checkstring(L, 2);
-		gFBEnv->pUIManager->CloneUI(uiname, newUIname);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* newUIname = LuaUtils::checkstring(L, 2);
+		UIManager::GetInstance().CloneUI(uiname, newUIname);
 		return 0;
 	}
 
 	int IsButtonActivated(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, compName);
-		Button* btn = dynamic_cast<Button*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		Button* btn = dynamic_cast<Button*>(comp.get());
 		if (btn)
 		{
 			bool activated = btn->IsActivated();
-			lua_pushboolean(L, activated);
+			LuaUtils::pushboolean(L, activated);
 			return 1;
 		}
 
@@ -792,10 +822,10 @@ namespace fastbird
 
 	int StartUIAnimation(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, compName);
-		const char* animName = luaL_checkstring(L, 3);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		const char* animName = LuaUtils::checkstring(L, 3);
 
 		if (comp)
 		{
@@ -807,7 +837,7 @@ namespace fastbird
 			auto uiAnimation = comp->GetUIAnimation(animName);
 			if (!uiAnimation)
 			{
-				auto ganim = gFBEnv->pUIManager->GetGlobalAnimation(animName);
+				auto ganim = UIManager::GetInstance().GetGlobalAnimation(animName);
 				uiAnimation = ganim->Clone();
 				uiAnimation->SetGlobalAnim(true);
 				comp->SetUIAnimation(uiAnimation);
@@ -822,10 +852,10 @@ namespace fastbird
 
 	int StopUIAnimation(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, compName);
-		const char* animName = luaL_checkstring(L, 3);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		const char* animName = LuaUtils::checkstring(L, 3);
 
 		if (comp)
 		{
@@ -840,16 +870,16 @@ namespace fastbird
 
 	int MatchUIHeight(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
 		bool checkName = false;
-		if (!lua_isnil(L, 3))
-			checkName = lua_toboolean(L, 3)!=0;
+		if (!LuaUtils::isnil(L, 3))
+			checkName = LuaUtils::toboolean(L, 3)!=0;
 
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, compName);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
-			Container* con = dynamic_cast<Container*>(comp);
+			Container* con = dynamic_cast<Container*>(comp.get());
 			if (con)
 			{
 				con->MatchHeight(checkName);
@@ -860,12 +890,12 @@ namespace fastbird
 
 	int GetCheckedFromCheckBox(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = dynamic_cast<CheckBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = dynamic_cast<CheckBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (comp)
 		{
-			lua_pushboolean(L, comp->GetCheck());
+			LuaUtils::pushboolean(L, comp->GetCheck());
 			return 1;
 		}
 		return 0;
@@ -873,12 +903,12 @@ namespace fastbird
 
 	int GetNumericUpDownValue(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = dynamic_cast<NumericUpDown*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = dynamic_cast<NumericUpDown*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (comp)
 		{
-			lua_pushinteger(L, comp->GetValue());
+			LuaUtils::pushinteger(L, comp->GetValue());
 			return 1;
 		}
 		return 0;
@@ -886,12 +916,12 @@ namespace fastbird
 
 	int SetNumericUpDownValue(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = dynamic_cast<NumericUpDown*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = dynamic_cast<NumericUpDown*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (comp)
 		{
-			int val = luaL_checkint(L, 3);
+			int val = LuaUtils::checkint(L, 3);
 			comp->SetNumber(val);
 			return 0;
 		}
@@ -900,17 +930,17 @@ namespace fastbird
 
 	int MoveUIToBottom(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		gFBEnv->pUIManager->MoveToBottom(uiname);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		UIManager::GetInstance().MoveToBottom(uiname);
 		return 0;
 	}
 
 	int SetDropDownIndex(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		unsigned index = luaL_checkunsigned(L, 3);
-		auto dropDown = dynamic_cast<DropDown*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		unsigned index = LuaUtils::checkunsigned(L, 3);
+		auto dropDown = dynamic_cast<DropDown*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (dropDown)
 		{
 			dropDown->SetSelectedIndex(index);
@@ -920,30 +950,30 @@ namespace fastbird
 
 	int GetDropDownIndex(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto dropDown = dynamic_cast<DropDown*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto dropDown = dynamic_cast<DropDown*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (dropDown)
 		{
-			lua_pushunsigned(L, dropDown->GetSelectedIndex());
+			LuaUtils::pushunsigned(L, dropDown->GetSelectedIndex());
 			return 1;
 		}
 		return 0;
 	}
 
 	int GetDropDownString(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto dropDown = dynamic_cast<DropDown*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto dropDown = dynamic_cast<DropDown*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (dropDown)
 		{
-			unsigned idx = luaL_checkunsigned(L, 3);
+			unsigned idx = LuaUtils::checkunsigned(L, 3);
 			auto str = dropDown->GetItemString(idx);
 			if (wcslen(str) == 0){
 				return 0;
 			}
 			std::string cstr = WideToAnsi(str);
-			lua_pushstring(L, cstr.c_str());
+			LuaUtils::pushstring(L, cstr.c_str());
 			return 1;
 		}
 		return 0;
@@ -951,20 +981,20 @@ namespace fastbird
 
 	int SetVisibleLuaUIWithoutFocusing(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		luaL_checktype(L, 2, LUA_TBOOLEAN);
-		bool visible = lua_toboolean(L, 2) != 0;
-		UIManager::GetUIManagerStatic()->LockFocus(true);
-		UIManager::GetUIManagerStatic()->SetVisible(uiname, visible);
-		UIManager::GetUIManagerStatic()->LockFocus(false);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		LuaUtils::checktype(L, 2, LUA_TBOOLEAN);
+		bool visible = LuaUtils::toboolean(L, 2);
+		UIManager::GetInstance().LockFocus(true);
+		UIManager::GetInstance().SetVisible(uiname, visible);
+		UIManager::GetInstance().LockFocus(false);
 		return 0;
 	}
 
 	int GetColorRampUIValues(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto colorRamp = dynamic_cast<ColorRampComp*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto colorRamp = dynamic_cast<ColorRampComp*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (colorRamp)
 		{
 			std::vector<float> values;
@@ -986,9 +1016,9 @@ namespace fastbird
 
 	int SetColorRampUIValues(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto colorRamp = dynamic_cast<ColorRampComp*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto colorRamp = dynamic_cast<ColorRampComp*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (colorRamp)
 		{
 			std::vector<float> values;
@@ -1014,35 +1044,35 @@ namespace fastbird
 		{
 			excepts.push_back(data.GetString());
 		}
-		UIManager::GetUIManagerStatic()->HideUIsExcept(excepts);
+		UIManager::GetInstance().HideUIsExcept(excepts);
 		return 0;
 	}
 
 	int StartHighlightUI(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		gFBEnv->pUIManager->HighlightUI(uiname);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		UIManager::GetInstance().HighlightUI(uiname);
 		return 0;
 	}
 
 	int StopHighlightUI(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		gFBEnv->pUIManager->StopHighlightUI(uiname);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		UIManager::GetInstance().StopHighlightUI(uiname);
 		return 0;
 	}
 
 	int SetEnableComponent(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		if (!lua_isboolean(L, 3))
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		if (!LuaUtils::isboolean(L, 3))
 		{
 			Error(FB_ERROR_LOG_ARG, "Invalid param.");
 			return 0;
 		}
-		bool enable = lua_toboolean(L, 3)!=0;
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
+		bool enable = LuaUtils::toboolean(L, 3)!=0;
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
 		if (comp)
 		{
 			comp->SetEnable(enable);
@@ -1052,11 +1082,11 @@ namespace fastbird
 
 	int GetUIPath(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		const char* path = gFBUIManager->GetUIPath(uiname);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		const char* path = UIManager::GetInstance().GetUIPath(uiname);
 		if (path)
 		{
-			lua_pushstring(L, path);
+			LuaUtils::pushstring(L, path);
 			return 1;
 		}
 		return 0;
@@ -1064,11 +1094,11 @@ namespace fastbird
 
 	int GetUIScriptPath(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		const char* path = gFBUIManager->GetUIScriptPath(uiname);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		const char* path = UIManager::GetInstance().GetUIScriptPath(uiname);
 		if (path)
 		{
-			lua_pushstring(L, path);
+			LuaUtils::pushstring(L, path);
 			return 1;
 		}
 		return 0;
@@ -1076,30 +1106,30 @@ namespace fastbird
 
 	int GetNumUIProperties(lua_State* L)
 	{
-		lua_pushinteger(L, UIProperty::COUNT);
+		LuaUtils::pushinteger(L, UIProperty::COUNT);
 		return 1;
 	}
 
 	int GetUIPropertyName(lua_State* L)
 	{
-		unsigned i = luaL_checkunsigned(L, 1);
+		unsigned i = LuaUtils::checkunsigned(L, 1);
 		assert(i < UIProperty::COUNT);
-		lua_pushstring(L, UIProperty::ConvertToString(i));
+		LuaUtils::pushstring(L, UIProperty::ConvertToString(i));
 		return 1;
 	}
 
 	int GetPropertyCurKeyValue(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		auto compName = luaL_checkstring(L, 2);
-		auto comp = gFBUIManager->FindComp(uiname, compName);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		auto compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName).get();
 		if (comp && comp->GetType() == ComponentType::PropertyList)
 		{
 			auto propertyList = (PropertyList*)comp;
 			std::string key, value;
 			propertyList->GetCurKeyValue(key, value);
-			lua_pushstring(L, key.c_str());
-			lua_pushstring(L, value.c_str());
+			LuaUtils::pushstring(L, key.c_str());
+			LuaUtils::pushstring(L, value.c_str());
 			return 2;
 		}
 		return 0;
@@ -1107,23 +1137,23 @@ namespace fastbird
 	}
 
 	int GetNumUIEvents(lua_State* L){
-		lua_pushinteger(L, UIEvents::EVENT_NUM);
+		LuaUtils::pushinteger(L, UIEvents::EVENT_NUM);
 		return 1;
 	}
 
 	int GetUIEventName(lua_State* L){
-		UIEvents::Enum e = (UIEvents::Enum)luaL_checkunsigned(L, 1);
-		lua_pushstring(L, UIEvents::ConvertToString(e));
+		UIEvents::Enum e = (UIEvents::Enum)LuaUtils::checkunsigned(L, 1);
+		LuaUtils::pushstring(L, UIEvents::ConvertToString(e));
 		return 1;
 	}
 
 	int ModifyDropDownItem(lua_State* L){
-		auto uiname = luaL_checkstring(L, 1);
-		auto compname = luaL_checkstring(L, 2);
-		unsigned index = luaL_checkunsigned(L, 3);
-		auto prop = UIProperty::ConvertToEnum(luaL_checkstring(L, 4));
-		auto str = luaL_checkstring(L, 5);
-		auto comp = gFBUIManager->FindComp(uiname, compname);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		auto compname = LuaUtils::checkstring(L, 2);
+		unsigned index = LuaUtils::checkunsigned(L, 3);
+		auto prop = UIProperty::ConvertToEnum(LuaUtils::checkstring(L, 4));
+		auto str = LuaUtils::checkstring(L, 5);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compname).get();
 		if (comp && comp->GetType() == ComponentType::DropDown){
 			auto dropDown = (DropDown*)comp;
 			if (dropDown){
@@ -1139,18 +1169,18 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int ClearListBox(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compoName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compoName);
-		auto listBox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compoName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compoName);
+		auto listBox = dynamic_cast<ListBox*>(comp.get());
 		if (listBox)
 		{
 			listBox->Clear();
-			lua_pushboolean(L, 1);
+			LuaUtils::pushboolean(L, 1);
 		}
 		else
 		{
-			lua_pushboolean(L, 0);
+			LuaUtils::pushboolean(L, 0);
 		}
 		return 1;
 	}
@@ -1158,9 +1188,9 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int ClearPropertyItems(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		auto compName = luaL_checkstring(L, 2);
-		auto comp = gFBUIManager->FindComp(uiname, compName);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		auto compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName).get();
 		if (comp && comp->GetType() == ComponentType::PropertyList)
 		{
 			auto propertyList = (PropertyList*)comp;
@@ -1172,9 +1202,9 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int SortPropertyList(lua_State* L)
 	{
-		auto uiname = luaL_checkstring(L, 1);
-		auto compName = luaL_checkstring(L, 2);
-		auto comp = gFBUIManager->FindComp(uiname, compName);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		auto compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName).get();
 		if (comp && comp->GetType() == ComponentType::PropertyList)
 		{
 			auto propertyList = (PropertyList*)comp;
@@ -1186,32 +1216,32 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int CacheListBox(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		bool found = gFBUIManager->CacheListBox(uiname, compName);
-		lua_pushboolean(L, found);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		bool found = UIManager::GetInstance().CacheListBox(uiname, compName);
+		LuaUtils::pushboolean(L, found);
 		return 1;
 	}
 
 	//-----------------------------------------------------------------------
 	int InsertListBoxItem(lua_State* L) // string or numeric key
 	{
-		auto listbox = gFBUIManager->GetCachedListBox();
+		auto listbox = UIManager::GetInstance().GetCachedListBox();
 		if (!listbox)
 			return 0;
 
-		if (lua_isnumber(L, 1))
+		if (LuaUtils::isnumber(L, 1))
 		{
-			unsigned key = luaL_checkunsigned(L, 1);
+			unsigned key = LuaUtils::checkunsigned(L, 1);
 			unsigned index = listbox->InsertItem(key);
-			lua_pushunsigned(L, index);
+			LuaUtils::pushunsigned(L, index);
 			return 1;
 		}
-		else if (lua_isstring(L, 1))
+		else if (LuaUtils::isstring(L, 1))
 		{
-			const char* key = luaL_checkstring(L, 1);
+			const char* key = LuaUtils::checkstring(L, 1);
 			unsigned index = listbox->InsertItem(AnsiToWide(key));
-			lua_pushunsigned(L, index);
+			LuaUtils::pushunsigned(L, index);
 			return 1;
 		}
 		return 0;
@@ -1220,12 +1250,12 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int SetListBoxItem(lua_State* L)
 	{
-		auto listbox = gFBUIManager->GetCachedListBox();
+		auto listbox = UIManager::GetInstance().GetCachedListBox();
 		if (!listbox)
 			return 0;
-		unsigned rowIndex = luaL_checkunsigned(L, 1);
-		unsigned colIndex = luaL_checkunsigned(L, 2);
-		ListItemDataType::Enum dataType = (ListItemDataType::Enum)luaL_checkunsigned(L, 3);
+		unsigned rowIndex = LuaUtils::checkunsigned(L, 1);
+		unsigned colIndex = LuaUtils::checkunsigned(L, 2);
+		ListItemDataType::Enum dataType = (ListItemDataType::Enum)LuaUtils::checkunsigned(L, 3);
 		
 		switch (dataType){
 		case ListItemDataType::String:
@@ -1233,22 +1263,22 @@ namespace fastbird
 		case ListItemDataType::TexturePath:
 		case ListItemDataType::TextureRegion:
 		{
-			listbox->SetItem(Vec2I(rowIndex, colIndex), AnsiToWide(luaL_checkstring(L, 4)), dataType);
+			listbox->SetItem(Vec2I(rowIndex, colIndex), AnsiToWide(LuaUtils::checkstring(L, 4)), dataType);
 			break;
 		}
 		case ListItemDataType::CheckBox:
 		{
-			listbox->SetItem(Vec2I(rowIndex, colIndex), lua_toboolean(L, 4)!=0);
+			listbox->SetItem(Vec2I(rowIndex, colIndex), LuaUtils::toboolean(L, 4)!=0);
 			break;
 		}
 		case ListItemDataType::NumericUpDown:
 		{
-			listbox->SetItem(Vec2I(rowIndex, colIndex), (int)lua_tonumber(L, 4));
+			listbox->SetItem(Vec2I(rowIndex, colIndex), (int)LuaUtils::tonumber(L, 4));
 			break;
 		}
 		case ListItemDataType::HorizontalGauge:
 		{
-			listbox->SetItem(Vec2I(rowIndex, colIndex), (float)lua_tonumber(L, 4));
+			listbox->SetItem(Vec2I(rowIndex, colIndex), (float)LuaUtils::tonumber(L, 4));
 			break;
 		}
 		default:
@@ -1261,14 +1291,14 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int AddPropertyItem(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* listCompName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, listCompName);
-		PropertyList* propertyList = dynamic_cast<PropertyList*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* listCompName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, listCompName);
+		PropertyList* propertyList = dynamic_cast<PropertyList*>(comp.get());
 		if (propertyList)
 		{
-			const char* key = luaL_checkstring(L, 3);
-			const char* value = luaL_checkstring(L, 4);
+			const char* key = LuaUtils::checkstring(L, 3);
+			const char* value = LuaUtils::checkstring(L, 4);
 			std::wstring wKey = AnsiToWide(key);
 			std::wstring wValue = AnsiToWide(value);
 			propertyList->InsertItem(wKey.c_str(), wValue.c_str());
@@ -1279,16 +1309,16 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int GetListBoxSelectedRows(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
-		ListBox* listbox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		ListBox* listbox = dynamic_cast<ListBox*>(comp.get());
 		if (listbox)
 		{
 			auto rows = listbox->GetSelectedRows();
 			if (rows.empty())
 			{
-				lua_pushnil(L);
+				LuaUtils::pushnil(L);
 				return 1;
 			}
 			LuaObject luaRows;
@@ -1309,10 +1339,10 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int GetListBoxSelectedStringKeys(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
-		ListBox* listbox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		ListBox* listbox = dynamic_cast<ListBox*>(comp.get());
 		if (listbox)
 		{
 			std::vector<std::string> keys;
@@ -1320,7 +1350,7 @@ namespace fastbird
 
 			if (keys.empty())
 			{
-				lua_pushnil(L);
+				LuaUtils::pushnil(L);
 				return 1;
 			}
 			LuaObject luaRows;
@@ -1341,10 +1371,10 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int GetListBoxSelectedNumericKeys(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
-		ListBox* listbox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		ListBox* listbox = dynamic_cast<ListBox*>(comp.get());
 		if (listbox)
 		{
 			std::vector<unsigned> keys;
@@ -1352,7 +1382,7 @@ namespace fastbird
 
 			if (keys.empty())
 			{
-				lua_pushnil(L);
+				LuaUtils::pushnil(L);
 				return 1;
 			}
 			LuaObject luaRows;
@@ -1372,15 +1402,15 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int GetListBoxStringKey(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
-		ListBox* listBox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		ListBox* listBox = dynamic_cast<ListBox*>(comp.get());
 		if (listBox){
-			unsigned row = luaL_checkunsigned(L, 3);
+			unsigned row = LuaUtils::checkunsigned(L, 3);
 			auto key = listBox->GetStringKey(row);
 			if (key){
-				lua_pushstring(L, WideToAnsi(key));
+				LuaUtils::pushstring(L, WideToAnsi(key));
 				return 1;
 			}
 		}
@@ -1389,14 +1419,14 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int GetListBoxNumericKey(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compName);
-		ListBox* listBox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName);
+		ListBox* listBox = dynamic_cast<ListBox*>(comp.get());
 		if (listBox){
-			unsigned row = luaL_checkunsigned(L, 3);
+			unsigned row = LuaUtils::checkunsigned(L, 3);
 			auto key = listBox->GetUnsignedKey(row);
-			lua_pushnumber(L, key);
+			LuaUtils::pushnumber(L, key);
 			return 1;
 		}
 		return 0;
@@ -1404,12 +1434,12 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int GetListBoxStringKeyCached(lua_State* L){
-		auto listBox = gFBUIManager->GetCachedListBox();
+		auto listBox = UIManager::GetInstance().GetCachedListBox();
 		if (listBox){
-			unsigned row = luaL_checkunsigned(L, 1);
+			unsigned row = LuaUtils::checkunsigned(L, 1);
 			auto key = listBox->GetStringKey(row);
 			if (key){
-				lua_pushstring(L, WideToAnsi(key));
+				LuaUtils::pushstring(L, WideToAnsi(key));
 				return 1;
 			}
 		}
@@ -1418,11 +1448,11 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int GetListBoxNumericKeyCached(lua_State* L){
-		auto listBox = gFBUIManager->GetCachedListBox();
+		auto listBox = UIManager::GetInstance().GetCachedListBox();
 		if (listBox){
-			unsigned row = luaL_checkunsigned(L, 1);
+			unsigned row = LuaUtils::checkunsigned(L, 1);
 			auto key = listBox->GetUnsignedKey(row);
-			lua_pushnumber(L, key);
+			LuaUtils::pushnumber(L, key);
 			return 1;
 		}
 		return 0;
@@ -1430,18 +1460,18 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int GetListBoxRowIndexCached(lua_State* L){
-		auto listBox = gFBUIManager->GetCachedListBox();
+		auto listBox = UIManager::GetInstance().GetCachedListBox();
 		if (listBox)
 		{
-			if (lua_isstring(L, 1)){
-				lua_pushnumber(L, listBox->FindRowIndex(
-					AnsiToWide(luaL_checkstring(L, 1))
+			if (LuaUtils::isstring(L, 1)){
+				LuaUtils::pushnumber(L, listBox->FindRowIndex(
+					AnsiToWide(LuaUtils::checkstring(L, 1))
 					));
 				return 1;
 			}
 			else{
-				lua_pushnumber(L, listBox->FindRowIndex(
-					luaL_checkunsigned(L, 1)));
+				LuaUtils::pushnumber(L, listBox->FindRowIndex(
+					LuaUtils::checkunsigned(L, 1)));
 				return 1;
 			}
 		}
@@ -1451,14 +1481,14 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int SelectListBoxItem(lua_State* L)
 	{
-		const char* wnd = luaL_checkstring(L, 1);
-		const char* comp = luaL_checkstring(L, 2);
-		if (lua_isnil(L, 3))
+		const char* wnd = LuaUtils::checkstring(L, 1);
+		const char* comp = LuaUtils::checkstring(L, 2);
+		if (LuaUtils::isnil(L, 3))
 		{
 			return 0;
 		}
-		unsigned row = luaL_checkunsigned(L, 3);
-		auto winbase = gFBEnv->pUIManager->FindComp(wnd, comp);
+		unsigned row = LuaUtils::checkunsigned(L, 3);
+		auto winbase = UIManager::GetInstance().FindComp(wnd, comp).get();
 		ListBox* listbox = dynamic_cast<ListBox*>(winbase);
 		if (listbox)
 		{
@@ -1479,9 +1509,9 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int SelectListBoxItems(lua_State* L)
 	{
-		const char* wnd = luaL_checkstring(L, 1);
-		const char* comp = luaL_checkstring(L, 2);
-		if (lua_isnil(L, 3))
+		const char* wnd = LuaUtils::checkstring(L, 1);
+		const char* comp = LuaUtils::checkstring(L, 2);
+		if (LuaUtils::isnil(L, 3))
 		{
 			return 0;
 		}
@@ -1491,7 +1521,7 @@ namespace fastbird
 			Error(FB_ERROR_LOG_ARG, "Invalid Param.");
 			return 0;
 		}
-		auto winbase = gFBEnv->pUIManager->FindComp(wnd, comp);
+		auto winbase = UIManager::GetInstance().FindComp(wnd, comp).get();
 		ListBox* listbox = dynamic_cast<ListBox*>(winbase);
 		if (listbox)
 		{
@@ -1513,19 +1543,19 @@ namespace fastbird
 		{
 			auto itemdata = listbox->GetData(row, col);
 			if (itemdata->IsTextData()){
-				lua_pushstring(L, WideToAnsi(itemdata->GetText()));
+				LuaUtils::pushstring(L, WideToAnsi(itemdata->GetText()));
 				return 1;
 			}
 			else if (itemdata->GetDataType() == ListItemDataType::CheckBox){
-				lua_pushboolean(L, itemdata->GetChecked());
+				LuaUtils::pushboolean(L, itemdata->GetChecked());
 				return 1;
 			}
 			else if (itemdata->GetDataType() == ListItemDataType::NumericUpDown){
-				lua_pushnumber(L, itemdata->GetInt());
+				LuaUtils::pushnumber(L, itemdata->GetInt());
 				return 1;
 			}
 			else if (itemdata->GetDataType() == ListItemDataType::HorizontalGauge){
-				lua_pushnumber(L, itemdata->GetFloat());
+				LuaUtils::pushnumber(L, itemdata->GetFloat());
 				return 1;
 			}
 			else
@@ -1539,36 +1569,36 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int GetListItemData(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto listbox = dynamic_cast<ListBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
-		unsigned row = luaL_checkunsigned(L, 3);
-		unsigned col = luaL_checkunsigned(L, 4);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto listbox = dynamic_cast<ListBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
+		unsigned row = LuaUtils::checkunsigned(L, 3);
+		unsigned col = LuaUtils::checkunsigned(L, 4);
 		return GetListItemDataImpl(L, listbox, row, col);
 	}
 
 	//-----------------------------------------------------------------------
 	int GetListItemDataCachedListBox(lua_State* L){
-		auto listbox = gFBUIManager->GetCachedListBox();
-		unsigned row = luaL_checkunsigned(L, 1);
-		unsigned col = luaL_checkunsigned(L, 2);
+		auto listbox = UIManager::GetInstance().GetCachedListBox().get();
+		unsigned row = LuaUtils::checkunsigned(L, 1);
+		unsigned col = LuaUtils::checkunsigned(L, 2);
 		return GetListItemDataImpl(L, listbox, row, col);		
 	}
 
 	//-----------------------------------------------------------------------
 	int SetListItemProperty(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* listCompName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, listCompName);
-		ListBox* listbox = dynamic_cast<ListBox*>(comp);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* listCompName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, listCompName);
+		ListBox* listbox = dynamic_cast<ListBox*>(comp.get());
 		if (listbox)
 		{
-			unsigned rowIndex = luaL_checkunsigned(L, 3);
-			unsigned colIndex = luaL_checkunsigned(L, 4);
+			unsigned rowIndex = LuaUtils::checkunsigned(L, 3);
+			unsigned colIndex = LuaUtils::checkunsigned(L, 4);
 			auto item = listbox->GetItem(Vec2I(rowIndex, colIndex));
-			auto prop = luaL_checkstring(L, 5);
-			auto val = luaL_checkstring(L, 6);
+			auto prop = LuaUtils::checkstring(L, 5);
+			auto val = LuaUtils::checkstring(L, 6);
 			item->SetProperty(UIProperty::ConvertToEnum(prop), val);
 		}
 		return 0;
@@ -1577,13 +1607,13 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int StartUIAnimationForListItem(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName).get();
 		if (!comp || comp->GetType() != ComponentType::ListBox)
 			return 0;
-		unsigned index = luaL_checkunsigned(L, 3);
-		const char* animName = luaL_checkstring(L, 4);
+		unsigned index = LuaUtils::checkunsigned(L, 3);
+		const char* animName = LuaUtils::checkstring(L, 4);
 
 		ListBox* listbox = (ListBox*)comp;
 		unsigned numCols = listbox->GetNumCols();
@@ -1600,7 +1630,7 @@ namespace fastbird
 				auto uiAnimation = item->GetUIAnimation(animName);
 				if (!uiAnimation)
 				{
-					auto ganim = gFBEnv->pUIManager->GetGlobalAnimation(animName);
+					auto ganim = UIManager::GetInstance().GetGlobalAnimation(animName);
 					uiAnimation = ganim->Clone();
 					item->SetUIAnimation(uiAnimation);
 				}
@@ -1616,13 +1646,13 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int StopUIAnimationForListItem(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto comp = gFBEnv->pUIManager->FindComp(uiname, compName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compName).get();
 		if (!comp || comp->GetType() != ComponentType::ListBox)
 			return 0;
-		unsigned index = luaL_checkunsigned(L, 3);
-		const char* animName = luaL_checkstring(L, 4);
+		unsigned index = LuaUtils::checkunsigned(L, 3);
+		const char* animName = LuaUtils::checkstring(L, 4);
 
 		ListBox* listbox = (ListBox*)comp;
 		unsigned numCols = listbox->GetNumCols();
@@ -1641,12 +1671,12 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int GetNumListBoxData(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto listBox = dynamic_cast<ListBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto listBox = dynamic_cast<ListBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (listBox)
 		{
-			lua_pushunsigned(L, listBox->GetNumData());
+			LuaUtils::pushunsigned(L, listBox->GetNumData());
 			return 1;
 		}
 		return 0;
@@ -1655,26 +1685,26 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	int SwapListBoxItem(lua_State* L)
 	{
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto listBox = dynamic_cast<ListBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto listBox = dynamic_cast<ListBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (listBox)
 		{
-			listBox->SwapItems(luaL_checkunsigned(L, 3), luaL_checkunsigned(L, 4));
+			listBox->SwapItems(LuaUtils::checkunsigned(L, 3), LuaUtils::checkunsigned(L, 4));
 		}
 		return 0;
 	}
 
 	//-----------------------------------------------------------------------
 	int GetLastChangedRow(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto listBox = dynamic_cast<ListBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto listBox = dynamic_cast<ListBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (listBox)
 		{
 			unsigned row = listBox->GetLastChangedRow();
 			if (row != -1){
-				lua_pushunsigned(L, row);
+				LuaUtils::pushunsigned(L, row);
 				return 1;
 			}
 		}
@@ -1682,17 +1712,17 @@ namespace fastbird
 	}
 
 	int SetListBoxItemProperty(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto listBox = dynamic_cast<ListBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto listBox = dynamic_cast<ListBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (listBox)
 		{
-			if (lua_type(L, 3) == LUA_TNUMBER){
-				unsigned key = luaL_checkunsigned(L, 3);
-				listBox->SetItemProperty(key, UIProperty::ConvertToEnum(luaL_checkstring(L, 4)), luaL_checkstring(L, 5));
+			if (LuaUtils::type(L, 3) == LUA_TNUMBER){
+				unsigned key = LuaUtils::checkunsigned(L, 3);
+				listBox->SetItemProperty(key, UIProperty::ConvertToEnum(LuaUtils::checkstring(L, 4)), LuaUtils::checkstring(L, 5));
 			}
-			else if (lua_type(L, 4) == LUA_TSTRING){
-				listBox->SetItemProperty(AnsiToWide(luaL_checkstring(L, 3)), UIProperty::ConvertToEnum(luaL_checkstring(L, 4)), luaL_checkstring(L, 5));
+			else if (LuaUtils::type(L, 4) == LUA_TSTRING){
+				listBox->SetItemProperty(AnsiToWide(LuaUtils::checkstring(L, 3)), UIProperty::ConvertToEnum(LuaUtils::checkstring(L, 4)), LuaUtils::checkstring(L, 5));
 			}
 			else
 				assert(0);
@@ -1702,76 +1732,76 @@ namespace fastbird
 
 	//-----------------------------------------------------------------------
 	int DisableListBoxItemEvent(lua_State* L) {
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compName = luaL_checkstring(L, 2);
-		auto listBox = dynamic_cast<ListBox*>(gFBEnv->pUIManager->FindComp(uiname, compName));
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compName = LuaUtils::checkstring(L, 2);
+		auto listBox = dynamic_cast<ListBox*>(UIManager::GetInstance().FindComp(uiname, compName).get());
 		if (listBox) {
-			listBox->DisableItemEvent(luaL_checkunsigned(L, 3));
+			listBox->DisableItemEvent(LuaUtils::checkunsigned(L, 3));
 		}
 		return 0;
 	}
 
 	//-----------------------------------------------------------------------
 	int SetTooltipString(lua_State* L){
-		const char* s = luaL_checkstring(L, 1);
-		gFBUIManager->SetTooltipString(AnsiToWide(s));
-		auto mouse = gFBEnv->pEngine->GetMouse();
-		gFBUIManager->SetTooltipPos(mouse->GetNPos());
+		const char* s = LuaUtils::checkstring(L, 1);
+		UIManager::GetInstance().SetTooltipString(AnsiToWide(s));		
+		auto injector = InputManager::GetInstance().GetInputInjector();
+		UIManager::GetInstance().SetTooltipPos(injector->GetMouseNPos());
 		return 0;
 	}
 
 	int ChangeUISizeX(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compoName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compoName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compoName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compoName);
 		if (!comp) return 0;
-		auto sizeX = luaL_checkint(L, 3);
+		auto sizeX = LuaUtils::checkint(L, 3);
 		comp->ChangeSizeX(sizeX);
 		return 0;
 	}
 	int ChangeUISizeY(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compoName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compoName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compoName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compoName);
 		if (!comp) return 0;
-		auto sizeY = luaL_checkint(L, 3);
+		auto sizeY = LuaUtils::checkint(L, 3);
 		comp->ChangeSizeY(sizeY);
 		return 0;
 	}
 	int ChangeUISize(lua_State* L){
-		const char* uiname = luaL_checkstring(L, 1);
-		const char* compoName = luaL_checkstring(L, 2);
-		auto comp = UIManager::GetUIManagerStatic()->FindComp(uiname, compoName);
+		const char* uiname = LuaUtils::checkstring(L, 1);
+		const char* compoName = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compoName);
 		if (!comp) return 0;
-		Vec2I size = luaU_check<Vec2I>(L, 3);
+		Vec2I size = LuaUtils::checkVec2I(L, 3);
 		comp->ChangeSize(size);
 		return 0;	
 	}
 
 	int SetEnableUIInput(lua_State* L){
-		if (lua_isboolean(L, 1)){
-			auto enable = lua_toboolean(L, 1) != 0;
-			gFBUIManager->EnableInputListener(enable);
+		if (LuaUtils::isboolean(L, 1)){
+			auto enable = LuaUtils::toboolean(L, 1);
+			UIManager::GetInstance().EnableInputListener(enable);
 		}
 		return 0;
 		
 	}
 
 	int SetCheckRadioBox(lua_State* L){
-		auto uiname = luaL_checkstring(L, 1);
-		auto compname = luaL_checkstring(L, 2);
-		auto comp = (RadioBox*)gFBUIManager->FindComp(uiname, compname);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		auto compname = LuaUtils::checkstring(L, 2);
+		auto comp = std::dynamic_pointer_cast<RadioBox>(UIManager::GetInstance().FindComp(uiname, compname));
 		assert(comp);
-		comp->OnClickRadio(comp);
+		comp->OnClickRadio(comp.get());
 		comp->SetCheck(true);
 		return 0;
 	}
 
 	int HasComponent(lua_State* L){
-		auto uiname = luaL_checkstring(L, 1);
-		auto compname = luaL_checkstring(L, 2);
-		auto comp = gFBUIManager->FindComp(uiname, compname);
-		lua_pushboolean(L, comp != 0);
+		auto uiname = LuaUtils::checkstring(L, 1);
+		auto compname = LuaUtils::checkstring(L, 2);
+		auto comp = UIManager::GetInstance().FindComp(uiname, compname);
+		LuaUtils::pushboolean(L, comp != 0);
 		return 1;
 	}
 }

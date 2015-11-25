@@ -1,3 +1,30 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 
 #include "Wnd.h"
@@ -8,22 +35,22 @@ namespace fastbird
 {
 class IUIObject;
 class CheckBox;
-class ListItem;
-
-class ITexture;
+FB_DECLARE_SMART_PTR(ListItem);
+FB_DECLARE_SMART_PTR(ListBox);
 //--------------------------------------------------------------------------------
-class ListBox : public Wnd
+class FB_DLL_UI ListBox : public Wnd
 {
 protected:
-	ListItem* mFocusedListItem;
+	ListItemWeakPtr mFocusedListItem;
 	unsigned mStartIndex;
 	unsigned mEndIndex;
 
 	ListBoxDataSet* mData;
-	typedef std::vector<ListItem*> ROW;
+	typedef std::vector<ListItemPtr> ROW;
+	typedef std::vector<ListItemWeakPtr> ROW_WEAK;
 	std::vector< ROW > mRecycleBin;	
-	ROW mHeaders;
-	std::vector<ROW> mItems;
+	ROW_WEAK mHeaders;
+	std::vector<ROW_WEAK> mItems;
 	typedef std::vector<size_t> SelectedRows;
 	SelectedRows mSelectedIndices;
 	unsigned mNumCols;
@@ -58,40 +85,43 @@ protected:
 
 	Vec2I mLastChangedItem; // for numeric updown
 
-public:
 	ListBox();
-	virtual ~ListBox();
+	~ListBox();
+
+public:
+	static ListBoxPtr Create();
+
 	// IWinBase
-	virtual ComponentType::Enum GetType() const { return ComponentType::ListBox; }
-	virtual void Scrolled();
-	virtual float GetContentHeight() const;
+	ComponentType::Enum GetType() const { return ComponentType::ListBox; }
+	void Scrolled();
+	float GetContentHeight() const;
 
 protected:
-	virtual void OnSizeChanged();
+	void OnSizeChanged();
 
 public:
 	// Own	
-	virtual unsigned InsertItem(unsigned uniqueKey);
-	virtual unsigned InsertItem(const wchar_t* uniqueKey);
-	virtual unsigned InsertEmptyData();
-	virtual bool ModifyKey(unsigned row, unsigned key);
+	unsigned InsertItem(unsigned uniqueKey);
+	unsigned InsertItem(const wchar_t* uniqueKey);
+	unsigned InsertEmptyData();
+	bool ModifyKey(unsigned row, unsigned key);
 
-	virtual void SetItem(const Vec2I& rowcol, const wchar_t* string, ListItemDataType::Enum type);
-	virtual void SetItem(const Vec2I& rowcol, bool checked);
-	virtual void SetItem(const Vec2I& rowcol, ITexture* texture);
-	virtual void SetItem(const Vec2I& rowcol, int number); // numeric updown
-	virtual void SetItem(const Vec2I& rowcol, float number); // numeric updown
+	void SetItem(const Vec2I& rowcol, const wchar_t* string, ListItemDataType::Enum type);
+	void SetItem(const Vec2I& rowcol, bool checked);
+	void SetItem(const Vec2I& rowcol, TexturePtr texture);
+	void SetItem(const Vec2I& rowcol, int number); // numeric updown
+	void SetItem(const Vec2I& rowcol, float number); // numeric updown
 
-	virtual bool GetCheckBox(const Vec2I& indexRowCol) const;
+	bool GetCheckBox(const Vec2I& indexRowCol) const;
 
-	virtual bool RemoveRow(const wchar_t* key);
-	virtual bool RemoveRow(unsigned uniqueKey);
-	virtual bool RemoveRowWithIndex(unsigned index);
+	bool RemoveRow(const wchar_t* key);
+	bool RemoveRow(unsigned uniqueKey);
+	bool RemoveRowWithIndex(unsigned index);
 	
-	virtual std::string GetSelectedString();
-	virtual const SelectedRows& GetSelectedRows() const { return mSelectedIndices; }
-	virtual void GetSelectedUniqueIdsString(std::vector<std::string>& ids) const;
-	virtual void GetSelectedUniqueIdsUnsigned(std::vector<unsigned>& ids) const;
+	std::string GetSelectedString();
+	const SelectedRows& GetSelectedRows() const { return mSelectedIndices; }
+	void GetSelectedUniqueIdsString(std::vector<std::string>& ids) const;
+	void GetSelectedUniqueIdsUnsigned(std::vector<unsigned>& ids) const;
 
 	void OnItemClicked(void* arg);
 	void OnItemDoubleClicked(void* arg);
@@ -99,60 +129,60 @@ public:
 	void OnNumericChanged(void* arg);
 	void OnDragHeader(void* arg);
 
-	void ChangeFocusItem(ListItem* newItem);
+	void ChangeFocusItem(ListItemPtr newItem);
 
 	size_t GetNumData() const;
 
 	unsigned GetNumCols() const { return mNumCols; }
 
-	virtual bool SetProperty(UIProperty::Enum prop, const char* val);
-	virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
+	bool SetProperty(UIProperty::Enum prop, const char* val);
+	bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
 
-	virtual ListItem* GetItem(const Vec2I& indexRowCol) const;
+	ListItemPtr GetItem(const Vec2I& indexRowCol) const;
 	ListBoxData* GetData(unsigned rowIndex, unsigned colIndex) const;
-	virtual unsigned FindRowIndex(unsigned uniqueKey) const;
-	virtual unsigned FindRowIndex(wchar_t* uniqueKey) const;
+	unsigned FindRowIndex(unsigned uniqueKey) const;
+	unsigned FindRowIndex(wchar_t* uniqueKey) const;
 
-	virtual unsigned GetUnsignedKey(unsigned rowIndex) const;
-	virtual const wchar_t* GetStringKey(unsigned rowIndex) const;
+	unsigned GetUnsignedKey(unsigned rowIndex) const;
+	const wchar_t* GetStringKey(unsigned rowIndex) const;
 
-	virtual void SetRowHeight(int rowHeight) { mRowHeight = rowHeight; }
+	void SetRowHeight(int rowHeight) { mRowHeight = rowHeight; }
 
-	virtual void SelectRow(unsigned index);
-	virtual void DeselectRow(unsigned index);
-	virtual void DeselectAll();
-	virtual void ToggleSelection(unsigned index);
+	void SelectRow(unsigned index);
+	void DeselectRow(unsigned index);
+	void DeselectAll();
+	void ToggleSelection(unsigned index);
 
-	virtual bool OnInputFromHandler(IInputInjectorPtr injector);
-	virtual void ClearSelection();
-	virtual bool IsSelected(unsigned row);
-	virtual unsigned GetNumRows();
-	virtual IWinBase* MakeMergedRow(unsigned row);
-	virtual IWinBase* MakeMergedRow(unsigned row, const char* backColor, const char* textColor, bool noMouseEvent);
-	virtual void SwapItems(unsigned index0, unsigned index1);
-	virtual void SwapItems(const wchar_t* uniqueKey0, const wchar_t* uniqueKey1);
+	bool OnInputFromHandler(IInputInjectorPtr injector);
+	void ClearSelection();
+	bool IsSelected(unsigned row);
+	unsigned GetNumRows();
+	WinBasePtr MakeMergedRow(unsigned row);
+	WinBasePtr MakeMergedRow(unsigned row, const char* backColor, const char* textColor, bool noMouseEvent);
+	void SwapItems(unsigned index0, unsigned index1);
+	void SwapItems(const wchar_t* uniqueKey0, const wchar_t* uniqueKey1);
 
-	virtual void SetItemProperty(unsigned uniqueKey, UIProperty::Enum prop, const char* val);
-	virtual void SetItemProperty(const wchar_t* uniqueKey, UIProperty::Enum prop, const char* val);
-	virtual void SetItemPropertyCol(unsigned col, UIProperty::Enum prop, const char* val);
-	virtual void SetItemPropertyKeyCol(const Vec2I& keycol, UIProperty::Enum prop, const char* val);
-	virtual void ClearItemProperties();
-	virtual void DisableItemEvent(unsigned uniqueKey);
+	void SetItemProperty(unsigned uniqueKey, UIProperty::Enum prop, const char* val);
+	void SetItemProperty(const wchar_t* uniqueKey, UIProperty::Enum prop, const char* val);
+	void SetItemPropertyCol(unsigned col, UIProperty::Enum prop, const char* val);
+	void SetItemPropertyKeyCol(const Vec2I& keycol, UIProperty::Enum prop, const char* val);
+	void ClearItemProperties();
+	void DisableItemEvent(unsigned uniqueKey);
 
-	virtual void VisualizeData(unsigned index);
+	void VisualizeData(unsigned index);
 	void FillItem(unsigned index);
 	void MoveToRecycle(unsigned row);
 	void Sort();
 
 	
 
-	virtual void Clear(bool immediately=false);
+	void Clear(bool immediately=false);
 
 	void SearchStartingChacrcter(char c, unsigned curIndex);
 	void IterateItem(bool next, bool apply);
 	void MakeSureRangeFor(unsigned rowIndex);
 
-	virtual void NoVirtualizingItem(unsigned rowIndex);
+	void NoVirtualizingItem(unsigned rowIndex);
 
 	void UpdateColSizes();
 	void UpdateItemAlign();
@@ -161,11 +191,11 @@ public:
 
 	float GetChildrenContentEnd() const;
 
-	virtual void RemoveAllChild(bool immediately = false);
+	void RemoveAllChildren(bool immediately = false);
 
 protected:
 
-	ListItem* CreateNewItem(int row, int col);
+	ListItemPtr CreateNewItem(int row, int col);
 	void SetHighlightRow(size_t row, bool highlight);
 	void SetHighlightRowCol(unsigned row, unsigned col, bool highlight);
 	void SetHighlightRowAndSelect(size_t row, bool highlight);

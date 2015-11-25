@@ -29,11 +29,11 @@
 #include "FBCommonHeaders/platform.h"
 #include "IRenderStrategy.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(RenderTarget);
-	DECLARE_SMART_PTR(IScene);
-	DECLARE_SMART_PTR(RenderStrategyDefault);
+	FB_DECLARE_SMART_PTR(RenderTarget);
+	FB_DECLARE_SMART_PTR(IScene);
+	FB_DECLARE_SMART_PTR(RenderStrategyDefault);
 	class RenderStrategyDefault : public IRenderStrategy{
-		DECLARE_PIMPL_NON_COPYABLE(RenderStrategyDefault);
+		FB_DECLARE_PIMPL_NON_COPYABLE(RenderStrategyDefault);
 		RenderStrategyDefault();
 
 	public:	

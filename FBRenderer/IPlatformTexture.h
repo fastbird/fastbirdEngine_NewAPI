@@ -31,7 +31,7 @@
 #include "RendererStructs.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IPlatformTexture);
+	FB_DECLARE_SMART_PTR(IPlatformTexture);
 	class IPlatformTexture
 	{
 	public:

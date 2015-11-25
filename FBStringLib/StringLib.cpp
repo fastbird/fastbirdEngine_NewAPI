@@ -174,8 +174,8 @@ namespace fastbird{
 		auto size = lhs.size();
 		auto size2 = rhs.size();
 		for (unsigned i = 0; i < size; ++i){
-			auto l = _ttolower(lhs[i]);
-			auto r = _ttolower(rhs[i]);
+			auto l = tolower(lhs[i]);
+			auto r = tolower(rhs[i]);
 			if (l == r)
 				continue;
 			return l>r ? 1 : -1;
@@ -207,7 +207,7 @@ namespace fastbird{
 			str.begin(),
 			str.end(),
 			str.begin(),
-			_ttolower);
+			tolower);
 	}	
 
 	void ToLowerCaseFirst(std::string& str){
@@ -220,7 +220,15 @@ namespace fastbird{
 			str.begin(),
 			str.end(),
 			str.begin(),
-			_ttoupper);
+			toupper);
+	}
+
+	void ToUpperCase(std::wstring& str){
+		std::transform(
+			str.begin(),
+			str.end(),
+			str.begin(),
+			toupper);
 	}
 
 	bool IsNumeric(LPCTSTR str){

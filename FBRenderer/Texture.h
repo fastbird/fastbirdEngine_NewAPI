@@ -29,8 +29,8 @@
 #include "RendererEnums.h"
 #include "RendererStructs.h"
 namespace fastbird{
-	DECLARE_SMART_PTR(IPlatformTexture);
-	DECLARE_SMART_PTR(Texture);
+	FB_DECLARE_SMART_PTR(IPlatformTexture);
+	FB_DECLARE_SMART_PTR(Texture);
 	/** Texture.
 	You can create a texture with the function Renderer::CreateTexture(...).
 	When you create server textures with the same file name, the underying hardward
@@ -38,7 +38,7 @@ namespace fastbird{
 	*/
 	class FB_DLL_RENDERER Texture
 	{
-		DECLARE_PIMPL(Texture);
+		FB_DECLARE_PIMPL(Texture);
 		friend class RenderResourceFactory;
 		Texture();
 		/** private operators.

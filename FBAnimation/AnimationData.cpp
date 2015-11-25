@@ -366,7 +366,7 @@ AnimationData::Action::Action(){
 }
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(AnimationData);
+FB_IMPLEMENT_STATIC_CREATE(AnimationData);
 AnimationData::AnimationData()
 	: mImpl(new Impl){
 

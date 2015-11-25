@@ -1,16 +1,51 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #include "StdAfx.h"
 #include "VerticalGauge.h"
+#include "UIObject.h"
+#include "FBRenderer/TextureAtlas.h"
 
 namespace fastbird
 {
 
-	VerticalGauge::VerticalGauge()
-		:mPercentage(0), mMaximum(1.f)
-		, mBlink(false)
-		, mBlinkSpeed(3.f)
-		, mTextureAtlas(0)
-		, mMaterialUsingImage(false)
-		, mHorizontalFlip(false)
+VerticalGaugePtr VerticalGauge::Create(){
+	VerticalGaugePtr p(new VerticalGauge, [](VerticalGauge* obj){ delete obj; });
+	p->mSelfPtr = p;
+	return p;
+}
+
+VerticalGauge::VerticalGauge()
+	:mPercentage(0), mMaximum(1.f)
+	, mBlink(false)
+	, mBlinkSpeed(3.f)
+	, mTextureAtlas(0)
+	, mMaterialUsingImage(false)
+	, mHorizontalFlip(false)
 {
 	for (int i = 0; i < 2; i++)
 	{
@@ -23,13 +58,13 @@ namespace fastbird
 	mUIObject->mOwnerUI = this;
 	mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 
-	IMaterial* mat = mUIObject->GetMaterial();
+	auto mat = mUIObject->GetMaterial();
 	mGaugeColor = Color(1, 1, 1, 1);
 	mBlinkColor = Color(1, 0, 0, 1);
-	mat->SetMaterialParameters(2, mGaugeColor.GetVec4());
-	mat->SetMaterialParameters(3, mBlinkColor.GetVec4());
+	mat->SetMaterialParameter(2, mGaugeColor.GetVec4());
+	mat->SetMaterialParameter(3, mBlinkColor.GetVec4());
 	// x is lerp.
-	mat->SetMaterialParameters(4, Vec4(0, 0, 0, 0));
+	mat->SetMaterialParameter(4, Vec4(0, 0, 0, 0));
 	Vec2 texcoords[4] = {
 		Vec2(0.f, 1.f),
 		Vec2(0.f, 0.f),
@@ -43,32 +78,32 @@ VerticalGauge::~VerticalGauge()
 {
 }
 
-void VerticalGauge::GatherVisit(std::vector<IUIObject*>& v)
+void VerticalGauge::GatherVisit(std::vector<UIObject*>& v)
 {
-	v.push_back(mUIObject);
+	v.push_back(mUIObject.get());
 }
 void VerticalGauge::OnStartUpdate(float elapsedTime)
 {
 	__super::OnStartUpdate(elapsedTime);
 	if (mBlink)
 	{
-		IMaterial* mat = mUIObject->GetMaterial();
-		mat->SetMaterialParameters(3, Vec4(sin(gFBEnv->pTimer->GetTime()*mBlinkSpeed)*.5f + .5f, 0, 0, 0));
+		auto mat = mUIObject->GetMaterial();
+		mat->SetMaterialParameter(3, Vec4(sin(gpTimer->GetTime()*mBlinkSpeed)*.5f + .5f, 0, 0, 0));
 	}
 }
 
 void VerticalGauge::SetPercentage(float p)
 {
 	mPercentage = p;
-	IMaterial* mat = mUIObject->GetMaterial();
-	mat->SetMaterialParameters(1, Vec4(mPercentage, mMaximum, 0, 0));
+	auto mat = mUIObject->GetMaterial();
+	mat->SetMaterialParameter(1, Vec4(mPercentage, mMaximum, 0, 0));
 }
 
 void VerticalGauge::SetMaximum(float m)
 {
 	mMaximum = m;
-	IMaterial* mat = mUIObject->GetMaterial();
-	mat->SetMaterialParameters(1, Vec4(mPercentage, m, 0, 0));
+	auto mat = mUIObject->GetMaterial();
+	mat->SetMaterialParameter(1, Vec4(mPercentage, m, 0, 0));
 }
 
 void VerticalGauge::Blink(bool blink)
@@ -76,23 +111,23 @@ void VerticalGauge::Blink(bool blink)
 	mBlink = blink;
 	if (!blink)
 	{
-		IMaterial* mat = mUIObject->GetMaterial();
-		mat->SetMaterialParameters(3, Vec4(0, 0, 0, 0));
+		auto mat = mUIObject->GetMaterial();
+		mat->SetMaterialParameter(3, Vec4(0, 0, 0, 0));
 	}
 }
 
 void VerticalGauge::SetGaugeColor(const Color& color)
 {
 	mGaugeColor = color;
-	IMaterial* mat = mUIObject->GetMaterial();
-	mat->SetMaterialParameters(2, color.GetVec4());
+	auto mat = mUIObject->GetMaterial();
+	mat->SetMaterialParameter(2, color.GetVec4());
 }
 
 void VerticalGauge::SetBlinkColor(const Color& color)
 {
 	mBlinkColor = color;
-	IMaterial* mat = mUIObject->GetMaterial();
-	mat->SetMaterialParameters(3, color.GetVec4());
+	auto mat = mUIObject->GetMaterial();
+	mat->SetMaterialParameter(3, color.GetVec4());
 }
 
 bool VerticalGauge::SetProperty(UIProperty::Enum prop, const char* val)
@@ -102,30 +137,30 @@ bool VerticalGauge::SetProperty(UIProperty::Enum prop, const char* val)
 	{
 	case UIProperty::GAUGE_COLOR:
 	{
-									SetGaugeColor(StringConverter::parseColor(val));
+									SetGaugeColor(StringMathConverter::ParseColor(val));
 									return true;
 	}
 
 	case UIProperty::GAUGE_BLINK_COLOR:
 	{
-										  SetBlinkColor(StringConverter::parseColor(val));
+										  SetBlinkColor(StringMathConverter::ParseColor(val));
 
 										  return true;
 	}
 
 	case UIProperty::GAUGE_BLINK_SPEED:
 	{
-										  mBlinkSpeed = StringConverter::parseReal(val);
+										  mBlinkSpeed = StringConverter::ParseReal(val);
 										  return true;
 	}
 	case UIProperty::GAUGE_MAX:
 	{
-								  SetMaximum(StringConverter::parseReal(val));
+								  SetMaximum(StringConverter::ParseReal(val));
 								  return true;
 	}
 	case UIProperty::GAUGE_CUR:
 	{
-								  SetPercentage(StringConverter::parseReal(val));
+								  SetPercentage(StringConverter::ParseReal(val));
 								  return true;
 	}
 		
@@ -158,7 +193,7 @@ bool VerticalGauge::SetProperty(UIProperty::Enum prop, const char* val)
 	case UIProperty::GAUGE_BORDER_COLOR:
 	{
 		mStrGaugeBorderColor = val;
-										   Color gaugeBorderC = StringConverter::parseColor(val);
+										   Color gaugeBorderC = StringMathConverter::ParseColor(val);
 										   if (mUIObject)
 										   {
 											   auto mat = mUIObject->GetMaterial();
@@ -185,7 +220,7 @@ bool VerticalGauge::GetProperty(UIProperty::Enum prop, char val[], unsigned bufs
 			if (mGaugeColor == UIProperty::GetDefaultValueVec4(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mGaugeColor);
+		auto data = StringConverter::ToString(mGaugeColor);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -197,7 +232,7 @@ bool VerticalGauge::GetProperty(UIProperty::Enum prop, char val[], unsigned bufs
 			if (mBlinkColor == Color(1, 0, 0, 1))
 				return false;
 		}
-		auto data = StringConverter::toString(mBlinkColor);
+		auto data = StringConverter::ToString(mBlinkColor);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -209,7 +244,7 @@ bool VerticalGauge::GetProperty(UIProperty::Enum prop, char val[], unsigned bufs
 			if (mBlinkSpeed == UIProperty::GetDefaultValueFloat(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mBlinkSpeed);
+		auto data = StringConverter::ToString(mBlinkSpeed);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -220,7 +255,7 @@ bool VerticalGauge::GetProperty(UIProperty::Enum prop, char val[], unsigned bufs
 			if (mMaximum == UIProperty::GetDefaultValueFloat(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mMaximum);
+		auto data = StringConverter::ToString(mMaximum);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -231,7 +266,7 @@ bool VerticalGauge::GetProperty(UIProperty::Enum prop, char val[], unsigned bufs
 			if (mPercentage == UIProperty::GetDefaultValueFloat(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mPercentage);
+		auto data = StringConverter::ToString(mPercentage);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -277,7 +312,7 @@ bool VerticalGauge::GetProperty(UIProperty::Enum prop, char val[], unsigned bufs
 			if (mHorizontalFlip == UIProperty::GetDefaultValueBool(prop))
 				return false;
 		}
-		auto data = StringConverter::toString(mHorizontalFlip);
+		auto data = StringConverter::ToString(mHorizontalFlip);
 		strcpy_s(val, bufsize, data.c_str());
 		return true;
 	}
@@ -318,16 +353,16 @@ void VerticalGauge::SetTextureAtlasRegion(UIProperty::Enum prop, const char* reg
 		assert(0);
 	}
 
-	mTextureAtlas = gFBEnv->pRenderer->GetTextureAtlas(mTextureAtlasFile.c_str());
+	mTextureAtlas = Renderer::GetInstance().GetTextureAtlas(mTextureAtlasFile.c_str());
 	if (mTextureAtlas)
 	{
 		if (!mMaterialUsingImage)
 		{
 			mMaterialUsingImage = true;
 			mUIObject->SetMaterial("es/Materials/UIVerticalGaugeImage.material");
-			mUIObject->GetMaterial()->SetMaterialParameters(1, Vec4(mPercentage, mMaximum, 0, 0));
+			mUIObject->GetMaterial()->SetMaterialParameter(1, Vec4(mPercentage, mMaximum, 0, 0));
 		}
-		mTextures[index] = mTextureAtlas->mTexture->Clone();
+		mTextures[index] = mTextureAtlas->GetTexture();
 		mAtlasRegions[index] = mTextureAtlas->GetRegion(region);
 		if (!mAtlasRegions[index])
 		{
@@ -351,7 +386,7 @@ void VerticalGauge::SetTextureAtlasRegion(UIProperty::Enum prop, const char* reg
 				mUIObject->SetTexCoord(texcoords, 4, 1);
 			float minY = texcoords[1].y;
 			float maxY = texcoords[2].y;
-			mUIObject->GetMaterial()->SetMaterialParameters(2, Vec4(minY, maxY, 0, 0));
+			mUIObject->GetMaterial()->SetMaterialParameter(2, Vec4(minY, maxY, 0, 0));
 			DWORD colors[4] = { 0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff };
 			mUIObject->SetColors(colors, 4);
 		}

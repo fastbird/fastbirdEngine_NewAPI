@@ -30,7 +30,7 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IPlatformInputLayout);
+	FB_DECLARE_SMART_PTR(IPlatformInputLayout);
 	class IPlatformInputLayout
 	{
 	public:

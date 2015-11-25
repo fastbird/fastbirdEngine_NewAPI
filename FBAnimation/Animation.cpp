@@ -245,7 +245,7 @@ public:
 };
 
 //---------------------------------------------------------------------------
-IMPLEMENT_STATIC_CREATE(Animation);
+FB_IMPLEMENT_STATIC_CREATE(Animation);
 AnimationPtr Animation::Create(const Animation& other){
 	return AnimationPtr(new Animation(other), [](Animation* obj){ delete obj; });
 }

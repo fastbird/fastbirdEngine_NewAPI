@@ -1,21 +1,44 @@
+/*
+ -----------------------------------------------------------------------------
+ This source file is part of fastbird engine
+ For the latest info, see http://www.jungwan.net/
+ 
+ Copyright (c) 2013-2015 Jungwan Byun
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+ -----------------------------------------------------------------------------
+*/
+
 #pragma once
 
 #include "Container.h"
 namespace fastbird
 {
-	class IUIObject;
-	class ImageBox;
-	class StaticText;
-	class Scroller;
 	class CardData;
-	class Wnd;
-
+	FB_DECLARE_SMART_PTR(Wnd);	
+	FB_DECLARE_SMART_PTR(CardScroller);
 	//------------------------------------------------------------------------
-	class CardScroller : public Container
+	class FB_DLL_UI CardScroller : public Container
 	{
 		CardData* mCardData;
-		std::vector<Wnd*> mItems;
-		std::vector<Wnd*> mRecycleBin;
+		std::vector<WndWeakPtr> mItems;
+		std::vector<WndPtr> mRecycleBin;
 		struct Props{
 			Props(const char* c, UIProperty::Enum p, const char* v)
 				: compName(c)
@@ -43,35 +66,39 @@ namespace fastbird
 		unsigned mStartIndex;
 		unsigned mEndIndex;
 
-	public:
+	protected:
 		CardScroller();
-		virtual ~CardScroller();
+		~CardScroller();
+
+	public:
+		
+		static CardScrollerPtr Create();
 
 		// IWinBase
-		virtual ComponentType::Enum GetType() const { return ComponentType::CardScroller; }
-		virtual void OnSizeChanged();
-		virtual bool SetProperty(UIProperty::Enum prop, const char* val);
-		virtual bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
-		virtual void SetCardSize_Offset(const Vec2& x_ratio, int offset);
-		virtual void SetCardSize(const Vec2I& size);
-		virtual void SetCardSizeNX(float nx);
-		virtual void SetCardSizeX(int x);
-		virtual void SetCardSizeY(int y);
-		virtual void SetCardOffset(int offset);
+		ComponentType::Enum GetType() const { return ComponentType::CardScroller; }
+		void OnSizeChanged();
+		bool SetProperty(UIProperty::Enum prop, const char* val);
+		bool GetProperty(UIProperty::Enum prop, char val[], unsigned bufsize, bool notDefaultOnly);
+		void SetCardSize_Offset(const Vec2& x_ratio, int offset);
+		void SetCardSize(const Vec2I& size);
+		void SetCardSizeNX(float nx);
+		void SetCardSizeX(int x);
+		void SetCardSizeY(int y);
+		void SetCardOffset(int offset);
 		
 		
-		virtual unsigned AddCard(unsigned key, LuaObject& data);
-		virtual void DeleteCard(unsigned key);
-		virtual void DeleteCardWithIndex(unsigned index);
-		virtual void DeleteAllCard();
-		virtual void SetTexture(unsigned key, const char* comp, ITexture* texture);
+		unsigned AddCard(unsigned key, LuaObject& data);
+		void DeleteCard(unsigned key);
+		void DeleteCardWithIndex(unsigned index);
+		void DeleteAllCard();
+		void SetTexture(unsigned key, const char* comp, TexturePtr texture);
 		
 		void SetItemProperty(unsigned key, const char* comp, const char* prop, const char* val);
 
 		void VisualizeData(unsigned index);
 		void Scrolled();
 		void MoveToRecycle(unsigned index);
-		Wnd* CreateNewCard(unsigned index);
+		WndPtr CreateNewCard(unsigned index);
 		bool IsExisting(unsigned key);
 		void RefreshTextures(unsigned index);
 		void RefreshProps(unsigned index);

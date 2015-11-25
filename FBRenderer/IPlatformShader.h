@@ -30,7 +30,7 @@
 #include "ShaderDefines.h"
 namespace fastbird
 {
-	DECLARE_SMART_PTR(IPlatformShader);
+	FB_DECLARE_SMART_PTR(IPlatformShader);
 	class IPlatformShader
 	{
 	public:
