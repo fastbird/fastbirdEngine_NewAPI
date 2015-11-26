@@ -32,14 +32,15 @@ namespace fastbird
 	FB_DECLARE_SMART_PTR(UICommands);
 	class UICommands : public ICVarObserver
 	{
-		FB_DECLARE_PIMPL_NON_COPYABLE(UICommands);
 		UICommands();
 		~UICommands();
 
 	public:
 
 		static UICommandsPtr Create();
+		int r_UI;
+		int UI_Debug;
 
-		virtual bool OnChangeCVar(CVar* pCVar);		
+		bool OnChangeCVar(CVarPtr pCVar);		
 	};
 }

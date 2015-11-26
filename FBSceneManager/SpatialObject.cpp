@@ -31,6 +31,8 @@
 #include "FBMathLib/BoundingVolume.h"
 #include "FBAnimation/Animation.h"
 #include "FBAnimation/AnimationData.h"
+#include "FBMathLib/Math.h"
+#include "FBMathLib/BoundingVolume.h"
 using namespace fastbird;
 
 class SpatialObject::Impl{
@@ -184,6 +186,12 @@ public:
 		}
 	}
 
+	void PlayAction(const char* name, bool immediate, bool reverse){
+		if (mAnim){
+			mAnim->PlayAction(name, immediate, reverse);
+		}
+	}
+
 	bool IsPlayingAction() const{
 		return mAnim && mAnim->IsPlaying();
 	}
@@ -319,6 +327,10 @@ void SpatialObject::SetAnimation(AnimationPtr anim){
 
 void SpatialObject::UpdateAnimation(TIME_PRECISION dt){
 	mImpl->UpdateAnimation(dt);
+}
+
+void SpatialObject::PlayAction(const char* name, bool immediate, bool reverse){
+	mImpl->PlayAction(name, immediate, reverse);
 }
 
 bool SpatialObject::IsPlayingAction() const{

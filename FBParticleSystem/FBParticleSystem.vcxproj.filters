@@ -8,6 +8,7 @@
     <ClInclude Include="ParticleStruct.h" />
     <ClInclude Include="ParticleRenderObject.h" />
     <ClInclude Include="ParticleRenderKey.h" />
+    <ClInclude Include="ParticleOptions.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ParticleSystem.cpp" />
@@ -15,5 +16,6 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="ParticleRenderObject.cpp" />
     <ClCompile Include="ParticleRenderKey.cpp" />
+    <ClCompile Include="ParticleOptions.cpp" />
   </ItemGroup>
 </Project>

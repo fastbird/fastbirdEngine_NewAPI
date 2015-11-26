@@ -46,7 +46,7 @@ namespace fastbird
 		~Profiler();
 
 		void SetAccumulator(TIME_PRECISION* p);
-		TIME_PRECISION GetDt();
+		TIME_PRECISION GetDt() const;
 		void Reset();	
 	};
 
@@ -54,11 +54,11 @@ namespace fastbird
 	{
 		const char* mName;
 		INT64 mStartTick;
-		TIME_PRECISION mPrevDT;
+		mutable TIME_PRECISION mPrevDT;
 
 	public:
 		ProfilerSimple(const char* name);
-		TIME_PRECISION GetDT();
+		TIME_PRECISION GetDT() const;
 		const char* GetName() const;
 		void Reset();		
 	};

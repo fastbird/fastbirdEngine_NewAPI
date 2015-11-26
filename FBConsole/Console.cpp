@@ -28,8 +28,7 @@
 #include "stdafx.h"
 #include "Console.h"
 #include "CandidatesData.h"
-#include "FBRenderer/Renderer.h"
-#include "FBRenderer/Font.h"
+#include "IConsoleRenderer.h"
 #include "FBSystemLib/StdOutRedirect.h"
 #include "FBSystemLib/ClipboardData.h"
 #include "FBMathLib/Math.h"
@@ -38,6 +37,8 @@
 #include "FBInputManager/InputManager.h"
 #include "FBInputManager/IInputInjector.h"
 #include "FBLua/LuaUtils.h"
+#include "FBLua/LuaObject.h"
+#include "FBCommonHeaders/Helpers.h"
 using namespace fastbird;
 
 bool gConsoleInvalidParam = false;
@@ -52,29 +53,26 @@ static void InvalidParamHandler(const wchar_t *pszExpression,
 //---------------------------------------------------------------------------
 class Console::Impl{
 public:
-	static const float sFontSize;
 	ConsoleWeakPtr mSelf;
 	bool mLuaMode;
 	int mCursorPos;
-	const int mCursorWidth;
+	IConsoleRenderer* mConsoleRenderer;
 	int mHighlightStart;
 	std::string mInputString;
 	std::wstring mInputStringw;
 	StringVector mBuffer;
 	WStringVector mBufferw; // display buffer
 	std::mutex mMutex;	
-	int mBufferBtmLine; // bottom line
-	int mLines;
+	int mBufferBtmLine; // bottom line	
 	bool mOpen;
-	const int mLineGap;
-	int mHeight;
+	
 	std::wstring mPrompt;
 	int mPromptStart;
-	Vec2I mInputPosition;
-	typedef std::vector<CVar*> CVARS;
+	
+	typedef std::vector<CVarPtr> CVARS;
 	CVARS mCVars;
 
-	typedef std::vector<ConsoleCommand*> COMMANDS;
+	typedef std::vector<ConsoleCommandPtr> COMMANDS;
 	COMMANDS mCommands;
 
 	CandidatesData* mCandiData;
@@ -107,10 +105,7 @@ public:
 
 	//---------------------------------------------------------------------------
 	Impl() : mCursorPos(0)
-		, mCursorWidth(10)
-		, mLines(15)
-		, mOpen(false)
-		, mLineGap(2)
+		, mOpen(false)		
 		, mHighlightStart(-1)
 		, mACMode(false), mCandiDepth(0), mCandiIndex(0)
 		, mBufferBtmLine(0)
@@ -119,6 +114,7 @@ public:
 		, mHistoryIndex(0)
 		, mHistoryIndexBackup(0)
 		, mRTSize(1600, 900)
+		, mConsoleRenderer(0)
 	{
 		mCandiData = FB_NEW(CandidatesData);
 		std::ifstream file(cacheFile);
@@ -145,13 +141,8 @@ public:
 	//--------------------------------------------------------------------------
 	bool Init()
 	{
-		// calc background size
-		mHeight = Round((sFontSize + mLineGap) * mLines);
-
 		mPrompt = AnsiToWide(">", 1);
 		mPromptStart = 2;
-		mInputPosition = Vec2I(20, mHeight - mLineGap);
-
 		return true;
 	}
 
@@ -159,8 +150,17 @@ public:
 		mRTSize = size;
 	}
 
+	void RegisterConsoleRenderer(IConsoleRenderer* provider){
+		mConsoleRenderer = provider;
+	}
+
+	void UnregisterConsoleRenderer(IConsoleRenderer* provider){
+		if (mConsoleRenderer == provider)
+			mConsoleRenderer = 0;
+	}
+
 	//--------------------------------------------------------------------------
-	void RegisterCommand(ConsoleCommand* pCom)
+	void RegisterCommand(ConsoleCommandPtr pCom)
 	{
 		for (const auto& c : mCVars)
 		{
@@ -183,14 +183,14 @@ public:
 	}
 
 	//--------------------------------------------------------------------------
-	void UnregisterCommand(ConsoleCommand* pCom)
+	void UnregisterCommand(ConsoleCommandPtr pCom)
 	{
 		mCommands.erase(std::remove(mCommands.begin(), mCommands.end(),
 			pCom), mCommands.end());
 	}
 
 	//--------------------------------------------------------------------------
-	void RegisterVariable(CVar* cvar)
+	void RegisterVariable(CVarPtr cvar)
 	{
 		// check the name;
 		for (const auto& c : mCVars)
@@ -216,7 +216,7 @@ public:
 	}
 
 	//--------------------------------------------------------------------------
-	void UnregisterVariable(CVar* cvar)
+	void UnregisterVariable(CVarPtr cvar)
 	{
 		mCVars.erase(std::remove(mCVars.begin(), mCVars.end(), cvar), mCVars.end());
 	}
@@ -246,16 +246,15 @@ public:
 		std::cerr << buf << std::endl;
 
 		std::wstring strw = AnsiToWide(buf, strlen(buf));
-		auto& renderer = Renderer::GetInstance();
-		if (renderer.GetFont(sFontSize))
+
+		if (mConsoleRenderer)
 		{
-			FontPtr pFont = renderer.GetFont(sFontSize);
-			int textWidth = (int)pFont->GetTextWidth((char*)strw.c_str());
+			int textWidth = mConsoleRenderer->GetTextWidth(strw.c_str());
 			const auto& size = mRTSize;
 			int consoleWidth = size.x;
 			if (textWidth > consoleWidth)
 			{
-				strw = pFont->StripTags(strw.c_str());
+				strw = mConsoleRenderer->StripTags(strw.c_str());
 				int numCharInRow = 20;
 				int len = strw.length();
 				int count = 0;
@@ -265,7 +264,7 @@ public:
 				int end = 1;
 				while (end<len)
 				{
-					int textWidth = (int)pFont->GetTextWidth((char*)&strw[start], (end - start) * 2);
+					int textWidth = (int)mConsoleRenderer->GetTextWidth(&strw[start], (end - start) * 2);
 					if (textWidth>consoleWidth)
 					{
 						mBuffer.push_back(std::string(buf + start, end - start));
@@ -292,7 +291,7 @@ public:
 
 		mBufferw.clear();
 		auto rit = mBuffer.rbegin(), ritEnd = mBuffer.rend();
-		int remainedLined = mLines - 1;
+		int remainedLined = mConsoleRenderer->NumLinesRender() - 1;
 		for (; rit != ritEnd && remainedLined; rit++)
 		{
 			auto strVec = Split(*rit, "\n");
@@ -305,7 +304,6 @@ public:
 					remainedLined--;
 				}
 			}
-
 		}
 	}
 
@@ -335,98 +333,24 @@ public:
 		mQueue.clear();
 	}
 
-	//--------------------------------------------------------------------------
-	void Render()
-	{
-		if (!mOpen)
-			return;
-		auto& renderer = Renderer::GetInstance();
-		FontPtr pFont = renderer.GetFont(sFontSize);
-		pFont->SetHeight((float)sFontSize);
-		const int lineHeight = (int)pFont->GetHeight();
-
-		// Draw Background
-		const auto& size = mRTSize;
-		renderer.DrawQuad(Vec2I(0, 0), Vec2I(size.x, mHeight),
-			Color::DarkGray);
-
-		// DrawHighlight
-		if (mHighlightStart != -1)
-		{
-			Vec2I highlightStartPos = mInputPosition;
-			highlightStartPos.x += (int)pFont->GetTextWidth((char*)mInputStringw.c_str(),
-				mHighlightStart * 2);
-			highlightStartPos.y -= lineHeight;
-			Vec2I highlightEndPos = mInputPosition;
-			highlightEndPos.x += (int)pFont->GetTextWidth((char*)mInputStringw.c_str(),
-				mCursorPos * 2);
-			highlightEndPos.y -= lineHeight;
-
-			if (mHighlightStart > mCursorPos)
-			{
-				std::swap(highlightStartPos, highlightEndPos);
-			}
-
-			highlightEndPos.y += lineHeight;
-
-			renderer.DrawQuad(highlightStartPos, highlightEndPos - highlightStartPos,
-				Color::Gray);
-		}
-
-		// Draw Cursor
-		Vec2I cursorPos = mInputPosition;
-		cursorPos.x += (int)pFont->GetTextWidth((char*)mInputStringw.c_str(), mCursorPos * 2);
-		renderer.DrawQuad(cursorPos, Vec2I(mCursorWidth, 2), Color::Yellow);
-
-		// Draw prompt
-		pFont->PrepareRenderResources();
-		pFont->SetRenderStates();
-		pFont->Write((float)mPromptStart, (float)mInputPosition.y, 0.f, Color::White,
-			(char*)mPrompt.c_str(), -1, Font::FONT_ALIGN_LEFT);
-
-		// Draw Input String
-		pFont->Write((float)mInputPosition.x, (float)mInputPosition.y, 0.f, Color::White,
-			(char*)mInputStringw.c_str(), -1, Font::FONT_ALIGN_LEFT);
-
-
-
-		// Draw Buffer
-		WStringVector bufferwRender(mBufferw.size());
-		{
-			MutexLock lock(mMutex);
-			std::copy(mBufferw.begin(), mBufferw.end(), bufferwRender.begin());
-		}
-
-		int bufferDrawPosY = mInputPosition.y - lineHeight - mLineGap;
-		auto it = bufferwRender.begin();
-		auto itEnd = bufferwRender.end();
-		for (; it < itEnd; it++)
-		{
-			unsigned numLineFeed = std::count(it->begin(), it->end(), L'\n');
-			pFont->Write((float)mInputPosition.x, (float)bufferDrawPosY, 0.f,
-				Color::Gray, (char*)it->c_str(), -1, Font::FONT_ALIGN_LEFT);
-			bufferDrawPosY -= lineHeight + mLineGap;
-		}
-		pFont->SetBackToOrigHeight();
-	}
-
 	void ConsumeInput(IInputInjectorPtr injector)
 	{
 		if (!mOpen)
 			return;	
 		
-		auto& renderer = Renderer::GetInstance();
 		if (unsigned int chr = injector->GetChar())
 		{
 			if (chr == 22) // Synchronous idle - ^V
 			{
 				injector->PopChar();
-				std::string data = GetClipboardDataAsString(renderer.GetMainWindowHandle());
-				if (!data.empty())
-				{
-					auto insertionPos = mInputString.begin() + mCursorPos;
-					mInputString.insert(insertionPos, data.begin(), data.end());
-					mCursorPos += data.size();
+				if (mConsoleRenderer){
+					std::string data = GetClipboardDataAsString(mConsoleRenderer->GetMainWindowHandle());
+					if (!data.empty())
+					{
+						auto insertionPos = mInputString.begin() + mCursorPos;
+						mInputString.insert(insertionPos, data.begin(), data.end());
+						mCursorPos += data.size();
+					}
 				}
 			}
 			else
@@ -665,9 +589,8 @@ public:
 		if (mLuaMode)
 		{
 			std::string newstring = std::string("  ") + command;
-			Log(newstring.c_str());
-			auto& renderer = Renderer::GetInstance();
-			processed =  LuaUtils::ExecuteLua(renderer.GetLua() , command);
+			Log(newstring.c_str());			
+			processed =  LuaUtils::ExecuteLua(command);
 			if (history){
 				if (pushed)
 					mValidHistory.push_back(processed);
@@ -911,15 +834,13 @@ public:
 		mInputStringw = AnsiToWide(mInputString.c_str(), mInputString.size());
 	}
 
-	void OnCVarChanged(CVar* cvar)
+	void OnCVarChanged(CVarPtr cvar)
 	{
 		auto self = mSelf.lock();
-		for (auto it : self->mObservers_){
-			for (auto weak : it.second){
-				auto observer = weak.lock();
-				if (observer){
-					observer->OnChangeCVar(cvar);
-				}
+		for (auto& observers : self->mObservers_){
+			for (auto it = observers.second.begin(); it != observers.second.end(); /**/){
+				IteratingWeakContainer(observers.second, it, observer);
+				observer->OnChangeCVar(cvar);				
 			}
 		}
 	}
@@ -933,9 +854,38 @@ public:
 	{
 		mBufferw.clear();
 	}
-};
 
-const float Console::Impl::sFontSize = 22.f;
+	CVarPtr GetVariable(const char* name) const{
+		if (!ValidCStringLength(name)){
+			Logger::Log(FB_ERROR_LOG_ARG, "Invalid param.");
+			return 0;
+		}
+
+		std::string keyname(name);
+		for (auto& it : mCVars){
+			if (keyname == it->mName){
+				return it;
+			}
+		}
+		Logger::Log(FB_FRAME_TIME, FB_ERROR_LOG_ARG, FormatString("CVar (%s) is not found", name).c_str());
+		return 0;
+	}
+
+	int GetIntVariable(const char* name, int def) const{
+		LuaObject obj(name);
+		return obj.GetInt(def);
+	}
+
+	Real GetRealVariable(const char* name, Real def) const{
+		LuaObject obj(name);
+		return obj.GetFloat(def);
+	}
+
+	Vec2ITuple GetVec2IVariable(const char* name, const Vec2ITuple& def) const{
+		LuaObject obj(name);
+		return obj.GetVec2I(def);
+	}
+};
 
 //---------------------------------------------------------------------------
 static ConsoleWeakPtr sConsole;
@@ -973,19 +923,27 @@ void Console::SetRenderTargetSize(const Vec2I& size) {
 	mImpl->SetRenderTargetSize(size);
 }
 
-void Console::RegisterCommand(ConsoleCommand* pCom) {
+void Console::RegisterConsoleRenderer(IConsoleRenderer* provider){
+	mImpl->RegisterConsoleRenderer(provider);
+}
+
+void Console::UnregisterConsoleRenderer(IConsoleRenderer* provider){
+	mImpl->UnregisterConsoleRenderer(provider);
+}
+
+void Console::RegisterCommand(ConsoleCommandPtr pCom) {
 	mImpl->RegisterCommand(pCom);
 }
 
-void Console::UnregisterCommand(ConsoleCommand* pCom) {
+void Console::UnregisterCommand(ConsoleCommandPtr pCom) {
 	mImpl->UnregisterCommand(pCom);
 }
 
-void Console::RegisterVariable(CVar* cvar) {
+void Console::RegisterVariable(CVarPtr cvar) {
 	mImpl->RegisterVariable(cvar);
 }
 
-void Console::UnregisterVariable(CVar* cvar) {
+void Console::UnregisterVariable(CVarPtr cvar) {
 	mImpl->UnregisterVariable(cvar);
 }
 
@@ -1009,12 +967,32 @@ void Console::ToggleOpen() {
 	mImpl->ToggleOpen();
 }
 
-void Console::Update() {
-	mImpl->Update();
+bool Console::IsOpen() const{
+	return mImpl->mOpen;
 }
 
-void Console::Render() {
-	mImpl->Render();
+int Console::GetCursorPos() const{
+	return mImpl->mCursorPos;
+}
+
+int Console::GetHighlightStart() const{
+	return mImpl->mHighlightStart;
+}
+
+const WCHAR* Console::GetInputString() const{
+	return mImpl->mInputStringw.c_str();
+}
+
+const WCHAR* Console::GetPrompt() const{
+	return mImpl->mPrompt.c_str();
+}
+
+const WStringVector& Console::GetDisplayBuffer() const{
+	return mImpl->mBufferw;
+}
+
+void Console::Update() {
+	mImpl->Update();
 }
 
 void Console::RegisterStdout(StdOutRedirect* p) {
@@ -1023,6 +1001,22 @@ void Console::RegisterStdout(StdOutRedirect* p) {
 
 void Console::Clear() {
 	mImpl->Clear();
+}
+
+CVarPtr Console::GetVariable(const char* name) const{
+	return mImpl->GetVariable(name);
+}
+
+int Console::GetIntVariable(const char* name, int def) const{
+	return mImpl->GetIntVariable(name, def);
+}
+
+Real Console::GetRealVariable(const char* name, Real def) const{
+	return mImpl->GetRealVariable(name, def);
+}
+
+Vec2ITuple Console::GetVec2IVariable(const char* name, const Vec2ITuple& def) const{
+	return mImpl->GetVec2IVariable(name, def);
 }
 
 //---------------------------------------------------------------------------

@@ -115,3 +115,5 @@ namespace fastbird
 		virtual void RegisterFilterCallback(IFilterCallback* callback, NeedCollisionForConvexCallback func) = 0;		
 	};
 }
+
+extern IPhysics* gFBPhysics;

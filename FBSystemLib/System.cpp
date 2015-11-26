@@ -68,4 +68,21 @@ namespace fastbird{
 		return -1;
 #endif
 	}
+
+	void ChangeWindowSize(HWindow handle, Vec2ITuple resol){
+#if defined(_PLATFORM_WINDOWS_)
+		RECT originalRect;
+		HWND hwnd = (HWND)handle;
+		GetWindowRect(hwnd, &originalRect);
+		RECT rect;
+		rect.left = originalRect.left;
+		rect.top = originalRect.right;
+		rect.right = rect.left + std::get<0>(resol);
+		rect.bottom = rect.top + std::get<1>(resol);
+		AdjustWindowRect(&rect, GetWindowLongPtr(hwnd, GWL_STYLE), FALSE);
+		SetWindowPos(hwnd, 0, originalRect.left, originalRect.top, rect.right - rect.left, rect.bottom - rect.top, 0);		
+#else
+		assert(0 && "Not implemented");		
+#endif
+	}
 }

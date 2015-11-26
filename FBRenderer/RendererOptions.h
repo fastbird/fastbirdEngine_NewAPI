@@ -28,10 +28,20 @@
 #pragma once
 #include "FBMathLib/Vec2I.h"
 #include "FBCommonHeaders/Types.h"
+#include "FBConsole/ICVarObserver.h"
 namespace fastbird{
-	FB_DECLARE_SMART_PTR(RenderOptions);
-	class RenderOptions{
+	FB_DECLARE_SMART_PTR_STRUCT(CVar);
+	FB_DECLARE_SMART_PTR(RendererOptions);
+	class RendererOptions : public ICVarObserver{
+		RendererOptions();
+		~RendererOptions();		
+
 	public:
+
+		// ICVarObserver
+		bool OnChangeCVar(CVarPtr pCVar);
+
+		static RendererOptionsPtr Create();
 		int r_UI;
 		int r_noObjectConstants;
 		int r_noMesh;
@@ -59,7 +69,6 @@ namespace fastbird{
 		float r_ShadowNear;
 		float r_ShadowFar;
 		float r_ShadowCamDist;
-
 		int r_UseShaderCache;
 		int r_GenerateShaderCache;
 		int r_numRenderTargets;

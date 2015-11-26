@@ -35,7 +35,7 @@
 #include "RenderStates.h"
 #include "Renderer.h"
 #include "RenderParam.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
 #include "Camera.h"
@@ -247,7 +247,7 @@ public:
 	void OnBeforeRenderingTransparents(Scene* scene)
 	{
 		auto& renderer = Renderer::GetInstance();
-		if (!renderer.GetOptions()->r_debugDraw)
+		if (!renderer.GetRendererOptions()->r_debugDraw)
 			return;
 		if (scene->GetRenderPass() != RENDER_PASS::PASS_NORMAL)
 			return;
@@ -289,7 +289,7 @@ public:
 	void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
 		auto& renderer = Renderer::GetInstance();
-		if (!renderer.GetOptions()->r_debugDraw)
+		if (!renderer.GetRendererOptions()->r_debugDraw)
 			return;
 		if (renderParam.mRenderPass != RENDER_PASS::PASS_NORMAL)
 			return;

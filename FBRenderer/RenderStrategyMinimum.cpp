@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include "RenderTarget.h"
 #include "Shader.h"
 #include "Renderer.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "Texture.h"
 #include "ResourceProvider.h"
 #include "Camera.h"
@@ -48,7 +48,6 @@ public:
 	RenderTargetId mId;
 	TexturePtr mDepthTarget;
 	CameraPtr mLightCamera;
-	Vec2 mLightCamSize;
 	TexturePtr mShadowMap;
 	ShaderPtr mCloudDepthWriteShader;
 	
@@ -83,12 +82,12 @@ public:
 		{
 			mLightCamera = Camera::Create();
 			mLightCamera->SetOrthogonal(true);
-			auto cmd = renderer.GetOptions();
+			auto cmd = renderer.GetRendererOptions();
 			float width = std::min(cmd->r_ShadowCamWidth, mSize.x * (cmd->r_ShadowCamWidth / 1600.f));
 			float height = std::min(cmd->r_ShadowCamHeight, mSize.y * (cmd->r_ShadowCamHeight / 900.f));
 			width = std::max(16.f, width);
 			height = std::max(16.f, height);
-			mLightCamSize = Vec2(width, height);
+			Vec2 lightCamSize(width, height);
 
 			Vec2 shadowMapSize(std::min((Real)cmd->r_ShadowMapWidth, (Real)(mSize.x / 1600.0f * cmd->r_ShadowMapWidth)),
 				std::min((Real)cmd->r_ShadowMapHeight, (Real)(mSize.y / 900.0f * cmd->r_ShadowMapHeight))
@@ -99,21 +98,21 @@ public:
 			shadowMapSize.y = std::max(16.0f, shadowMapSize.y);
 
 			Vec2 vWorldUnitsPerTexel;
-			vWorldUnitsPerTexel = Vec2(mLightCamSize.x, mLightCamSize.y);
+			vWorldUnitsPerTexel = Vec2(lightCamSize.x, lightCamSize.y);
 			vWorldUnitsPerTexel *= Vec2(1.0f / shadowMapSize.x, 1.0f / shadowMapSize.y);
-			mLightCamSize.x = std::floor(mLightCamSize.x / vWorldUnitsPerTexel.x);
-			mLightCamSize.x *= vWorldUnitsPerTexel.x;
-			mLightCamSize.y = std::floor(mLightCamSize.y / vWorldUnitsPerTexel.y);
-			mLightCamSize.y *= vWorldUnitsPerTexel.y;
+			lightCamSize.x = std::floor(lightCamSize.x / vWorldUnitsPerTexel.x);
+			lightCamSize.x *= vWorldUnitsPerTexel.x;
+			lightCamSize.y = std::floor(lightCamSize.y / vWorldUnitsPerTexel.y);
+			lightCamSize.y *= vWorldUnitsPerTexel.y;
 
-			mLightCamera->SetWidth(mLightCamSize.x);
-			mLightCamera->SetHeight(mLightCamSize.y);
+			mLightCamera->SetWidth(lightCamSize.x);
+			mLightCamera->SetHeight(lightCamSize.y);
 			mLightCamera->SetNearFar(cmd->r_ShadowNear, cmd->r_ShadowFar);
 		}
 
 		auto cam = renderer.GetCamera();
 		auto target = cam->GetTarget();
-		float shadowCamDist = renderer.GetOptions()->r_ShadowCamDist;
+		float shadowCamDist = renderer.GetRendererOptions()->r_ShadowCamDist;
 		auto scene = mScene.lock();
 		if (scene){
 			const auto& lightDir = scene->GetMainLightDirection();			
@@ -233,13 +232,36 @@ public:
 		}
 	}
 
+	void OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName){
+		if (strcmp(optionName, "r_shadowmapwidth") == 0 ||
+			strcmp(optionName, "r_shadowmapheight") == 0)
+		{
+			mShadowMap.reset();
+		}
+		else if ((strcmp(optionName, "r_shadowcamwidth") == 0 ||
+			strcmp(optionName, "r_shadowcamheight") == 0))
+		{
+			if (mLightCamera){
+				mLightCamera->SetWidth(options->r_ShadowCamWidth);
+				mLightCamera->SetHeight(options->r_ShadowCamHeight);
+			}
+		}
+		else if ((strcmp(optionName, "r_shadownear") == 0 ||
+			strcmp(optionName, "r_shadowfar") == 0))
+		{
+			if (mLightCamera){
+				mLightCamera->SetNearFar(options->r_ShadowNear, options->r_ShadowFar);
+			}
+		}
+	}
+
 	void ShadowTarget(bool bind)
 	{
 		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		if (bind){
 
-			auto cmd = renderer.GetOptions();
+			auto cmd = renderer.GetRendererOptions();
 			if (!mShadowMap)
 			{
 				const auto& size = mSize;
@@ -357,4 +379,8 @@ void RenderStrategyMinimum::GlowRenderTarget(bool bind){
 
 void RenderStrategyMinimum::DepthTexture(bool bind){
 	mImpl->DepthTexture(bind);
+}
+
+void RenderStrategyMinimum::OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName){
+	mImpl->OnRendererOptionChanged(options, optionName);
 }

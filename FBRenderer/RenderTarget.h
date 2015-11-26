@@ -46,6 +46,7 @@ namespace fastbird
 	FB_DECLARE_SMART_PTR(Camera);
 	FB_DECLARE_SMART_PTR(Mouse);
 	FB_DECLARE_SMART_PTR(Keyboard);
+	FB_DECLARE_SMART_PTR(RendererOptions);
 	FB_DECLARE_SMART_PTR(Renderer);
 	FB_DECLARE_SMART_PTR(RenderTarget);
 	class FB_DLL_RENDERER RenderTarget : public Observable<IRenderTargetObserver>
@@ -121,6 +122,8 @@ namespace fastbird
 		void TriggerDrawEvent();
 
 		bool SetSmallSilouetteBuffer();
-		bool SetBigSilouetteBuffer();
+		bool SetBigSilouetteBuffer();		
+
+		void OnRendererOptionChanged(RendererOptionsPtr options, const char* name);
 	};
 }

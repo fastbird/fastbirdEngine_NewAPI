@@ -466,8 +466,20 @@ public:
 
 	// IRenderListener
 	void BeforeUIRendering(HWindowId hwndId, HWindow hwnd){
+		if (!mUICommands->r_UI)
+			return;
+
 		if (hwndId == 1)
 			mDragBox.Render();
+
+		auto& uis = mRenderUIs[hwndId];
+		for (auto& obj : uis){
+			obj->Render();
+		}
+	}
+
+	void RenderUI(HWindowId hwndId, HWindow hwnd){
+
 	}
 
 	void BeforeDebugHudRendering(HWindowId hwndId, HWindow hwnd){
@@ -2659,6 +2671,7 @@ UIManager::UIManager()
 
 UIManager::~UIManager()
 {	
+	Logger::Log(FB_DEFAULT_LOG_ARG, "UIManager deleted.");
 }
 
 WinBasePtr UIManager::CreateComponent(ComponentType::Enum type){
@@ -2675,6 +2688,10 @@ bool UIManager::OnFileChanged(const char* file) {
 
 void UIManager::BeforeUIRendering(HWindowId hwndId, HWindow hwnd) {
 	mImpl->BeforeUIRendering(hwndId, hwnd);
+}
+
+void UIManager::RenderUI(HWindowId hwndId, HWindow hwnd){
+	mImpl->RenderUI(hwndId, hwnd)
 }
 
 void UIManager::AfterUIRendered(HWindowId hwndId, HWindow hwnd){

@@ -367,6 +367,10 @@ namespace fastbird
 		return lua_toboolean(L, -1)!=0;
 	}
 
+	Vec2ITuple LuaUtils::GetLuaVarAsVec2I(const char* varname){
+		return GetLuaVarAsVec2I(sLuaState, varname);
+	}
+
 	Vec2ITuple LuaUtils::GetLuaVarAsVec2I(lua_State* L, const char* varname)
 	{
 		LUA_STACK_CLIPPER w(L);
@@ -397,9 +401,16 @@ namespace fastbird
 		lua_setglobal(L, varName);
 	}
 
+	bool LuaUtils::ExecuteLua(const char* chunk){
+		return ExecuteLua(sLuaState, chunk);
+	}
+
 	bool LuaUtils::ExecuteLua(lua_State* L, const char* chunk){
 		if (!ValidCStringLength(chunk))
 			return false;
+		if (!L){
+			Logger::Log(FB_ERROR_LOG_ARG, "Invalid param.");
+		}
 
 		int error;
 		error = luaL_loadbuffer(L, chunk, strlen(chunk), "line") || lua_pcall(L, 0, 0, 0);
@@ -410,6 +421,14 @@ namespace fastbird
 			PrintLuaErrorString(L, errorString);			
 		}
 		return true;
+	}
+
+	bool LuaUtils::DoFile(const char* filepath){
+		if (sLuaState){
+			return DoFile(sLuaState, filepath);
+		}
+		Logger::Log(FB_ERROR_LOG_ARG, "Main lua state is not prepared.");
+		return false;
 	}
 
 	bool LuaUtils::DoFile(lua_State* L, const char* filepath){
@@ -425,12 +444,41 @@ namespace fastbird
 		return true;
 	}
 
-	bool LuaUtils::DoFile(const char* filepath){
-		if (sLuaState){
-			return DoFile(sLuaState, filepath);
+	bool LuaUtils::LoadConfig(const char* filename){
+		// load the chunk and then change the value of its first upvalue
+		luaL_loadfile(sLuaState, filename); // func.
+		lua_createtable(sLuaState, 0, 0); // func. {}
+		const char* upvaluName = lua_setupvalue(sLuaState, -2, 1); // func.
+		lua_pushvalue(sLuaState, -1); //func. func.
+
+		// now the function has empty _ENV
+		int error = lua_pcall(sLuaState, 0, 0, 0); // func.
+		if (error)
+		{
+			// func. error
+			const char* errorString = lua_tostring(sLuaState, -1);
+			lua_pop(sLuaState, 1);
+			PrintLuaErrorString(sLuaState, errorString);			
+			return false;
 		}
-		Logger::Log(FB_ERROR_LOG_ARG, "Main lua state is not prepared.");
-		return false;
+
+		const char* name = lua_getupvalue(sLuaState, -1, 1); // func. _ENV
+		LuaObject env(sLuaState, -1);
+		auto it = env.GetTableIterator();
+		LuaTableIterator::KeyValue kv;
+		while (it.GetNext(kv)){
+			if (!kv.first.IsString())
+				continue;
+			// for security.
+			if (kv.second.HasFunction())
+				continue;
+
+			kv.second.PushToStack();
+			lua_setglobal(sLuaState, kv.first.GetString().c_str());
+		}
+		lua_pop(sLuaState, 2); // pop func. and _ENV
+
+		return true;
 	}
 
 	int LuaUtils::Traceback(lua_State *L) {
@@ -494,6 +542,62 @@ namespace fastbird
 
 	void LuaUtils::pushcfunction(lua_CFunction f){
 		lua_pushcfunction(sLuaState, f);
+	}
+
+	void LuaUtils::pushVec2(const Vec2Tuple& data){
+		luaU_push<Vec2Tuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushVec2(lua_State* L, const Vec2Tuple& data){
+		luaU_push<Vec2Tuple>(L, data);
+	}
+
+	void LuaUtils::pushVec2I(const Vec2ITuple& data){
+		luaU_push<Vec2ITuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushVec2I(lua_State* L, const Vec2ITuple& data){
+		luaU_push<Vec2ITuple>(L, data);
+	}
+
+	void LuaUtils::pushVec3(const Vec3Tuple& data){
+		luaU_push<Vec3Tuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushVec3(lua_State* L, const Vec3Tuple& data){
+		luaU_push<Vec3Tuple>(L, data);
+	}
+
+	void LuaUtils::pushVec3I(const Vec3ITuple& data){
+		luaU_push<Vec3ITuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushVec3I(lua_State* L, const Vec3ITuple& data){
+		luaU_push<Vec3ITuple>(L, data);
+	}
+
+	void LuaUtils::pushVec4(const Vec4Tuple& data){
+		luaU_push<Vec4Tuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushVec4(lua_State* L, const Vec4Tuple& data){
+		luaU_push<Vec4Tuple>(L, data);
+	}
+
+	void LuaUtils::pushQuat(const QuatTuple& data){
+		luaU_push<QuatTuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushQuat(lua_State* L, const QuatTuple& data){
+		luaU_push<QuatTuple>(L, data);
+	}
+
+	void LuaUtils::pushTransformation(const TransformationTuple& data){
+		luaU_push<TransformationTuple>(sLuaState, data);
+	}
+
+	void LuaUtils::pushTransformation(lua_State* L, const TransformationTuple& data){
+		luaU_push<TransformationTuple>(L, data);
 	}
 
 	void LuaUtils::pushcfunction(lua_State* L, lua_CFunction f){
@@ -582,6 +686,14 @@ namespace fastbird
 		luaL_checktype(L, index, luaType);
 	}
 
+	Vec2Tuple LuaUtils::checkVec2(int index){
+		return luaU_check<Vec2Tuple>(sLuaState, index);
+	}
+
+	Vec2Tuple LuaUtils::checkVec2(lua_State* L, int index){
+		return luaU_check<Vec2Tuple>(L, index);
+	}
+
 	Vec2ITuple LuaUtils::checkVec2I(int index){
 		return luaU_check<Vec2ITuple>(sLuaState, index);
 	}
@@ -589,6 +701,39 @@ namespace fastbird
 	Vec2ITuple LuaUtils::checkVec2I(lua_State* L, int index){
 		return luaU_check<Vec2ITuple>(L, index);
 	}
+
+	Vec3Tuple LuaUtils::checkVec3(int index){
+		return luaU_check<Vec3Tuple>(sLuaState, index);
+	}
+
+	Vec3Tuple LuaUtils::checkVec3(lua_State* L, int index){
+		return luaU_check<Vec3Tuple>(L, index);
+	}
+
+	Vec3ITuple LuaUtils::checkVec3I(int index){
+		return luaU_check<Vec3ITuple>(sLuaState, index);
+	}
+
+	Vec3ITuple LuaUtils::checkVec3I(lua_State* L, int index){
+		return luaU_check<Vec3ITuple>(L, index);
+	}
+
+	QuatTuple LuaUtils::checkQuat(int index){
+		return luaU_check<QuatTuple>(sLuaState, index);
+	}
+
+	QuatTuple LuaUtils::checkQuat(lua_State* L, int index){
+		return luaU_check<QuatTuple>(L, index);
+	}
+
+	TransformationTuple LuaUtils::checkTransformation(int index){
+		return luaU_check<TransformationTuple>(sLuaState, index);
+	}
+
+	TransformationTuple LuaUtils::checkTransformation(lua_State* L, int index){
+		return luaU_check<TransformationTuple>(L, index);
+	}
+
 
 	bool LuaUtils::isboolean(int index){
 		return lua_isboolean(sLuaState, index);
@@ -711,15 +856,16 @@ namespace fastbird
 
 
 
-	RecursiveSpinLock<true, false> sLuaLock;
+	static RecursiveSpinLock<true, false> sLock;
 	void LuaUtils::LockLua(){
-		sLuaLock.Lock();
+		sLock.Lock();
 	}
 
 	void LuaUtils::UnlockLua(){
-		sLuaLock.Unlock();
+		sLock.Unlock();
 	}
 
+	//---------------------------------------------------------------------------
 	LuaLock::LuaLock(){
 		LuaUtils::LockLua();
 	}
@@ -1046,7 +1192,7 @@ fastbird::QuatTuple luaU_Impl< fastbird::QuatTuple>::luaU_to(lua_State* L, int i
 	fastbird::LUA_STACK_WATCHER watcher(L, " fastbird::QuatTuple luaU_to(lua_State* L, int index)");
 	fastbird::QuatTuple ret;
 	int n = 1;
-	PullNumbers(L, index, n, ret.value);	
+	PullNumbers(L, index, n, ret.value);
 	return ret;
 }
 
@@ -1072,7 +1218,7 @@ fastbird::TransformationTuple luaU_Impl< fastbird::TransformationTuple>::luaU_to
 	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::TransformationTuple luaU_to(lua_State* L, int index)");
 	int n = 1;
 	fastbird::TransformationTuple ret;
-	PullNumbers(L,index,  n, ret);
+	PullNumbers(L, index, n, ret);
 	return ret;
 }
 
@@ -1083,3 +1229,4 @@ void luaU_Impl< fastbird::TransformationTuple>::luaU_push(lua_State* L, const fa
 	int n = 1;
 	PushNumbers(L, n, val);
 }
+

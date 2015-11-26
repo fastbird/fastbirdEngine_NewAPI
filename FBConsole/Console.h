@@ -32,32 +32,43 @@
 #include "ICVarObserver.h"
 #include "ConsoleDataType.h"
 namespace fastbird{
+	class IConsoleRenderer;
 	class StdOutRedirect;
 	FB_DECLARE_SMART_PTR(Console);
 	class FB_DLL_CONSOLE Console : public IInputConsumer, public Observable<ICVarObserver>{
 		FB_DECLARE_PIMPL_NON_COPYABLE(Console);
-		Console();		
-
+		Console();				
 	public:
 		static ConsolePtr Create();
 		static Console& GetInstance();		
 		static bool HasInstance();
 
 		void SetRenderTargetSize(const Vec2I& size);
-		void RegisterCommand(ConsoleCommand* pCom);
-		void UnregisterCommand(ConsoleCommand* pCom);
-		void RegisterVariable(CVar* cvar);
-		void UnregisterVariable(CVar* cvar);
+		void RegisterConsoleRenderer(IConsoleRenderer* provider);
+		void UnregisterConsoleRenderer(IConsoleRenderer* provider);
+		void RegisterCommand(ConsoleCommandPtr pCom);
+		void UnregisterCommand(ConsoleCommandPtr pCom);
+		void RegisterVariable(CVarPtr cvar);
+		void UnregisterVariable(CVarPtr cvar);
 		void AddCandidatesTo(const char* parent, const StringVector& candidates);
 		void Log(const char* szFmt, ...);
 		void ProcessCommand(const char* command, bool history = true);
 		void QueueProcessCommand(const char* command, bool history = true);
 		void ToggleOpen();
-		void Update();
-		void Render();
-		void RegisterStdout(StdOutRedirect* p);
+		bool IsOpen() const;
+		int GetCursorPos() const;
+		int GetHighlightStart() const;
+		const WCHAR* GetInputString() const;
+		const WCHAR* GetPrompt() const;
+		const WStringVector& GetDisplayBuffer() const;
+		void Update();		
+		void RegisterStdout(StdOutRedirect* p);		
 		void Clear();
-
+		CVarPtr GetVariable(const char* name) const;
+		/// Use this functions to get default value defiend in lua script
+		int GetIntVariable(const char* name, int def) const;
+		Real GetRealVariable(const char* name, Real def) const;
+		Vec2ITuple GetVec2IVariable(const char* name, const Vec2ITuple& def) const;
 		//---------------------------------------------------------------------------
 		// IInputConsumer
 		//---------------------------------------------------------------------------

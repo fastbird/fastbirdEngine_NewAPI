@@ -31,7 +31,7 @@
 namespace fastbird
 {
 	// model triangle
-	typedef struct {
+	struct ModelTriangle {
 		unsigned        v[3];
 		// cached data for optimized ray-triangle intersections
 		Vec2   v0Proj;           // 2D projection of vertices along the dominant axis
@@ -40,7 +40,7 @@ namespace fastbird
 		Vec3   faceNormal;
 		Real         d;                // distance from triangle plane to origin
 		int           dominantAxis;     // dominant axis of the triangle plane
-	} ModelTriangle;
+	};
 
 	struct ModelIntersection {
 		const ModelTriangle        *pTri;      // Pointer to mesh triangle that was intersected by ray

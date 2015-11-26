@@ -35,7 +35,7 @@
 #include "RenderParam.h"
 #include "GaussianDistribution.h"
 #include "StarDef.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "SystemTextures.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
@@ -73,8 +73,7 @@ public:
 	TexturePtr mGlowTarget;
 	TexturePtr mGlowTexture[2];
 	bool mGlowSet;
-	CameraPtr mLightCamera;
-	Vec2 mLightCamSize;
+	CameraPtr mLightCamera;	
 	TexturePtr mShadowMap;
 	TexturePtr mCloudVolumeDepth;
 	ShaderPtr mCloudDepthWriteShader;
@@ -122,12 +121,12 @@ public:
 		{
 			mLightCamera = Camera::Create();
 			mLightCamera->SetOrthogonal(true);
-			auto cmd = renderer.GetOptions();
+			auto cmd = renderer.GetRendererOptions();
 			float width = std::min(cmd->r_ShadowCamWidth, mSize.x * (cmd->r_ShadowCamWidth / 1600.f));
 			float height = std::min(cmd->r_ShadowCamHeight, mSize.y * (cmd->r_ShadowCamHeight / 900.f));
 			width = std::max(16.f, width);
 			height = std::max(16.f, height);
-			mLightCamSize = Vec2(width, height);
+			Vec2 lightCamSize(width, height);
 
 			Vec2 shadowMapSize(std::min((Real)cmd->r_ShadowMapWidth, (Real)(mSize.x / 1600.0f * cmd->r_ShadowMapWidth)),
 				std::min((Real)cmd->r_ShadowMapHeight, (Real)(mSize.y / 900.0f * cmd->r_ShadowMapHeight))
@@ -138,21 +137,21 @@ public:
 			shadowMapSize.y = std::max(16.0f, shadowMapSize.y);
 
 			Vec2 vWorldUnitsPerTexel;
-			vWorldUnitsPerTexel = Vec2(mLightCamSize.x, mLightCamSize.y);
+			vWorldUnitsPerTexel = Vec2(lightCamSize.x, lightCamSize.y);
 			vWorldUnitsPerTexel *= Vec2(1.0f / shadowMapSize.x, 1.0f / shadowMapSize.y);
-			mLightCamSize.x = std::floor(mLightCamSize.x / vWorldUnitsPerTexel.x);
-			mLightCamSize.x *= vWorldUnitsPerTexel.x;
-			mLightCamSize.y = std::floor(mLightCamSize.y / vWorldUnitsPerTexel.y);
-			mLightCamSize.y *= vWorldUnitsPerTexel.y;
+			lightCamSize.x = std::floor(lightCamSize.x / vWorldUnitsPerTexel.x);
+			lightCamSize.x *= vWorldUnitsPerTexel.x;
+			lightCamSize.y = std::floor(lightCamSize.y / vWorldUnitsPerTexel.y);
+			lightCamSize.y *= vWorldUnitsPerTexel.y;
 
-			mLightCamera->SetWidth(mLightCamSize.x);
-			mLightCamera->SetHeight(mLightCamSize.y);
+			mLightCamera->SetWidth(lightCamSize.x);
+			mLightCamera->SetHeight(lightCamSize.y);
 			mLightCamera->SetNearFar(cmd->r_ShadowNear, cmd->r_ShadowFar);
 		}
 
 		auto cam = renderer.GetCamera();
 		auto target = cam->GetTarget();
-		float shadowCamDist = renderer.GetOptions()->r_ShadowCamDist;
+		float shadowCamDist = renderer.GetRendererOptions()->r_ShadowCamDist;
 		auto scene = mScene.lock();
 		if (scene){
 			auto lightDir = scene->GetMainLightDirection();
@@ -168,7 +167,7 @@ public:
 		}
 	}
 
-	void Render(size_t face){		
+	void Render(size_t face){
 		auto scene = mScene.lock();
 		if (!scene)
 			return;
@@ -409,7 +408,7 @@ public:
 		auto& renderer = Renderer::GetInstance();
 		auto rt = mRenderTarget.lock();
 		if (bind){
-			if (!renderer.GetOptions()->r_Glow){
+			if (!renderer.GetRendererOptions()->r_Glow){
 				rt->BindTargetOnly(true);
 			}
 
@@ -442,7 +441,7 @@ public:
 			}
 
 			TexturePtr rts[] = { rt->GetRenderTargetTexture(), mGlowTarget };
-			if (mHDRTarget && renderer.GetOptions()->r_HDR)
+			if (mHDRTarget && renderer.GetRendererOptions()->r_HDR)
 			{
 				rts[0] = mHDRTarget;
 			}
@@ -471,7 +470,7 @@ public:
 		auto rt = mRenderTarget.lock();
 		if (bind){
 
-			auto cmd = renderer.GetOptions();
+			auto cmd = renderer.GetRendererOptions();
 			if (!mShadowMap)
 			{
 				const auto& size = mSize;
@@ -614,7 +613,7 @@ public:
 				*pData = camera->GetMatrix(Camera::ViewProj) * lightPos; // only x,y needed.
 				pData->x = (float)lightPos.x;
 				pData->y = (float)lightPos.y;
-				auto pEC = renderer.GetOptions();
+				auto pEC = renderer.GetRendererOptions();
 
 				pData->z = pEC->r_GodRayDensity; // density
 				pData->w = pEC->r_GodRayDecay; // decay
@@ -1208,18 +1207,18 @@ public:
 				
 				renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::StarGlarePS), false);
 
-				// Setup next expansion
-				vtStepUV *= starGlareSamples;
-				attnPowScale *= starGlareSamples;
+// Setup next expansion
+vtStepUV *= starGlareSamples;
+attnPowScale *= starGlareSamples;
 
-				// Set the work drawn just before to next texture source.
-				pSrcTexture = mStarTextures[iWorkTexture];
+// Set the work drawn just before to next texture source.
+pSrcTexture = mStarTextures[iWorkTexture];
 
-				iWorkTexture += 1;
-				if (iWorkTexture > 2)
-				{
-					iWorkTexture = 1;
-				}
+iWorkTexture += 1;
+if (iWorkTexture > 2)
+{
+	iWorkTexture = 1;
+}
 			}
 		}
 
@@ -1239,7 +1238,7 @@ public:
 			renderer.SetRenderTarget(rts, index, 1, 0, 0);
 		}
 		renderer.SetTextures(&textures[0], textures.size(), BINDING_SHADER_PS, 0);
-	
+
 		switch (starGlareDef->m_nStarLines)
 		{
 		case 2:
@@ -1290,6 +1289,29 @@ public:
 	void DeleteShadowMap()
 	{
 		mShadowMap = 0;
+	}
+
+	void OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName){
+		if (strcmp(optionName, "r_shadowmapwidth") == 0 ||
+			strcmp(optionName, "r_shadowmapheight") == 0)
+		{
+			mShadowMap.reset();
+		}
+		else if ((strcmp(optionName, "r_shadowcamwidth") == 0 ||
+			strcmp(optionName, "r_shadowcamheight") == 0))
+		{
+			if (mLightCamera){
+				mLightCamera->SetWidth(options->r_ShadowCamWidth);
+				mLightCamera->SetHeight(options->r_ShadowCamHeight);
+			}
+		}
+		else if ((strcmp(optionName, "r_shadownear") == 0 ||
+			strcmp(optionName, "r_shadowfar") == 0))
+		{
+			if (mLightCamera){
+				mLightCamera->SetNearFar(options->r_ShadowNear, options->r_ShadowFar);
+			}
+		}
 	}
 };
 
@@ -1349,4 +1371,8 @@ void RenderStrategyDefault::GlowRenderTarget(bool bind){
 
 void RenderStrategyDefault::DepthTexture(bool bind){
 	return mImpl->DepthTexture(bind);
+}
+
+void RenderStrategyDefault::OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName){
+	mImpl->OnRendererOptionChanged(options, optionName);
 }

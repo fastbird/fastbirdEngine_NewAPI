@@ -32,6 +32,7 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(Camera);
 	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(RenderTarget);	
+	FB_DECLARE_SMART_PTR(RendererOptions);
 	FB_DECLARE_SMART_PTR(IRenderStrategy);
 	class FB_DLL_RENDERER IRenderStrategy{
 	protected:
@@ -50,5 +51,6 @@ namespace fastbird{
 		virtual bool SetBigSilouetteBuffer() = 0;	
 		virtual void GlowRenderTarget(bool bind) = 0;
 		virtual void DepthTexture(bool bind) = 0;
+		virtual void OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName) = 0;
 	};
 }

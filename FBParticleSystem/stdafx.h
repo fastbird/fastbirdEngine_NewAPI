@@ -34,6 +34,7 @@
 #define FB_DLL_SCENEOBJECTFACTORY __declspec(dllimport)
 #define FB_DLL_TIMER __declspec(dllimport)
 #define FB_DLL_FILESYSTEM __declspec(dllimport)
+#define FB_DLL_CONSOLE __declspec(dllimport)
 
 #else
 

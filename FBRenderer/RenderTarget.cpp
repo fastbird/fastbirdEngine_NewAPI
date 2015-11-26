@@ -31,7 +31,7 @@
 #include "Texture.h"
 #include "RenderStrategyDefault.h"
 #include "RenderEventMarker.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "RenderTargetParam.h"
 #include "Camera.h"
 #include "FBSceneManager/IScene.h"
@@ -219,7 +219,7 @@ public:
 	{
 		auto& renderer = Renderer::GetInstance();
 		renderer.SetCurrentRenderTarget(mSelfPtr.lock());
-		if (hdr &&  mStrategy->IsHDR() && renderer.GetOptions()->r_HDR){
+		if (hdr &&  mStrategy->IsHDR() && renderer.GetRendererOptions()->r_HDR){
 			mStrategy->SetHDRTarget();
 		}
 		else{
@@ -269,6 +269,10 @@ public:
 
 	bool SetBigSilouetteBuffer(){
 		return mStrategy->SetBigSilouetteBuffer();
+	}
+
+	void OnRendererOptionChanged(RendererOptionsPtr options, const char* name){
+		return mStrategy->OnRendererOptionChanged(options, name);
 	}
 
 	//---------------------------------------------------------------------------
@@ -565,5 +569,9 @@ bool RenderTarget::SetSmallSilouetteBuffer(){
 
 bool RenderTarget::SetBigSilouetteBuffer(){
 	return mImpl->SetBigSilouetteBuffer();
+}
+
+void RenderTarget::OnRendererOptionChanged(RendererOptionsPtr options, const char* name){
+	return mImpl->OnRendererOptionChanged(options, name);
 }
 }

@@ -29,6 +29,7 @@
 #include "KeyboardEvent.h"
 #include "MouseEvent.h"
 #include "FBInputDevice.h"
+#include "IInputInjector.h" // convenient include
 #include "FBTimer/Timer.h"
 namespace fastbird{
 	FB_DECLARE_SMART_PTR(IMouse);
@@ -50,6 +51,7 @@ namespace fastbird{
 	public:
 
 		static InputManagerPtr Create();
+		static bool HasInstance();
 		static InputManager& GetInstance();
 
 		void SetMainWindowHandle(HWindow window);
@@ -57,9 +59,7 @@ namespace fastbird{
 
 		//-------------------------------------------------------------------
 		// Manager
-		//-------------------------------------------------------------------
-		void PrepareKeyboard(); /// for default keyboard
-		void PrepareMouse(); /// for default mouse
+		//-------------------------------------------------------------------		
 		void SetKeyboard(IKeyboardPtr keyboard);
 		void SetMouse(IMousePtr mouse);
 
@@ -103,7 +103,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// Mouse
 		//-------------------------------------------------------------------
-		void PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION);
+		void PushMouseEvent(HWindow handle, const MouseEvent& mouseEvent, TIME_PRECISION gameTimeInSec);
 		Real GetSensitivity() const;
 		void SetSensitivity(Real sens);
 		Real GetWheelSensitivity() const;

@@ -46,8 +46,10 @@ namespace fastbird{
 		const char* GetName() const;		
 		void OnAttachedToScene(ScenePtr pScene);
 		void OnDetachedFromScene(ScenePtr pScene);
+		
+		bool IsAttached() const;
 		/**
-		\param pScene Pass null to check whether the object is attached to any scene. Otherwise checks for the specified scene.
+		\param pScene Pass null(Same with calling IsAttached()) to check whether the object is attached to any scene. Otherwise checks for the specified scene.
 		*/
 		bool IsAttached(ScenePtr pScene) const;
 

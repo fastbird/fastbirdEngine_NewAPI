@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ConsoleRenderer.h" />
     <ClInclude Include="DebugHud.h" />
     <ClInclude Include="Font.h" />
     <ClInclude Include="GaussianDistribution.h" />
@@ -41,7 +42,7 @@
     <ClInclude Include="RendererEnums.h" />
     <ClInclude Include="RendererStructs.h" />
     <ClInclude Include="RenderEventMarker.h" />
-    <ClInclude Include="RenderOptions.h" />
+    <ClInclude Include="RendererOptions.h" />
     <ClInclude Include="RenderParam.h" />
     <ClInclude Include="RenderPass.h" />
     <ClInclude Include="RenderStates.h" />
@@ -67,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ConsoleRenderer.cpp" />
     <ClCompile Include="DebugHud.cpp" />
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="GaussianDistribution.cpp" />
@@ -80,6 +82,7 @@
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
+    <ClCompile Include="RendererOptions.cpp" />
     <ClCompile Include="RenderEventMarker.cpp" />
     <ClCompile Include="RenderStates.cpp" />
     <ClCompile Include="RenderStrategyDefault.cpp" />
@@ -100,6 +103,9 @@
     <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FBConsole\FBConsole.vcxproj">
+      <Project>{ae082870-0e26-479c-9aab-c7d3c32a55ca}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
       <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
     </ProjectReference>

@@ -27,13 +27,13 @@
 
 #pragma once
 namespace fastbird{
-	struct CVar;
+	FB_DECLARE_SMART_PTR_STRUCT(CVar);
 	class ICVarObserver
 	{
 	public:
 		enum{
 			Default
 		};
-		virtual bool OnChangeCVar(CVar* pCVar) = 0;
+		virtual bool OnChangeCVar(CVarPtr pCVar) = 0;
 	};
 }

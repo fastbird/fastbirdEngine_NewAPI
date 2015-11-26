@@ -50,17 +50,46 @@ public:
 	Impl()
 		: mValid(0)
 		, mMainWindowHandle((HWindow)-1)
+		, mKeyboard(IKeyboardPtr(new Keyboard))
+		, mMouse(IMousePtr(new Mouse))
 	{
 		
 		gpTimer = Timer::GetMainTimer().get();
 		for (int i = 0; i < InputDevice::DeviceNum; ++i){
 			mValid += 1 << i;
-		}
+		}		
 		SetInputInjector(InputInjector::Create());
 	}
 
 	void SetMainWindowHandle(HWindow window){
-		mMainWindowHandle = window;
+		if (mMainWindowHandle == window)
+			return;
+
+		mMainWindowHandle = window;	
+
+#ifdef _PLATFORM_WINDOWS_
+		const unsigned short HID_USAGE_PAGE_GENERIC = 0x01;
+		const unsigned short HID_USAGE_GENERIC_MOUSE = 0x02;
+		const unsigned short HID_USAGE_GENERIC_KEYBOARD = 0x06;
+
+		RAWINPUTDEVICE Rid[2];
+		Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+		Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
+		Rid[0].dwFlags = 0;
+		Rid[0].hwndTarget = 0;
+
+		Rid[1].usUsagePage = HID_USAGE_PAGE_GENERIC;
+		Rid[1].usUsage = HID_USAGE_GENERIC_KEYBOARD;
+		Rid[1].dwFlags = 0;
+		Rid[1].hwndTarget = 0;
+
+		HRESULT hr = RegisterRawInputDevices(Rid, 2, sizeof(Rid[0]));
+		if (FAILED(hr))
+		{
+			Logger::Log(FB_ERROR_LOG_ARG, "Registering Raw input devices failed!");
+		}
+#else
+#endif
 	}
 
 	HWindow GetMainWindowHandle() const{
@@ -82,18 +111,11 @@ public:
 		mValid = 0;
 		mValid = InputDevice::AllMask;		
 		for (auto& it : mConsumers){
-			for (auto weak = it.second.begin(); weak != it.second.end();){
-
-				auto consumer = weak->lock();
-				if (consumer){
-					consumer->ConsumeInput(mInjector);
-					if (!(mValid & InputDevice::AllMask))
-						return;
-					++weak;
-				}
-				else{
-					weak = it.second.erase(weak);
-				}
+			for (auto weak = it.second.begin(); weak != it.second.end(); /**/){
+				IteratingWeakContainer(it.second, weak, consumer);				
+				consumer->ConsumeInput(mInjector);
+				if (!(mValid & InputDevice::AllMask))
+					return;				
 			}
 		}
 	}
@@ -180,6 +202,10 @@ InputManagerPtr InputManager::Create(){
 	return sInputManager.lock();
 }
 
+bool InputManager::HasInstance(){
+	return !sInputManager.expired();
+}
+
 InputManager& InputManager::GetInstance(){
 	if (sInputManager.expired()){
 		Logger::Log(FB_ERROR_LOG_ARG, "InputManager is deleted! The program will crash...");
@@ -207,14 +233,6 @@ HWindow InputManager::GetMainWindowHandle() const{
 //-------------------------------------------------------------------
 // Manager
 //-------------------------------------------------------------------
-void InputManager::PrepareKeyboard(){
-	mImpl->mKeyboard = IKeyboardPtr(new Keyboard);
-}
-
-void InputManager::PrepareMouse(){
-	mImpl->mMouse = IMousePtr(new Mouse);
-}
-
 void InputManager::SetKeyboard(IKeyboardPtr keyboard){
 	mImpl->mKeyboard = keyboard;
 }

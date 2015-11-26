@@ -35,7 +35,7 @@
 #include "RenderTarget.h"
 #include "IPlatformTexture.h"
 #include "Font.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Shader.h"
@@ -49,12 +49,15 @@
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
 #include "Camera.h"
+#include "ConsoleRenderer.h"
+#include "FBConsole/Console.h"
 #include "EssentialEngineData/shaders/Constants.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBCommonHeaders/Factory.h"
 #include "FBSystemLib/ModuleHandler.h"
+#include "FBSystemLib/System.h"
 #include "FBFileSystem/FileSystem.h"
 #include "FBSceneManager/IScene.h"
 #include "FBInputManager/IInputInjector.h"
@@ -81,8 +84,7 @@ public:
 	typedef std::vector<RenderTargetWeakPtr> RenderTargets;
 
 	RendererWeakPtr mSelf;
-	Renderer* mObject;
-	lua_State* mL;
+	Renderer* mObject;	
 
 	std::string mPlatformRendererType;
 	struct PlatformRendererHolder{
@@ -112,7 +114,7 @@ public:
 	VectorMap<HWindowId, HWindow> mWindowHandles;
 	VectorMap<HWindow, HWindowId> mWindowIds;
 	VectorMap<HWindowId, Vec2I> mWindowSizes;
-	HWindowId mMainWindowId;
+	HWindowId mMainWindowId;	
 	VectorMap<HWindowId, RenderTargetPtr> mWindowRenderTargets;
 	RenderTargetPtr mCurrentRenderTarget;
 	std::vector<TexturePtr> mCurrentRTTextures;
@@ -152,7 +154,7 @@ public:
 	VectorMap<int, FontPtr> mFonts;
 	DebugHudPtr		mDebugHud;
 	GeometryRendererPtr mGeomRenderer;	
-	RenderOptionsPtr mOptions;
+	RendererOptionsPtr mRendererOptions;
 	bool mForcedWireframe;
 	RENDERER_FRAME_PROFILER mFrameProfiler;
 	PRIMITIVE_TOPOLOGY mCurrentTopology;	
@@ -164,7 +166,8 @@ public:
 	// 1/4
 	// x, y,    offset, weight;
 	VectorMap< std::pair<DWORD, DWORD>, std::pair<std::vector<Vec4f>, std::vector<Vec4f> > > mGauss5x5;	
-	InputLayoutPtr mPositionInputLayout;	
+	InputLayoutPtr mPositionInputLayout;
+	ConsoleRendererPtr mConsoleRenderer;
 
 	struct DebugRenderTarget
 	{
@@ -190,6 +193,8 @@ public:
 	VectorMap<std::string, UI3DObjPtr> mUI3DRenderObjs;	
 	std::vector<IVideoPlayerPtr> mVideoPlayers;
 	INT64 mLastRenderedTime;
+	unsigned mMainWindowStyle;
+	bool mWindowSizeInternallyChanging;
 	
 	//-----------------------------------------------------------------------
 	Impl(Renderer* renderer)
@@ -202,6 +207,10 @@ public:
 		, mLuminance(0.5f)
 		, mLuminanceOnCpu(false)
 		, mLastRenderedTime(0)
+		, mWindowSizeInternallyChanging(false)
+		, mConsoleRenderer(ConsoleRenderer::Create())
+		, mRendererOptions(RendererOptions::Create())
+		, mMainWindowStyle(0)
 	{
 		gpTimer = Timer::GetMainTimer().get();
 		mLastRenderedTime = gpTimer->GetTickCount();
@@ -218,14 +227,17 @@ public:
 		shadowBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 8 });
 		auto& ggxBindings = mSystemTextureBindings[SystemTextures::GGXPrecalc];
 		ggxBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 9 });
+
+		if (Console::HasInstance()){
+			Console::GetInstance().AddObserver(ICVarObserver::Default, mRendererOptions);
+		}
+		else{
+			Logger::Log(FB_ERROR_LOG_ARG, "The console is not initialized!");
+		}
 	}
 
 	~Impl(){
-	}
-
-	void SetLuaState(lua_State* L){
-		mL = L;
-	}
+	}	
 
 	bool PrepareRenderEngine(const char* type){
 		if (!type || strlen(type) == 0){
@@ -284,6 +296,10 @@ public:
 
 		mWindowHandles[id] = window;
 		mWindowIds[window] = id;
+		if (width == 0 || height == 0){
+			width = mRendererOptions->r_resolution.x;
+			height = mRendererOptions->r_resolution.y;
+		}
 		mWindowSizes[id] = { width, height };		
 		IPlatformTexturePtr colorTexture;
 		IPlatformTexturePtr depthTexture;
@@ -479,7 +495,7 @@ public:
 		//-----------------------------------------------------------------------
 		static_assert(DEFAULT_INPUTS::COUNT == 10, "You may not define a new element of mInputLayoutDesc for the new description.");
 
-		LuaObject multiFontSet(mL, "r_multiFont");
+		LuaObject multiFontSet("r_multiFont");
 		if (multiFontSet.IsValid()){
 			auto it = multiFontSet.GetSequenceIterator();
 			LuaObject data;
@@ -498,7 +514,7 @@ public:
 		}
 		else{
 			FontPtr font = Font::Create();
-			LuaObject r_font(mL, "r_font");
+			LuaObject r_font("r_font");
 			std::string fontPath = r_font.GetString();
 			if (fontPath.empty())
 			{
@@ -667,6 +683,8 @@ public:
 		RenderDebugRenderTargets();
 
 		RenderFade();
+
+		mConsoleRenderer->Render();
 	}
 
 	//-------------------------------------------------------------------
@@ -1145,7 +1163,7 @@ public:
 		}
 		static TIME_PRECISION time = 0;
 		static std::set<TextureWeakPtr, std::owner_less<TextureWeakPtr>> usedRenderTargets;
-		if (GetOptions()->r_numRenderTargets && gpTimer)
+		if (GetRendererOptions()->r_numRenderTargets && gpTimer)
 		{
 			for (int i = 0; i<num; i++)
 			{
@@ -1355,7 +1373,7 @@ public:
 	// GPU constants
 	//-------------------------------------------------------------------
 	void UpdateObjectConstantsBuffer(const void* pData, bool record){
-		if (mOptions->r_noObjectConstants)
+		if (mRendererOptions->r_noObjectConstants)
 			return;
 		if (record)
 			mFrameProfiler.NumUpdateObjectConst += 1;
@@ -1433,9 +1451,9 @@ public:
 	}
 	void UpdateRareConstantsBuffer(){
 		RARE_CONSTANTS rare;
-		rare.gMiddleGray = mOptions->r_HDRMiddleGray;
-		rare.gStarPower = mOptions->r_StarPower;
-		rare.gBloomPower = mOptions->r_BloomPower;
+		rare.gMiddleGray = mRendererOptions->r_HDRMiddleGray;
+		rare.gStarPower = mRendererOptions->r_StarPower;
+		rare.gBloomPower = mRendererOptions->r_BloomPower;
 		rare.gRareDummy = 0.f;
 		GetPlatformRenderer().UpdateShaderConstants(ShaderConstants::RareChange, &rare, sizeof(RARE_CONSTANTS));
 
@@ -1795,6 +1813,40 @@ public:
 	void TakeScreenshot(){
 		auto filepath = GetNextScreenshotFile();
 		GetPlatformRenderer().TakeScreenshot(filepath.c_str());
+	}
+
+	void ChangeFullscreenMode(int mode){
+		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Changing fullscreen mode: %d", mode).c_str());
+		GetPlatformRenderer().ChangeFullscreenMode(mMainWindowId, mWindowHandles[mMainWindowId], mode);
+	}
+
+	void OnWindowSizeChanged(HWindow window, const Vec2I& clientSize){
+		if (mWindowSizeInternallyChanging)
+			return;
+
+		ChangeResolution(GetMainWindowHandle(), clientSize);
+	}
+
+	void ChangeResolution(HWindow window, const Vec2I& resol){
+		if (window == GetMainWindowHandle())
+			mRendererOptions->r_resolution = resol;
+
+		auto handleId = GetWindowHandleId(window);
+		IPlatformTexturePtr color, depth;
+		bool success = GetPlatformRenderer().ChangeResolution(handleId, window, 
+			resol, color, depth);
+		if (success){
+			auto rt = GetRenderTarget(handleId);
+			rt->SetColorTexture(CreateTexture(color));
+			rt->SetDepthTexture(CreateTexture(depth));
+		}
+	}
+
+	void ChangeWindowSizeAndResolution(HWindow window, const Vec2I& resol){
+		mWindowSizeInternallyChanging = true;
+		ChangeWindowSize(window, resol);
+		mWindowSizeInternallyChanging = false;
+		ChangeResolution(window, resol);
 	}
 
 	void UnbindInputLayout(){
@@ -2186,8 +2238,16 @@ public:
 		return mUseFilmicToneMapping;
 	}
 
+	void SetFilmicToneMapping(bool use){
+		mUseFilmicToneMapping = use;
+	}
+
 	bool GetLuminanaceOnCPU() const{
 		return mLuminanceOnCpu;
+	}
+
+	void SetLuminanaceOnCPU(bool oncpu){
+		mLuminance = oncpu;
 	}
 
 	RenderTargetPtr GetRenderTarget(HWindowId id) const{
@@ -2310,12 +2370,12 @@ public:
 		return ret;
 	}
 
-	RenderOptions* GetOptions() const{
-		return mOptions.get();
+	RendererOptionsPtr GetRendererOptions() const{
+		return mRendererOptions;
 	}
 
-	lua_State* GetLua() const{
-		return mL;
+	void SetMainWindowStyle(unsigned style){
+		mMainWindowStyle = style;
 	}
 
 	//-------------------------------------------------------------------
@@ -2361,10 +2421,9 @@ RendererPtr Renderer::Create(){
 	return sRenderer.lock();
 }
 
-RendererPtr Renderer::Create(const char* renderEngineName, lua_State* L){
+RendererPtr Renderer::Create(const char* renderEngineName){
 	if (sRenderer.expired()){
-		auto renderer = Create();
-		renderer->SetLuaState(L);
+		auto renderer = Create();		
 		renderer->PrepareRenderEngine(renderEngineName);
 		return renderer;
 	}
@@ -2378,7 +2437,7 @@ Renderer& Renderer::GetInstance(){
 	return *sRenderer.lock();
 }
 
-bool Renderer::DoesExists(){
+bool Renderer::HasInstance(){
 	return sRenderer.lock() != 0;
 }
 
@@ -2394,11 +2453,7 @@ Renderer::Renderer()
 }
 
 Renderer::~Renderer(){
-}
-
-//-------------------------------------------------------------------
-void Renderer::SetLuaState(lua_State* L) {
-	mImpl->SetLuaState(L);
+	Logger::Log(FB_DEFAULT_LOG_ARG, "Renderer deleted.");
 }
 
 bool Renderer::PrepareRenderEngine(const char* rendererPlugInName) {
@@ -2710,6 +2765,30 @@ void Renderer::TakeScreenshot() {
 	mImpl->TakeScreenshot();
 }
 
+void Renderer::ChangeFullscreenMode(int mode){
+	mImpl->ChangeFullscreenMode(mode);
+}
+
+void Renderer::OnWindowSizeChanged(HWindow window, const Vec2I& clientSize){
+	mImpl->OnWindowSizeChanged(window, clientSize);
+}
+
+void Renderer::ChangeResolution(const Vec2I& resol){
+	mImpl->ChangeResolution(GetMainWindowHandle(), resol);
+}
+
+void Renderer::ChangeResolution(HWindow window, const Vec2I& resol){
+	mImpl->ChangeResolution(window, resol);
+}
+
+void Renderer::ChangeWindowSizeAndResolution(const Vec2I& resol){
+	mImpl->ChangeWindowSizeAndResolution(GetMainWindowHandle(), resol);
+}
+
+void Renderer::ChangeWindowSizeAndResolution(HWindow window, const Vec2I& resol){
+	mImpl->ChangeWindowSizeAndResolution(window, resol);
+}
+
 //-------------------------------------------------------------------
 // FBRenderer State
 //-------------------------------------------------------------------
@@ -2855,8 +2934,16 @@ bool Renderer::GetFilmicToneMapping() const{
 	return mImpl->GetFilmicToneMapping();
 }
 
+void Renderer::SetFilmicToneMapping(bool use){
+	mImpl->SetFilmicToneMapping(use);
+}
+
 bool Renderer::GetLuminanaceOnCPU() const{
 	return mImpl->GetLuminanaceOnCPU();
+}
+
+void Renderer::SetLuminanaceOnCPU(bool oncpu){
+	mImpl->SetLuminanaceOnCPU(oncpu);
 }
 
 RenderTargetPtr Renderer::GetRenderTarget(HWindowId id) const {
@@ -2911,12 +2998,12 @@ bool Renderer::GetResolutionList(unsigned& outNum, Vec2I* list) {
 	return mImpl->GetResolutionList(outNum, list);
 }
 
-RenderOptions* Renderer::GetOptions() const {
-	return mImpl->GetOptions();
+RendererOptionsPtr Renderer::GetRendererOptions() const {
+	return mImpl->GetRendererOptions();
 }
 
-lua_State* Renderer::GetLua() const {
-	return mImpl->GetLua();
+void Renderer::SetMainWindowStyle(unsigned style){
+	mImpl->SetMainWindowStyle(style);
 }
 
 //-------------------------------------------------------------------

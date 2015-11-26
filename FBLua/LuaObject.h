@@ -79,6 +79,7 @@ namespace fastbird
 		// index will not be popped.
 		LuaObject(lua_State* L, int index, bool pop = false);
 		LuaObject(lua_State* L, const char* globalName);
+		LuaObject(const char* globalName);
 		LuaObject(const LuaObject& other);
 		LuaObject& operator=(const LuaObject& other);
 		~LuaObject();

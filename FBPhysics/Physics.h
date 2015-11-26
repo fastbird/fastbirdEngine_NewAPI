@@ -37,7 +37,8 @@ namespace fastbird
 	class Physics : public IPhysics
 	{
 		FB_DECLARE_PIMPL_NON_COPYABLE(Physics);		
-		Physics();		
+		Physics();
+		~Physics();
 
 	public:
 		/**Internal only.

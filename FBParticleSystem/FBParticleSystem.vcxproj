@@ -72,6 +72,7 @@
   <ItemGroup>
     <ClInclude Include="ParticleEmitter.h" />
     <ClInclude Include="ParticleEnum.h" />
+    <ClInclude Include="ParticleOptions.h" />
     <ClInclude Include="ParticleRenderKey.h" />
     <ClInclude Include="ParticleRenderObject.h" />
     <ClInclude Include="ParticleStruct.h" />
@@ -80,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ParticleEmitter.cpp" />
+    <ClCompile Include="ParticleOptions.cpp" />
     <ClCompile Include="ParticleRenderKey.cpp" />
     <ClCompile Include="ParticleRenderObject.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
@@ -89,6 +91,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FBConsole\FBConsole.vcxproj">
+      <Project>{ae082870-0e26-479c-9aab-c7d3c32a55ca}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
       <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
     </ProjectReference>

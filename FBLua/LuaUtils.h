@@ -106,29 +106,29 @@ else{\
 #define REGISTER_ENUM_TO_LUA(endIdx, enumName) \
 	inline void RegisterToLua(lua_State* L)\
 {\
-	LuaUtils::createtable(L, 0, (endIdx)); \
+	fastbird::LuaUtils::createtable(L, 0, (endIdx)); \
 for (int i = 0; i <= (endIdx); ++i)\
 {\
-	LuaUtils::pushinteger(L, i); \
-	LuaUtils::setfield(L, -2, ConvertToString(Enum(i))); \
+	fastbird::LuaUtils::pushinteger(L, i); \
+	fastbird::LuaUtils::setfield(L, -2, ConvertToString(Enum(i))); \
 }\
-	LuaUtils::getglobal(L, "NoNewMethod"); \
-	LuaUtils::setfield(L, -2, "__newindex"); \
-	LuaUtils::pushvalue(L, -1); \
-	LuaUtils::setmetatable(L, -2); \
-	LuaUtils::setglobal(L, #enumName); \
+	fastbird::LuaUtils::getglobal(L, "NoNewMethod"); \
+	fastbird::LuaUtils::setfield(L, -2, "__newindex"); \
+	fastbird::LuaUtils::pushvalue(L, -1); \
+	fastbird::LuaUtils::setmetatable(L, -2); \
+	fastbird::LuaUtils::setglobal(L, #enumName); \
 	\
-	LuaUtils::createtable(L, 0, (endIdx)); \
+	fastbird::LuaUtils::createtable(L, 0, (endIdx)); \
 for (int i = 0; i <= (endIdx); ++i)\
 {\
-	LuaUtils::pushstring(L, ConvertToString(Enum(i))); \
-	LuaUtils::rawseti(L, -2, i); \
+	fastbird::LuaUtils::pushstring(L, ConvertToString(Enum(i))); \
+	fastbird::LuaUtils::rawseti(L, -2, i); \
 }\
-	LuaUtils::getglobal(L, "NoNewMethod"); \
-	LuaUtils::setfield(L, -2, "__newindex"); \
-	LuaUtils::pushvalue(L, -1); \
-	LuaUtils::setmetatable(L, -2); \
-	LuaUtils::setglobal(L, #enumName "String");\
+	fastbird::LuaUtils::getglobal(L, "NoNewMethod"); \
+	fastbird::LuaUtils::setfield(L, -2, "__newindex"); \
+	fastbird::LuaUtils::pushvalue(L, -1); \
+	fastbird::LuaUtils::setmetatable(L, -2); \
+	fastbird::LuaUtils::setglobal(L, #enumName "String");\
 }
 
 #define REGISTER_CLASS_ENUM_TO_LUA(classname, enumName, endIdx) \
@@ -201,13 +201,16 @@ namespace fastbird
 		static std::string GetLuaValueAsString(lua_State* L, int stackIndex);
 		static std::string GetLuaVarAsString(lua_State* L, const char* varName, const char* luaFile = 0);
 		static bool GetLuaVarAsBoolean(lua_State* L, const char* varName);
+		static Vec2ITuple GetLuaVarAsVec2I(const char* varname);
 		static Vec2ITuple GetLuaVarAsVec2I(lua_State* L, const char* varname);
 		static float GetLuaVarAsFloat(lua_State* L, const char* varName);
 		static unsigned GetLuaVarAsUnsigned(lua_State* L, const char* varName);
 		static void SetLuaVar(lua_State* L, const char* varName, bool value);
+		static bool ExecuteLua(const char* chunk);
 		static bool ExecuteLua(lua_State* L, const char* chunk);
 		static bool DoFile(lua_State* L, const char* filepath);
 		static bool DoFile(const char* filepath);
+		static bool LoadConfig(const char* filepath);
 		static int Traceback(lua_State *L);
 
 		/// push nil
@@ -230,7 +233,21 @@ namespace fastbird
 		static void pushboolean(bool b);
 		static void pushboolean(lua_State* L, bool b);
 		static void pushcfunction(lua_CFunction f);
-		static void pushcfunction(lua_State* L, lua_CFunction f);
+		static void pushcfunction(lua_State* L, lua_CFunction f);		
+		static void pushVec2(const Vec2Tuple& data);
+		static void pushVec2(lua_State* L, const Vec2Tuple& data);
+		static void pushVec2I(const Vec2ITuple& data);
+		static void pushVec2I(lua_State* L, const Vec2ITuple& data);
+		static void pushVec3(const Vec3Tuple& data);
+		static void pushVec3(lua_State* L, const Vec3Tuple& data);
+		static void pushVec3I(const Vec3ITuple& data);
+		static void pushVec3I(lua_State* L, const Vec3ITuple& data);
+		static void pushVec4(const Vec4Tuple& data);
+		static void pushVec4(lua_State* L, const Vec4Tuple& data);
+		static void pushQuat(const QuatTuple& data);
+		static void pushQuat(lua_State* L, const QuatTuple& data);
+		static void pushTransformation(const TransformationTuple& data);
+		static void pushTransformation(lua_State* L, const TransformationTuple& data);
 
 		static const char* tostring(int index);
 		static const char* tostring(lua_State* L, int index);
@@ -253,8 +270,18 @@ namespace fastbird
 		static double checknumber(lua_State* L, int index);
 		static void checktype(int index, int luaType);
 		static void checktype(lua_State* L, int index, int luaType);
+		static Vec2Tuple checkVec2(int index);
+		static Vec2Tuple checkVec2(lua_State* L, int index);
 		static Vec2ITuple checkVec2I(int index);
 		static Vec2ITuple checkVec2I(lua_State* L, int index);
+		static Vec3Tuple checkVec3(int index);
+		static Vec3Tuple checkVec3(lua_State* L, int index);
+		static Vec3ITuple checkVec3I(int index);
+		static Vec3ITuple checkVec3I(lua_State* L, int index);
+		static QuatTuple checkQuat(int index);
+		static QuatTuple checkQuat(lua_State* L, int index);
+		static TransformationTuple checkTransformation(int index);
+		static TransformationTuple checkTransformation(lua_State* L, int index);
 
 		static bool isboolean(int index);
 		static bool isboolean(lua_State* L, int index);

@@ -82,6 +82,7 @@
     <ClInclude Include="Console.h" />
     <ClInclude Include="ConsoleDataType.h" />
     <ClInclude Include="ICVarObserver.h" />
+    <ClInclude Include="IConsoleRenderer.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
@@ -99,9 +100,6 @@
     </ProjectReference>
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
       <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\FBRenderer\FBRenderer.vcxproj">
-      <Project>{fd658a50-2d36-4bb4-8eda-635bf71b4cdb}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBStringLib\FBStringLib.vcxproj">
       <Project>{97920097-3e86-410d-8d98-a2ecad02a35f}</Project>

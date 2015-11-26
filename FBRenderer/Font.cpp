@@ -34,7 +34,7 @@
 #include "InputLayout.h"
 #include "Material.h"
 #include "TextureAtlas.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "Shader.h"
 #include "ResourceProvider.h"
 #include "ResourceTypes.h"
@@ -534,7 +534,7 @@ public:
 		if (!mInitialized)
 			return;
 		auto& renderer = Renderer::GetInstance();
-		if (renderer.GetOptions()->r_noText)
+		if (renderer.GetRendererOptions()->r_noText)
 			return;
 
 		//

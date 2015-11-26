@@ -41,6 +41,7 @@ Plugin: \b FBRendererD3D11
 #define FB_DLL_INPUTMANAGER __declspec(dllimport)
 #define FB_DLL_LUA __declspec(dllimport)
 #define FB_DLL_SCENEMANAGER __declspec(dllimport)
+#define FB_DLL_CONSOLE __declspec(dllimport)
 #else
 #define FB_DLL_TIMER
 #endif

@@ -30,7 +30,7 @@
 #include "Renderer.h"
 #include "Font.h"
 #include "FBTimer/Timer.h"
-#include "RenderOptions.h"
+#include "RendererOptions.h"
 #include "RenderStates.h"
 #include "InputLayout.h"
 #include "Shader.h"
@@ -290,7 +290,7 @@ public:
 	void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
 		auto& renderer = Renderer::GetInstance();
-		if (!renderer.GetOptions()->r_debugDraw)
+		if (!renderer.GetRendererOptions()->r_debugDraw)
 			return;
 		if (renderParam.mRenderPass != RENDER_PASS::PASS_NORMAL)
 			return;
@@ -504,7 +504,7 @@ public:
 
 	void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut)
 	{
-		if (!Renderer::GetInstance().GetOptions()->r_debugDraw)
+		if (!Renderer::GetInstance().GetRendererOptions()->r_debugDraw)
 			return;
 		if (renderParam.mRenderPass != RENDER_PASS::PASS_NORMAL)
 			return;

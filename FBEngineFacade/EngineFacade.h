@@ -28,7 +28,17 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBCommonHeaders/Types.h"
+#include "DirectionalLightIndex.h"
+#include "FBVideoPlayer/VideoPlayerType.h"
 namespace fastbird{
+	class ProfilerSimple;
+	FB_DECLARE_SMART_PTR(Font);
+	FB_DECLARE_SMART_PTR(IVideoPlayer);
+	FB_DECLARE_SMART_PTR(ICamera);
+	FB_DECLARE_SMART_PTR(IFileChangeObserver);
+	FB_DECLARE_SMART_PTR(IRendererObserver);
+	FB_DECLARE_SMART_PTR(IInputInjector);
+	FB_DECLARE_SMART_PTR(EngineOptions);
 	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(EngineFacade);
 	class FB_DLL_ENGINEFACADE EngineFacade{
@@ -36,16 +46,50 @@ namespace fastbird{
 		EngineFacade();
 		~EngineFacade();
 
-	public:
+	public:		
 		static EngineFacadePtr Create();
+		static EngineFacade& GetInstance();
+		static bool HasInstance();
 
 		static const HWindowId INVALID_HWND_ID = (HWindowId)-1;
 		
+		HWindowId CreateEngineWindow(int x, int y, int width, int height,
+			const char* wndClass, const char* title, unsigned style, unsigned exStyle,
+			WNDPROC winProc);
 		/// \param pluginName "FBRendererD3D11" is provided.
 		bool InitRenderer(const char* pluginName);
-		bool InitCanvas(HWindow window, int width, int height);
+		bool InitCanvas(HWindowId id, int width, int height);
 		ScenePtr GetMainScene() const;
+		void UpdateInput();
 		void Update(TIME_PRECISION dt);
 		void Render();
+		EngineOptionsPtr GetEngineOptions() const;
+		bool MainCameraExists() const;
+		ICameraPtr GetMainCamera() const;
+		const Vec3& GetMainCameraPos() const;
+		const Vec3& GetMainCameraDirection() const;
+		const Ray3& GetWorldRayFromCursor();
+		IInputInjectorPtr GetInputInjector();
+		void AddDirectionalLightCoordinates(DirectionalLightIndex::Enum idx, Real phi, Real theta);
+		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName);
+		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName, int tab);
+		/// for windows;
+		intptr_t WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp);
+		/** Register an input consumer.
+		You need unregister when the consumer is destroyed or does not
+		need to getinput information any more.
+		\param consumer
+		\param priority number one priority is handled first.
+		i.e. the lowest value is handled first. Check the default
+		priority at IInputConsumer::Priority
+		*/
+		void RegisterInputConsumer(IInputConsumerPtr consumer, int priority);
+		void AddRendererObserver(int rendererObserverType, IRendererObserverPtr observer);
+		void AddFileChangeObserver(int fileChangeObserverType, IFileChangeObserverPtr observer);
+		const Vec2I& GetMainRenderTargetSize() const;
+		IVideoPlayerPtr CreateVideoPlayer(VideoPlayerType::Enum type);
+		void QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color);
+		void QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color, float size);
+		FontPtr GetFont(float fontHeight);
 	};
 }

@@ -35,46 +35,21 @@ using namespace fastbird;
 static void StartUIEditor(StringVector& arg);
 static void KillUIEditor(StringVector& arg);
 
-static ConsoleCommand ccStartUIEditor("StartUIEditor", StartUIEditor, "Start ui editor");
-static ConsoleCommand ccKillUIEditor("KillUIEditor", KillUIEditor, "Kill ui editor");
-
-class UICommands::Impl{
-public:
-	UICommandsWeakPtr mSelfPtr;
-	std::vector<CVar*> mCVars;
-	std::vector<ConsoleCommand*> mCommands;
-
-	//---------------------------------------------------------------------------
-	Impl(){
-		FB_REGISTER_CC(&ccStartUIEditor);
-		FB_REGISTER_CC(&ccKillUIEditor);
-	}
-	~Impl(){
-		if (Console::HasInstance()){
-			Console::GetInstance().RemoveObserver(ICVarObserver::Default, mSelfPtr.lock());
-			for (auto p : mCVars)
-			{
-				Console::GetInstance().UnregisterVariable(p);
-				delete p;
-			}
-			for (const auto& p : mCommands)
-			{
-				Console::GetInstance().UnregisterCommand(p);
-			}
-		}
-	}
-};
-
 UICommandsPtr UICommands::Create(){
 	UICommandsPtr p(new UICommands, [](UICommands* obj){ delete obj; });
-	p->mImpl->mSelfPtr = p;
 	return p;
 }
 
 UICommands::UICommands()
-	: mImpl(new Impl)
 {
-	
+	FB_REGISTER_CC("StartUIEditor", StartUIEditor, "Start ui editor");
+	FB_REGISTER_CC("KillUIEditor", KillUIEditor, "Kill ui editor");
+
+	r_UI = Console::GetInstance().GetIntVariable("r_UI", 1);
+	FB_REGISTER_CVAR(r_UI, r_UI, CVAR_CATEGORY_CLIENT, "Render uis.");
+
+	UI_Debug = Console::GetInstance().GetIntVariable("UI_Debug", 0);
+	FB_REGISTER_CVAR(UI_Debug, UI_Debug, CVAR_CATEGORY_CLIENT, "UI debug");
 }
 
 UICommands::~UICommands()
@@ -82,7 +57,7 @@ UICommands::~UICommands()
 	
 }
 
-bool UICommands::OnChangeCVar(CVar* pCVar)
+bool UICommands::OnChangeCVar(CVarPtr pCVar)
 {
 	return false;
 }

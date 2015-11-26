@@ -29,16 +29,12 @@
 #include <string>
 
 #define FB_REGISTER_CVAR(name, def, category, desc) \
-	CVar* pCVar##name = new CVar(#name, def, name, category, desc); \
-	mCVars.push_back(pCVar##name);\
-	if (Console::HasInstance()){\
-		Console::GetInstance().RegisterVariable(pCVar##name);\
-		}
-
-#define FB_REGISTER_CC(p) \
-	mCommands.push_back(p);\
 	if (Console::HasInstance())\
-		Console::GetInstance().RegisterCommand(p);
+		Console::GetInstance().RegisterVariable(CVarPtr(new CVar(#name, def, name, category, desc)));
+
+#define FB_REGISTER_CC(name, func, desc) \
+	if (Console::HasInstance())\
+		Console::GetInstance().RegisterCommand(ConsoleCommandPtr(new ConsoleCommand(#name, func, desc)));
 
 namespace fastbird{
 	class Vec2I;
@@ -56,6 +52,7 @@ namespace fastbird{
 		CVAR_TYPE_VEC2I,
 	};
 
+	FB_DECLARE_SMART_PTR_STRUCT(CVar);
 	struct FB_DLL_CONSOLE CVar
 	{
 		CVar(const char* _name, const int _def, int& _storage,
@@ -85,6 +82,7 @@ namespace fastbird{
 
 	typedef std::function<void(StringVector&)> CFunc;
 	//--------------------------------------------------------------------------
+	FB_DECLARE_SMART_PTR_STRUCT(ConsoleCommand);
 	struct FB_DLL_CONSOLE ConsoleCommand
 	{
 		ConsoleCommand(const std::string& name, CFunc f,

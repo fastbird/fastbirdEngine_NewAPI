@@ -70,11 +70,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DirectionalLightIndex.h" />
     <ClInclude Include="EngineFacade.h" />
+    <ClInclude Include="EngineOptions.h" />
+    <ClInclude Include="FacadeMeshObject.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EngineFacade.cpp" />
+    <ClCompile Include="EngineOptions.cpp" />
+    <ClCompile Include="FacadeMeshObject.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

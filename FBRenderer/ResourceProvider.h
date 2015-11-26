@@ -64,6 +64,10 @@ namespace fastbird{
 
 		virtual int GetNumToneMaps() const;
 		virtual int GetNumLuminanceMaps() const;
+
+		virtual void DeleteTexture(int ResourceTypes_Textures);
+		virtual void DeleteShader(int ResourceTypes_Shaders);
+
 	};
 }
 

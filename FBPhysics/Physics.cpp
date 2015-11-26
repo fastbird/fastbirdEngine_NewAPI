@@ -1226,7 +1226,10 @@ void TickCallback(btDynamicsWorld *world, btScalar timeStep)
 
 Physics::Physics()
 	: mImpl(new Impl(this)){
+}
 
+Physics::~Physics(){
+	Logger::Log(FB_ERROR_LOG_ARG, "Physics deleted.");
 }
 
 void Physics::Initilaize() {

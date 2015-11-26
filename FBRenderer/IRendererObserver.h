@@ -36,6 +36,7 @@ namespace fastbird{
 		/// All defined at event DefaultRenderEvent
 		/// renderer->AddObserver(DefaultRenderEvent, observer);
 		virtual void BeforeUIRendering(HWindowId hwndId, HWindow hwnd) = 0;
+		virtual void RenderUI(HWindowId hwndId, HWindow hwnd) = 0;
 		virtual void AfterUIRendered(HWindowId hwndId, HWindow hwnd) = 0;
 		virtual void BeforeDebugHudRendering(HWindowId hwndId, HWindow hwnd) = 0;
 		virtual void AfterDebugHudRendered(HWindowId hwndId, HWindow hwnd) = 0;

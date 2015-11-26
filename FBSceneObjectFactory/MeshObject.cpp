@@ -35,7 +35,7 @@
 #include "FBSceneManager/SceneManager.h"
 #include "FBRenderer/Camera.h"
 #include "FBRenderer/Renderer.h"
-#include "FBRenderer/RenderOptions.h"
+#include "FBRenderer/RendererOptions.h"
 #include "FBRenderer/RenderStates.h"
 #include "FBRenderer/VertexBuffer.h"
 #include "FBRenderer/IndexBuffer.h"
@@ -43,6 +43,7 @@
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/ResourceProvider.h"
 #include "FBStringLib/StringLib.h"
+#include "FBMathLib/GeomUtils.h"
 #include "EssentialEngineData/shaders/Constants.h"
 using namespace fastbird;
 
@@ -161,7 +162,7 @@ public:
 	
 	void Render(const RenderParam& renderParam, RenderParamOut* renderParamOut){
 		auto& renderer = Renderer::GetInstance();		
-		auto renderOption = renderer.GetOptions();
+		auto renderOption = renderer.GetRendererOptions();
 		if (renderOption->r_noMesh)
 			return;		
 		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))

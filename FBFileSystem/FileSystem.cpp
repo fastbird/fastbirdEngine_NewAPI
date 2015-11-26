@@ -182,11 +182,9 @@ int FileSystem::CompareFileModifiedTime(const char* file1, const char* file2){
 }
 
 bool FileSystem::SecurityOK(const char* filepath){
-	if (gWorkingPath.empty()){
-		gWorkingPath = boost::filesystem::current_path(); // absolute
-	}
+	auto cwd = GetCurrentDir();
 	auto abspath = boost::filesystem::absolute(filepath);
-	if (abspath.generic_string().find(gWorkingPath.generic_string()) != std::string::npos)
+	if (abspath.generic_string().find(cwd) != std::string::npos)
 		return true;
 
 	return false;
@@ -271,5 +269,8 @@ std::string FileSystem::GetAppDataFolder(){
 
 
 std::string FileSystem::GetCurrentDir(){
+	if (gWorkingPath.empty()){
+		gWorkingPath = boost::filesystem::current_path(); // absolute
+	}
 	return gWorkingPath.generic_string();
 }

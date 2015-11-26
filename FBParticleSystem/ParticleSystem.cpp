@@ -29,6 +29,7 @@
 #include "ParticleSystem.h"
 #include "ParticleEmitter.h"
 #include "ParticleRenderObject.h"
+#include "ParticleOptions.h"
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/Camera.h"
@@ -39,6 +40,7 @@ class ParticleSystem::Impl
 {
 public:
 	ParticleSystem* mSelf;
+	ParticleOptionsPtr mParticleOptions;
 	typedef std::vector< ParticleEmitterPtr > Emitters;
 	Emitters mActiveParticles;
 	Emitters mPendingAdds;
@@ -57,6 +59,7 @@ public:
 	//---------------------------------------------------------------------------
 	Impl(ParticleSystem* self)
 		: mSelf(self)
+		, mParticleOptions(ParticleOptions::Create())
 		, mOverridingCamera(Camera::Create())
 	{
 	}

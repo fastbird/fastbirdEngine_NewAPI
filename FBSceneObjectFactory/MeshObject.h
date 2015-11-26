@@ -35,6 +35,7 @@
 #include "FBRenderer/RendererEnums.h"
 #include "FBRenderer/RendererStructs.h"
 namespace fastbird{
+	struct ModelTriangle;
 	FB_DECLARE_SMART_PTR(IndexBuffer);
 	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(MeshObject);
@@ -62,18 +63,6 @@ namespace fastbird{
 		//---------------------------------------------------------------------------
 		// Own functions
 		//---------------------------------------------------------------------------
-
-		// model triangle
-		struct ModelTriangle {
-			unsigned        v[3];
-			// cached data for optimized ray-triangle intersections
-			Vec2   v0Proj;           // 2D projection of vertices along the dominant axis
-			Vec2   v1Proj;
-			Vec2   v2Proj;
-			Vec3   faceNormal;
-			Real         d;                // distance from triangle plane to origin
-			int           dominantAxis;     // dominant axis of the triangle plane
-		};
 
 		enum BUFFER_TYPE
 		{

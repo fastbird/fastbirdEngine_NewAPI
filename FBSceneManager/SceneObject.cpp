@@ -184,6 +184,10 @@ void SceneObject::OnDetachedFromScene(ScenePtr pScene){
 	mImpl->OnDetachedFromScene(pScene);
 }
 
+bool SceneObject::IsAttached() const{
+	return mImpl->IsAttached(0);
+}
+
 bool SceneObject::IsAttached(ScenePtr pScene) const{
 	return mImpl->IsAttached(pScene);
 }

@@ -32,4 +32,5 @@ namespace fastbird{
 	bool IsWindowForeground(HWindow window);
 	HWindow ForegroundWindow();
 	HWindow WindowFromMousePosition();
+	void ChangeWindowSize(HWindow handle, Vec2ITuple resol);
 }

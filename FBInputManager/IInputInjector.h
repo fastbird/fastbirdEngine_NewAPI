@@ -35,9 +35,7 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(IMouse);
 	FB_DECLARE_SMART_PTR(IInputInjector);
 	class IInputInjector{
-	public:
-		virtual ~IInputInjector(){}
-		
+	public:		
 		virtual bool IsValid(InputDevice::Enum type) const = 0;
 		virtual void Invalidate(InputDevice::Enum type) const = 0;
 		/// Invalidate(InputDevice::Mouse) + Invalidate mouse click time.
@@ -104,6 +102,10 @@ namespace fastbird{
 		virtual void ClearWheel() = 0;				
 		virtual Real GetWheelSensitivity() const = 0;
 		virtual unsigned long GetNumLinesWheelScroll() const = 0;
+
+		// Command
+		virtual void CursorToCenter() = 0;
+		virtual void SetCursorPosition(const Vec2ITuple& pos) = 0;
 
 	private:
 		friend class InputManager;

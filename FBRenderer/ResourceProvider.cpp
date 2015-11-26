@@ -670,6 +670,18 @@ public:
 	int GetNumLuminanceMaps() const{
 		return NumLuminanceMaps;
 	}
+
+	void DeleteTexture(int ResourceTypes_Textures){
+		auto it = mTextures.Find(ResourceTypes_Textures);
+		if (it != mTextures.end())
+			mTextures.erase(it);
+	}
+
+	void DeleteShader(int ResourceTypes_Shaders){
+		auto it = mShaders.Find(ResourceTypes_Shaders);
+		if (it != mShaders.end())
+			mShaders.erase(it);
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -745,3 +757,10 @@ int ResourceProvider::GetNumLuminanceMaps() const {
 	return mImpl->GetNumLuminanceMaps();
 }
 
+void ResourceProvider::DeleteTexture(int ResourceTypes_Textures){
+	mImpl->DeleteTexture(ResourceTypes_Textures);
+}
+
+void ResourceProvider::DeleteShader(int ResourceTypes_Shaders){
+	mImpl->DeleteShader(ResourceTypes_Shaders);
+}

@@ -26,12 +26,12 @@
 */
 
 #pragma once
-#include "SceneObject.h"
 #include "ISpatialObject.h"
+#include "FBMathLib/BoundingVolume.h"// convinient include
 #include "FBCommonHeaders/Types.h"
-#include "FBMathLib/Math.h"
-#include "FBMathLib/BoundingVolume.h"
 namespace fastbird{	
+	class Quat;
+	class Transformation;
 	FB_DECLARE_SMART_PTR(Animation);
 	FB_DECLARE_SMART_PTR(SpatialObject);
 	class FB_DLL_SCENEMANAGER SpatialObject : public ISpatialObject {
@@ -66,6 +66,7 @@ namespace fastbird{
 		void ClearTransformChanged();
 		void SetAnimation(AnimationPtr anim);
 		void UpdateAnimation(TIME_PRECISION dt);
+		void PlayAction(const char* name, bool immediate, bool reverse);			
 		bool IsPlayingAction() const;
 		void NotifyTransformChanged();		
 

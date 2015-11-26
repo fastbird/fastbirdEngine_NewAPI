@@ -339,6 +339,16 @@ unsigned long InputInjector::GetNumLinesWheelScroll() const{
 	return 0;
 }
 
+void InputInjector::CursorToCenter(){
+	if (mImpl->mMouse)
+		mImpl->mMouse->CursorToCenter();
+}
+
+void InputInjector::SetCursorPosition(const Vec2ITuple& pos){
+	if (mImpl->mMouse)
+		mImpl->mMouse->SetCursorPosition(std::get<0>(pos), std::get<1>(pos));
+}
+
 void InputInjector::SetKeyboard(IKeyboardPtr keyboard){
 	mImpl->mKeyboard = keyboard;
 }

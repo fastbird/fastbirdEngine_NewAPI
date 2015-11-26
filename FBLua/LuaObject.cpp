@@ -61,7 +61,7 @@ bool LuaObject::ReleaseUsedCount(int ref)
 
 
 LuaObject::LuaObject()
-:LuaObject(0)
+:LuaObject((lua_State*)0)
 {
 
 }
@@ -86,6 +86,12 @@ LuaObject::LuaObject(lua_State* L, const char* globalName)
 	mRef = luaL_ref(L, LUA_REGISTRYINDEX);
 	AddUsedCount(mRef);
 	mName = globalName;
+}
+
+LuaObject::LuaObject(const char* globalName)
+	:LuaObject(LuaUtils::GetLuaState(), globalName)
+{
+
 }
 
 LuaObject::LuaObject(const LuaObject& other)

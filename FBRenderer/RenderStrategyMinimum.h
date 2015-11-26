@@ -53,5 +53,6 @@ namespace fastbird{
 		bool SetBigSilouetteBuffer();
 		void GlowRenderTarget(bool bind);
 		void DepthTexture(bool bind);
+		void OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName);
 	};
 }

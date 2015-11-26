@@ -112,7 +112,7 @@ namespace fastbird
 			*mAccumulator += elapsedTime;		
 	}
 
-	TIME_PRECISION Profiler::GetDt(){
+	TIME_PRECISION Profiler::GetDt() const{
 		return (gpTimer->GetTickCount() - mStartTick) / (TIME_PRECISION)std::milli::den;
 	}
 
@@ -128,7 +128,7 @@ namespace fastbird
 		mStartTick = gpTimer->GetTickCount();
 	}
 
-	TIME_PRECISION ProfilerSimple::GetDT()
+	TIME_PRECISION ProfilerSimple::GetDT() const
 	{
 		TIME_PRECISION dt = (gpTimer->GetTickCount() - mStartTick) / (TIME_PRECISION)std::milli::den;
 		mPrevDT = (dt + mPrevDT) * .5f;

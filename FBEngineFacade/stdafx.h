@@ -34,6 +34,9 @@
 #define FB_DLL_SCENEOBJECTFACTORY __declspec(dllimport)
 #define FB_DLL_TIMER __declspec(dllimport)
 #define FB_DLL_INPUTMANAGER __declspec(dllimport)
+#define FB_DLL_CONSOLE __declspec(dllimport)
+#define FB_DLL_FILEMONITOR __declspec(dllimport)
+#define FB_DLL_VIDEOPLAYER __declspec(dllimport)
 #else
 #define FB_DLL_ENGINEFACADE 
 #endif
@@ -42,3 +45,4 @@
 #include "FBLua/LuaUtils.h"
 #include "FBMemoryManagerLib/MemoryManager.h"
 #include "FBTimer/Timer.h"
+#include "FBMathLib/Math.h"

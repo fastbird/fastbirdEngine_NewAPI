@@ -109,6 +109,10 @@ namespace fastbird{
 		Real GetWheelSensitivity() const;
 		unsigned long GetNumLinesWheelScroll() const;
 
+		// Command
+		void CursorToCenter();
+		void SetCursorPosition(const Vec2ITuple& pos);
+
 	private:
 		friend class InputManager;
 		void SetKeyboard(IKeyboardPtr keyboard);

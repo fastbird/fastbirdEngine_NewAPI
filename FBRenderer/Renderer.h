@@ -45,8 +45,7 @@
 #include "FBMathLib/Math.h"
 struct lua_State;
 namespace fastbird{	
-	struct POINT_LIGHT_CONSTANTS;
-	class RenderOptions;
+	struct POINT_LIGHT_CONSTANTS;	
 	typedef unsigned RenderTargetId;
 	FB_DECLARE_SMART_PTR(ResourceProvider);
 	FB_DECLARE_SMART_PTR(IVideoPlayer);
@@ -63,6 +62,7 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(VertexBuffer);
 	FB_DECLARE_SMART_PTR(Texture);
 	FB_DECLARE_SMART_PTR(RenderTarget);
+	FB_DECLARE_SMART_PTR(RendererOptions);
 	FB_DECLARE_SMART_PTR(Renderer);
 	/** Render vertices with a specified material	
 	Rednerer handles vertex/index data, materials, textures, shaders,
@@ -84,18 +84,18 @@ namespace fastbird{
 		the default renderer on Windows, and "FBRendererGL41" for Mac. \n
 		\param L Renderer need the lua_State* to read the configuration file. If you pass NULL, all setting will be default.
 		*/
-		static RendererPtr Create(const char* rendererPlugInName, lua_State* L);
+		static RendererPtr Create(const char* rendererPlugInName);
 
 		/** Returns the Renderer as a reference.
 		This function does not check the validity whether the Renderer is created or not.
 		It will cause a crash if you call this function without calling Renderer::Create()
-		If you need to check the validity use Renderer::DoesExists() function.
+		If you need to check the validity use Renderer::HasInstance() function.
 		*/
 		static Renderer& GetInstance();
 
 		/** Checks whether the renderer does exists or not.
 		*/
-		static bool DoesExists();
+		static bool HasInstance();
 
 		/** Used for only in the Renderer project.
 		*/
@@ -104,13 +104,7 @@ namespace fastbird{
 		
 	public:
 		~Renderer();
-		static const HWindow INVALID_HWND;
-
-		/** Set lua state.
-		Renderer load configuration file using lua. You need to set it before you call Renderer::PrepareRenderEngine()
-		If you don't set the lua_State, all setting will be default values.
-		*/
-		void SetLuaState(lua_State* L);
+		static const HWindow INVALID_HWND;		
 
 		/** Prepare the platform specific render engine
 		You don't need to call this function if you create Renderer with the following function.
@@ -237,6 +231,12 @@ namespace fastbird{
 		void BeginEvent(const char* name);
 		void EndEvent();
 		void TakeScreenshot();
+		void ChangeFullscreenMode(int mode);
+		void OnWindowSizeChanged(HWindow window, const Vec2I& clientSize);
+		void ChangeResolution(const Vec2I& resol);
+		void ChangeResolution(HWindow window, const Vec2I& resol);		
+		void ChangeWindowSizeAndResolution(const Vec2I& resol);
+		void ChangeWindowSizeAndResolution(HWindow window, const Vec2I& resol);
 		
 
 		//-------------------------------------------------------------------
@@ -285,7 +285,9 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		unsigned GetMultiSampleCount() const;
 		bool GetFilmicToneMapping() const;
+		void SetFilmicToneMapping(bool use);
 		bool GetLuminanaceOnCPU() const;
+		void SetLuminanaceOnCPU(bool oncpu);
 		RenderTargetPtr GetRenderTarget(HWindowId id) const;
 		void SetCamera(CameraPtr pCamera);
 		CameraPtr GetCamera() const; // this is for current carmera.
@@ -299,8 +301,8 @@ namespace fastbird{
 		unsigned GetNumLoadingTexture() const;
 		Vec2I FindClosestSize(HWindowId id, const Vec2I& input);
 		bool GetResolutionList(unsigned& outNum, Vec2I* list);
-		RenderOptions* GetOptions() const;
-		lua_State* GetLua() const;
+		RendererOptionsPtr GetRendererOptions() const;
+		void SetMainWindowStyle(unsigned style);
 
 		//-------------------------------------------------------------------
 		// Drawing
