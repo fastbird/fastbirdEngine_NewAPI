@@ -33,6 +33,8 @@
 #include "RegionTestParam.h"
 #include "Styles.h"
 #include "UIProperty.h"
+#include "ComponentType.h"
+#include "Align.h"
 #include "FBFileMonitor/IFileChangeObserver.h"
 #include "FBRenderer/IRendererObserver.h"
 #include "FBInputManager/IInputConsumer.h"

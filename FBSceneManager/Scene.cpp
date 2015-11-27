@@ -59,8 +59,8 @@ public:
 	VectorMap<ICamera*, SPATIAL_OBJECTS_RAW> mPreRenderList;
 	VectorMap<ICamera*, SPATIAL_OBJECTS_RAW> mVisibleTransparentObjects;
 	
-	std::vector<SceneObjectWeakPtr> mMarkObjects;
-	std::vector<SceneObjectWeakPtr> mHPBarObjects;
+	/*std::vector<SceneObjectWeakPtr> mMarkObjects;
+	std::vector<SceneObjectWeakPtr> mHPBarObjects;*/
 
 	SkySpherePtr mSkySphere;
 	DirectionalLightPtr mDirectionalLight[2];
@@ -123,7 +123,11 @@ public:
 		return mDirectionalLight[0]->GetDirection();
 	}
 
-	void GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data){
+	void SetLightDirection(DirectionalLightIndex::Enum idx, const Vec3& dir){
+		mDirectionalLight[idx]->SetDirection(dir);
+	}
+
+	void GetDirectionalLightInfo(DirectionalLightIndex::Enum idx, DirectionalLightInfo& data){
 		auto& light = mDirectionalLight[idx];
 		data.mDirection_Intensiy = Vec4(light->GetDirection(), light->GetIntensity());
 		data.mDiffuse = Vec4(light->GetDiffuse(), 1.f);
@@ -361,12 +365,22 @@ public:
 		return false;
 	}
 
-	bool DetachObject(SceneObjectPtr pObject){
-		DeleteValuesInVector(mObjects, pObject);
-		if (mObjectsDeletedAny) {
+	bool DetachObject(SceneObject* pObject){
+		bool deletedAny = false;
+		for (auto it = mObjects.begin(); it != mObjects.end(); /**/){
+			if (it->lock().get() == pObject){
+				it = mObjects.erase(it);
+				deletedAny = true;
+			}
+			else{
+				++it;
+			}
+		}
+		
+		if (deletedAny) {
 			pObject->OnDetachedFromScene(mSelfPtr.lock());
 		}
-		return mObjectsDeletedAny;
+		return deletedAny;
 	}
 
 
@@ -379,12 +393,22 @@ public:
 		return false;
 	}
 
-	bool DetachSpatialObject(SpatialSceneObjectPtr pSpatialObject){
-		DeleteValuesInVector(mSpatialObjects, pSpatialObject);
-		if (mSpatialObjectsDeletedAny) {
+	bool DetachSpatialObject(SpatialSceneObject* pSpatialObject){
+		bool deletedAny = false;
+		for (auto it = mSpatialObjects.begin(); it != mSpatialObjects.end(); /**/){
+			if (it->lock().get() == pSpatialObject){
+				it = mSpatialObjects.erase(it);
+				deletedAny = true;
+			}
+			else{
+				++it;
+			}
+		}
+		
+		if (deletedAny) {
 			pSpatialObject->OnDetachedFromScene(mSelfPtr.lock());
 		}
-		return mSpatialObjectsDeletedAny;
+		return deletedAny;
 	}
 
 	void SetSkipSpatialObjects(bool skip){
@@ -548,7 +572,12 @@ const Vec3& Scene::GetMainLightDirection(){
 	return mImpl->GetMainLightDirection();
 }
 
-void Scene::GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data){
+void Scene::SetLightDirection(DirectionalLightIndex::Enum idx, const Vec3& dir){
+	return mImpl->SetLightDirection(idx, dir);
+}
+
+
+void Scene::GetDirectionalLightInfo(DirectionalLightIndex::Enum idx, DirectionalLightInfo& data){
 	mImpl->GetDirectionalLightInfo(idx, data);
 }
 
@@ -569,7 +598,7 @@ bool Scene::AttachObjectFB(SceneObjectPtr object, SceneObject*) {
 	return mImpl->AttachObject(object);
 }
 
-bool Scene::DetachObjectFB(SceneObjectPtr object, SceneObject*) {
+bool Scene::DetachObject(SceneObject* object) {
 	return mImpl->DetachObject(object);
 }
 
@@ -577,7 +606,7 @@ bool Scene::AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject*) {
 	return mImpl->AttachSpatialObject(object);
 }
 
-bool Scene::DetachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject*) {
+bool Scene::DetachObject(SpatialSceneObject* object) {
 	return mImpl->DetachSpatialObject(object);
 }
 

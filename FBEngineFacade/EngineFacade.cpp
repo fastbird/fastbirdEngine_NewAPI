@@ -187,7 +187,7 @@ public:
 	}
 
 	ScenePtr GetMainScene() const{
-		return mMainScene;
+		return std::static_pointer_cast<Scene>(Renderer::GetInstance().GetMainRenderTarget()->GetScene());
 	}
 
 	void UpdateInput(){
@@ -250,7 +250,7 @@ EngineFacadePtr EngineFacade::Create(){
 	}
 	return sFacade.lock();
 }
-FB_IMPLEMENT_STATIC_CREATE(EngineFacade);
+
 EngineFacade& EngineFacade::GetInstance(){
 	if (sFacade.expired()){
 		Logger::Log(FB_ERROR_LOG_ARG, "EngineFacade is already deleted. Program will crash.");
@@ -274,7 +274,7 @@ EngineFacade::~EngineFacade(){
 HWindowId EngineFacade::CreateEngineWindow(int x, int y, int width, int height,
 	const char* wndClass, const char* title, unsigned style, unsigned exStyle,
 	WNDPROC winProc){
-	mImpl->CreateEngineWindow(x, y, width, height, wndClass, title, style, exStyle, winProc);
+	return mImpl->CreateEngineWindow(x, y, width, height, wndClass, title, style, exStyle, winProc);
 }
 
 bool EngineFacade::InitRenderer(const char* pluginName) {
@@ -309,7 +309,7 @@ bool EngineFacade::MainCameraExists() const{
 	return Renderer::GetInstance().GetMainCamera() != 0;
 }
 
-ICameraPtr EngineFacade::GetMainCamera() const{
+CameraPtr EngineFacade::GetMainCamera() const{
 	return Renderer::GetInstance().GetMainCamera();
 }
 
@@ -525,4 +525,45 @@ FontPtr EngineFacade::GetFont(float fontHeight){
 		Renderer::GetInstance().GetFont(fontHeight);
 	Logger::Log(FB_ERROR_LOG_ARG, "Renderer is deleted.");
 	return 0;
+}
+
+unsigned EngineFacade::GetNumLoadingTexture() const{
+	if (Renderer::HasInstance())
+		return Renderer::GetInstance().GetNumLoadingTexture();
+	return 0;
+}
+
+RenderTargetPtr EngineFacade::CreateRenderTarget(const RenderTargetParamEx& param){
+	if (Renderer::HasInstance()){
+		RenderTargetParam renderParam;
+		renderParam.mSize = param.mSize;
+		renderParam.mPixelFormat = param.mPixelFormat;
+		renderParam.mEveryFrame = param.mEveryFrame;
+		renderParam.mShaderResourceView = param.mShaderResourceView;
+		renderParam.mMipmap = param.mMipmap;
+		renderParam.mCubemap = param.mCubemap;
+		renderParam.mWillCreateDepth = param.mWillCreateDepth;
+		renderParam.mUsePool = param.mUsePool;
+		auto rt = Renderer::GetInstance().CreateRenderTarget(renderParam);
+		if (!param.mSceneNameToCreateAndOwn.empty()){
+			auto scene = SceneManager::GetInstance().CreateScene(param.mSceneNameToCreateAndOwn.c_str());
+			rt->TakeOwnershipScene(scene);
+		}
+		if (!param.mEnvironmentTexture.empty()){
+			rt->SetEnvTexture(Renderer::GetInstance().CreateTexture(param.mEnvironmentTexture.c_str()));
+		}
+		return rt;
+	}
+	return 0;
+}
+
+ScenePtr EngineFacade::CreateScene(const char* uniquename){
+	return SceneManager::GetInstance().CreateScene(uniquename);
+}
+
+void EngineFacade::OverrideMainScene(ScenePtr scene){
+	if (scene)
+		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(scene);
+	else
+		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(mImpl->mMainScene);
 }

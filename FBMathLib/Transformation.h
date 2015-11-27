@@ -51,6 +51,7 @@ namespace fastbird
 		// itentity, RSSeperated, UniformScale
 		bool, bool, bool> TransformationTuple;
 	FB_DECLARE_SMART_PTR(Transformation);
+	typedef std::vector<Transformation> Transformations;
 	class Transformation
 	{
 	private:

@@ -29,7 +29,6 @@
 #include "Texture.h"
 #include "Renderer.h"
 #include "IPlatformTexture.h"
-#include "FBCommonHeaders/CowPtr.h"
 #include "FBCommonHeaders/VectorMap.h"
 
 namespace fastbird{

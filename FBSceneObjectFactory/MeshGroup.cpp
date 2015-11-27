@@ -137,6 +137,26 @@ public:
 		}
 	}
 
+	MaterialPtr GetMaterial(){
+		if (mMeshObjects.empty())
+			return 0;
+
+		return mMeshObjects[0].first->GetMaterial();
+	}
+
+	void SetMaterial(MaterialPtr mat, RENDER_PASS pass){
+		if (mMeshObjects.empty())
+			return;
+
+		return mMeshObjects[0].first->SetMaterial(mat, pass);
+	}
+
+	void SetMaterial(const char* path, RENDER_PASS pass){
+		if (mMeshObjects.empty())
+			return;
+
+		return mMeshObjects[0].first->SetMaterial(path, pass);
+	}
 
 	//---------------------------------------------------------------------------
 	// Own functions
@@ -357,12 +377,8 @@ public:
 		for (auto& it : mMeshObjects)
 		{
 			auto meshObj = it.first;
-			auto anim = meshObj->GetAnimation();
-			if (anim)
-			{
-				if (anim->IsActionDone(action))
-					return true;
-			}
+			if (meshObj->IsActionDone(action))
+				return true;
 		}
 		return false;
 	}
@@ -502,6 +518,18 @@ void MeshGroup::Render(const RenderParam& param, RenderParamOut* paramOut) {
 
 void MeshGroup::PostRender(const RenderParam& param, RenderParamOut* paramOut) {
 	mImpl->PostRender(param, paramOut);
+}
+
+MaterialPtr MeshGroup::GetMaterial(){
+	return mImpl->GetMaterial();
+}
+
+void MeshGroup::SetMaterial(MaterialPtr mat, RENDER_PASS pass){
+	mImpl->SetMaterial(mat, pass);
+}
+
+void MeshGroup::SetMaterial(const char* path, RENDER_PASS pass){
+	mImpl->SetMaterial(path, pass);
 }
 
 void MeshGroup::SetEnableHighlight(bool enable) {

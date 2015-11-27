@@ -32,7 +32,7 @@ namespace fastbird
 {
 FB_DECLARE_SMART_PTR(SyncEvent);
 FB_DECLARE_SMART_PTR(Task);
-class Task
+class Task : std::enable_shared_from_this<Task>
 {
     friend class TaskScheduler;
     friend class WorkerThread;

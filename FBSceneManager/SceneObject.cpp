@@ -28,6 +28,7 @@
 #include "stdafx.h"
 #include "SceneObject.h"
 #include "FBCommonHeaders/Helpers.h"
+#include "Scene.h"
 #include <vector>
 using namespace fastbird;
 
@@ -190,6 +191,37 @@ bool SceneObject::IsAttached() const{
 
 bool SceneObject::IsAttached(ScenePtr pScene) const{
 	return mImpl->IsAttached(pScene);
+}
+
+void SceneObject::DetachFromScene(){
+	DetachFromScene(false);
+}
+void SceneObject::DetachFromScene(bool includingRtt){
+	auto& scenes = mImpl->mScenes;
+	unsigned limit = scenes.size();
+	unsigned count = 0;
+	for (unsigned i = 0; i < scenes.size() && count < limit;)
+	{
+		auto scene = scenes[i].lock();
+		if (scene){
+			if (includingRtt)
+			{
+				scene->DetachObject(this);
+			}
+			else
+			{
+				if (!scene->IsRttScene())
+				{
+					scene->DetachObject(this);
+				}
+				else
+				{
+					++i;
+				}
+			}
+		}
+		++count;
+	}
 }
 
 //-------------------------------------------------------------------

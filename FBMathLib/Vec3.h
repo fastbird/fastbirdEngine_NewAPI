@@ -32,6 +32,8 @@ namespace fastbird
 {
 	class Mat33;
 	class Vec3I;
+	class Vec3;
+	typedef std::vector<Vec3> Vec3s;
 	class Vec3
 	{
 	public:

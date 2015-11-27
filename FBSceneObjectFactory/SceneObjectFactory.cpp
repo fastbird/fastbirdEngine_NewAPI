@@ -37,6 +37,7 @@
 #include "FBAnimation/AnimationData.h"
 #include "FBAnimation/Animation.h"
 #include "FBTimer/Timer.h"
+#include "FBMathLib/GeomUtils.h"
 #include "MeshObject.h"
 #include "MeshGroup.h"
 #include "SkySphere.h"
@@ -83,11 +84,11 @@ public:
 	Vec2 ConvertCollada(const collada::Vec2& src){
 		return Vec2((Real)src.x, (Real)src.y);
 	}
-	std::vector<MeshObject::ModelTriangle> ConvertCollada(const std::vector<collada::ModelTriangle>& data){
-		std::vector<MeshObject::ModelTriangle> ret;
+	std::vector<ModelTriangle> ConvertCollada(const std::vector<collada::ModelTriangle>& data){
+		std::vector<ModelTriangle> ret;
 		ret.reserve(data.size());
 		for (auto src : data){
-			ret.push_back(MeshObject::ModelTriangle());
+			ret.push_back(ModelTriangle());
 			auto& d = ret.back();
 			for (int i = 0; i<3; ++i) 
 				d.v[i] = src.v[i];
@@ -170,7 +171,7 @@ public:
 			mesh->SetNormals(group.first, &data[0], data.size());
 			std::vector<Vec2> data2 = ConvertCollada(group.second.mUVs);
 			mesh->SetUVs(group.first, &data2[0], data2.size());
-			std::vector<MeshObject::ModelTriangle> triangles = ConvertCollada(group.second.mTriangles);
+			std::vector<ModelTriangle> triangles = ConvertCollada(group.second.mTriangles);
 			mesh->SetTriangles(group.first, &triangles[0], triangles.size());	
 			MaterialPtr material;
 			if (!group.second.mMaterialPath.empty()){

@@ -32,15 +32,14 @@
 #include "IScene.h"
 #include "FBRenderer/RenderParam.h"
 #include "FBCommonHeaders/Observable.h"
+#undef AttachObjectFB
+#undef DetachObjectFB
 namespace fastbird{
 	class Vec3;
 	class Color;
 	class Ray3;
 	FB_DECLARE_SMART_PTR(ICamera);
 	FB_DECLARE_SMART_PTR(SkySphere);
-	FB_DECLARE_SMART_PTR(SpatialObject);
-	FB_DECLARE_SMART_PTR(SpatialSceneObject);
-	FB_DECLARE_SMART_PTR(SceneObject);
 	FB_DECLARE_SMART_PTR(DirectionalLight);
 	FB_DECLARE_SMART_PTR(Scene);
 	class FB_DLL_SCENEMANAGER Scene : public IScene, public Observable<ISceneObserver>{
@@ -54,8 +53,9 @@ namespace fastbird{
 		const char* GetName() const;
 		void Update(TIME_PRECISION dt);
 		void AddSceneObserver(int ISceneObserverEnum, ISceneObserverPtr observer);
-		void GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data);
+		void GetDirectionalLightInfo(DirectionalLightIndex::Enum index, DirectionalLightInfo& data);
 		const Vec3& GetMainLightDirection();
+		void SetLightDirection(DirectionalLightIndex::Enum idx, const Vec3& dir);
 		void PreRender(const RenderParam& prarm, RenderParamOut* paramOut);
 		void Render(const RenderParam& prarm, RenderParamOut* paramOut);		
 
@@ -63,10 +63,10 @@ namespace fastbird{
 		int GetRenderPass() const;
 
 		bool AttachObjectFB(SceneObjectPtr object, SceneObject* rawPointer);
-		bool DetachObjectFB(SceneObjectPtr object, SceneObject* rawPointer);
+		bool DetachObject(SceneObject* object);
 
 		bool AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer);
-		bool DetachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer);
+		bool DetachObject(SpatialSceneObject* object);
 
 		void SetSkipSpatialObjects(bool skip);
 		void ClearEverySpatialObject();

@@ -30,13 +30,15 @@
 #include "FBSceneManager/SpatialSceneObject.h"
 #include "MeshAuxiliary.h"
 #include "CollisionInfo.h"
+#include "FBRenderer/RenderPass.h"
 namespace fastbird
 {
 	class Color;
 	class AnimationData;
+	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(MeshObject);
 	FB_DECLARE_SMART_PTR(MeshGroup);
-	class MeshGroup : public SpatialSceneObject
+	class FB_DLL_SCENEOBJECTFACTORY MeshGroup : public SpatialSceneObject
 	{
 		FB_DECLARE_PIMPL_CLONEABLE(MeshGroup);
 
@@ -48,16 +50,17 @@ namespace fastbird
 		static MeshGroupPtr Create();
 		static MeshGroupPtr Create(const MeshGroup& other);
 
-		//---------------------------------------------------------------------------
-		// IRenderable
-		//---------------------------------------------------------------------------								
 		void PreRender(const RenderParam& param, RenderParamOut* paramOut);
 		void Render(const RenderParam& param, RenderParamOut* paramOut);
 		void PostRender(const RenderParam& param, RenderParamOut* paramOut);		
-
+		
 		//---------------------------------------------------------------------------
 		// Own functions
 		//---------------------------------------------------------------------------		
+		MaterialPtr GetMaterial();
+		void SetMaterial(MaterialPtr mat, RENDER_PASS pass);
+		void SetMaterial(const char* path, RENDER_PASS pass);
+
 		MeshGroupPtr Clone() const;
 		void SetEnableHighlight(bool enable);
 		// order of inserting meshes is important. parent first.

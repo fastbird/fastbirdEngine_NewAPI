@@ -27,13 +27,12 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
+#include "FBRenderer/RenderableObject.h"
 #include "SceneObjectFlag.h"
-namespace fastbird{
-	struct RenderParam;
-	struct RenderParamOut;	
+namespace fastbird{	
 	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(SceneObject);
-	class FB_DLL_SCENEMANAGER SceneObject{
+	class FB_DLL_SCENEMANAGER SceneObject : public RenderableObject{
 		FB_DECLARE_PIMPL_CLONEABLE(SceneObject);				
 
 	protected:
@@ -53,6 +52,10 @@ namespace fastbird{
 		*/
 		bool IsAttached(ScenePtr pScene) const;
 
+		/// not including rtt
+		void DetachFromScene();
+		void DetachFromScene(bool includingRtt);
+
 		//-------------------------------------------------------------------
 		// Object Flags
 		//-------------------------------------------------------------------
@@ -65,14 +68,7 @@ namespace fastbird{
 		/// Combination of SceneObjectFlag::Enum
 		bool HasObjFlag(unsigned flag);
 		void SetVisible(bool visible);
-		bool GetVisible() const;
-
-		//-------------------------------------------------------------------
-		// Rendering
-		//-------------------------------------------------------------------
-		virtual void PreRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
-		virtual void Render(const RenderParam& param, RenderParamOut* paramOut) = 0;
-		virtual void PostRender(const RenderParam& param, RenderParamOut* paramOut) = 0;
+		bool GetVisible() const;		
 
 		//-------------------------------------------------------------------
 		// Debugging features

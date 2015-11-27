@@ -49,6 +49,8 @@ public:
 	IRenderStrategyPtr mStrategy;
 	RendererWeakPtr mRenderer;
 	ISceneWeakPtr mScene;
+	/// For RTT(render to texture)
+	IScenePtr mSceneOwnerShip;
 	RenderTargetId mId;
 
 	bool mEnabled;
@@ -128,6 +130,11 @@ public:
 		}
 		mStrategy->SetScene(scene);
 		return prevScene.lock();
+	}
+
+	void TakeOwnershipScene(IScenePtr scene){
+		mScene = scene;
+		mSceneOwnerShip = scene;
 	}
 
 	void SetCamera(CameraPtr cam){

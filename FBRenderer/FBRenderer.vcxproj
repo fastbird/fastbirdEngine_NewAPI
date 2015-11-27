@@ -36,8 +36,10 @@
     <ClInclude Include="IVideoPlayer.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="NullPlatformRenderer.h" />
+    <ClInclude Include="PixelFormats.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PointLightManager.h" />
+    <ClInclude Include="RenderableObject.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererEnums.h" />
     <ClInclude Include="RendererStructs.h" />

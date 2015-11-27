@@ -725,6 +725,8 @@ public:
 	}
 
 	void KeepRenderTargetInPool(RenderTargetPtr rt){
+		if (!rt)
+			return;
 		if (!ValueExistsInVector(mRenderTargetPool, rt)){
 			mRenderTargetPool.push_back(rt);
 		}

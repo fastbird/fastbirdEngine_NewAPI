@@ -78,6 +78,7 @@ namespace fastbird
 		
 		IRenderStrategyPtr SetRenderStrategy(IRenderStrategyPtr strategy);
 		IScenePtr RegisterScene(IScenePtr scene);
+		void TakeOwnershipScene(IScenePtr scene);
 		IScenePtr GetScene() const;
 		void SetCamera(CameraPtr cam);
 		/// Returns previous camera

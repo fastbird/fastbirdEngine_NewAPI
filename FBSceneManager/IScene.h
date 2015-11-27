@@ -28,6 +28,8 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Vec4.h"
+#include "DirectionalLightIndex.h"
+
 namespace fastbird{
 	struct DirectionalLightInfo{
 		Vec4 mDirection_Intensiy;
@@ -37,14 +39,17 @@ namespace fastbird{
 	struct RenderParam;
 	struct RenderParamOut;
 	class Color;
+	FB_DECLARE_SMART_PTR(SpatialSceneObject);
+	FB_DECLARE_SMART_PTR(SceneObject);
 	FB_DECLARE_SMART_PTR(SkySphere);
 	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(ISceneObserver);
 	class IScene{
 	public:
 		virtual void AddSceneObserver(int ISceneObserverEnum, ISceneObserverPtr observer) = 0;
-		virtual void GetDirectionalLightInfo(unsigned idx, DirectionalLightInfo& data) = 0;
+		virtual void GetDirectionalLightInfo(DirectionalLightIndex::Enum idx, DirectionalLightInfo& data) = 0;
 		virtual const Vec3& GetMainLightDirection() = 0;
+		virtual void SetLightDirection(DirectionalLightIndex::Enum idx, const Vec3& dir) = 0;
 		virtual void PreRender(const RenderParam& prarm, RenderParamOut* paramOut) = 0;
 		virtual void Render(const RenderParam& prarm, RenderParamOut* paramOut) = 0;
 		virtual void PreRenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut) = 0;
@@ -52,5 +57,13 @@ namespace fastbird{
 		virtual const Color& GetFogColor() const = 0;
 		virtual void AttachSkySphere(SkySpherePtr p) = 0;
 		virtual void DetachSkySphere() = 0;
+
+		virtual bool AttachObjectFB(SceneObjectPtr object, SceneObject* rawPointer) = 0;
+		virtual bool DetachObject(SceneObject* object) = 0;
+
+		virtual bool AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer) = 0;
+		virtual bool DetachObject(SpatialSceneObject* object) = 0;
 	};
 }
+#define AttachObjectFB(p) AttachObjectFB((p), (p).get())
+#define DetachObjectFB(p) DetachObjectFB((p), (p).get())

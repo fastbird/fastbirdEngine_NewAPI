@@ -71,6 +71,10 @@
     <ClInclude Include="ICameraObserver.h" />
     <ClInclude Include="RendererOptions.h" />
     <ClInclude Include="ConsoleRenderer.h" />
+    <ClInclude Include="PixelFormats.h">
+      <Filter>Enum&amp;Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderableObject.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />

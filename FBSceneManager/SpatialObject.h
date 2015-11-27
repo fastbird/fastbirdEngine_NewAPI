@@ -68,6 +68,7 @@ namespace fastbird{
 		void UpdateAnimation(TIME_PRECISION dt);
 		void PlayAction(const char* name, bool immediate, bool reverse);			
 		bool IsPlayingAction() const;
+		bool IsActionDone(const char* action) const;
 		void NotifyTransformChanged();		
 
 	protected:

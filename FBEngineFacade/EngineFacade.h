@@ -28,19 +28,21 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBCommonHeaders/Types.h"
-#include "DirectionalLightIndex.h"
+#include "FBSceneManager/DirectionalLightIndex.h"
+#include "RenderTargetParamEx.h"
 #include "FBVideoPlayer/VideoPlayerType.h"
 namespace fastbird{
 	class ProfilerSimple;
 	FB_DECLARE_SMART_PTR(Font);
 	FB_DECLARE_SMART_PTR(IVideoPlayer);
-	FB_DECLARE_SMART_PTR(ICamera);
+	FB_DECLARE_SMART_PTR(Camera);
 	FB_DECLARE_SMART_PTR(IFileChangeObserver);
 	FB_DECLARE_SMART_PTR(IRendererObserver);
 	FB_DECLARE_SMART_PTR(IInputInjector);
 	FB_DECLARE_SMART_PTR(EngineOptions);
 	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(EngineFacade);
+	FB_DECLARE_SMART_PTR(RenderTarget);
 	class FB_DLL_ENGINEFACADE EngineFacade{
 		FB_DECLARE_PIMPL_NON_COPYABLE(EngineFacade);
 		EngineFacade();
@@ -59,13 +61,14 @@ namespace fastbird{
 		/// \param pluginName "FBRendererD3D11" is provided.
 		bool InitRenderer(const char* pluginName);
 		bool InitCanvas(HWindowId id, int width, int height);
+		/// returning scene attache to the main render target.
 		ScenePtr GetMainScene() const;
 		void UpdateInput();
 		void Update(TIME_PRECISION dt);
 		void Render();
 		EngineOptionsPtr GetEngineOptions() const;
 		bool MainCameraExists() const;
-		ICameraPtr GetMainCamera() const;
+		CameraPtr GetMainCamera() const;
 		const Vec3& GetMainCameraPos() const;
 		const Vec3& GetMainCameraDirection() const;
 		const Ray3& GetWorldRayFromCursor();
@@ -91,5 +94,9 @@ namespace fastbird{
 		void QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color);
 		void QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color, float size);
 		FontPtr GetFont(float fontHeight);
+		unsigned GetNumLoadingTexture() const;
+		RenderTargetPtr CreateRenderTarget(const RenderTargetParamEx& param);		
+		ScenePtr CreateScene(const char* uniquename);
+		void OverrideMainScene(ScenePtr scene);
 	};
 }

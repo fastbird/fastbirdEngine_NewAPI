@@ -26,13 +26,15 @@
 */
 
 #include "stdafx.h"
+#include <theora/theoradec.h>
+#include <ogg/ogg.h>
 #include "VideoPlayerOgg.h"
 #include "FBAudioPlayer/Audio.h"
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/ResourceProvider.h"
 #include "FBRenderer/Texture.h"
 #include "FBTimer/Timer.h"
-#include <theora/theoradec.h>
+
 using namespace fastbird;
 
 namespace fastbird{

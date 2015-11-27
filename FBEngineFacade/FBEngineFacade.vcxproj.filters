@@ -4,13 +4,18 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="EngineFacade.h" />
     <ClInclude Include="EngineOptions.h" />
-    <ClInclude Include="DirectionalLightIndex.h" />
-    <ClInclude Include="FacadeMeshObject.h" />
+    <ClInclude Include="CollisionShapeInfo.h" />
+    <ClInclude Include="FacadeMesh.h" />
+    <ClInclude Include="FacadeTrail.h" />
+    <ClInclude Include="RenderTargetParamEx.h" />
+    <ClInclude Include="Voxelizer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="EngineFacade.cpp" />
     <ClCompile Include="EngineOptions.cpp" />
-    <ClCompile Include="FacadeMeshObject.cpp" />
+    <ClCompile Include="FacadeMesh.cpp" />
+    <ClCompile Include="FacadeTrail.cpp" />
+    <ClCompile Include="Voxelizer.cpp" />
   </ItemGroup>
 </Project>

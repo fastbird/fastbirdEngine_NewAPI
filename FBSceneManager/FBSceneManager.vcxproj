@@ -71,6 +71,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="DirectionalLight.h" />
+    <ClInclude Include="DirectionalLightIndex.h" />
     <ClInclude Include="IScene.h" />
     <ClInclude Include="ISceneObserver.h" />
     <ClInclude Include="ISpatialObject.h" />

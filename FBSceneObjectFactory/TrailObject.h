@@ -27,11 +27,11 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
-#include "FBSceneManager/SpatialSceneObject.h"
+#include "FBSceneManager/SceneObject.h"
 namespace fastbird{
 	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(TrailObject);
-	class FB_DLL_SCENEOBJECTFACTORY TrailObject : public SpatialSceneObject
+	class FB_DLL_SCENEOBJECTFACTORY TrailObject : public SceneObject
 	{
 		FB_DECLARE_PIMPL_NON_COPYABLE(TrailObject);
 		TrailObject();

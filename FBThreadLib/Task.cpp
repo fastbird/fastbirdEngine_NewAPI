@@ -81,7 +81,7 @@ void Task::Trigger(TaskScheduler* pScheduler)
     }
     else
     {
-		pScheduler->AddPendingTask(this);
+		pScheduler->AddPendingTask(this->shared_from_this());
 		pScheduler->SchedulerSlice();
     }
 }

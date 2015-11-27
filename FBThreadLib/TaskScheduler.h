@@ -50,7 +50,7 @@ private:
 	friend class Task;
 	friend class WorkerThread;
 	void AddIdleWorker(WorkerThread* w);
-	void AddPendingTask(Task* t);
+	void AddPendingTask(TaskPtr t);
 	void SchedulerSlice();
 	TaskPtr GetNextReadyTask(WorkerThread* Thread);	
 };

@@ -196,6 +196,12 @@ public:
 		return mAnim && mAnim->IsPlaying();
 	}
 
+	bool IsActionDone(const char* action) const{
+		if (!mAnim)
+			return true;
+		return mAnim->IsActionDone(action);
+	}
+
 	void NotifyTransformChanged(){
 		mTransformChanged = true;
 	}
@@ -335,6 +341,10 @@ void SpatialObject::PlayAction(const char* name, bool immediate, bool reverse){
 
 bool SpatialObject::IsPlayingAction() const{
 	return mImpl->IsPlayingAction();
+}
+
+bool SpatialObject::IsActionDone(const char* action) const{
+	return mImpl->IsActionDone(action);
 }
 
 void SpatialObject::NotifyTransformChanged(){

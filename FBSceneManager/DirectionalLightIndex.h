@@ -2,8 +2,8 @@
 namespace fastbird{
 	namespace DirectionalLightIndex{
 		enum Enum{
-			MainDirectionalLight,
-			SubDirectionalLight,
+			Main,
+			Sub,
 		};
 	}
 }

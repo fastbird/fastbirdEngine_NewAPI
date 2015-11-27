@@ -2,6 +2,8 @@
 #include "EngineOptions.h"
 #include "FBConsole/Console.h"
 using namespace fastbird;
+
+FB_IMPLEMENT_STATIC_CREATE(EngineOptions);
 EngineOptions::EngineOptions(){
 	if (!Console::HasInstance()){
 		Logger::Log(FB_ERROR_LOG_ARG, "Console is not initialized! Engine Options won't work.");

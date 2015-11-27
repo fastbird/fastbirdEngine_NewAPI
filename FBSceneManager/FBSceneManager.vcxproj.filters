@@ -12,6 +12,7 @@
     <ClInclude Include="IScene.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="ISpatialObject.h" />
+    <ClInclude Include="DirectionalLightIndex.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

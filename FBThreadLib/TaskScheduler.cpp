@@ -370,3 +370,19 @@ bool TaskScheduler::_IsFinalized() const{
 void TaskScheduler::_Schedule(){
 	mImpl->SchedulerSlice();
 }
+
+void TaskScheduler::AddIdleWorker(WorkerThread* w){
+	mImpl->AddIdleWorker(w);
+}
+
+void TaskScheduler::AddPendingTask(TaskPtr t){
+	mImpl->AddPendingTask(t);
+}
+
+void TaskScheduler::SchedulerSlice(){
+	mImpl->SchedulerSlice();
+}
+
+TaskPtr TaskScheduler::GetNextReadyTask(WorkerThread* thread){
+	return mImpl->GetNextReadyTask(thread);
+}
