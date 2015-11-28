@@ -32,6 +32,8 @@
 namespace fastbird
 {
 FB_DECLARE_SMART_PTR(RenderTarget);
+FB_DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
+FB_DECLARE_SMART_PTR(TextureAtlas);
 FB_DECLARE_SMART_PTR(ImageBox);
 class FB_DLL_UI ImageBox : public Container
 {

@@ -392,4 +392,33 @@ public:
 
 		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Total hull = %u", mHulls.size()).c_str());
 	}
+	const HULLS& GetHulls() const{
+		return mHulls;
+	}
+
 };
+
+//---------------------------------------------------------------------------
+FB_IMPLEMENT_STATIC_CREATE(Voxelizer);
+
+Voxelizer::Voxelizer()
+	:mImpl(new Impl)
+{
+
+}
+Voxelizer::~Voxelizer(){
+
+}
+
+bool Voxelizer::RunVoxelizer(const char* filename, UINT numVoxels, bool swapYZ, bool oppositCull) {
+	return mImpl->RunVoxelizer(filename, numVoxels, swapYZ, oppositCull);
+}
+
+MeshObjectPtr Voxelizer::GetMeshObject() const {
+	return mImpl->GetMeshObject();
+}
+
+const Voxelizer::HULLS& Voxelizer::GetHulls() const {
+	return mImpl->GetHulls();
+}
+

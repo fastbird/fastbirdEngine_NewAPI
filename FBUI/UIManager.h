@@ -43,7 +43,9 @@ namespace fastbird
 {
 	void RegisterLuaFuncs(lua_State* mL);
 	void RegisterLuaEnums(lua_State* mL);
+	class TextManipulator;
 	class IUIEditor;
+	FB_DECLARE_SMART_PTR(Texture);
 	FB_DECLARE_SMART_PTR(UICommands);
 	FB_DECLARE_SMART_PTR(UIAnimation);
 	FB_DECLARE_SMART_PTR(ListBox);

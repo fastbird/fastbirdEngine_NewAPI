@@ -31,6 +31,7 @@
 #include "FBCommonHeaders/Helpers.h"
 #include "luawrapperutil.hpp"
 #include "FBCommonHeaders/RecursiveSpinLock.h"
+using namespace fastbird;
 
 // luawapper util
 template<>
@@ -604,6 +605,14 @@ namespace fastbird
 		lua_pushcfunction(L, f);
 	}
 
+	void LuaUtils::pushlightuserdata(void* p){
+		lua_pushlightuserdata(sLuaState, p);
+	}
+
+	void LuaUtils::pushlightuserdata(lua_State* L, void* p){
+		lua_pushlightuserdata(L, p);
+	}
+
 	const char* LuaUtils::tostring(int idx){
 		if (sLuaState)
 			return tostring(sLuaState, idx);
@@ -644,6 +653,14 @@ namespace fastbird
 
 	double LuaUtils::tonumber(lua_State* L, int idx){
 		return lua_tonumber(L, idx);
+	}
+
+	void* LuaUtils::touserdata(int index){
+		return lua_touserdata(sLuaState, index);
+	}
+
+	void* LuaUtils::touserdata(lua_State* L, int index){
+		return lua_touserdata(L, index);
 	}
 
 	const char* LuaUtils::checkstring(int index){
@@ -767,12 +784,52 @@ namespace fastbird
 		return lua_isstring(L, index) != 0;
 	}
 
+	bool LuaUtils::isuserdata(int index){
+		return lua_isuserdata(sLuaState, index) != 0;
+	}
+
+	bool LuaUtils::isuserdata(lua_State* L, int index){
+		return lua_isuserdata(L, index) != 0;
+	}
+
 	int LuaUtils::type(int index){
 		return lua_type(sLuaState, index);
 	}
 
 	int LuaUtils::type(lua_State* L, int index){
 		return lua_type(L, index);
+	}
+
+	const char* LuaUtils::luatypename(int index){
+		return luaL_typename(sLuaState, index);
+	}
+
+	const char* LuaUtils::luatypename(lua_State* L, int index){
+		return luaL_typename(L, index);
+	}
+
+	void LuaUtils::replace(int index){
+		lua_replace(sLuaState, index);
+	}
+
+	void LuaUtils::replace(lua_State* L, int index){
+		lua_replace(L, index);
+	}
+
+	void LuaUtils::pop(int n){
+		lua_pop(sLuaState, n);
+	}
+
+	void LuaUtils::pop(lua_State* L, int n){
+		lua_pop(L, n);
+	}
+
+	void LuaUtils::newtable(){
+		lua_newtable(sLuaState);
+	}
+
+	void LuaUtils::newtable(lua_State* L){
+		lua_newtable(L);
 	}
 
 	void LuaUtils::createtable(int narr, int nrec){
@@ -819,6 +876,22 @@ namespace fastbird
 		lua_getglobal(L, name);
 	}
 
+	void LuaUtils::gettable(int index){
+		lua_gettable(sLuaState, index);
+	}
+
+	void LuaUtils::gettable(lua_State* L, int index){
+		lua_gettable(L, index);
+	}
+
+	void LuaUtils::settable(int index){
+		lua_settable(sLuaState, index);
+	}
+
+	void LuaUtils::settable(lua_State* L, int index){
+		lua_settable(L, index);
+	}
+
 	/// Pushes a copy of the element at the given index onto the stack. 
 	void LuaUtils::pushvalue(int index){
 		lua_pushvalue(sLuaState, index);
@@ -837,6 +910,30 @@ namespace fastbird
 		lua_setmetatable(L, index);
 	}
 
+	int LuaUtils::getmetatable(int index){
+		return lua_getmetatable(sLuaState, index);
+	}
+
+	int LuaUtils::getmetatable(lua_State* L, int index){
+		return lua_getmetatable(L, index);
+	}
+
+	void LuaUtils::Lgetmetatable(const char* tname){
+		return luaL_getmetatable(sLuaState, tname);
+	}
+
+	void LuaUtils::Lgetmetatable(lua_State* L, const char* tname){
+		return luaL_getmetatable(L, tname);
+	}
+
+	int LuaUtils::Lnewmetatable(const char* tname){
+		return luaL_newmetatable(sLuaState, tname);
+	}
+
+	int LuaUtils::Lnewmetatable(lua_State* L, const char* tname){
+		return luaL_newmetatable(L, tname);
+	}
+
 	/// Does the equivalent of t[n] = v, where t is the table at the given index and v is the value at the top of the stack. 
 	void LuaUtils::rawseti(int tableindex, int n){
 		lua_rawseti(sLuaState, tableindex, n);
@@ -844,6 +941,14 @@ namespace fastbird
 
 	void LuaUtils::rawseti(lua_State* L, int tableindex, int n){
 		lua_rawseti(L, tableindex, n);
+	}
+
+	void LuaUtils::rawset(int index){
+		lua_rawset(sLuaState, index);
+	}
+
+	void LuaUtils::rawset(lua_State* L, int index){
+		lua_rawset(L, index);
 	}
 
 	int LuaUtils::gettop(){
@@ -854,7 +959,85 @@ namespace fastbird
 		return lua_gettop(L);
 	}
 
+	void LuaUtils::settop(int index){
+		lua_settop(sLuaState, index);
+	}
 
+	void LuaUtils::settop(lua_State* L, int index){
+		lua_settop(L, index);
+	}
+
+	int LuaUtils::rawequal(int index1, int index2) {
+		return lua_rawequal(sLuaState, index1, index2);
+	}
+
+	int LuaUtils::rawequal(lua_State* L, int index1, int index2){
+		return lua_rawequal(L, index1, index2);
+	}
+
+	void LuaUtils::insert(int index){
+		lua_insert(sLuaState, index);
+	}
+
+	void LuaUtils::insert(lua_State* L, int index){
+		lua_insert(L, index);
+	}
+
+	void LuaUtils::remove(int index){
+		lua_remove(sLuaState, index);
+	}
+
+	void LuaUtils::remove(lua_State* L, int index){
+		lua_remove(L, index);
+	}
+
+	void* LuaUtils::newuserdata(size_t size){
+		return lua_newuserdata(sLuaState, size);
+	}
+
+	void* LuaUtils::newuserdata(lua_State* L, size_t size){
+		return lua_newuserdata(L, size);
+	}
+
+	void LuaUtils::call(int nargs, int nresults){
+		lua_call(sLuaState, nargs, nresults);
+	}
+
+	void LuaUtils::call(lua_State* L, int nargs, int nresults){
+		lua_call(L, nargs, nresults);
+	}
+
+	int LuaUtils::pcall(int nargs, int nresults, int msgh){
+		return lua_pcall(sLuaState, nargs, nresults, msgh);
+	}
+
+	int LuaUtils::pcall(lua_State *L, int nargs, int nresults, int msgh){
+		return lua_pcall(L, nargs, nresults, msgh);
+	}
+
+	int LuaUtils::next(int index){
+		return lua_next(sLuaState, index);
+	}
+
+	int LuaUtils::next(lua_State* L, int index){
+		return lua_next(L, index);
+	}
+
+	int LuaUtils::argerror(int arg, const char* extramsg){
+		return luaL_argerror(sLuaState, arg, extramsg);
+	}
+
+	int LuaUtils::argerror(lua_State* L, int arg, const char* extramsg){
+		return luaL_argerror(L, arg, extramsg);
+	}
+
+	int LuaUtils::error(int arg, const char* msg){
+		return luaL_error(sLuaState, msg);
+	}
+
+	int LuaUtils::error(lua_State* L, const char* msg){
+		return luaL_error(L, msg);
+	}
 
 	static RecursiveSpinLock<true, false> sLock;
 	void LuaUtils::LockLua(){
@@ -956,13 +1139,13 @@ template <class T>
 void PullNumbersElem(lua_State* L, int index, int& n, T& value){
 	lua_rawgeti(L, index, n++);
 	value = (T)lua_tonumber(L, -1);
-	lua_pop(L, 1);
+	LuaUtils::pop(L, 1);
 }
 template <>
 void PullNumbersElem(lua_State* L, int index, int& n, bool& value){
 	lua_rawgeti(L, index, n++);
 	value = lua_toboolean(L, -1) != 0;
-	lua_pop(L, 1);
+	LuaUtils::pop(L, 1);
 }
 
 template<class Tuple, std::size_t N>

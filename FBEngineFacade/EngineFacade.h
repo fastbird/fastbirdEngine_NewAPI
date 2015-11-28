@@ -29,10 +29,14 @@
 #include "FBCommonHeaders/platform.h"
 #include "FBCommonHeaders/Types.h"
 #include "FBSceneManager/DirectionalLightIndex.h"
-#include "RenderTargetParamEx.h"
+#include "FBSceneManager/ISceneObserver.h"
 #include "FBVideoPlayer/VideoPlayerType.h"
+#include "FBRenderer/ICamera.h"
+#include "RenderTargetParamEx.h"
 namespace fastbird{
 	class ProfilerSimple;
+	FB_DECLARE_SMART_PTR(Task);
+	FB_DECLARE_SMART_PTR(Voxelizer);
 	FB_DECLARE_SMART_PTR(Font);
 	FB_DECLARE_SMART_PTR(IVideoPlayer);
 	FB_DECLARE_SMART_PTR(Camera);
@@ -55,29 +59,19 @@ namespace fastbird{
 
 		static const HWindowId INVALID_HWND_ID = (HWindowId)-1;
 		
+		//---------------------------------------------------------------------------
+		// Engine Facade
+		//---------------------------------------------------------------------------
 		HWindowId CreateEngineWindow(int x, int y, int width, int height,
 			const char* wndClass, const char* title, unsigned style, unsigned exStyle,
 			WNDPROC winProc);
-		/// \param pluginName "FBRendererD3D11" is provided.
-		bool InitRenderer(const char* pluginName);
-		bool InitCanvas(HWindowId id, int width, int height);
-		/// returning scene attache to the main render target.
-		ScenePtr GetMainScene() const;
+		/// for windows;
+		intptr_t WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp);
+		EngineOptionsPtr GetEngineOptions() const;
 		void UpdateInput();
 		void Update(TIME_PRECISION dt);
 		void Render();
-		EngineOptionsPtr GetEngineOptions() const;
-		bool MainCameraExists() const;
-		CameraPtr GetMainCamera() const;
-		const Vec3& GetMainCameraPos() const;
-		const Vec3& GetMainCameraDirection() const;
-		const Ray3& GetWorldRayFromCursor();
 		IInputInjectorPtr GetInputInjector();
-		void AddDirectionalLightCoordinates(DirectionalLightIndex::Enum idx, Real phi, Real theta);
-		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName);
-		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName, int tab);
-		/// for windows;
-		intptr_t WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp);
 		/** Register an input consumer.
 		You need unregister when the consumer is destroyed or does not
 		need to getinput information any more.
@@ -87,16 +81,70 @@ namespace fastbird{
 		priority at IInputConsumer::Priority
 		*/
 		void RegisterInputConsumer(IInputConsumerPtr consumer, int priority);
-		void AddRendererObserver(int rendererObserverType, IRendererObserverPtr observer);
 		void AddFileChangeObserver(int fileChangeObserverType, IFileChangeObserverPtr observer);
-		const Vec2I& GetMainRenderTargetSize() const;
 		IVideoPlayerPtr CreateVideoPlayer(VideoPlayerType::Enum type);
+		VoxelizerPtr CreateVoxelizer();
+		
+
+		//---------------------------------------------------------------------------
+		// Renderer Interfaces
+		//---------------------------------------------------------------------------
+		/// \param pluginName "FBRendererD3D11" is provided.
+		bool InitRenderer(const char* pluginName);
+		bool InitCanvas(HWindowId id, int width, int height);
+		void AddRendererObserver(int rendererObserverType, IRendererObserverPtr observer);
+		RenderTargetPtr GetMainRenderTarget() const;
+		const Vec2I& GetMainRenderTargetSize() const;
+		bool MainCameraExists() const;
 		void QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color);
 		void QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color, float size);
+		void QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color);
+		void QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color, Real size);
+		void QueueDrawText(const Vec2I& pos, const char* text, const Color& color);
+		void QueueDrawText(const Vec2I& pos, const char* text, const Color& color, Real size);
+		void QueueDrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end,
+			const Color& color0, const Color& color1);
 		FontPtr GetFont(float fontHeight);
 		unsigned GetNumLoadingTexture() const;
-		RenderTargetPtr CreateRenderTarget(const RenderTargetParamEx& param);		
+		RenderTargetPtr CreateRenderTarget(const RenderTargetParamEx& param);
+		CameraPtr GetMainCamera() const;
+		Real GetMainCameraAspectRatio() const;
+		Real GetMainCameraFov() const;
+		const Vec3& GetMainCameraPos() const;
+		const Vec3& GetMainCameraDirection() const;
+		const Mat44& GetCameraMatrix(ICamera::MatrixType type) const;
+		const Ray3& GetWorldRayFromCursor();
+		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName);
+		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName, int tab);
+		void DrawProfileResult(wchar_t* buf, const char* posVarName);
+		void DrawProfileResult(wchar_t* buf, const char* posVarName, int tab);
+		void* MapMaterialParameterBuffer();
+		void UnmapMaterialParameterBuffer();
+		void* MapBigBuffer();
+		void UnmapBigBuffer();
+
+		//---------------------------------------------------------------------------
+		// Scene Manipulations
+		//---------------------------------------------------------------------------
+		/// returning scene attache to the main render target.
+		ScenePtr GetMainScene() const;
+		ScenePtr GetCurrentScene() const;
+		/// Add a scene observer to the main scene
+		/// \param type ISceneObserver::
+		void AddSceneObserver(ISceneObserver::Type type, ISceneObserverPtr observer);
+		/// Remove a scene observer from the main scene
+		void RemoveSceneObserver(ISceneObserver::Type type, ISceneObserverPtr observer);
 		ScenePtr CreateScene(const char* uniquename);
 		void OverrideMainScene(ScenePtr scene);
+		void SetDrawClouds(bool draw);				
+		void AddDirectionalLightCoordinates(DirectionalLightIndex::Enum idx, Real phi, Real theta);
+		const Vec3& GetLightDirection(DirectionalLightIndex::Enum idx);
+		const Vec3& GetLightDiffuse(DirectionalLightIndex::Enum idx);
+		const Real GetLightIntensity(DirectionalLightIndex::Enum idx);
+		void DetachBlendingSky(ScenePtr scene);
+
+
+		void StopAllParticles();
+		void AddTask(TaskPtr NewTask);
 	};
 }

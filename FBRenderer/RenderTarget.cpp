@@ -204,9 +204,9 @@ public:
 		auto scene = mScene.lock();
 		if (scene){
 			DirectionalLightInfo lightInfo;
-			scene->GetDirectionalLightInfo(0, lightInfo);
+			scene->GetDirectionalLightInfo(DirectionalLightIndex::Main, lightInfo);
 			renderer.SetDirectionalLightInfo(0, lightInfo);
-			scene->GetDirectionalLightInfo(1, lightInfo);
+			scene->GetDirectionalLightInfo(DirectionalLightIndex::Sub, lightInfo);
 			renderer.SetDirectionalLightInfo(1, lightInfo);			
 		}
 
@@ -422,6 +422,10 @@ IRenderStrategyPtr RenderTarget::SetRenderStrategy(IRenderStrategyPtr strategy){
 IScenePtr RenderTarget::RegisterScene(IScenePtr scene)
 {
 	return mImpl->RegisterScene(scene);
+}
+
+void RenderTarget::TakeOwnershipScene(IScenePtr scene){
+	return mImpl->TakeOwnershipScene(scene);
 }
 
 IScenePtr RenderTarget::GetScene() const

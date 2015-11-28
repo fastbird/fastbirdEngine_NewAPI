@@ -2,7 +2,7 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	FB_DECLARE_SMART_PTR(EngineOptions);
-	class EngineOptions{		
+	class FB_DLL_ENGINEFACADE EngineOptions{
 		EngineOptions();
 		~EngineOptions();
 

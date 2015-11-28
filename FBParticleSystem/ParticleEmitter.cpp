@@ -643,7 +643,7 @@ public:
 						if (p.mCurLifeTime >= p.mLifeTime)
 						{
 							if (p.mMeshObject){
-								SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);								
+								p.mMeshObject->DetachFromScene();
 							}
 							if (p.mPointLight)
 							{
@@ -918,7 +918,7 @@ public:
 					{
 						p.mCurLifeTime = p.mLifeTime;
 						if (p.mMeshObject){
-							SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
+							p.mMeshObject->DetachFromScene();
 						}
 						if (p.mPointLight)
 							p.mPointLight->SetEnabled(false);
@@ -931,7 +931,7 @@ public:
 					for (auto& p : particles)
 					{
 						if (p.mMeshObject){
-							SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
+							p.mMeshObject->DetachFromScene();
 						}
 						if (p.mPointLight)
 							p.mPointLight->SetEnabled(true);
@@ -948,7 +948,7 @@ public:
 		mStopImmediate = true;
 	}
 
-	void SetVisibleParticle(bool visible){
+	void SetVisible(bool visible){
 		mVisible = visible;		
 		for (auto& pt : *(mTemplates.const_get()))
 		{
@@ -957,12 +957,12 @@ public:
 			{
 				if (p.mMeshObject){
 					p.mMeshObject->SetVisible(visible);
-					SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
+					p.mMeshObject->DetachFromScene();
 				}
 				if (p.mPointLight)
 					p.mPointLight->SetEnabled(visible);
 				if (p.mParticleEmitter)
-					p.mParticleEmitter->SetVisibleParticle(visible);
+					p.mParticleEmitter->SetVisible(visible);
 			}
 		}
 	}
@@ -1500,7 +1500,7 @@ public:
 				}
 			}
 			if (mVisible){
-				SceneManager::GetInstance().GetMainScene()->DetachObjectFB(p.mMeshObject);
+				p.mMeshObject->DetachFromScene();
 			}
 			p.mMeshObject->SetPosition(p.mPosWorld);
 			p.mMeshObject->SetScale(Vec3(scale));
@@ -1600,8 +1600,12 @@ void ParticleEmitter::StopImmediate() {
 	mImpl->StopImmediate();
 }
 
-void ParticleEmitter::SetVisibleParticle(bool visible) {
-	mImpl->SetVisibleParticle(visible);
+void ParticleEmitter::SetVisible(bool visible) {
+	mImpl->SetVisible(visible);
+}
+
+bool ParticleEmitter::GetVisible() const{
+	return mImpl->mVisible;
 }
 
 bool ParticleEmitter::IsAlive() {

@@ -28,8 +28,9 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBCommonHeaders/VectorMap.h"
-#include "LuaUtils.h"
 #include "FBCommonHeaders/SpinLock.h"
+#include "LuaUtils.h"
+#include "luawrapper.hpp"
 namespace fastbird
 {
 	class FB_DLL_LUA LuaObject;
@@ -134,6 +135,7 @@ namespace fastbird
 		void SetSeq(int n, const Vec3ITuple& val) const;
 		void SetSeq(int n, const Vec3Tuple& val) const;
 		void SetSeq(int n, LuaObject& value) const;
+		
 		template<class T>
 		void SetSeq(int n, T* val) const
 		{

@@ -11,5 +11,6 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="LuaUtils.cpp" />
     <ClCompile Include="LuaObject.cpp" />
+    <ClCompile Include="luawrapper.cpp" />
   </ItemGroup>
 </Project>

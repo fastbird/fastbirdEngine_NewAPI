@@ -70,20 +70,29 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BillboardQuadFacade.h" />
     <ClInclude Include="CollisionShapeInfo.h" />
+    <ClInclude Include="DustFacade.h" />
     <ClInclude Include="EngineFacade.h" />
     <ClInclude Include="EngineOptions.h" />
-    <ClInclude Include="FacadeMesh.h" />
-    <ClInclude Include="FacadeTrail.h" />
+    <ClInclude Include="MeshFacade.h" />
+    <ClInclude Include="MeshLoadOptions.h" />
+    <ClInclude Include="ParticleEmitterFacade.h" />
+    <ClInclude Include="SkyFacade.h" />
+    <ClInclude Include="TrailFacade.h" />
     <ClInclude Include="RenderTargetParamEx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Voxelizer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BillboardQuadFacade.cpp" />
+    <ClCompile Include="DustFacade.cpp" />
     <ClCompile Include="EngineFacade.cpp" />
     <ClCompile Include="EngineOptions.cpp" />
-    <ClCompile Include="FacadeMesh.cpp" />
-    <ClCompile Include="FacadeTrail.cpp" />
+    <ClCompile Include="MeshFacade.cpp" />
+    <ClCompile Include="ParticleEmitterFacade.cpp" />
+    <ClCompile Include="SkyFacade.cpp" />
+    <ClCompile Include="TrailFacade.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -111,6 +120,9 @@
     </ProjectReference>
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
       <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBParticleSystem\FBParticleSystem.vcxproj">
+      <Project>{7d3a3d30-b44b-4508-8758-77f9db92b2f4}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBRenderer\FBRenderer.vcxproj">
       <Project>{fd658a50-2d36-4bb4-8eda-635bf71b4cdb}</Project>

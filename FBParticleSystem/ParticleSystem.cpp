@@ -337,7 +337,9 @@ ParticleSystem& ParticleSystem::GetInstance(){
 	return *sParticleSystem.lock();
 }
 
-ParticleSystem::ParticleSystem(){
+ParticleSystem::ParticleSystem()
+	:mImpl(new Impl(this))
+{
 
 }
 

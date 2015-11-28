@@ -5,17 +5,26 @@
     <ClInclude Include="EngineFacade.h" />
     <ClInclude Include="EngineOptions.h" />
     <ClInclude Include="CollisionShapeInfo.h" />
-    <ClInclude Include="FacadeMesh.h" />
-    <ClInclude Include="FacadeTrail.h" />
     <ClInclude Include="RenderTargetParamEx.h" />
     <ClInclude Include="Voxelizer.h" />
+    <ClInclude Include="MeshFacade.h" />
+    <ClInclude Include="SkyFacade.h" />
+    <ClInclude Include="TrailFacade.h" />
+    <ClInclude Include="DustFacade.h" />
+    <ClInclude Include="BillboardQuadFacade.h" />
+    <ClInclude Include="MeshLoadOptions.h" />
+    <ClInclude Include="ParticleEmitterFacade.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="EngineFacade.cpp" />
     <ClCompile Include="EngineOptions.cpp" />
-    <ClCompile Include="FacadeMesh.cpp" />
-    <ClCompile Include="FacadeTrail.cpp" />
     <ClCompile Include="Voxelizer.cpp" />
+    <ClCompile Include="MeshFacade.cpp" />
+    <ClCompile Include="SkyFacade.cpp" />
+    <ClCompile Include="TrailFacade.cpp" />
+    <ClCompile Include="DustFacade.cpp" />
+    <ClCompile Include="BillboardQuadFacade.cpp" />
+    <ClCompile Include="ParticleEmitterFacade.cpp" />
   </ItemGroup>
 </Project>

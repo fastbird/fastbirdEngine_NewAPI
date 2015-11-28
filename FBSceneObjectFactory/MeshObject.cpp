@@ -1169,6 +1169,10 @@ MeshObjectPtr MeshObject::Clone() const{
 	return mImpl->Clone();
 }
 
+void MeshObject::SetMaterial(const char* filepath){
+	mImpl->SetMaterial(filepath, PASS_NORMAL);
+}
+
 void MeshObject::SetMaterial(const char* filepath, int pass) {
 	mImpl->SetMaterial(filepath, pass);
 }

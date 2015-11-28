@@ -181,6 +181,7 @@ namespace fastbird{
 		void UnbindTexture(BINDING_SHADER shader, int slot);
 		void UnbindInputLayout();
 		void UnbindVertexBuffers();
+		void UnbindShader(BINDING_SHADER shader);
 		// pre defined
 		void BindDepthTexture(bool set);		
 		void SetDepthWriteShader();
@@ -362,7 +363,7 @@ namespace fastbird{
 		//-------------------------------------------------------------------
 		// ISceneObserver
 		//-------------------------------------------------------------------
-		void OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
+		void OnAfterMakeVisibleSet(IScene* scene);
 		void OnBeforeRenderingOpaques(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
 		void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut);
 

@@ -193,26 +193,27 @@ bool SceneObject::IsAttached(ScenePtr pScene) const{
 	return mImpl->IsAttached(pScene);
 }
 
-void SceneObject::DetachFromScene(){
-	DetachFromScene(false);
+bool SceneObject::DetachFromScene(){
+	return DetachFromScene(false);
 }
-void SceneObject::DetachFromScene(bool includingRtt){
+bool SceneObject::DetachFromScene(bool includingRtt){
 	auto& scenes = mImpl->mScenes;
 	unsigned limit = scenes.size();
 	unsigned count = 0;
+	bool detached = false;
 	for (unsigned i = 0; i < scenes.size() && count < limit;)
 	{
 		auto scene = scenes[i].lock();
 		if (scene){
 			if (includingRtt)
 			{
-				scene->DetachObject(this);
+				detached = scene->DetachObject(this) || detached;
 			}
 			else
 			{
 				if (!scene->IsRttScene())
 				{
-					scene->DetachObject(this);
+					detached = scene->DetachObject(this) || detached;
 				}
 				else
 				{
@@ -222,6 +223,7 @@ void SceneObject::DetachFromScene(bool includingRtt){
 		}
 		++count;
 	}
+	return detached;
 }
 
 //-------------------------------------------------------------------

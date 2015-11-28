@@ -1278,11 +1278,7 @@ public:
 			texture->Bind(binding.mShader, binding.mSlot);
 		}
 	}
-
-	void UnbindTexture(BINDING_SHADER shader, int slot){
-		GetPlatformRenderer().UnbindTexture(shader, slot);
-	}
-
+	
 	void BindDepthTexture(bool set){
 		auto mainRt = GetMainRenderTarget();
 		if (mainRt){
@@ -1851,6 +1847,10 @@ public:
 		ChangeResolution(window, resol);
 	}
 
+	void UnbindTexture(BINDING_SHADER shader, int slot){
+		GetPlatformRenderer().UnbindTexture(shader, slot);
+	}
+
 	void UnbindInputLayout(){
 		GetPlatformRenderer().UnbindInputLayout();
 	}
@@ -2383,7 +2383,7 @@ public:
 	//-------------------------------------------------------------------
 	// ISceneObserver
 	//-------------------------------------------------------------------
-	void OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut){
+	void OnAfterMakeVisibleSet(IScene* scene){
 
 	}
 
@@ -2613,6 +2613,10 @@ void Renderer::SetSystemTexture(SystemTextures::Enum type, TexturePtr texture) {
 
 void Renderer::UnbindTexture(BINDING_SHADER shader, int slot) {
 	mImpl->UnbindTexture(shader, slot);
+}
+
+void Renderer::UnbindShader(BINDING_SHADER shader){
+	mImpl->UnbindShader(shader);
 }
 
 void Renderer::UnbindInputLayout(){
@@ -3157,8 +3161,8 @@ void Renderer::RenderDebugHud() {
 //-------------------------------------------------------------------
 // ISceneObserver
 //-------------------------------------------------------------------
-void Renderer::OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {
-	mImpl->OnAfterMakeVisibleSet(scene, renderParam, renderParamOut);
+void Renderer::OnAfterMakeVisibleSet(IScene* scene) {
+	mImpl->OnAfterMakeVisibleSet(scene);
 }
 
 void Renderer::OnBeforeRenderingOpaques(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) {

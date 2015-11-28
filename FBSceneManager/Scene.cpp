@@ -234,7 +234,7 @@ public:
 			}
 			++it;
 
-			observer->OnAfterMakeVisibleSet(mSelf, renderParam, renderParamOut);
+			observer->OnAfterMakeVisibleSet(mSelf);
 		}		
 	}
 
@@ -423,8 +423,8 @@ public:
 		return mSpatialObjects.size();
 	}
 
-	const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(ICameraPtr cam){
-		return mVisibleObjectsMain[cam.get()];
+	const SPATIAL_OBJECTS_RAW* GetVisibleSpatialList(ICameraPtr cam){
+		return &mVisibleObjectsMain[cam.get()];
 	}
 
 	void PrintSpatialObject(){
@@ -622,7 +622,7 @@ unsigned Scene::GetNumSpatialObjects() const {
 	return mImpl->GetNumSpatialObjects();
 }
 
-const Scene::SPATIAL_OBJECTS_RAW& Scene::GetVisibleSpatialList(ICameraPtr cam) {
+const Scene::SPATIAL_OBJECTS_RAW* Scene::GetVisibleSpatialList(ICameraPtr cam) {
 	return mImpl->GetVisibleSpatialList(cam);
 }
 

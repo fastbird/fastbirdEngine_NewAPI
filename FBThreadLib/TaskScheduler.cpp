@@ -363,6 +363,10 @@ TaskScheduler::TaskScheduler(int NumThreads)
 	gTaskScheduler = this;
 }
 
+void TaskScheduler::AddTask(TaskPtr NewTask){
+	mImpl->AddTask(NewTask);
+}
+
 bool TaskScheduler::_IsFinalized() const{
 	return mImpl->mFinalize;
 }

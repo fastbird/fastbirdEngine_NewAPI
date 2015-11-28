@@ -50,56 +50,57 @@
 
 struct lua_State;
 typedef int (*lua_CFunction) (lua_State *L);
+struct luaL_Reg;
 namespace fastbird
 { 
 	const char* GetCWD();
 }
 
 #define CHECK_NUM_LUA_ARGS_FB(x) \
-	int numLuaArgs = lua_gettop(L); \
+	int numLuaArgs = LuaUtils::gettop(L); \
 if (numLuaArgs != (x)) \
 {\
 	assert(0); \
-	return luaL_error(L, "Got %d arguments, expected %d", numLuaArgs, (x)); \
+	return LuaUtils::error(L, FormatString("Got %d arguments, expected %d", numLuaArgs, (x)).c_str()); \
 }
 
 #define LUA_SETCFUNCTION(lua, name) LuaUtils::pushcfunction((lua), (name));\
 	LuaUtils::setglobal((lua), (#name));
 
-#define LUA_PCALL(lua, arg, ret) if(int error = lua_pcall((lua), (arg), ret, 0)) \
+#define LUA_PCALL(lua, arg, ret) if(int error = LuaUtils::pcall((lua), (arg), ret, 0)) \
 {\
-	const char* errorString = lua_tostring(lua, -1); \
+	const char* errorString = LuaUtils::tostring(lua, -1); \
 	Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());\
 	LuaUtils::PrintLuaErrorString(lua, errorString);\
-	lua_pop(lua, 1); \
+	LuaUtils::pop(lua, 1); \
 	assert(0);\
 	return;\
 }
 
 #define LUA_PCALL_RET_FALSE(lua, arg, ret) \
-int cfuncbase = lua_gettop(lua) - (arg);  /* function index */\
-lua_pushcfunction(lua, LuaUtils::Traceback);  /* push traceback function */\
-lua_insert(lua, cfuncbase);  /* put it under chunk and args */\
-if(int error = lua_pcall((lua), (arg), ret, cfuncbase)) \
+int cfuncbase = LuaUtils::gettop(lua) - (arg);  /* function index */\
+LuaUtils::pushcfunction(lua, LuaUtils::Traceback);  /* push traceback function */\
+LuaUtils::insert(lua, cfuncbase);  /* put it under chunk and args */\
+if(int error = LuaUtils::pcall((lua), (arg), ret, cfuncbase)) \
 {\
-	lua_remove(lua, cfuncbase);\
-	const char* errorString = lua_tostring(lua, -1);\
+	LuaUtils::remove(lua, cfuncbase);\
+	const char* errorString = LuaUtils::tostring(lua, -1);\
 	Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());\
 	LuaUtils::PrintLuaErrorString(lua, errorString);\
-	lua_pop(lua, 1); \
+	LuaUtils::pop(lua, 1); \
 	assert(0); \
 	return false; \
 }\
 else{\
-	lua_remove(lua, cfuncbase);\
+	LuaUtils::remove(lua, cfuncbase);\
 }
 
-#define LUA_PCALL_NO_RET(lua, arg, ret) if(int error = lua_pcall((lua), arg, ret, 0)) \
+#define LUA_PCALL_NO_RET(lua, arg, ret) if(int error = LuaUtils::pcall((lua), arg, ret, 0)) \
 {\
-	const char* errorString = lua_tostring(lua, -1); \
+	const char* errorString = LuaUtils::tostring(lua, -1); \
 	Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());\
 	LuaUtils::PrintLuaErrorString(lua, errorString);\
-	lua_pop(lua, 1); \
+	LuaUtils::pop(lua, 1); \
 	assert(0); \
 }
 
@@ -134,28 +135,28 @@ for (int i = 0; i <= (endIdx); ++i)\
 #define REGISTER_CLASS_ENUM_TO_LUA(classname, enumName, endIdx) \
 	static void RegisterEnumToLua(lua_State* L)\
 {\
-	lua_getglobal(L, #classname); \
-	if (lua_isnil(L, -1))\
+	LuaUtils::getglobal(L, #classname); \
+	if (LuaUtils::isnil(L, -1))\
 		{\
 		assert(0); \
-		lua_pop(L, 1); \
-		lua_createtable(L, 1, 0); \
-		lua_setglobal(L, #classname); \
-		lua_getglobal(L, #classname);\
+		LuaUtils::pop(L, 1); \
+		LuaUtils::createtable(L, 1, 0); \
+		LuaUtils::setglobal(L, #classname); \
+		LuaUtils::getglobal(L, #classname);\
 		}\
 \
-	lua_createtable(L, 0, endIdx); \
+	LuaUtils::createtable(L, 0, endIdx); \
 	for (int i = 0; i <= endIdx; ++i)\
 		{\
-		lua_pushinteger(L, i);\
-		lua_setfield(L, -2, ConvertToString(##enumName(i))); \
+		LuaUtils::pushinteger(L, i);\
+		LuaUtils::setfield(L, -2, ConvertToString(##enumName(i))); \
 		}\
-	lua_getglobal(L, "NoNewMethod");\
-	lua_setfield(L, -2, "__newindex");\
-	lua_pushvalue(L, -1);\
-	lua_setmetatable(L, -2);\
-	lua_setfield(L, -2, #enumName);\
-	lua_pop(L, 1);\
+	LuaUtils::getglobal(L, "NoNewMethod");\
+	LuaUtils::setfield(L, -2, "__newindex");\
+	LuaUtils::pushvalue(L, -1);\
+	LuaUtils::setmetatable(L, -2);\
+	LuaUtils::setfield(L, -2, #enumName);\
+	LuaUtils::pop(L, 1);\
 }
 
 namespace fastbird
@@ -233,7 +234,9 @@ namespace fastbird
 		static void pushboolean(bool b);
 		static void pushboolean(lua_State* L, bool b);
 		static void pushcfunction(lua_CFunction f);
-		static void pushcfunction(lua_State* L, lua_CFunction f);		
+		static void pushcfunction(lua_State* L, lua_CFunction f);
+		static void pushlightuserdata(void* p);
+		static void pushlightuserdata(lua_State* L, void* p);
 		static void pushVec2(const Vec2Tuple& data);
 		static void pushVec2(lua_State* L, const Vec2Tuple& data);
 		static void pushVec2I(const Vec2ITuple& data);
@@ -259,7 +262,8 @@ namespace fastbird
 		static unsigned tounsigned(lua_State* L, int index);
 		static double tonumber(int index);
 		static double tonumber(lua_State* L, int index);
-
+		static void* touserdata(int index);
+		static void* touserdata(lua_State* L, int index);
 		static const char* checkstring(int index);		
 		static const char* checkstring(lua_State* L, int index);
 		static int checkint(int index);
@@ -291,10 +295,18 @@ namespace fastbird
 		static bool isnumber(lua_State* L, int index);
 		static bool isstring(int index);
 		static bool isstring(lua_State* L, int index);
+		static bool isuserdata(int index);
+		static bool isuserdata(lua_State* L, int index);
 		static int type(int index);
 		static int type(lua_State* L, int index);
+		static const char* luatypename(int index);
+		static const char* luatypename(lua_State* L, int index);
+		static void replace(int index);
+		static void replace(lua_State* L, int index);
+		static void pop(int n);
+		static void pop(lua_State* L, int n);
 
-		/// Creates a new empty table and pushes it onto the stack. It is equivalent to lua_createtable(L, 0, 0). 
+		/// Creates a new empty table and pushes it onto the stack. It is equivalent to LuaUtils::createtable(L, 0, 0). 
 		static void newtable();
 		static void newtable(lua_State* L);
 		/**	Creates a new empty table and pushes it onto the stack. 
@@ -318,18 +330,59 @@ namespace fastbird
 		/// Pushes onto the stack the value of the global \a key. 
 		static void getglobal(const char* name);
 		static void getglobal(lua_State* L, const char* name);
+		static void gettable(int index);
+		static void gettable(lua_State* L, int index);
+		static void settable(int index);
+		static void settable(lua_State* L, int index);
+
 		/// Pushes a copy of the element at the given index onto the stack. 
 		static void pushvalue(int index);
 		static void pushvalue(lua_State* L, int index);
 		/// Pops a table from the stack and sets it as the new metatable for the value at the given index. 
 		static void setmetatable(int index);
 		static void setmetatable(lua_State* L, int index);
+		static int getmetatable(int index);
+		static int getmetatable(lua_State* L, int index);
+		/// Pushes onto the stack the metatable associated with name \a tname in the registry 
+		static void Lgetmetatable(const char* tname);
+		static void Lgetmetatable(lua_State* L, const char* tname);
+		static int Lnewmetatable(const char* tname);
+		static int Lnewmetatable(lua_State* L, const char* tname);
 		/// Does the equivalent of t[n] = v, where t is the table at the given index and v is the value at the top of the stack. 
 		static void rawseti(int tableindex, int n);
 		static void rawseti(lua_State* L, int tableindex, int n);
+		/// Similar to lua_settable, but does a raw assignment (i.e., without metamethods). 
+		/// Does the equivalent to t[k] = v, where t is the value at the given index, v is the value at the top of the stack, and k is the value just below the top. 
+		static void rawset(int index);
+		static void rawset(lua_State* L, int index);
 		/// Returns the index of the top element in the stack. Because indices start at 1, this result is equal to the number of elements in the stack (and so 0 means an empty stack). 
 		static int gettop();
 		static int gettop(lua_State* L);
+		/// Accepts any index, or 0, and sets the stack top to this index. If the new top is larger than the old one, then the new elements are filled with nil. If index is 0, then all stack elements are removed. 
+		static void settop(int index);
+		static void settop(lua_State* L, int index);
+		/// Returns 1 if the two values in indices index1 and index2 are primitively equal (that is, without calling metamethods). Otherwise returns 0. Also returns 0 if any of the indices are non valid. 
+		static int rawequal(int index1, int index2);
+		static int rawequal(lua_State* L, int index1, int index2);
+		static void insert(int index);
+		static void insert(lua_State* L, int index);
+		static void remove(int index);
+		static void remove(lua_State* L, int index);
+		static void* newuserdata(size_t size);
+		static void* newuserdata(lua_State* L, size_t size);
+		static void call(int nargs, int nresults);
+		static void call(lua_State* L, int nargs, int nresults);
+		static int pcall(int nargs, int nresults, int msgh);
+		static int pcall(lua_State *L, int nargs, int nresults, int msgh);
+		static int next(int index);
+		static int next(lua_State* L, int index);
+
+		static int argerror(int arg, const char* extramsg);
+		static int argerror(lua_State* L, int arg, const char* extramsg);
+		static int error(int arg, const char* msg);
+		static int error(lua_State* L, const char* msg);
+
+
 
 		static void LockLua();
 		static void UnlockLua();
@@ -341,4 +394,6 @@ namespace fastbird
 
 		operator lua_State*() const;
 	};
+
+#include "luawrapperutil.hpp"
 }

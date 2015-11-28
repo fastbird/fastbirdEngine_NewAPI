@@ -30,6 +30,7 @@
 #include <vector>
 #include <iostream>
 #include <memory>
+#include "Types.h"
 #include "Helpers.h"
 namespace fastbird{
 	template <typename Observer>
@@ -42,6 +43,7 @@ namespace fastbird{
 		std::map< ObserverEventType, std::vector<ObserverWeakPtr> > mObservers_;
 
 	public:
+
 		void AddObserver(ObserverEventType type, ObserverPtr observer){
 			auto& observers = mObservers_[type];
 			if (!ValueExistsInVector(observers, observer)){
@@ -59,5 +61,5 @@ namespace fastbird{
 		}
 
 		virtual void OnObserverAdded(ObserverPtr observer) {}
-	};
+	};	
 }

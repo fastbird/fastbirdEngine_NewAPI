@@ -116,4 +116,4 @@ namespace fastbird
 	};
 }
 
-extern IPhysics* gFBPhysics;
+extern fastbird::IPhysics* gFBPhysics;

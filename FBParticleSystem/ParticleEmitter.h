@@ -53,7 +53,8 @@ namespace fastbird
 		void Stop();
 		void ProcessDeleteOnStop(bool stopping, bool force = false);
 		void StopImmediate();
-		void SetVisibleParticle(bool visible);
+		void SetVisible(bool visible);
+		bool GetVisible() const;
 		bool IsAlive();
 		bool IsActive() const;
 		void SetEmitterDirection(const fastbird::Vec3& dir);

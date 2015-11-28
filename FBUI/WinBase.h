@@ -29,6 +29,7 @@
 #include "EventHandler.h"
 #include "VisibleStatus.h"
 #include "UIProperty.h"
+#include "ComponentType.h"
 namespace fastbird
 {
 	FB_DECLARE_SMART_PTR(UIAnimation);	

@@ -38,6 +38,7 @@
 #define FB_DLL_FILEMONITOR __declspec(dllimport)
 #define FB_DLL_VIDEOPLAYER __declspec(dllimport)
 #define FB_DLL_COLLADA __declspec(dllimport)
+#define FB_DLL_PARTICLESYSTEM __declspec(dllimport)
 #else
 #define FB_DLL_ENGINEFACADE 
 #endif

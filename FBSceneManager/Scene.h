@@ -73,7 +73,7 @@ namespace fastbird{
 		unsigned GetNumSpatialObjects() const;
 		/** You do not own the returned pointers of this function
 		do not keep any pointer. */
-		const SPATIAL_OBJECTS_RAW& GetVisibleSpatialList(ICameraPtr cam);
+		const SPATIAL_OBJECTS_RAW* GetVisibleSpatialList(ICameraPtr cam);
 		void PrintSpatialObject();
 
 		void AttachSkySphere(SkySpherePtr p);		

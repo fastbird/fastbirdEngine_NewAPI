@@ -2691,7 +2691,7 @@ void UIManager::BeforeUIRendering(HWindowId hwndId, HWindow hwnd) {
 }
 
 void UIManager::RenderUI(HWindowId hwndId, HWindow hwnd){
-	mImpl->RenderUI(hwndId, hwnd)
+	mImpl->RenderUI(hwndId, hwnd);
 }
 
 void UIManager::AfterUIRendered(HWindowId hwndId, HWindow hwnd){

@@ -26,6 +26,7 @@
 */
 
 #pragma once
+#include "Align.h"
 namespace fastbird
 {
 	namespace UIProperty

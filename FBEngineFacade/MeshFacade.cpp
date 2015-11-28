@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "FacadeMesh.h"
+#include "MeshFacade.h"
 #include "EngineFacade.h"
 #include "FBSceneObjectFactory/MeshObject.h"
 #include "FBSceneObjectFactory/MeshGroup.h"
@@ -7,7 +7,7 @@
 #include "FBSceneManager/Scene.h"
 #include "FBRenderer/Material.h"
 using namespace fastbird;
-class FacadeMesh::Impl{
+class MeshFacade::Impl{
 public:
 	MeshObjectPtr mMeshObject;
 	MeshGroupPtr mMeshGroup;
@@ -21,8 +21,20 @@ public:
 
 	}
 
-	bool LoadMeshObject(const char* daePath){
-		auto loaded = SceneObjectFactory::GetInstance().CreateMeshObject(daePath);
+	MeshImportDesc MakeImportDesc(const MeshLoadOptions& options){
+		MeshImportDesc desc;
+		desc.generateTangent = options.generateTangent;
+		desc.keepMeshData = options.keepMeshData;
+		desc.mergeMaterialGroups = options.mergeMaterialGroups;
+		desc.oppositeCull = options.oppositeCull;
+		desc.useIndexBuffer = options.useIndexBuffer;
+		desc.yzSwap = options.yzSwap;
+		return desc;
+	}
+
+	bool LoadMeshObject(const char* daePath, const MeshLoadOptions& options){
+		MeshImportDesc importDesc = MakeImportDesc(options);
+		auto loaded = SceneObjectFactory::GetInstance().CreateMeshObject(daePath, importDesc);
 		if (loaded){
 			mMeshGroup = 0;
 			mMeshObject = loaded;
@@ -121,6 +133,11 @@ public:
 
 	bool AttachToScene(){
 		auto scene = EngineFacade::GetInstance().GetMainScene();
+		return AttachToScene(scene);
+	}
+
+	bool AttachToCurrentScene(){
+		auto scene = EngineFacade::GetInstance().GetCurrentScene();
 		return AttachToScene(scene);
 	}
 
@@ -585,215 +602,240 @@ public:
 			mMeshGroup->SetMeshRotation(idx, rot);
 	}
 
+	SpatialObjectPtr GetSpatialObject() const{
+		if (mMeshObject)
+			return std::static_pointer_cast<SpatialObject>(mMeshObject);
+		else if (mMeshGroup)
+			return std::static_pointer_cast<SpatialObject>(mMeshGroup);
+		return 0;
+	}
+
 };
 
-std::vector<FacadeMeshWeakPtr> sMeshes;
+std::vector<MeshFacadeWeakPtr> sMeshes;
 //---------------------------------------------------------------------------
-FacadeMeshPtr FacadeMesh::Create(){
-	FacadeMeshPtr p(new FacadeMesh, [](FacadeMesh* obj){ delete obj; });
+MeshFacadePtr MeshFacade::Create(){
+	MeshFacadePtr p(new MeshFacade, [](MeshFacade* obj){ delete obj; });
 	sMeshes.push_back(p);
 	return p;
 }
 
-FacadeMesh::FacadeMesh()
+MeshFacade::MeshFacade()
 	: mImpl(new Impl)
 {
 
 }
 
-FacadeMesh::~FacadeMesh(){
+MeshFacade::~MeshFacade(){
 
 }
 
-bool FacadeMesh::LoadMeshObject(const char* daePath) {
-	return mImpl->LoadMeshObject(daePath);
+bool MeshFacade::LoadMeshObject(const char* daePath) {
+	return mImpl->LoadMeshObject(daePath, MeshLoadOptions());
 }
 
-bool FacadeMesh::LoadMeshGroup(const char* daePath){
+bool MeshFacade::LoadMeshObject(const char* daePath, const MeshLoadOptions& options){
+	return mImpl->LoadMeshObject(daePath, options);
+}
+
+bool MeshFacade::LoadMeshGroup(const char* daePath){
 	return mImpl->LoadMeshGroup(daePath);
 }
 
-bool FacadeMesh::IsVaildMesh() const{
+bool MeshFacade::IsVaildMesh() const{
 	return mImpl->IsVaildMesh();
 }
 
-bool FacadeMesh::IsMeshObject() const{
+bool MeshFacade::IsMeshObject() const{
 	return mImpl->IsMeshObject();
 }
 
-bool FacadeMesh::IsMeshGroup() const{
+bool MeshFacade::IsMeshGroup() const{
 	return mImpl->IsMeshGroup();
 }
 
-void FacadeMesh::SetGameType(int type) {
+void MeshFacade::SetGameType(int type) {
 	mImpl->SetGameType(type);
 }
 
-void FacadeMesh::SetGameId(unsigned id) {
+void MeshFacade::SetGameId(unsigned id) {
 	mImpl->SetGameId(id);
 }
 
-void FacadeMesh::SetGamePtr(void* ptr) {
+void MeshFacade::SetGamePtr(void* ptr) {
 	mImpl->SetGamePtr(ptr);
 }
 
-void FacadeMesh::ModifyObjFlag(unsigned flag, bool enable) {
+void MeshFacade::ModifyObjFlag(unsigned flag, bool enable) {
 	mImpl->ModifyObjFlag(flag, enable);
 }
 
-void FacadeMesh::SetEnableHighlight(bool enable) {
+void MeshFacade::SetEnableHighlight(bool enable) {
 	mImpl->SetEnableHighlight(enable);
 }
 
-MaterialPtr FacadeMesh::GetMaterial() const {
+MaterialPtr MeshFacade::GetMaterial() const {
 	return mImpl->GetMaterial();
 }
 
-void FacadeMesh::SetMaterialParameter(unsigned idx, const Vec4& value){
+void MeshFacade::SetMaterialParameter(unsigned idx, const Vec4& value){
 	return mImpl->SetMaterialParameter(idx, value);
 }
 
-void FacadeMesh::SetMaterial(MaterialPtr material) {
+void MeshFacade::SetMaterial(MaterialPtr material) {
 	mImpl->SetMaterial(material);
 }
 
-void FacadeMesh::SetMaterial(const char* path) {
+void MeshFacade::SetMaterial(const char* path) {
 	mImpl->SetMaterial(path);
 }
 
-bool FacadeMesh::AttachToScene() {
+bool MeshFacade::AttachToScene() {
 	return mImpl->AttachToScene();
 }
 
-bool FacadeMesh::AttachToScene(IScenePtr scene){
+bool MeshFacade::AttachToCurrentScene(){
+	return mImpl->AttachToCurrentScene();
+}
+
+bool MeshFacade::AttachToScene(IScenePtr scene){
 	return mImpl->AttachToScene(scene);
 }
 
-bool FacadeMesh::DetachFromScene() {
+bool MeshFacade::DetachFromScene() {
 	return mImpl->DetachFromScene(false);
 }
 
-bool FacadeMesh::DetachFromScene(bool includingRtt){
+bool MeshFacade::DetachFromScene(bool includingRtt){
 	return mImpl->DetachFromScene(includingRtt);
 }
 
 
-bool FacadeMesh::IsAttached() const {
+bool MeshFacade::IsAttached() const {
 	return mImpl->IsAttached();
 }
 
-bool FacadeMesh::IsAttached(IScenePtr scene) const{
+bool MeshFacade::IsAttached(IScenePtr scene) const{
 	return mImpl->IsAttached(scene);
 }
 
-void FacadeMesh::SetAlpha(float alpha) {
+void MeshFacade::SetAlpha(float alpha) {
 	mImpl->SetAlpha(alpha);
 }
 
-void FacadeMesh::SetForceAlphaBlending(bool enable, float alpha, float forceGlow, bool disableDepth) {
+void MeshFacade::SetForceAlphaBlending(bool enable, float alpha, float forceGlow, bool disableDepth) {
 	mImpl->SetForceAlphaBlending(enable, alpha, forceGlow, disableDepth);
 }
 
-void FacadeMesh::SetAmbientColor(const Color& color) {
+void MeshFacade::SetAmbientColor(const Color& color) {
 	mImpl->SetAmbientColor(color);
 }
 
-const AUXILIARIES* FacadeMesh::GetAuxiliaries() const {
+const AUXILIARIES* MeshFacade::GetAuxiliaries() const {
 	return mImpl->GetAuxiliaries();
 }
 
-Transformation FacadeMesh::GetAuxiliaryWorldTransformation(const char* name, bool& outFound) const{
+Transformation MeshFacade::GetAuxiliaryWorldTransformation(const char* name, bool& outFound) const{
 	return mImpl->GetAuxiliaryWorldTransformation(name, outFound);
 }
 
-Transformations FacadeMesh::GetAuxiliaryWorldTransformations(const char* name) const{
+Transformations MeshFacade::GetAuxiliaryWorldTransformations(const char* name) const{
 	return mImpl->GetAuxiliaryWorldTransformations(name);
 }
 
-Transformations FacadeMesh::GetAuxiliaryTransformations(const char* name) const{
+Transformations MeshFacade::GetAuxiliaryTransformations(const char* name) const{
 	return mImpl->GetAuxiliaryTransformations(name);
 }
 
-Vec3s FacadeMesh::GetAuxiliaryPositions(const char* name) const{
+Vec3s MeshFacade::GetAuxiliaryPositions(const char* name) const{
 	return mImpl->GetAuxiliaryPositions(name);
 }
 
-Vec3s FacadeMesh::GetAuxiliaryWorldPositions(const char* name) const{
+Vec3s MeshFacade::GetAuxiliaryWorldPositions(const char* name) const{
 	return mImpl->GetAuxiliaryWorldPositions(name);
 }
 
-const Transformation& FacadeMesh::GetTransformation() const {
+const Transformation& MeshFacade::GetTransformation() const {
 	return mImpl->GetTransformation();
 }
 
-void FacadeMesh::SetTransformation(const Transformation& transform) {
+void MeshFacade::SetTransformation(const Transformation& transform) {
 	mImpl->SetTransformation(transform);
 }
 
-void FacadeMesh::SetPosition(const Vec3& pos) {
+void MeshFacade::SetPosition(const Vec3& pos) {
 	mImpl->SetPosition(pos);
 }
 
-void FacadeMesh::SetRotation(const Quat& rot) {
+void MeshFacade::SetRotation(const Quat& rot) {
 	mImpl->SetRotation(rot);
 }
 
-void FacadeMesh::SetScale(const Vec3& scale) {
+void MeshFacade::SetScale(const Vec3& scale) {
 	mImpl->SetScale(scale);
 }
 
-const BoundingVolumePtr FacadeMesh::GetBoundingVolume() const {
+const BoundingVolumePtr MeshFacade::GetBoundingVolume() const {
 	return mImpl->GetBoundingVolume();
 }
 
-const BoundingVolumePtr FacadeMesh::GetBoundingVolumeWorld() const {
+const BoundingVolumePtr MeshFacade::GetBoundingVolumeWorld() const {
 	return mImpl->GetBoundingVolumeWorld();
 }
 
-bool FacadeMesh::RayCast(const Ray3& ray, Vec3& pos, const ModelTriangle** tri) {
+bool MeshFacade::RayCast(const Ray3& ray, Vec3& pos, const ModelTriangle** tri) {
 	return mImpl->RayCast(ray, pos, tri);
 }
 
-bool FacadeMesh::CheckNarrowCollision(BoundingVolumePtr bv) {
+bool MeshFacade::CheckNarrowCollision(BoundingVolumePtr bv) {
 	return mImpl->CheckNarrowCollision(bv);
 }
 
-Ray3::IResult FacadeMesh::CheckNarrowCollisionRay(const Ray3& ray) {
+Ray3::IResult MeshFacade::CheckNarrowCollisionRay(const Ray3& ray) {
 	return mImpl->CheckNarrowCollisionRay(ray);
 }
 
-bool FacadeMesh::HasCollisionShapes() const {
+bool MeshFacade::HasCollisionShapes() const {
 	return mImpl->HasCollisionShapes();
 }
 
-CollisionShapeInfos FacadeMesh::GetCollisionShapeInfos() const{
+CollisionShapeInfos MeshFacade::GetCollisionShapeInfos() const{
 	return mImpl->GetCollisionShapeInfos();
 }
 
-Vec3 FacadeMesh::GetRandomPosInVolume(const Vec3* nearWorld) {
+Vec3 MeshFacade::GetRandomPosInVolume(const Vec3* nearWorld) {
 	return mImpl->GetRandomPosInVolume(nearWorld);
 }
 
-void FacadeMesh::PlayAction(const char* action, bool immediate, bool reverse) {
+void MeshFacade::PlayAction(const char* action, bool immediate, bool reverse) {
 	mImpl->PlayAction(action, immediate, reverse);
 }
 
-bool FacadeMesh::IsPlayingAction() const {
+bool MeshFacade::IsPlayingAction() const {
 	return mImpl->IsPlayingAction();
 }
 
-bool FacadeMesh::IsActionDone(const char* action) const{
+bool MeshFacade::IsActionDone(const char* action) const{
 	return mImpl->IsActionDone(action);
 }
 
-unsigned FacadeMesh::GetNumMeshes() const{
+unsigned MeshFacade::GetNumMeshes() const{
 	return mImpl->GetNumMeshes();
 }
 
-const Vec3& FacadeMesh::GetMeshOffset(unsigned idx) const{
+const Vec3& MeshFacade::GetMeshOffset(unsigned idx) const{
 	return mImpl->GetMeshOffset(idx);
 }
 
-void FacadeMesh::SetMeshRotation(unsigned idx, const Quat& rot){
+void MeshFacade::SetMeshRotation(unsigned idx, const Quat& rot){
 	return mImpl->SetMeshRotation(idx, rot);
+}
+
+SpatialObjectPtr MeshFacade::GetSpatialObject() const{
+	return mImpl->GetSpatialObject();
+}
+
+void MeshFacade::AddAsCloudVolume(ScenePtr scene){
+	if (mImpl->mMeshObject)
+		scene->AddCloudVolume(mImpl->mMeshObject);
 }

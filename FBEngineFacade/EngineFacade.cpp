@@ -28,6 +28,7 @@
 #include "stdafx.h"
 #include "EngineFacade.h"
 #include "EngineOptions.h"
+#include "Voxelizer.h"
 #include "FBTimer/Profiler.h"
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/Camera.h"
@@ -36,11 +37,13 @@
 #include "FBSceneManager/Scene.h"
 #include "FBSceneManager/DirectionalLight.h"
 #include "FBSceneObjectFactory/SceneObjectFactory.h"
+#include "FBSceneObjectFactory/SkySphere.h"
 #include "FBThreadLib/TaskScheduler.h"
 #include "FBConsole/Console.h"
 #include "FBInputManager/InputManager.h"
 #include "FBFileMonitor/FileMonitor.h"
 #include "FBVideoPlayer/VideoPlayerOgg.h"
+#include "FBParticleSystem/ParticleSystem.h"
 using namespace fastbird;
 class EngineFacade::Impl{
 public:
@@ -58,6 +61,7 @@ public:
 	SceneManagerPtr mSceneManager;
 	ScenePtr mMainScene;
 	SceneObjectFactoryPtr mSceneObjectFactory;
+	ParticleSystemPtr mParticleSystem;
 	CameraPtr mMainCamera;
 	EngineOptionsPtr mEngineOptions;
 	bool mRayFromCursorCalced;
@@ -85,12 +89,12 @@ public:
 		}
 
 		mSceneObjectFactory = SceneObjectFactory::Create();
+		mParticleSystem = ParticleSystem::Create();
 		if (!mSceneObjectFactory){
 			Logger::Log(FB_ERROR_LOG_ARG, "SceneObjectFactory is not initialized.");
 		}
 
 		mEngineOptions = EngineOptions::Create();
-
 		mRenderer = Renderer::Create();
 	}
 
@@ -187,7 +191,15 @@ public:
 	}
 
 	ScenePtr GetMainScene() const{
+		return mMainScene;
+	}
+
+	ScenePtr GetCurrentScene() const{
 		return std::static_pointer_cast<Scene>(Renderer::GetInstance().GetMainRenderTarget()->GetScene());
+	}
+
+	void SetDrawClouds(bool draw){
+		mMainScene->SetDrawClouds(draw);
 	}
 
 	void UpdateInput(){
@@ -237,6 +249,15 @@ public:
 		assert(light);
 		light->AddPhi(phi);
 		light->AddTheta(theta);
+	}
+
+	const Vec3& GetLightDirection(DirectionalLightIndex::Enum idx){
+		if (!mMainScene){
+			Logger::Log(FB_ERROR_LOG_ARG, "No main scene found");
+			return Vec3::UNIT_Y;
+		}
+		auto light = mMainScene->GetDirectionalLight(idx);
+		return light->GetDirection();
 	}
 };
 
@@ -289,6 +310,33 @@ ScenePtr EngineFacade::GetMainScene() const {
 	return mImpl->GetMainScene();
 }
 
+ScenePtr EngineFacade::GetCurrentScene() const{
+	return mImpl->GetCurrentScene();
+}
+
+void EngineFacade::AddSceneObserver(ISceneObserver::Type type, ISceneObserverPtr observer){
+	mImpl->mMainScene->AddSceneObserver(type, observer);
+}
+
+void EngineFacade::RemoveSceneObserver(ISceneObserver::Type type, ISceneObserverPtr observer){
+	mImpl->mMainScene->RemoveObserver(type, observer);
+}
+
+ScenePtr EngineFacade::CreateScene(const char* uniquename){
+	return SceneManager::GetInstance().CreateScene(uniquename);
+}
+
+void EngineFacade::OverrideMainScene(ScenePtr scene){
+	if (scene)
+		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(scene);
+	else
+		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(mImpl->mMainScene);
+}
+
+void EngineFacade::SetDrawClouds(bool draw){
+	mImpl->SetDrawClouds(draw);
+}
+
 void EngineFacade::UpdateInput(){
 	mImpl->UpdateInput();
 }
@@ -313,12 +361,24 @@ CameraPtr EngineFacade::GetMainCamera() const{
 	return Renderer::GetInstance().GetMainCamera();
 }
 
+Real EngineFacade::GetMainCameraAspectRatio() const{
+	return Renderer::GetInstance().GetMainCamera()->GetAspectRatio();
+}
+
+Real EngineFacade::GetMainCameraFov() const{
+	return Renderer::GetInstance().GetMainCamera()->GetFOV();
+}
+
 const Vec3& EngineFacade::GetMainCameraPos() const{
 	return Renderer::GetInstance().GetMainCamera()->GetPosition();
 }
 
 const Vec3& EngineFacade::GetMainCameraDirection() const{
 	return Renderer::GetInstance().GetMainCamera()->GetDirection();
+}
+
+const Mat44& EngineFacade::GetCameraMatrix(ICamera::MatrixType type) const{
+	return Renderer::GetInstance().GetMainCamera()->GetMatrix(type);
 }
 
 const Ray3& EngineFacade::GetWorldRayFromCursor(){
@@ -331,6 +391,17 @@ IInputInjectorPtr EngineFacade::GetInputInjector(){
 
 void EngineFacade::AddDirectionalLightCoordinates(DirectionalLightIndex::Enum idx, Real phi, Real theta){
 	mImpl->AddDirectionalLightCoordinates(idx, phi, theta);
+}
+
+const Vec3& EngineFacade::GetLightDirection(DirectionalLightIndex::Enum idx){
+	return mImpl->GetLightDirection(idx);
+}
+
+void EngineFacade::DetachBlendingSky(ScenePtr scene){
+	auto sky = scene->GetSkySphere();
+	if (sky){
+		sky->DetachBlendingSky();
+	}
 }
 
 void EngineFacade::DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName){
@@ -347,6 +418,31 @@ void EngineFacade::DrawProfileResult(const ProfilerSimple& profiler, const char*
 	swprintf_s(buf, L"%s%s : %f", tapString.c_str(), profiler.GetName(), profiler.GetDT());
 	Vec2I pos = LuaUtils::GetLuaVarAsVec2I(posVarName);
 	Renderer::GetInstance().QueueDrawText(pos, buf, Color::White);
+}
+
+void EngineFacade::DrawProfileResult(wchar_t* buf, const char* posVarName){
+	DrawProfileResult(buf, posVarName, 0);
+}
+
+void EngineFacade::DrawProfileResult(wchar_t* buf, const char* posVarName, int tab){
+	Vec2I pos = LuaUtils::GetLuaVarAsVec2I(posVarName);
+	Renderer::GetInstance().QueueDrawText(pos, buf, Color::White);
+}
+
+void* EngineFacade::MapMaterialParameterBuffer(){
+	return Renderer::GetInstance().MapMaterialParameterBuffer();
+}
+
+void EngineFacade::UnmapMaterialParameterBuffer(){
+	Renderer::GetInstance().UnmapMaterialParameterBuffer();
+}
+
+void* EngineFacade::MapBigBuffer(){
+	return Renderer::GetInstance().MapBigBuffer();
+}
+
+void EngineFacade::UnmapBigBuffer(){
+	return Renderer::GetInstance().UnmapBigBuffer();
 }
 
 intptr_t EngineFacade::WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp){
@@ -498,6 +594,10 @@ void EngineFacade::AddFileChangeObserver(int fileChangeObserverType, IFileChange
 	FileMonitor::GetInstance().AddObserver(fileChangeObserverType, observer);
 }
 
+RenderTargetPtr EngineFacade::GetMainRenderTarget() const{
+	return Renderer::GetInstance().GetMainRenderTarget();
+}
+
 const Vec2I& EngineFacade::GetMainRenderTargetSize() const{
 	return Renderer::GetInstance().GetMainRenderTargetSize();
 }
@@ -518,6 +618,27 @@ void EngineFacade::QueueDrawTextForDuration(float secs, const Vec2I& pos, const 
 void EngineFacade::QueueDrawTextForDuration(float secs, const Vec2I& pos, const char* text, const Color& color, float size){
 	if (Renderer::HasInstance())
 		Renderer::GetInstance().QueueDrawTextForDuration(secs, pos, text, color, size);
+}
+
+void EngineFacade::QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color){
+	Renderer::GetInstance().QueueDrawText(pos, text, color);
+}
+
+void EngineFacade::QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color, Real size){
+	Renderer::GetInstance().QueueDrawText(pos, text, color, size);
+}
+
+void EngineFacade::QueueDrawText(const Vec2I& pos, const char* text, const Color& color){
+	Renderer::GetInstance().QueueDrawText(pos, text, color);
+}
+
+void EngineFacade::QueueDrawText(const Vec2I& pos, const char* text, const Color& color, Real size){
+	Renderer::GetInstance().QueueDrawText(pos, text, color, size);
+}
+
+void EngineFacade::QueueDrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end,
+	const Color& color0, const Color& color1){
+	Renderer::GetInstance().QueueDrawLineBeforeAlphaPass(start, end, color0, color1);
 }
 
 FontPtr EngineFacade::GetFont(float fontHeight){
@@ -557,13 +678,14 @@ RenderTargetPtr EngineFacade::CreateRenderTarget(const RenderTargetParamEx& para
 	return 0;
 }
 
-ScenePtr EngineFacade::CreateScene(const char* uniquename){
-	return SceneManager::GetInstance().CreateScene(uniquename);
+VoxelizerPtr EngineFacade::CreateVoxelizer(){
+	return Voxelizer::Create();
 }
 
-void EngineFacade::OverrideMainScene(ScenePtr scene){
-	if (scene)
-		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(scene);
-	else
-		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(mImpl->mMainScene);
+void EngineFacade::StopAllParticles(){
+	mImpl->mParticleSystem->StopParticles();
+}
+
+void EngineFacade::AddTask(TaskPtr NewTask){
+	mImpl->mTaskSchedular->AddTask(NewTask);
 }

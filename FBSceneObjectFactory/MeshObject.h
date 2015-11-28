@@ -76,6 +76,7 @@ namespace fastbird{
 		};
 
 		MeshObjectPtr Clone() const;
+		void SetMaterial(const char* filepath);
 		void SetMaterial(const char* filepath, int pass);
 		void SetMaterial(MaterialPtr pMat, int pass);
 		MaterialPtr GetMaterial(int pass = 0) const;

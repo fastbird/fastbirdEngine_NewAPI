@@ -30,14 +30,15 @@
 #include "FBRenderer/RenderParam.h"
 namespace fastbird
 {
-	FB_DECLARE_SMART_PTR(IScene);
+	class IScene;
+	FB_DECLARE_SMART_PTR(ISceneObserver);
 	class ISceneObserver
 	{
 	public:
-		enum{
+		enum Type{
 			Timing
 		};
-		virtual void OnAfterMakeVisibleSet(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
+		virtual void OnAfterMakeVisibleSet(IScene* scene) = 0;
 		virtual void OnBeforeRenderingOpaques(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
 		virtual void OnBeforeRenderingTransparents(IScene* scene, const RenderParam& renderParam, RenderParamOut* renderParamOut) = 0;
 	};

@@ -53,8 +53,8 @@ namespace fastbird{
 		bool IsAttached(ScenePtr pScene) const;
 
 		/// not including rtt
-		void DetachFromScene();
-		void DetachFromScene(bool includingRtt);
+		bool DetachFromScene();
+		bool DetachFromScene(bool includingRtt);
 
 		//-------------------------------------------------------------------
 		// Object Flags

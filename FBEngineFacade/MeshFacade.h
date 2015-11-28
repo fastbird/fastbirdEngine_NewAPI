@@ -2,21 +2,25 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBSceneManager/SceneObjectFlag.h"
 #include "CollisionShapeInfo.h"
+#include "MeshLoadOptions.h"
 namespace fastbird{
 	struct ModelTriangle;
 	typedef std::vector< std::pair<std::string, Transformation> > AUXILIARIES;
+	FB_DECLARE_SMART_PTR(SpatialObject);
 	FB_DECLARE_SMART_PTR(BoundingVolume);
 	FB_DECLARE_SMART_PTR(Material);
-	FB_DECLARE_SMART_PTR(FacadeMesh);
+	FB_DECLARE_SMART_PTR(MeshFacade);
+	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(IScene);
-	class FB_DLL_ENGINEFACADE FacadeMesh{
-		FB_DECLARE_PIMPL_NON_COPYABLE(FacadeMesh);
-		FacadeMesh();
-		~FacadeMesh();
+	class FB_DLL_ENGINEFACADE MeshFacade{
+		FB_DECLARE_PIMPL_NON_COPYABLE(MeshFacade);
+		MeshFacade();
+		~MeshFacade();
 
 	public:
-		static FacadeMeshPtr Create();		
+		static MeshFacadePtr Create();		
 		bool LoadMeshObject(const char* daePath);
+		bool LoadMeshObject(const char* daePath, const MeshLoadOptions& options);
 		bool LoadMeshGroup(const char* daePath);
 
 		bool IsVaildMesh() const;
@@ -34,6 +38,8 @@ namespace fastbird{
 		void SetMaterial(MaterialPtr material);
 		void SetMaterial(const char* path);
 		bool AttachToScene();
+		/// Attach to the current scene which is bound to the current render target.
+		bool AttachToCurrentScene();
 		bool AttachToScene(IScenePtr scene);
 		/// not including RTT
 		bool DetachFromScene();
@@ -81,6 +87,8 @@ namespace fastbird{
 
 		unsigned GetNumMeshes() const;
 		const Vec3& GetMeshOffset(unsigned idx) const;
-		void SetMeshRotation(unsigned idx, const Quat& rot);
+		void SetMeshRotation(unsigned idx, const Quat& rot);		
+		SpatialObjectPtr GetSpatialObject() const;
+		void AddAsCloudVolume(ScenePtr scene);
 	};
 }
