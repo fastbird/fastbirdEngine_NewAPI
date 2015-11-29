@@ -384,3 +384,7 @@ void RenderStrategyMinimum::DepthTexture(bool bind){
 void RenderStrategyMinimum::OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName){
 	mImpl->OnRendererOptionChanged(options, optionName);
 }
+
+TexturePtr RenderStrategyMinimum::GetShadowMap(){
+	return mImpl->mShadowMap;
+}

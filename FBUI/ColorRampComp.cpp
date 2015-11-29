@@ -168,7 +168,7 @@ void ColorRampComp::SetColorRampValuesFloats(const std::vector<float>& values)
 		mBars.push_back(bar);
 		bar->ModifySize(Vec2I(0, -10));
 		bar->SetAlign(ALIGNH::CENTER, ALIGNV::MIDDLE);
-		bar->SetProperty(UIProperty::TEXTUREATLAS, "es/textures/ui.xml");
+		bar->SetProperty(UIProperty::TEXTUREATLAS, "EssentialEngineData/textures/ui.xml");
 		bar->SetProperty(UIProperty::REGION, "BarComp");
 		bar->SetProperty(UIProperty::HOVER_IMAGE, "BarCompHover");
 		bar->SetProperty(UIProperty::DRAGABLE, "1, 0");

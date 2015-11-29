@@ -90,12 +90,12 @@ namespace fastbird
 		if (indent != 0)
 		{
 			char buffer[255];
-			sprintf_s(buffer, 255, "%s[Profiler] %s takes %f secs.", sp, mName.c_str(), elapsedTime);
+			sprintf_s(buffer, 255, "%s[Profiler] %s takes %f secs.\n", sp, mName.c_str(), elapsedTime);
 			msgs.push(buffer);
 		}
 		else
 		{
-			DebugOutput("%s[Profiler] %s takes %f secs.", sp, mName.c_str(), elapsedTime);
+			DebugOutput("%s[Profiler] %s takes %f secs.\n", sp, mName.c_str(), elapsedTime);
 			// print stack
 			while (!msgs.empty())
 			{

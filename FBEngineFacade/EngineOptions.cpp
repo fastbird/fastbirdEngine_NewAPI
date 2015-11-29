@@ -14,10 +14,7 @@ EngineOptions::EngineOptions(){
 	FB_REGISTER_CVAR(WheelSens, WheelSens, CVAR_CATEGORY_CLIENT, "WheelSensitivity");
 
 	MouseSens = Console::GetInstance().GetRealVariable("MouseSens", 0.03f);
-	FB_REGISTER_CVAR(MouseSens, MouseSens, CVAR_CATEGORY_CLIENT, "MouseSensitivity");
-
-	FB_REGISTER_CVAR(MoveEditParticle, 0, CVAR_CATEGORY_CLIENT, "MoveEditParticle");
-	
+	FB_REGISTER_CVAR(MouseSens, MouseSens, CVAR_CATEGORY_CLIENT, "MouseSensitivity");	
 }
 
 EngineOptions::~EngineOptions(){

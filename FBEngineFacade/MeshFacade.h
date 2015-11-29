@@ -1,6 +1,8 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
+#include "FBRenderer/PrimitiveTopology.h"
 #include "FBSceneManager/SceneObjectFlag.h"
+#include "FBSceneObjectFactory/MeshVertexBufferType.h"
 #include "CollisionShapeInfo.h"
 #include "MeshLoadOptions.h"
 namespace fastbird{
@@ -9,6 +11,7 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(SpatialObject);
 	FB_DECLARE_SMART_PTR(BoundingVolume);
 	FB_DECLARE_SMART_PTR(Material);
+	FB_DECLARE_SMART_PTR(MeshObject);
 	FB_DECLARE_SMART_PTR(MeshFacade);
 	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(IScene);
@@ -19,9 +22,15 @@ namespace fastbird{
 
 	public:
 		static MeshFacadePtr Create();		
-		bool LoadMeshObject(const char* daePath);
-		bool LoadMeshObject(const char* daePath, const MeshLoadOptions& options);
-		bool LoadMeshGroup(const char* daePath);
+		/// Returned self.
+		MeshFacadePtr LoadMeshObject(const char* daePath);
+		MeshFacadePtr LoadMeshObject(const char* daePath, const MeshLoadOptions& options);
+		MeshFacadePtr CreateEmptyMeshObject();
+		MeshFacadePtr LoadMeshGroup(const char* daePath);
+		/// Internal purpose
+		void SetMeshObject(MeshObjectPtr mesh);
+		MeshFacadePtr Clone();
+		const char* GetName() const;
 
 		bool IsVaildMesh() const;
 		bool IsMeshObject() const;
@@ -37,6 +46,8 @@ namespace fastbird{
 		void SetMaterialParameter(unsigned idx, const Vec4& value);
 		void SetMaterial(MaterialPtr material);
 		void SetMaterial(const char* path);
+		void SetVisible(bool visible);
+		bool GetVisible() const;
 		bool AttachToScene();
 		/// Attach to the current scene which is bound to the current render target.
 		bool AttachToCurrentScene();
@@ -65,12 +76,14 @@ namespace fastbird{
 		const Transformation& GetTransformation() const;
 		void SetTransformation(const Transformation& transform);
 		void SetPosition(const Vec3& pos);
+		const Vec3& GetPosition() const;
 		void SetRotation(const Quat& rot);
+		const Quat& GetRotation() const;
 		void SetScale(const Vec3& scale);
 		const BoundingVolumePtr GetBoundingVolume() const;
 		const BoundingVolumePtr GetBoundingVolumeWorld() const;
 		bool RayCast(const Ray3& ray, Vec3& pos, const ModelTriangle** tri);
-		bool CheckNarrowCollision(BoundingVolumePtr bv);
+		bool CheckNarrowCollision(const BoundingVolume* bv);
 		Ray3::IResult CheckNarrowCollisionRay(const Ray3& ray);
 		bool HasCollisionShapes() const;		
 		CollisionShapeInfos GetCollisionShapeInfos() const;
@@ -90,5 +103,17 @@ namespace fastbird{
 		void SetMeshRotation(unsigned idx, const Quat& rot);		
 		SpatialObjectPtr GetSpatialObject() const;
 		void AddAsCloudVolume(ScenePtr scene);
+		void SetUseDynamicVB(MeshVertexBufferType::Enum type, bool use);
+		void StartModification();
+		void SetPositions(int matGroupIdx, const Vec3* p, size_t numVertices);
+		void SetNormals(int matGroupIdx, const Vec3* n, size_t numNormals);
+		void SetUVs(int matGroupIdx, const Vec2* uvs, size_t numUVs);
+		void SetColors(int matGroupIdx, const DWORD* colors, size_t numColors);
+		void EndModification(bool keepMeshData);
+		void SetTopology(PRIMITIVE_TOPOLOGY topology);
+		void ClearVertexBuffers();
+		void SetRadius(Real r);
+		Real GetRadius() const;
+		Vec3* GetPositionVertices(int matGroupIdx, size_t& outNumPositions);
 	};
 }

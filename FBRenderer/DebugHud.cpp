@@ -148,7 +148,7 @@ public:
 		mObjectConstants_WorldLine.gWorldViewProj.MakeIdentity();
 		auto& renderer = Renderer::GetInstance();
 		mLineShader = renderer.CreateShader(
-			"es/shaders/Line.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
+			"EssentialEnginedata/shaders/Line.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
 
 		mInputLayout = renderer.GetInputLayout(DEFAULT_INPUTS::POSITION_COLOR, mLineShader);
 		mVertexBuffer = renderer.CreateVertexBuffer(0, LINE_STRIDE, MAX_LINE_VERTEX,

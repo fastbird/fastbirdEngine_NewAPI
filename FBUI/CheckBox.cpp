@@ -74,9 +74,9 @@ void CheckBox::OnCreated()
 	
 
 	if (mChecked)
-		imageBox->SetTextureAtlasRegion("es/textures/ui.xml", "checkbox_checked");
+		imageBox->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "checkbox_checked");
 	else
-		imageBox->SetTextureAtlasRegion("es/textures/ui.xml", "checkbox_unchecked");
+		imageBox->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "checkbox_unchecked");
 }
 
 void CheckBox::GatherVisit(std::vector<UIObject*>& v)
@@ -118,9 +118,9 @@ void CheckBox::UpdateImage()
 	if (imageBox)
 	{
 		if (mChecked)
-			imageBox->SetTextureAtlasRegion("es/textures/ui.xml", "checkbox_checked");
+			imageBox->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "checkbox_checked");
 		else
-			imageBox->SetTextureAtlasRegion("es/textures/ui.xml", "checkbox_unchecked");
+			imageBox->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "checkbox_unchecked");
 	}
 }
 

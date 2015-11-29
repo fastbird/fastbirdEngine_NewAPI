@@ -63,17 +63,18 @@ namespace fastbird{
 		Logger::Log(FB_DEFAULT_LOG_ARG_NO_LINE, FormatString("Trying to load a module(%s)... ", buf).c_str());
 		HMODULE module = LoadLibraryA(buf);
 		if (!module) {
-			Logger::Log(FB_ERROR_LOG_ARG, "\tFailed.");
+			Logger::Log("\tFailed.\n");
+			strcpy_s(buf, MAX_PATH, path);
 			strcat_s(buf, MAX_PATH, ".dll");
 			Logger::Log(FB_DEFAULT_LOG_ARG_NO_LINE, FormatString("Trying to load a module(%s)... ", buf).c_str());
 			module = LoadLibraryA(buf);
 		}		
 		
 		if (!module) {
-			Logger::Log(FB_ERROR_LOG_ARG, "\tFailed.");
+			Logger::Log("\tFailed.\n");
 		}
 		else{
-			Logger::Log(FB_DEFAULT_LOG_ARG, "\tSucceeded.");
+			Logger::Log("\tSucceeded.\n");
 		}
 		return (intptr_t)module;
 #else

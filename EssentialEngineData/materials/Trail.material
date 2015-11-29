@@ -2,7 +2,7 @@
 	<BlendDesc BlendEnalbe="true" BlendOp="BLEND_OP_ADD" SrcBlend="BLEND_SRC_ALPHA" DestBlend="BLEND_ONE"/>
 	<DepthStencilDesc DepthEnable="true" DepthWriteMask="DEPTH_WRITE_MASK_ZERO"/>
 	<RasterizerDesc CullMode="CULL_MODE_NONE"/>
-	<ShaderFile>es/Shaders/Trail.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/Trail.hlsl</ShaderFile>
 	<Shaders>VS|GS|PS</Shaders>
 	<MaterialConstants>
 		<AmbientColor>0.15, 0.15, 0.15, 1</AmbientColor>
@@ -11,7 +11,7 @@
 		<EmissiveColor_Strength>0, 0, 0, 0</EmissiveColor_Strength>
 	</MaterialConstants>
 	<Textures>
-		<Texture slot="0" shader="ps" AddressU="Wrap" AddressV="Wrap">es/textures/trail.dds</Texture>
+		<Texture slot="0" shader="ps" AddressU="Wrap" AddressV="Wrap">EssentialEngineData/textures/trail.dds</Texture>
 	</Textures>
 	<MaterialParameters>
 		<param desc="width">0.025, 0, 0, 0</param>

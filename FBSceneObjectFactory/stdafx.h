@@ -36,9 +36,11 @@
 #define FB_DLL_ANIMATION
 #endif
 
+#include <assert.h>
+#include <queue>
+
 #include "FBCommonHeaders/platform.h"
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 #include "FBMathLib/Math.h"
 #include "FBTimer/Timer.h"
-#include <queue>

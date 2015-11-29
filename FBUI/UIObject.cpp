@@ -96,7 +96,7 @@ public:
 		, mNeedToUpdateColorVB(false)
 		, mNeedToUpdateTexcoordVB(false)
 	{
-		SetMaterial("es/materials/UI.material");
+		SetMaterial("EssentialEngineData/materials/UI.material");
 		mOwnerUI = 0;
 		mTextColor = Color(0.8f, 0.8f, 0.8f);
 

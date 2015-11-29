@@ -144,9 +144,9 @@ public:
 		mObjectConstants_WorldLine.gWorldViewProj.MakeIdentity();
 		auto& renderer = Renderer::GetInstance();
 		mLineShader = renderer.CreateShader(
-			"es/shaders/Line.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+			"EssentialEnginedata/shaders/Line.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		mInputLayout = renderer.GetInputLayout(DEFAULT_INPUTS::POSITION_COLOR, mLineShader);
-		mThickLineMaterial = renderer.CreateMaterial("es/materials/ThickLine.material");
+		mThickLineMaterial = renderer.CreateMaterial("EssentialEngineData/materials/ThickLine.material");
 		mVertexBuffer = renderer.CreateVertexBuffer(0, LINE_STRIDE, MAX_LINE_VERTEX,
 			BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
 		mVertexBufferThickLine = renderer.CreateVertexBuffer(0, THICK_LINE_STRIDE, MAX_LINE_VERTEX,

@@ -54,7 +54,7 @@ TextField::TextField()
 	, mCursorOffset(0)
 {
 	mUIObject = UIObject::Create(GetRenderTargetSize());
-	mUIObject->SetMaterial("es/Materials/UITextField.material");
+	mUIObject->SetMaterial("EssentialEngineData/materials/UITextField.material");
 	mUIObject->mOwnerUI = this;
 	mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 	mUIObject->SetTextColor(mTextColor);
@@ -327,7 +327,7 @@ void TextField::SetUseBorder(bool use)
 		T->SetRender3D(mRender3D, GetRenderTargetSize());
 		T->SetManualParent(mSelfPtr.lock());
 		T->ChangeSizeY(1);
-		T->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		T->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 
 		auto L = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
@@ -336,7 +336,7 @@ void TextField::SetUseBorder(bool use)
 		L->SetRender3D(mRender3D, GetRenderTargetSize());
 		L->SetManualParent(mSelfPtr.lock());
 		L->ChangeSizeX(1);
-		L->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		L->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 		auto R = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 		R->SetHwndId(GetHwndId());
@@ -345,7 +345,7 @@ void TextField::SetUseBorder(bool use)
 		R->SetManualParent(mSelfPtr.lock());
 		R->SetAlign(ALIGNH::RIGHT, ALIGNV::TOP);
 		R->ChangeSizeX(1);
-		R->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		R->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 
 		auto B = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
@@ -355,7 +355,7 @@ void TextField::SetUseBorder(bool use)
 		B->SetManualParent(mSelfPtr.lock());
 		B->SetAlign(ALIGNH::LEFT, ALIGNV::BOTTOM);
 		B->ChangeSizeY(1);
-		B->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		B->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 		auto LT = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 		LT->SetHwndId(GetHwndId());
@@ -363,7 +363,7 @@ void TextField::SetUseBorder(bool use)
 		LT->SetRender3D(mRender3D, GetRenderTargetSize());
 		LT->SetManualParent(mSelfPtr.lock());
 		LT->ChangeSize(Vec2I(1, 1));
-		LT->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		LT->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 		auto RT = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 		RT->SetHwndId(GetHwndId());
@@ -372,7 +372,7 @@ void TextField::SetUseBorder(bool use)
 		RT->SetManualParent(mSelfPtr.lock());
 		RT->ChangeSize(Vec2I(1, 1));
 		RT->SetAlign(ALIGNH::RIGHT, ALIGNV::TOP);
-		RT->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		RT->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 		auto LB = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 		LB->SetHwndId(GetHwndId());
@@ -381,7 +381,7 @@ void TextField::SetUseBorder(bool use)
 		LB->SetManualParent(mSelfPtr.lock());
 		LB->ChangeSize(Vec2I(1, 1));
 		LB->SetAlign(ALIGNH::LEFT, ALIGNV::BOTTOM);
-		LB->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		LB->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 		auto RB = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));
 		RB->SetHwndId(GetHwndId());
@@ -390,7 +390,7 @@ void TextField::SetUseBorder(bool use)
 		RB->SetManualParent(mSelfPtr.lock());
 		RB->ChangeSize(Vec2I(1, 1));
 		RB->SetAlign(ALIGNH::RIGHT, ALIGNV::BOTTOM);
-		RB->SetTextureAtlasRegion("es/textures/ui.xml", "ThinBorder");
+		RB->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "ThinBorder");
 
 		RefreshBorder();
 		RefreshScissorRects();

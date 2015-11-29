@@ -102,6 +102,7 @@ public:
 		: mStandBy(false)
 		, mUseShaderCache(true)
 		, mGenerateShaderCache(true)
+		, mDepthStencilFormat(PIXEL_FORMAT_D24_UNORM_S8_UINT)
 	{
 		IDXGIFactory1* dxgiFactory;
 		HRESULT hr;
@@ -929,7 +930,7 @@ public:
 			fopen_s(&file, filepath.c_str(), "rb");
 			if (file == 0)
 			{
-				const char* paths[] = { "es/shaders/"
+				const char* paths[] = { "EssentialEnginedata/shaders/"
 				};
 				for (int i = 0; i < ARRAYCOUNT(paths); i++)
 				{

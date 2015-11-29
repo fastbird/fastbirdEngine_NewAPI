@@ -50,23 +50,31 @@ namespace fastbird{
 		typedef std::vector<SpatialSceneObject*> SPATIAL_OBJECTS_RAW;
 		static ScenePtr Create(const char* name);		
 		
-		const char* GetName() const;
-		void Update(TIME_PRECISION dt);
+		
+		//---------------------------------------------------------------------------
+		// IScene interface
+		//---------------------------------------------------------------------------
 		void AddSceneObserver(int ISceneObserverEnum, ISceneObserverPtr observer);
 		void GetDirectionalLightInfo(DirectionalLightIndex::Enum index, DirectionalLightInfo& data);
 		const Vec3& GetMainLightDirection();
 		void SetLightDirection(DirectionalLightIndex::Enum idx, const Vec3& dir);
 		void PreRender(const RenderParam& prarm, RenderParamOut* paramOut);
 		void Render(const RenderParam& prarm, RenderParamOut* paramOut);		
-
-		/// Returns currently rendering pass which is RenderParam.mRenderPass when the Render() is called.
-		int GetRenderPass() const;
-
+		void PreRenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
+		void RenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
+		const Color& GetFogColor() const;	
+		void AttachSkySphere(SkySpherePtr p);
+		void DetachSkySphere();
 		bool AttachObjectFB(SceneObjectPtr object, SceneObject* rawPointer);
 		bool DetachObject(SceneObject* object);
-
 		bool AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer);
 		bool DetachObject(SpatialSceneObject* object);
+
+		//---------------------------------------------------------------------------
+		const char* GetName() const;
+		void Update(TIME_PRECISION dt);
+		/// Returns currently rendering pass which is RenderParam.mRenderPass when the Render() is called.
+		int GetRenderPass() const;
 
 		void SetSkipSpatialObjects(bool skip);
 		void ClearEverySpatialObject();
@@ -75,9 +83,7 @@ namespace fastbird{
 		do not keep any pointer. */
 		const SPATIAL_OBJECTS_RAW* GetVisibleSpatialList(ICameraPtr cam);
 		void PrintSpatialObject();
-
-		void AttachSkySphere(SkySpherePtr p);		
-		void DetachSkySphere();
+		
 		SkySpherePtr GetSkySphere();		
 		void ToggleSkyRendering();
 		void SetSkyRendering(bool render);
@@ -88,10 +94,7 @@ namespace fastbird{
 		/** p is a MeshObject*/
 		void AddCloudVolume(SpatialSceneObjectPtr p);
 		void ClearClouds();
-		void PreRenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
-		void RenderCloudVolumes(const RenderParam& prarm, RenderParamOut* paramOut);
-				
-		const Color& GetFogColor() const;
+		
 		void SetFogColor(const Color& c);
 		void SetDrawClouds(bool e);
 

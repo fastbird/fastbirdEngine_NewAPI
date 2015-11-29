@@ -197,7 +197,7 @@ public:
 		{
 			if (c->mName == cvar->mName || c == cvar)
 			{
-				Logger::Log(FB_ERROR_LOG_ARG, FormatString("The same name of CVar(%s) already exists.", cvar->mName).c_str());				
+				Logger::Log(FB_ERROR_LOG_ARG, FormatString("The same name of CVar(%s) already exists.", cvar->mName.c_str()).c_str());				
 				return;
 			}
 		}
@@ -206,7 +206,7 @@ public:
 		{
 			if (c->mName == cvar->mName)
 			{
-				Logger::Log(FB_ERROR_LOG_ARG, FormatString("The same name of CFunc(%s) already exists.", cvar->mName).c_str());
+				Logger::Log(FB_ERROR_LOG_ARG, FormatString("The same name of CFunc(%s) already exists.", cvar->mName.c_str()).c_str());
 			}
 		}
 

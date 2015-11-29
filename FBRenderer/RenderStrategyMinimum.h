@@ -54,5 +54,6 @@ namespace fastbird{
 		void GlowRenderTarget(bool bind);
 		void DepthTexture(bool bind);
 		void OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName);
+		TexturePtr GetShadowMap();
 	};
 }

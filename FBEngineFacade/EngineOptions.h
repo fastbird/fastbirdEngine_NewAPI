@@ -11,7 +11,6 @@ namespace fastbird{
 
 		float WheelSens;
 		float MouseSens;
-		int MoveEditParticle;
 		int e_profile;
 		int e_NoMeshLoad;	
 	};

@@ -82,29 +82,11 @@ public:
 	//---------------------------------------------------------------------------
 	Impl(TaskScheduler* self, int numThread)
 		: mSelf(self)
-		, mFinalize(false)
+		, mFinalize(false)		
 	{
-		mSchedulingSlices = 0;
-		for (int i = 0; i<ARRAYCOUNT(mActiveTasksMap); i++)
-		{
-			mActiveTasksMap[i] = NULL;
-		}
-
+		gTaskScheduler = self;
 		mNumWorkerThreads = (numThread == 0) ? GetNumProcessors() : numThread;
 		assert(mNumWorkerThreads > 0);
-
-		mWorkerThreads.assign(mNumWorkerThreads, 0);
-
-		for (int i = 0; i<mNumWorkerThreads; i++)
-		{
-			mWorkerThreads[i] = new WorkerThread(mSelf);
-			AddIdleWorker(mWorkerThreads[i]);
-		}
-
-		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Task Scheduler initialized using %d worker threads\n", mNumWorkerThreads).c_str());		
-
-		gScheduleSliceEvent = CreateSyncEvent(false);
-		mSchedulerThread = std::thread(Scheduler);
 	}
 
 	~Impl(){
@@ -126,6 +108,26 @@ public:
 		}
 	}
 
+	void Init(){
+		mSchedulingSlices = 0;
+		for (int i = 0; i<ARRAYCOUNT(mActiveTasksMap); i++)
+		{
+			mActiveTasksMap[i] = NULL;
+		}		
+
+		mWorkerThreads.assign(mNumWorkerThreads, 0);
+
+		for (int i = 0; i<mNumWorkerThreads; i++)
+		{
+			mWorkerThreads[i] = new WorkerThread(mSelf);
+			AddIdleWorker(mWorkerThreads[i]);
+		}
+
+		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Task Scheduler initialized using %d worker threads\n", mNumWorkerThreads).c_str());
+
+		gScheduleSliceEvent = CreateSyncEvent(false);
+		mSchedulerThread = std::thread(Scheduler);
+	}
 	//---------------------------------------------------------------------------
 	// Public
 	//---------------------------------------------------------------------------
@@ -360,7 +362,7 @@ TaskSchedulerPtr TaskScheduler::Create(int numThreads){
 TaskScheduler::TaskScheduler(int NumThreads)
 	: mImpl(new Impl(this, NumThreads))
 {
-	gTaskScheduler = this;
+	mImpl->Init();
 }
 
 void TaskScheduler::AddTask(TaskPtr NewTask){

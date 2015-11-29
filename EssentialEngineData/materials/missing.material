@@ -1,5 +1,5 @@
 <Material>
-	<ShaderFile>es/shaders/Mesh.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/Mesh.hlsl</ShaderFile>
 	<MaterialConstants>
 		<AmbientColor>0.15, 0.15, 0.15, 1</AmbientColor>
 		<DiffuseColor_Alpha>1, 0, 0, 1</DiffuseColor_Alpha>
@@ -7,7 +7,7 @@
 		<EmissiveColor_Strength>0, 0, 0, 0</EmissiveColor_Strength>
 	</MaterialConstants>
 	<Textures>
-		<Texture slot="0" shader="ps" AddressU="Wrap" AddressV="Wrap">es/textures/missingmaterial.dds</Texture>
+		<Texture slot="0" shader="ps" AddressU="Wrap" AddressV="Wrap">EssentialEngineData/textures/missingmaterial.dds</Texture>
 	</Textures>
 	<MaterialParameters>
 	</MaterialParameters>

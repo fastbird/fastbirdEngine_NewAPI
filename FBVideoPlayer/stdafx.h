@@ -36,6 +36,7 @@
 #define FB_DLL_AUDIO
 #endif
 
+#include <assert.h>
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 

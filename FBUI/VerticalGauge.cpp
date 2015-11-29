@@ -54,7 +54,7 @@ VerticalGauge::VerticalGauge()
 	}
 
 	mUIObject = UIObject::Create(GetRenderTargetSize());
-	mUIObject->SetMaterial("es/Materials/UIVerticalGauge.material");
+	mUIObject->SetMaterial("EssentialEngineData/materials/UIVerticalGauge.material");
 	mUIObject->mOwnerUI = this;
 	mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 
@@ -359,7 +359,7 @@ void VerticalGauge::SetTextureAtlasRegion(UIProperty::Enum prop, const char* reg
 		if (!mMaterialUsingImage)
 		{
 			mMaterialUsingImage = true;
-			mUIObject->SetMaterial("es/Materials/UIVerticalGaugeImage.material");
+			mUIObject->SetMaterial("EssentialEngineData/materials/UIVerticalGaugeImage.material");
 			mUIObject->GetMaterial()->SetMaterialParameter(1, Vec4(mPercentage, mMaximum, 0, 0));
 		}
 		mTextures[index] = mTextureAtlas->GetTexture();

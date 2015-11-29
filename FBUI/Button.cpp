@@ -56,7 +56,7 @@ namespace fastbird
 		, mImageSize(0, 0)
 	{
 		mUIObject = UIObject::Create(GetRenderTargetSize());
-		mUIObject->SetMaterial("es/Materials/UIButton.material");
+		mUIObject->SetMaterial("EssentialEngineData/materials/UIButton.material");
 		mUIObject->mOwnerUI = this;
 		mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 		mTextColor = Color(1.0f, 0.92f, 0.0f);

@@ -54,7 +54,7 @@ void RadioBox::OnCreated(){
 		AddChild(Vec2I(0, 0), Vec2I(mSize.y, mSize.y), ComponentType::ImageBox));
 	mRadioImageBox = imageBox;
 	imageBox->SetRuntimeChild(true);	
-	imageBox->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_unchecked");
+	imageBox->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "radiobox_unchecked");
 	imageBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_LEFT_CLICK,
 		std::bind(&RadioBox::OnChildrenClicked, this, std::placeholders::_1));
 	imageBox->RegisterEventFunc(UIEvents::EVENT_MOUSE_HOVER,
@@ -198,9 +198,9 @@ void RadioBox::UpdateImage()
 	if (!image)
 		return;
 	if (mChecked)
-		image->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_checked");
+		image->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "radiobox_checked");
 	else
-		image->SetTextureAtlasRegion("es/textures/ui.xml", "radiobox_unchecked");
+		image->SetTextureAtlasRegion("EssentialEngineData/textures/ui.xml", "radiobox_unchecked");
 }
 
 void RadioBox::OnMouseHover(void* arg)

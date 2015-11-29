@@ -199,9 +199,9 @@ void WinBase::OnResolutionChanged(HWindowId hwndId){
 
 HWindowId WinBase::GetHwndId() const
 {
-	auto root = GetRootWnd();
+	auto root = GetRootWndRaw();
 	assert(root);	
-	if (root.get() == this)
+	if (root == this)
 	{
 		return mHwndId;
 	}
@@ -2303,7 +2303,7 @@ void WinBase::RecreateBorders(){
 		const char* atts[] = {
 			"t", "l", "r", "b", "lt", "rt", "lb", "rb"
 		};
-		const char* uixmlPath = "es/textures/ui.xml";
+		const char* uixmlPath = "EssentialEngineData/textures/ui.xml";
 		for (auto i = 0; i < ORDER_NUM; ++i){
 			const char* borderRegion = um.GetBorderRegion(atts[i]);
 			const auto& size = mBorders[i]->SetTextureAtlasRegion(uixmlPath, borderRegion);
@@ -2312,7 +2312,7 @@ void WinBase::RecreateBorders(){
 	}
 	else{
 		auto& um = UIManager::GetInstance();
-		const char* uixmlPath = "es/textures/ui.xml";
+		const char* uixmlPath = "EssentialEngineData/textures/ui.xml";
 		auto T = std::static_pointer_cast<ImageBox>(um.CreateComponent(ComponentType::ImageBox));
 		T->SetHwndId(GetHwndId());
 		mBorders.push_back(T);
@@ -3462,7 +3462,7 @@ Vec2I WinBase::GetRenderTargetSize() const
 	}
 	else
 	{
-		auto root = GetRootWnd();
+		auto root = GetRootWndRaw();
 		assert(root);
 		auto hwndId = root->GetHwndId();
 		return Renderer::GetInstance().GetRenderTargetSize(hwndId);
@@ -3488,6 +3488,16 @@ WinBasePtr WinBase::GetRootWnd() const
 	if (manualParent)
 		return manualParent->GetRootWnd();
 	return mSelfPtr.lock();
+}
+
+WinBase* WinBase::GetRootWndRaw() const{
+	auto parent = mParent.lock();
+	if (parent)
+		return parent->GetRootWndRaw();
+	auto manualParent = mManualParent.lock();
+	if (manualParent)
+		return manualParent->GetRootWndRaw();
+	return (WinBase*)this;
 }
 
 void WinBase::OnDrag(int dx, int dy)

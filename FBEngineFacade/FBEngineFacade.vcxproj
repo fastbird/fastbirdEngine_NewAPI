@@ -88,6 +88,7 @@
     <ClCompile Include="BillboardQuadFacade.cpp" />
     <ClCompile Include="DustFacade.cpp" />
     <ClCompile Include="EngineFacade.cpp" />
+    <ClCompile Include="EngineFacadeDLL.cpp" />
     <ClCompile Include="EngineOptions.cpp" />
     <ClCompile Include="MeshFacade.cpp" />
     <ClCompile Include="ParticleEmitterFacade.cpp" />
@@ -108,6 +109,9 @@
     </ProjectReference>
     <ProjectReference Include="..\FBFileMonitor\FBFileMonitor.vcxproj">
       <Project>{288dc950-fe81-430a-ba47-933cb0875e8e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\FBFileSystem\FBFileSystem.vcxproj">
+      <Project>{970770a8-f3c4-43ad-b4a0-c076ec6fe610}</Project>
     </ProjectReference>
     <ProjectReference Include="..\FBInputManager\FBInputManager.vcxproj">
       <Project>{c8797aa0-b737-4f09-a6a4-131350b54bc9}</Project>

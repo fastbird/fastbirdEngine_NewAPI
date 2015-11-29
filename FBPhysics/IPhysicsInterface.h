@@ -39,10 +39,10 @@ namespace fastbird
 
 		// col shape provider
 		virtual bool IsGroupedBody() const { return false; }
-		virtual unsigned GetShapesForGroup(const Vec3I& groupIdx, CollisionShapePtr shapes[], unsigned maxNum) const { assert(0); return 0; }
-		virtual unsigned GetNumGroups() const { assert(0); return 0; }
-		virtual unsigned GetNumColShapes(const Vec3I& groupIdx) { assert(0); return 0; }
-		virtual float GetMassForGroup(const Vec3I& group) const { assert(0); return 0; }
+		virtual unsigned GetShapesForGroup(const Vec3I& groupIdx, CollisionShapePtr shapes[], unsigned maxNum) const { return 0; }
+		virtual unsigned GetNumGroups() const { return 0; }
+		virtual unsigned GetNumColShapes(const Vec3I& groupIdx) { return 0; }
+		virtual float GetMassForGroup(const Vec3I& group) const { return 0; }
 
 		virtual unsigned GetNumColShapes() const = 0;		
 		virtual fastbird::CollisionShapePtr GetShape(unsigned i) = 0;

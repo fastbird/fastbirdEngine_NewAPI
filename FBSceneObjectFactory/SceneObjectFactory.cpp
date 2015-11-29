@@ -61,6 +61,7 @@ public:
 	// key is lower case.
 	VectorMap<std::string, DataHolder<MeshObjectPtr> > mMeshObjects;
 	VectorMap<std::string, DataHolder<MeshGroupPtr> > mMeshGroups;
+	std::map<std::string, std::vector< MeshObjectPtr >  > mFractureObjects;
 	bool mNoMesh;
 
 	SkySphereWeakPtr mNextEnvUpdateSky;
@@ -218,7 +219,7 @@ public:
 		std::string filepath(daeFilePath);
 		if (mNoMesh)
 		{
-			filepath = "es/objects/defaultCube.dae";
+			filepath = "EssentialEngineData/objects/defaultCube.dae";
 		}
 		std::string filepathKey = filepath;
 		ToLowerCase(filepathKey);
@@ -256,6 +257,53 @@ public:
 			}
 			return 0;
 		}
+	}
+
+	std::vector<MeshObjectPtr> CreateMeshObjects(const char* daeFilePath, const MeshImportDesc& desc){
+		std::vector<MeshObjectPtr> ret;
+		if (!ValidCStringLength(daeFilePath)) {
+			Logger::Log(FB_ERROR_LOG_ARG, "Invalid arg.");
+			return ret;
+		}
+		std::string filepath(daeFilePath);
+		if (mNoMesh)
+		{
+			filepath = "EssentialEngineData/objects/defaultCube.dae";
+		}
+		std::string filepathKey = filepath;
+		ToLowerCase(filepathKey);
+
+		auto it = mFractureObjects.find(filepathKey);
+		if (it != mFractureObjects.end()){
+			for (auto mesh : it->second){
+				ret.push_back(mesh->Clone());
+			}
+			return ret;
+		}
+
+		auto pColladaImporter = ColladaImporter::Create();
+		ColladaImporter::ImportOptions option;
+		option.mMergeMaterialGroups = desc.mergeMaterialGroups;
+		option.mOppositeCull = desc.oppositeCull;
+		option.mSwapYZ = desc.yzSwap;
+		option.mUseIndexBuffer = desc.useIndexBuffer;
+		option.mUseMeshGroup = false;
+		pColladaImporter->ImportCollada(filepath.c_str(), option);
+		auto& fractureObjects = mFractureObjects[filepathKey];
+		auto meshIt = pColladaImporter->GetMeshIterator();
+		if (!meshIt.HasMoreElement()){
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to load fracture mehses(%s)", daeFilePath).c_str());
+		}
+		while (meshIt.HasMoreElement()){
+			auto meshObject = ConvertMeshData(meshIt.GetNext().second, desc.generateTangent, desc.keepMeshData);
+			if (meshObject){
+				fractureObjects.push_back(meshObject);
+			}
+		}
+		for (auto mesh : fractureObjects){
+			ret.push_back(mesh->Clone());
+		}
+		return ret;
 	}
 
 	MeshObjectConstPtr GetMeshArcheType(const char* name){
@@ -301,7 +349,7 @@ public:
 		std::string filepath(daeFilePath);
 		if (mNoMesh)
 		{
-			filepath = "es/objects/defaultCube.dae";
+			filepath = "EssentialEngineData/objects/defaultCube.dae";
 		}
 		std::string filepathKey = filepath;
 		ToLowerCase(filepathKey);
@@ -407,6 +455,10 @@ MeshObjectPtr SceneObjectFactory::CreateMeshObject(const char* daeFilePath) {
 
 MeshObjectPtr SceneObjectFactory::CreateMeshObject(const char* daeFilePath, const MeshImportDesc& desc) {
 	return mImpl->CreateMeshObject(daeFilePath, desc);
+}
+
+std::vector<MeshObjectPtr> SceneObjectFactory::CreateMeshObjects(const char* daeFilePath, const MeshImportDesc& desc){
+	return mImpl->CreateMeshObjects(daeFilePath, desc);
 }
 
 MeshObjectConstPtr SceneObjectFactory::GetMeshArcheType(const char* name) {

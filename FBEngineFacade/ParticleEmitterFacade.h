@@ -2,7 +2,7 @@
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
 	FB_DECLARE_SMART_PTR(ParticleEmitterFacade);
-	class ParticleEmitterFacade{
+	class FB_DLL_ENGINEFACADE ParticleEmitterFacade{
 		FB_DECLARE_PIMPL_NON_COPYABLE(ParticleEmitterFacade);
 		ParticleEmitterFacade();
 		~ParticleEmitterFacade();

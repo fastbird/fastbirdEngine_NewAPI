@@ -210,6 +210,11 @@ void Transformation::AddRotation (const Quat& addR)
 	SetRotation(ret);
 }
 
+const Quat& Transformation::GetRotation() const{
+	assert(mRSSeperated);
+	return mR;
+}
+
 //----------------------------------------------------------------------------
 void Transformation::SetTranslation (const Vec3& t)
 {
@@ -221,6 +226,10 @@ void Transformation::AddTranslation(const Vec3& addT)
 {
 	mT +=addT;
     mIdentity = false;
+}
+
+const Vec3& Transformation::GetTranslation() const{
+	return mT;
 }
 
 //----------------------------------------------------------------------------
@@ -253,6 +262,11 @@ void Transformation::AddScale(const Vec3& s)
 		mUniformScale = false;
 }
 
+const Vec3& Transformation::GetScale() const{
+	assert(mRSSeperated);
+	return mS;
+}
+
 //----------------------------------------------------------------------------
 void Transformation::SetUniformScale (Real fScale)
 {
@@ -262,6 +276,11 @@ void Transformation::SetUniformScale (Real fScale)
     mUniformScale = true;
 }
 
+Real Transformation::GetUniformScale() const{
+	assert(mRSSeperated && mUniformScale);
+	return mS.x;
+}
+
 //----------------------------------------------------------------------------
 void Transformation::SetMatrix (const Mat33& mat)
 {
@@ -269,6 +288,11 @@ void Transformation::SetMatrix (const Mat33& mat)
     mIdentity = false;
     mRSSeperated = false;
     mUniformScale = false;
+}
+
+const Mat33& Transformation::GetMatrix() const{
+	assert(mRSSeperated);
+	return mMat;
 }
 
 //----------------------------------------------------------------------------

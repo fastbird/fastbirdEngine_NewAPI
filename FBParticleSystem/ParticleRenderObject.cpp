@@ -66,7 +66,7 @@ public:
 		, mMaxVertices(MAX_SHARED_VERTICES)
 		, mLastFrameNumVertices(0)
 	{
-		mMaterial = Renderer::GetInstance().CreateMaterial("es/materials/particle.material");
+		mMaterial = Renderer::GetInstance().CreateMaterial("EssentialEngineData/materials/particle.material");
 		mSelf->GetBoundingVolumeWorld()->SetAlwaysPass(true);
 	}
 

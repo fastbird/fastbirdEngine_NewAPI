@@ -69,7 +69,7 @@ public:
 		, mDeleteTime(2.f)
 		, mLastPoint(0, 0, 0)
 	{
-		mMaterial = Renderer::GetInstance().CreateMaterial("es/materials/Trail.material");
+		mMaterial = Renderer::GetInstance().CreateMaterial("EssentialEngineData/materials/Trail.material");
 	}
 
 	// IRenderable

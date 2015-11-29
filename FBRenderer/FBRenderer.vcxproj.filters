@@ -75,6 +75,7 @@
       <Filter>Enum&amp;Structures</Filter>
     </ClInclude>
     <ClInclude Include="RenderableObject.h" />
+    <ClInclude Include="PrimitiveTopology.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer.cpp" />
@@ -116,6 +117,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="RendererOptions.cpp" />
     <ClCompile Include="ConsoleRenderer.cpp" />
+    <ClCompile Include="RendererDLL.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Enum&amp;Structures">

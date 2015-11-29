@@ -130,6 +130,10 @@ public:
 		, mFilterCallback(0)
 		, mEnabled(true)
 	{
+		Initilaize();
+	}
+	~Impl(){
+		Deinitialize();
 	}
 
 
@@ -159,7 +163,7 @@ public:
 		//solverInfo.m_splitImpulsePenetrationThreshold = -0.02;
 	}
 
-	void Deinitilaize(){
+	void Deinitialize(){
 		if (mDynamicsWorld)
 		{
 			RegisterFilterCallback(0, 0);
@@ -1237,7 +1241,7 @@ void Physics::Initilaize() {
 }
 
 void Physics::Deinitilaize() {
-	mImpl->Deinitilaize();
+	mImpl->Deinitialize();
 }
 
 void Physics::Update(float dt) {

@@ -97,6 +97,7 @@ SceneManagerPtr SceneManager::Create(){
 		sceneManager->mImpl->mSelf = sceneManager;
 		sSceneManager = sceneManager;
 		gpTimer = Timer::GetMainTimer().get();
+		return sceneManager;
 	}
 	return sSceneManager.lock();
 }

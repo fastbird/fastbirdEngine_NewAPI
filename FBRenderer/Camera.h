@@ -74,6 +74,8 @@ namespace fastbird
 		void SetDirrectionAndRight(const Vec3& dir, const Vec3& right);
 		void SetRotation(const Quat& rot);
 		const Quat& GetRotation() const;
+		Vec3 GetRight() const;
+		Vec3 GetUp() const;
 		void SetTransformation(const Vec3& pos, const Quat& rot);
 		void SetTransformation(const Transformation& t);
 		const Transformation& GetTransformation() const;

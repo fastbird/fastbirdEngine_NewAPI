@@ -39,9 +39,12 @@
 #define FB_DLL_VIDEOPLAYER __declspec(dllimport)
 #define FB_DLL_COLLADA __declspec(dllimport)
 #define FB_DLL_PARTICLESYSTEM __declspec(dllimport)
+#define FB_DLL_FILESYSTEM __declspec(dllimport)
 #else
 #define FB_DLL_ENGINEFACADE 
 #endif
+
+#include <assert.h>
 
 #include "FBRenderer/Renderer.h"
 #include "FBLua/LuaUtils.h"

@@ -44,7 +44,7 @@ namespace fastbird
 		, mMouseInHexaIdx(-1)
 	{
 		mUIObject = UIObject::Create(GetRenderTargetSize());
-		mUIObject->SetMaterial("es/Materials/UIHexagonal.material");
+		mUIObject->SetMaterial("EssentialEngineData/materials/UIHexagonal.material");
 		mUIObject->mOwnerUI = this;
 		mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 

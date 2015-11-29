@@ -30,6 +30,7 @@
 #include "DirectoryIterator.h"
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
+#include "FBCommonHeaders/Helpers.h"
 using namespace fastbird;
 
 static bool gLogginStarted = false;
@@ -39,7 +40,7 @@ void FileSystem::StartLoggingIfNot(const char* path){
 	if (gLogginStarted)
 		return;
 	auto filepath = "FileSystem.log";
-	FileSystem::BackupFile(filepath, 5);
+	FileSystem::BackupFile(filepath, 5, "Backup_Log");
 	Logger::Init(filepath);
 	gLogginStarted = true;
 }
@@ -151,15 +152,30 @@ std::string FileSystem::Absolute(const char* path){
 	return boost::filesystem::absolute(path).generic_string();
 }
 
+std::string FileSystem::MakrEndingSlashIfNot(const char* directory){
+	if (!ValidCStringLength(directory))
+		return std::string();
+	std::string ret = boost::filesystem::path(directory).generic_string();
+	if (ret.back() != '/')
+		ret.push_back('/');
+	return ret;
+}
+
 void FileSystem::BackupFile(const char* filepath, unsigned numKeeping) {
+	BackupFile(filepath, numKeeping, "./");
+}
+
+void FileSystem::BackupFile(const char* filepath, unsigned numKeeping, const char* directory){
+	std::string strDirectory = MakrEndingSlashIfNot(directory);
 	auto backupPath = FileSystem::ReplaceExtension(filepath, "");
 	auto extension = FileSystem::GetExtension(filepath);
 	for (int i = (int)numKeeping - 1; i > 0; --i){
-		auto oldPath = FormatString("%s_bak%d.%s", backupPath.c_str(), i, extension);
-		auto newPath = FormatString("%s_bak%d.%s", backupPath.c_str(), i + 1, extension);
+		auto oldPath = FormatString("%s%s_bak%d%s", strDirectory.c_str(), backupPath.c_str(), i, extension);
+		auto newPath = FormatString("%s%s_bak%d%s", strDirectory.c_str(), backupPath.c_str(), i + 1, extension);		
+		boost::filesystem::create_directories(boost::filesystem::path(newPath).parent_path());
 		FileSystem::Rename(oldPath.c_str(), newPath.c_str());
 	}
-	auto newPath = FormatString("%s_bak%d.%s", backupPath.c_str(), 1, extension);
+	auto newPath = FormatString("%s%s_bak%d%s", strDirectory.c_str(), backupPath.c_str(), 1, extension);
 	FileSystem::Rename(filepath, newPath.c_str());
 }
 

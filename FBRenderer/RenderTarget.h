@@ -126,5 +126,8 @@ namespace fastbird
 		bool SetBigSilouetteBuffer();		
 
 		void OnRendererOptionChanged(RendererOptionsPtr options, const char* name);
+
+		/// debugging features
+		TexturePtr GetShadowMap() const;
 	};
 }

@@ -103,7 +103,7 @@ void Wnd::RefreshFrame()
 
 	if (mUseFrame)
 	{
-		const char* uixmlPath = "es/textures/ui.xml";
+		const char* uixmlPath = "EssentialEngineData/textures/ui.xml";
 		if (mFrames.empty())
 		{			
 			auto T = std::static_pointer_cast<ImageBox>(UIManager::GetInstance().CreateComponent(ComponentType::ImageBox));

@@ -31,7 +31,6 @@
 #include "Quat.h"
 #include "Plane3.h"
 #include "Ray3.h"
-#include <assert.h>
 
 namespace fastbird
 {
@@ -91,31 +90,17 @@ namespace fastbird
 		void SetDirection(const Vec3& dir);
 		void SetDirectionAndRight(const Vec3& dir, const Vec3& right);
 		void AddRotation (const Quat& addR);
-		const Quat& GetRotation() const{
-			assert(mRSSeperated);
-			return mR;
-		}
+		const Quat& GetRotation() const;
 		void SetMatrix (const Mat33& mat);
-		const Mat33& GetMatrix () const{
-			assert(mRSSeperated);
-			return mMat;
-		}
+		const Mat33& GetMatrix() const;
 		void SetTranslation(const Vec3& t);
 		void AddTranslation(const Vec3& addT);
-		const Vec3& GetTranslation() const{
-			return mT;
-		}
+		const Vec3& GetTranslation() const;
 		void SetScale (const Vec3& s);
 		void AddScale(const Vec3& s);
-		const Vec3& GetScale () const{
-			assert(mRSSeperated);
-			return mS;
-		}
+		const Vec3& GetScale() const;
 		void SetUniformScale (Real fScale);
-		Real GetUniformScale () const{
-			assert(mRSSeperated && mUniformScale);
-			return mS.x;
-		}
+		Real GetUniformScale() const;
 
 		Real GetNorm () const;
 		Vec3 ApplyForward (const Vec3& p) const;

@@ -30,7 +30,6 @@
 #include "FBStringLib/StringLib.h"
 #include "FBDebugLib/Logger.h"
 #include "FBCommonHeaders/Types.h"
-#include <assert.h>
 
 #if !defined(LUA_TNONE)
 #define LUA_TNONE		(-1)
@@ -50,7 +49,21 @@
 
 struct lua_State;
 typedef int (*lua_CFunction) (lua_State *L);
+#if !defined(FBLua)
+//---------------------------------------------------------------------------
+// If Lua versions is changed, need to check these definitions.
+//---------------------------------------------------------------------------
+typedef struct luaL_Reg {
+	const char *name;
+	lua_CFunction func;
+} luaL_Reg;
+
+#define LUAI_MAXSTACK		1000000
+#define LUAI_FIRSTPSEUDOIDX	(-LUAI_MAXSTACK - 1000)
+#define LUA_REGISTRYINDEX	LUAI_FIRSTPSEUDOIDX
+#else
 struct luaL_Reg;
+#endif
 namespace fastbird
 { 
 	const char* GetCWD();
@@ -295,6 +308,8 @@ namespace fastbird
 		static bool isnumber(lua_State* L, int index);
 		static bool isstring(int index);
 		static bool isstring(lua_State* L, int index);
+		static bool istable(int index);
+		static bool istable(lua_State* L, int index);
 		static bool isuserdata(int index);
 		static bool isuserdata(lua_State* L, int index);
 		static int type(int index);
@@ -372,8 +387,8 @@ namespace fastbird
 		static void* newuserdata(lua_State* L, size_t size);
 		static void call(int nargs, int nresults);
 		static void call(lua_State* L, int nargs, int nresults);
-		static int pcall(int nargs, int nresults, int msgh);
-		static int pcall(lua_State *L, int nargs, int nresults, int msgh);
+		static int pcall(int nargs, int nresults, int msgh = 0);
+		static int pcall(lua_State *L, int nargs, int nresults, int msgh = 0);
 		static int next(int index);
 		static int next(lua_State* L, int index);
 
@@ -396,4 +411,67 @@ namespace fastbird
 	};
 
 #include "luawrapperutil.hpp"
+	template<>
+	struct FB_DLL_LUA luaU_Impl < std::string >
+	{
+		static std::string luaU_check(lua_State* L, int index);
+		static std::string luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const std::string& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::Vec2ITuple >
+	{
+		static fastbird::Vec2ITuple luaU_check(lua_State* L, int index);
+		static fastbird::Vec2ITuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::Vec2ITuple& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::Vec2Tuple >
+	{
+		static fastbird::Vec2Tuple luaU_check(lua_State* L, int index);
+		static fastbird::Vec2Tuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::Vec2Tuple& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::Vec3ITuple >
+	{
+		static fastbird::Vec3ITuple luaU_check(lua_State* L, int index);
+		static fastbird::Vec3ITuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::Vec3ITuple& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::Vec3Tuple >
+	{
+		static fastbird::Vec3Tuple luaU_check(lua_State* L, int index);
+		static fastbird::Vec3Tuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::Vec3Tuple& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::Vec4Tuple >
+	{
+		static fastbird::Vec4Tuple luaU_check(lua_State* L, int index);
+		static fastbird::Vec4Tuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::Vec4Tuple& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::QuatTuple >
+	{
+		static fastbird::QuatTuple luaU_check(lua_State* L, int index);
+		static fastbird::QuatTuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::QuatTuple& val);
+	};
+
+	template<>
+	struct FB_DLL_LUA luaU_Impl < fastbird::TransformationTuple >
+	{
+		static fastbird::TransformationTuple luaU_check(lua_State* L, int index);
+		static fastbird::TransformationTuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fastbird::TransformationTuple& val);
+	};
 }

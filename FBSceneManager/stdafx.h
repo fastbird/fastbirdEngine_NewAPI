@@ -58,5 +58,6 @@ Plugin:
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <assert.h>
 
 #include "FBDebugLib/Logger.h"

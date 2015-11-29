@@ -35,11 +35,12 @@
 #define FB_DLL_ENGINEFACADE 
 #endif
 
+#include <assert.h>
+#include <vector>
+#include <fstream>
+
+#include <algorithm>
 #include "FBLua/LuaUtils.h"
 #include "FBMemoryManagerLib/MemoryManager.h"
 #include "FBTimer/Timer.h"
 #include "FBDebugLib/DebugLib.h"
-
-#include <vector>
-#include <fstream>
-#include <algorithm>

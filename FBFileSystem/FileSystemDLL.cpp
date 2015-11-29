@@ -33,12 +33,12 @@ using namespace fastbird;
 class DLLInit{
 public:
 	DLLInit(){
-		/*auto filepath = _T("FileSystem.log");
-		FileSystem::BackupFile(filepath, 5);
-		Logger::Init(filepath);*/
+		auto filepath = "_FBFileSystem.log";
+		FileSystem::BackupFile(filepath, 5, "Backup_Log");
+		Logger::Init(filepath);
 	}
 	~DLLInit(){
-		/*Logger::Release();*/
+		Logger::Release();
 	}
 };
 

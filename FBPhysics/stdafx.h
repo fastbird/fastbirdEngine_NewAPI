@@ -42,6 +42,7 @@
 #endif
 
 #include <iostream>
+#include <assert.h>
 
 #include <btBulletCollisionCommon.h>
 #include <btBulletDynamicsCommon.h>

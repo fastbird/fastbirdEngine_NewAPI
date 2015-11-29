@@ -1,7 +1,7 @@
 <Material transparent="true">
 	<BlendDesc BlendEnalbe="true" BlendOp="BLEND_OP_ADD" SrcBlend="BLEND_SRC_ALPHA" DestBlend="BLEND_INV_SRC_ALPHA"/>
 	<DepthStencilDesc DepthEnable="true" DepthWriteMask="DEPTH_WRITE_MASK_ZERO"/>
-	<ShaderFile>es/Shaders/UI3D.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/UI3D.hlsl</ShaderFile>
 	<MaterialConstants>
 		<AmbientColor>0.15, 0.15, 0.15, 1</AmbientColor>
 		<DiffuseColor_Alpha>1, 1, 1, 0.8</DiffuseColor_Alpha>

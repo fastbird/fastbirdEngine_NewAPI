@@ -20,7 +20,7 @@
 #include "luawrapper.hpp"
 
 #ifndef LUAW_NO_CXX11
-#include <type_traits>
+//#include <type_traits>
 #endif
 
 #ifndef LUAW_STD
@@ -67,7 +67,7 @@ U luaU_opt(lua_State* L, int index, const U& fallback = U())
 }
 
 template<>
-struct luaU_Impl<bool>
+struct FB_DLL_LUA luaU_Impl<bool>
 {
     static bool luaU_check(lua_State* L, int         index) { return LuaUtils::toboolean  (L, index) != 0; }
     static bool luaU_to   (lua_State* L, int         index) { return LuaUtils::toboolean  (L, index) != 0; }
@@ -75,7 +75,7 @@ struct luaU_Impl<bool>
 };
 
 template<>
-struct luaU_Impl<const char*>
+struct FB_DLL_LUA luaU_Impl<const char*>
 {
     static const char* luaU_check(lua_State* L, int                index) { return LuaUtils::checkstring(L, index); }
     static const char* luaU_to   (lua_State* L, int                index) { return LuaUtils::tostring    (L, index); }
@@ -83,7 +83,7 @@ struct luaU_Impl<const char*>
 };
 
 template<>
-struct luaU_Impl<unsigned int>
+struct FB_DLL_LUA luaU_Impl<unsigned int>
 {
     static unsigned int luaU_check(lua_State* L, int                 index) { return static_cast<unsigned int>(LuaUtils::checkunsigned(L, index)); }
     static unsigned int luaU_to   (lua_State* L, int                 index) { return static_cast<unsigned int>(LuaUtils::tounsigned    (L, index)); }
@@ -91,7 +91,7 @@ struct luaU_Impl<unsigned int>
 };
 
 template<>
-struct luaU_Impl<int>
+struct FB_DLL_LUA luaU_Impl<int>
 {
     static int  luaU_check(lua_State* L, int        index) { return static_cast<int>(LuaUtils::checkint(L, index)); }
     static int  luaU_to   (lua_State* L, int        index) { return static_cast<int>(LuaUtils::tointeger    (L, index)); }
@@ -99,7 +99,7 @@ struct luaU_Impl<int>
 };
 
 template<>
-struct luaU_Impl<unsigned char>
+struct FB_DLL_LUA luaU_Impl<unsigned char>
 {
     static unsigned char luaU_check(lua_State* L, int                  index) { return static_cast<unsigned char>(LuaUtils::checkint(L, index)); }
     static unsigned char luaU_to   (lua_State* L, int                  index) { return static_cast<unsigned char>(LuaUtils::tointeger    (L, index)); }
@@ -107,7 +107,7 @@ struct luaU_Impl<unsigned char>
 };
 
 template<>
-struct luaU_Impl<char>
+struct FB_DLL_LUA luaU_Impl<char>
 {
     static char luaU_check(lua_State* L, int         index) { return static_cast<char>(LuaUtils::checkint(L, index)); }
     static char luaU_to   (lua_State* L, int         index) { return static_cast<char>(LuaUtils::tointeger    (L, index)); }
@@ -115,7 +115,7 @@ struct luaU_Impl<char>
 };
 
 template<>
-struct luaU_Impl<float>
+struct FB_DLL_LUA luaU_Impl<float>
 {
     static float luaU_check(lua_State* L, int          index) { return static_cast<float>(LuaUtils::checknumber(L, index)); }
     static float luaU_to   (lua_State* L, int          index) { return static_cast<float>(LuaUtils::tonumber    (L, index)); }
@@ -123,7 +123,7 @@ struct luaU_Impl<float>
 };
 
 template<>
-struct luaU_Impl<double>
+struct FB_DLL_LUA luaU_Impl<double>
 {
     static double luaU_check(lua_State* L, int           index) { return static_cast<double>(LuaUtils::checknumber(L, index)); }
     static double luaU_to   (lua_State* L, int           index) { return static_cast<double>(LuaUtils::tonumber    (L, index)); }

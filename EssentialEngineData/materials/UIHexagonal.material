@@ -3,7 +3,7 @@
 		RenderTargetWriteMask="COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE"/>
 	<DepthStencilDesc DepthEnable="false" DepthWriteMask="DEPTH_WRITE_MASK_ZERO"/>
 	
-	<ShaderFile>es/Shaders/UIHexagonal.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/UIHexagonal.hlsl</ShaderFile>
 	<MaterialConstants>
 		<AmbientColor>0.0, 0, 0, 1</AmbientColor>
 		<DiffuseColor_Alpha>1.0, 1.0, 1.0, 1</DiffuseColor_Alpha>
@@ -11,7 +11,7 @@
 		<EmissiveColor_Strength>0, 0, 0, 0</EmissiveColor_Strength>
 	</MaterialConstants>
 	<Textures>
-		<Texture slot="0" shader="ps" AddressU="Wrap" AddressV="Wrap">es/Textures/hexagonal_background.dds</Texture>
+		<Texture slot="0" shader="ps" AddressU="Wrap" AddressV="Wrap">EssentialEngineData/Textures/hexagonal_background.dds</Texture>
 	</Textures>
 	<MaterialParameters>
 		<param comment="enable0, enable1, enable2, enable3">0, 0, 0, 0</param>

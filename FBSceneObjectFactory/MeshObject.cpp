@@ -93,7 +93,7 @@ public:
 	BoundingVolumePtr mAABB;
 	FRAME_PRECISION mLastPreRendered;
 
-	bool mUseDynamicVB[BUFFER_TYPE_NUM];
+	bool mUseDynamicVB[MeshVertexBufferType::Num];
 	bool mForceAlphaBlending;
 
 	//---------------------------------------------------------------------------
@@ -107,7 +107,7 @@ public:
 		mObjectConstants.gWorld.MakeIdentity();
 		auto& renderer = Renderer::GetInstance();
 		SetMaterial(renderer.GetResourceProvider()->GetMaterial(ResourceTypes::Materials::Missing), 0);
-		for (int i = 0; i < BUFFER_TYPE_NUM; ++i)
+		for (int i = 0; i < MeshVertexBufferType::Num; ++i)
 		{
 			mUseDynamicVB[i] = false;
 		}
@@ -612,8 +612,8 @@ public:
 			{
 				it.mVBPos = renderer.CreateVertexBuffer(
 					&it.mPositions[0], sizeof(Vec3), it.mPositions.size(),
-					mUseDynamicVB[BUFFER_TYPE_POSITION] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
-					mUseDynamicVB[BUFFER_TYPE_POSITION] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
+					mUseDynamicVB[MeshVertexBufferType::Position] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
+					mUseDynamicVB[MeshVertexBufferType::Position] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
 				mAABB->AddComputeData(&it.mPositions[0], it.mPositions.size());
 			}
 			else
@@ -625,8 +625,8 @@ public:
 				assert(it.mPositions.size() == it.mNormals.size());
 				it.mVBNormal = renderer.CreateVertexBuffer(
 					&it.mNormals[0], sizeof(Vec3), it.mNormals.size(),
-					mUseDynamicVB[BUFFER_TYPE_NORMAL] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
-					mUseDynamicVB[BUFFER_TYPE_NORMAL] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
+					mUseDynamicVB[MeshVertexBufferType::Normal] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
+					mUseDynamicVB[MeshVertexBufferType::Normal] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
 			}
 			else
 			{
@@ -637,8 +637,8 @@ public:
 				assert(it.mPositions.size() == it.mUVs.size());
 				it.mVBUV = renderer.CreateVertexBuffer(
 					&it.mUVs[0], sizeof(Vec2), it.mUVs.size(),
-					mUseDynamicVB[BUFFER_TYPE_UV] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
-					mUseDynamicVB[BUFFER_TYPE_UV] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
+					mUseDynamicVB[MeshVertexBufferType::UV] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
+					mUseDynamicVB[MeshVertexBufferType::UV] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);				
 			}
 			else
 			{
@@ -650,8 +650,8 @@ public:
 				assert(it.mPositions.size() == it.mColors.size());
 				it.mVBColor = renderer.CreateVertexBuffer(
 					&it.mColors[0], sizeof(DWORD), it.mColors.size(),
-					mUseDynamicVB[BUFFER_TYPE_COLOR] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
-					mUseDynamicVB[BUFFER_TYPE_COLOR] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
+					mUseDynamicVB[MeshVertexBufferType::Color] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
+					mUseDynamicVB[MeshVertexBufferType::Color] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);				
 			}
 			else
 			{
@@ -663,8 +663,9 @@ public:
 				assert(it.mPositions.size() == it.mTangents.size());
 				it.mVBTangent = renderer.CreateVertexBuffer(
 					&it.mTangents[0], sizeof(Vec3), it.mTangents.size(),
-					mUseDynamicVB[BUFFER_TYPE_TANGENT] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
-					mUseDynamicVB[BUFFER_TYPE_TANGENT] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
+					mUseDynamicVB[MeshVertexBufferType::Tangent] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
+					mUseDynamicVB[MeshVertexBufferType::Tangent] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
+				
 			}
 			else
 			{
@@ -760,7 +761,7 @@ public:
 		return mCollisions.const_get()->operator[](idx);		
 	}
 
-	bool CheckNarrowCollision(BoundingVolumeConstPtr pBV) const{
+	bool CheckNarrowCollision(const BoundingVolume* pBV) const{
 		unsigned num = GetNumCollisionShapes();
 		if (!num)
 			return true;		
@@ -819,11 +820,11 @@ public:
 		}
 	}
 
-	void SetUseDynamicVB(BUFFER_TYPE type, bool useDynamicVB){
+	void SetUseDynamicVB(MeshVertexBufferType::Enum type, bool useDynamicVB){
 		mUseDynamicVB[type] = useDynamicVB;
 	}
 
-	MapData MapVB(BUFFER_TYPE type, size_t materialGroupIdx){
+	MapData MapVB(MeshVertexBufferType::Enum type, size_t materialGroupIdx){
 		if (!mUseDynamicVB[type])
 		{
 			assert(0);
@@ -838,15 +839,15 @@ public:
 		MaterialGroup& mg = mMaterialGroups[materialGroupIdx];
 		switch (type)
 		{
-		case BUFFER_TYPE_POSITION:
+		case MeshVertexBufferType::Position:
 			return mg.mVBPos->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
-		case BUFFER_TYPE_NORMAL:
+		case MeshVertexBufferType::Normal:
 			return mg.mVBNormal->Map(0, MAP_TYPE_WRITE_NO_OVERWRITE, MAP_FLAG_NONE);
-		case BUFFER_TYPE_UV:
+		case MeshVertexBufferType::UV:
 			return mg.mVBUV->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
-		case BUFFER_TYPE_COLOR:
+		case MeshVertexBufferType::Color:
 			return mg.mVBColor->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
-		case BUFFER_TYPE_TANGENT:
+		case MeshVertexBufferType::Tangent:
 			return mg.mVBTangent->Map(0, MAP_TYPE_WRITE, MAP_FLAG_NONE);
 		}
 		assert(0);
@@ -854,7 +855,7 @@ public:
 		return MapData();
 	}
 
-	void UnmapVB(BUFFER_TYPE type, size_t materialGroupIdx){
+	void UnmapVB(MeshVertexBufferType::Enum type, size_t materialGroupIdx){
 		if (!mUseDynamicVB[type])
 		{
 			assert(0);
@@ -868,15 +869,15 @@ public:
 		MaterialGroup& mg = mMaterialGroups[materialGroupIdx];
 		switch (type)
 		{
-		case BUFFER_TYPE_POSITION:
+		case MeshVertexBufferType::Position:
 			return mg.mVBPos->Unmap(0);
-		case BUFFER_TYPE_NORMAL:
+		case MeshVertexBufferType::Normal:
 			return mg.mVBNormal->Unmap(0);
-		case BUFFER_TYPE_UV:
+		case MeshVertexBufferType::UV:
 			return mg.mVBUV->Unmap(0);
-		case BUFFER_TYPE_COLOR:
+		case MeshVertexBufferType::Color:
 			return mg.mVBColor->Unmap(0);
-		case BUFFER_TYPE_TANGENT:
+		case MeshVertexBufferType::Tangent:
 			return mg.mVBTangent->Unmap(0);
 		}
 		assert(0);
@@ -1329,7 +1330,7 @@ FBCollisionShapeConstPtr MeshObject::GetCollisionShape(unsigned idx) const {
 	return mImpl->GetCollisionShape(idx);
 }
 
-bool MeshObject::CheckNarrowCollision(BoundingVolumeConstPtr pBV) const {
+bool MeshObject::CheckNarrowCollision(const BoundingVolume* pBV) const {
 	return mImpl->CheckNarrowCollision(pBV);
 }
 
@@ -1345,15 +1346,15 @@ void MeshObject::DeleteCollisionShapes() {
 	mImpl->DeleteCollisionShapes();
 }
 
-void MeshObject::SetUseDynamicVB(BUFFER_TYPE type, bool useDynamicVB) {
+void MeshObject::SetUseDynamicVB(MeshVertexBufferType::Enum type, bool useDynamicVB) {
 	mImpl->SetUseDynamicVB(type, useDynamicVB);
 }
 
-MapData MeshObject::MapVB(BUFFER_TYPE type, size_t materialGroupIdx) {
+MapData MeshObject::MapVB(MeshVertexBufferType::Enum type, size_t materialGroupIdx) {
 	return mImpl->MapVB(type, materialGroupIdx);
 }
 
-void MeshObject::UnmapVB(BUFFER_TYPE type, size_t materialGroupIdx) {
+void MeshObject::UnmapVB(MeshVertexBufferType::Enum type, size_t materialGroupIdx) {
 	mImpl->UnmapVB(type, materialGroupIdx);
 }
 

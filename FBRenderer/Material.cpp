@@ -128,7 +128,12 @@ public:
 
 
 	//---------------------------------------------------------------------------
-	Impl(){
+	Impl()
+		: mUniqueData(new SharedData)
+		, mMaterialData(new MaterialData)
+		, mRenderStatesData(new RenderStatesData)
+		, mShaderData(new ShaderData)
+	{
 	}
 
 	Impl(const Impl& other)
@@ -161,7 +166,7 @@ public:
 				if (errMsg)
 					Logger::Log("\t%s", errMsg);
 			}			
-			doc.LoadFile("es/materials/missing.material");
+			doc.LoadFile("EssentialEngineData/materials/missing.material");
 			if (doc.Error())
 			{
 				Logger::Log(FB_ERROR_LOG_ARG, "Loading the fallback material is also failed.");

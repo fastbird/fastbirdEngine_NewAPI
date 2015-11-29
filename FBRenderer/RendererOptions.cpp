@@ -65,9 +65,6 @@ RendererOptions::RendererOptions(){
 	r_Glow = Console::GetInstance().GetIntVariable("r_Glow", 1);
 	FB_REGISTER_CVAR(r_Glow, r_Glow, CVAR_CATEGORY_CLIENT, "Glow");
 
-	r_UI = Console::GetInstance().GetIntVariable("r_UI", 1);
-	FB_REGISTER_CVAR(r_UI, r_UI, CVAR_CATEGORY_CLIENT, "UI Rendering");
-
 	r_Shadow = Console::GetInstance().GetIntVariable("r_Shadow", 1);
 	FB_REGISTER_CVAR(r_Shadow, r_Shadow, CVAR_CATEGORY_CLIENT, "enable shadow");
 

@@ -222,7 +222,7 @@ public:
 		auto& cloudBindings = mSystemTextureBindings[SystemTextures::CloudVolume];
 		cloudBindings.push_back(TextureBinding{BINDING_SHADER_PS, 6});
 		auto& noiseBindings = mSystemTextureBindings[SystemTextures::Noise];
-		envBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 7 });
+		noiseBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 7 });
 		auto& shadowBindings = mSystemTextureBindings[SystemTextures::ShadowMap];
 		shadowBindings.push_back(TextureBinding{ BINDING_SHADER_PS, 8 });
 		auto& ggxBindings = mSystemTextureBindings[SystemTextures::GGXPrecalc];
@@ -260,7 +260,7 @@ public:
 					mPlatformRenderer = std::shared_ptr<PlatformRendererHolder>(
 						new PlatformRendererHolder(platformRenderer, module), 
 						[](PlatformRendererHolder* obj){delete obj; });
-					Logger::Log(FB_DEFAULT_LOG_ARG, "Render engine %s is prepared.", type);
+					Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Render engine %s is prepared.", type).c_str());
 					return true;
 				}
 				else{
@@ -319,7 +319,7 @@ public:
 			mRenderTargetConstants.rendertarget_dummy = 0;
 			GetPlatformRenderer().UpdateShaderConstants(ShaderConstants::RenderTarget, &mRenderTargetConstants, sizeof(RENDERTARGET_CONSTANTS));
 			if (mainCanvas){
-				OnMainCavasCreated();
+				OnMainCavasCreated();				
 			}
 			return true;
 		}
@@ -331,7 +331,7 @@ public:
 
 	void OnMainCavasCreated(){
 		mResourceProvider = ResourceProvider::Create();
-		
+		GetMainRenderTarget()->Bind();
 		// POSITION
 		{
 			INPUT_ELEMENT_DESC desc("POSITION", 0, INPUT_ELEMENT_FORMAT_FLOAT3, 0, 0, INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0);
@@ -518,7 +518,7 @@ public:
 			std::string fontPath = r_font.GetString();
 			if (fontPath.empty())
 			{
-				fontPath = "es/fonts/font22.fnt";
+				fontPath = "EssentialEngineData/fonts/font22.fnt";
 			}
 			auto err = font->Init(fontPath.c_str());
 			if (!err){
@@ -2063,15 +2063,45 @@ public:
 	}
 
 	void SetEnvironmentTextureOverride(TexturePtr texture){
-	
+		mEnvironmentTextureOverride = texture;
+		if (mEnvironmentTextureOverride)
+		{
+			auto& bindings = GetSystemTextureBindings(SystemTextures::Environment);
+			for (auto& binding : bindings){
+				mEnvironmentTextureOverride->Bind(binding.mShader, binding.mSlot);
+			}
+		}
+		else
+		{
+			if (mEnvironmentTexture)
+			{
+				auto& bindings = GetSystemTextureBindings(SystemTextures::Environment);
+				for (auto& binding : bindings){
+					mEnvironmentTexture->Bind(binding.mShader, binding.mSlot);
+				}			
+			}
+			else
+			{
+				auto& bindings = GetSystemTextureBindings(SystemTextures::Environment);
+				for (auto& binding : bindings){
+					UnbindTexture(binding.mShader, binding.mSlot);
+				}
+			}
+		}
 	}
 
 	void SetDebugRenderTarget(unsigned idx, const char* textureName){
-	
+		assert(idx < MaxDebugRenderTargets);
+		auto mainRT = GetMainRenderTarget();
+		assert(mainRT);
+		if (_stricmp(textureName, "Shadow") == 0)
+			mDebugRenderTargets[idx].mTexture = mainRT->GetShadowMap();
+		else
+			mDebugRenderTargets[idx].mTexture = 0;
 	}
 
 	void SetFadeAlpha(Real alpha){
-	
+		mFadeAlpha = alpha;
 	}
 
 	PointLightManagerPtr GetPointLightMan() const{

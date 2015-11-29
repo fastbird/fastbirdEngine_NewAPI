@@ -40,6 +40,9 @@
 
 #endif
 
+#include <assert.h>
+#include <map>
+
 #include "FBMathLib/Math.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBDebugLib/Logger.h"
@@ -49,5 +52,3 @@
 #include "TinyXmlLib/tinyxml2.h"
 #include "FBTimer/Timer.h"
 #include "FBFileSystem/FileSystem.h"
-
-#include <map>

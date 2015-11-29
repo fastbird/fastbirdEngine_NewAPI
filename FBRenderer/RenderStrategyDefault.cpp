@@ -1376,3 +1376,7 @@ void RenderStrategyDefault::DepthTexture(bool bind){
 void RenderStrategyDefault::OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName){
 	mImpl->OnRendererOptionChanged(options, optionName);
 }
+
+TexturePtr RenderStrategyDefault::GetShadowMap(){
+	return mImpl->mShadowMap;
+}

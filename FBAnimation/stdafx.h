@@ -33,3 +33,5 @@
 #define FB_DLL_TIMER
 #define FB_DLL_ANIMATION
 #endif
+
+#include <assert.h>

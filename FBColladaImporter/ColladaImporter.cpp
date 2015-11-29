@@ -37,14 +37,13 @@
 static const float PI = 3.1415926535897932384626433832795f;
 namespace fastbird{
 typedef std::vector< collada::CollisionInfo > COLLISION_INFOS;
-typedef std::map<std::string, collada::MeshPtr> MeshObjects;
 class ColladaImporter::Impl : public COLLADAFW::IWriter{
 public:	
 	typedef std::vector<float> FLOAT_DATA;
 	ColladaImporter* mSelf;
 	ImportOptions mOptions;
-	MeshObjects mMeshObjects;
-	MeshObjects mCollisionMeshes;
+	ColladaMeshObjects mMeshObjects;
+	ColladaMeshObjects mCollisionMeshes;
 	collada::MeshGroupPtr mMeshGroup;
 	std::string mFilepath;	
 
@@ -177,6 +176,10 @@ public:
 	collada::MeshGroupPtr GetMeshGroup() const{
 		return mMeshGroup;
 	}
+
+	IteratorWrapper<ColladaMeshObjects> GetMeshIterator(){
+		return IteratorWrapper<ColladaMeshObjects>(mMeshObjects);
+	}
 	
 	// Private functions
 	std::string GetMaterialFilepath(const char* sz)
@@ -272,7 +275,7 @@ public:
 					std::string file = GetMaterialFilepath(meshPrimitives[i]->getMaterial().c_str());
 					if (file.empty())
 					{
-						file = "es/materials/missing.material";
+						file = "EssentialEngineData/materials/missing.material";
 					}
 					meshInfo.mMaterials.push_back(file);					
 				}
@@ -1067,6 +1070,10 @@ collada::MeshPtr ColladaImporter::GetMeshObject() const {
 
 collada::MeshGroupPtr ColladaImporter::GetMeshGroup() const {
 	return mImpl->GetMeshGroup();
+}
+
+IteratorWrapper<ColladaMeshObjects> ColladaImporter::GetMeshIterator(){
+	return mImpl->GetMeshIterator();
 }
 
 }

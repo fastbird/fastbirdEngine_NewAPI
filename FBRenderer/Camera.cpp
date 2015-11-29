@@ -168,6 +168,14 @@ public:
 		return mTransformation.GetRotation();
 	}
 
+	Vec3 GetRight() const{
+		return mTransformation.GetRight();
+	}
+
+	Vec3 GetUp() const{
+		return mTransformation.GetUp();
+	}
+
 	void SetDirection(const Vec3& dir)
 	{
 		mTransformation.SetDirection(dir);
@@ -578,6 +586,14 @@ void Camera::SetRotation(const Quat& rot){
 
 const Quat& Camera::GetRotation() const{
 	return mImpl->GetRotation();
+}
+
+Vec3 Camera::GetRight() const{
+	return mImpl->GetRight();
+}
+
+Vec3 Camera::GetUp() const{
+	return mImpl->GetUp();
 }
 
 void Camera::SetDirection(const Vec3& dir){

@@ -206,7 +206,7 @@ public:
 		assert(mVertexBuffer);
 
 		// init shader
-		mShader = renderer.CreateShader("es/shaders/font.hlsl", 
+		mShader = renderer.CreateShader("EssentialEnginedata/shaders/font.hlsl", 
 			BINDING_SHADER_VS | BINDING_SHADER_PS, SHADER_DEFINES());
 		mInputLayout = renderer.GetInputLayout(
 			DEFAULT_INPUTS::POSITION_COLOR_TEXCOORD_BLENDINDICES, mShader);		
@@ -927,7 +927,11 @@ public:
 };
 
 //----------------------------------------------------------------------------
-FB_IMPLEMENT_STATIC_CREATE(Font);
+FontPtr Font::Create(){
+	FontPtr p(new Font, [](Font* obj){ delete obj; });
+	p->mImpl->mSelf = p;
+	return p;
+}
 Font::Font()
 	: mImpl(new Impl)
 {

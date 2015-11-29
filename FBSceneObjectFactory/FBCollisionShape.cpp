@@ -116,7 +116,7 @@ public:
 		return ret;
 	}
 
-	bool TestCollision(BoundingVolumeConstPtr pBV, const Transformation& objT) const{
+	bool TestCollision(const BoundingVolume* pBV, const Transformation& objT) const{
 		if (!mBV)
 			return false;
 
@@ -199,7 +199,7 @@ FBCollisionShape::IResult FBCollisionShape::Intersects(const Ray3& ray, const Tr
 	return mImpl->Intersects(ray, objT);
 }
 
-bool FBCollisionShape::TestCollision(BoundingVolumeConstPtr pBV, const Transformation& objT) const{
+bool FBCollisionShape::TestCollision(const BoundingVolume* pBV, const Transformation& objT) const{
 	return mImpl->TestCollision(pBV, objT);
 }
 

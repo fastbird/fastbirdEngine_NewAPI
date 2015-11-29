@@ -29,6 +29,7 @@
 #include "EngineFacade.h"
 #include "EngineOptions.h"
 #include "Voxelizer.h"
+#include "MeshFacade.h"
 #include "FBTimer/Profiler.h"
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/Camera.h"
@@ -60,23 +61,30 @@ public:
 	RendererPtr mRenderer;
 	SceneManagerPtr mSceneManager;
 	ScenePtr mMainScene;
+	ScenePtr mTemporalOverridingScene;
+	bool mLockSceneOverriding;
 	SceneObjectFactoryPtr mSceneObjectFactory;
 	ParticleSystemPtr mParticleSystem;
 	CameraPtr mMainCamera;
 	EngineOptionsPtr mEngineOptions;
 	bool mRayFromCursorCalced;
 
+	// EngineFacade
+	std::vector<MeshFacadePtr> mTempMeshes;
+	std::map<std::string, std::vector< MeshFacadePtr> > mFractureObjects;
+
 	//---------------------------------------------------------------------------
 	Impl()
 		: mL(0)
 		, mNextWindowId(MainWindowId)
 		, mRayFromCursorCalced(false)
-		, mMainCamera(Camera::Create())
+		, mLockSceneOverriding(false)
 	{
 		mL = LuaUtils::OpenLuaState();
+		mInputManager = InputManager::Create();
 		mConsole = Console::Create();
 		mTaskSchedular = TaskScheduler::Create(6);
-		mInputManager = InputManager::Create();
+		
 		mSceneManager = SceneManager::Create();
 		if (!mSceneManager){
 			Logger::Log(FB_ERROR_LOG_ARG, "Cannot create SceneManager.");
@@ -86,12 +94,6 @@ public:
 			if (!mMainScene){
 				Logger::Log(FB_ERROR_LOG_ARG, "Cannot create the main scene.");
 			}
-		}
-
-		mSceneObjectFactory = SceneObjectFactory::Create();
-		mParticleSystem = ParticleSystem::Create();
-		if (!mSceneObjectFactory){
-			Logger::Log(FB_ERROR_LOG_ARG, "SceneObjectFactory is not initialized.");
 		}
 
 		mEngineOptions = EngineOptions::Create();
@@ -160,8 +162,19 @@ public:
 		return INVALID_HWND_ID;
 	}
 
+	HWindowId GetMainWindowHandleId() const{
+		return MainWindowId;
+	}
+
 	bool InitRenderer(const char* pluginName){		
-		return Renderer::GetInstance().PrepareRenderEngine(pluginName);		
+		bool success = Renderer::GetInstance().PrepareRenderEngine(pluginName);		
+		if (success){			
+			mParticleSystem = ParticleSystem::Create();
+			if (!mSceneObjectFactory){
+				Logger::Log(FB_ERROR_LOG_ARG, "SceneObjectFactory is not initialized.");
+			}
+		}
+		return success;
 	}
 
 	bool InitCanvas(HWindowId id, int width, int height){
@@ -176,18 +189,35 @@ public:
 		}
 		else{			
 			if (id == MainWindowId){
+				mSceneObjectFactory = SceneObjectFactory::Create();
 				auto rt = mRenderer->GetRenderTarget(id);
 				if (!rt){
 					Logger::Log(FB_ERROR_LOG_ARG, "Main RenderTarget is not initialized.");
 				}
 				else{
 					rt->RegisterScene(mMainScene);
-					rt->SetCamera(mMainCamera);
+					mMainCamera = rt->GetCamera();					
 				}
 			}
 
 			return true;
 		}
+	}
+
+	void OverrideMainScene(IScenePtr scene){
+		if (mLockSceneOverriding)
+			return;
+		if (scene)
+			Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(scene);
+		else
+			Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(mMainScene);		
+	}
+
+	void OverrideMainScene(){
+		if (mLockSceneOverriding)
+			return;
+		mTemporalOverridingScene = mSceneManager->CreateScene( FormatString("TemporalScene%d%u", std::rand(), gpTimer->GetTickCount()).c_str() );
+		OverrideMainScene(mTemporalOverridingScene);
 	}
 
 	ScenePtr GetMainScene() const{
@@ -215,6 +245,52 @@ public:
 
 	void Render(){
 		mRenderer->Render();
+	}
+
+	void AddTempMesh(MeshFacadePtr mesh){
+		mTempMeshes.push_back(mesh);
+	}
+
+	std::vector<MeshFacadePtr> CreateFractureMeshes(const char* daeFilePath){
+		std::vector<MeshFacadePtr> ret;
+		MeshImportDesc desc;
+		desc.keepMeshData = true;
+		auto meshObjects = mSceneObjectFactory->CreateMeshObjects(daeFilePath, desc);
+		for (auto meshObject : meshObjects){
+			auto meshFacade = MeshFacade::Create();
+			meshFacade->SetMeshObject(meshObject);
+			ret.push_back(meshFacade);
+		}
+		return ret;
+	}
+
+	void GetFractureMeshObjects(const char* daeFilePath, std::vector<MeshFacadePtr>& objects){
+		if (ValidCStringLength(daeFilePath))
+			return;
+
+		objects.clear();
+		std::string filepath(daeFilePath);
+		if (mEngineOptions->e_NoMeshLoad)
+		{
+			filepath = "EssentialEngineData/objects/defaultCube.dae";
+		}
+		std::string keyFilepath = filepath;
+		ToLowerCase(keyFilepath);
+		auto it = mFractureObjects.find(keyFilepath);
+		if (it != mFractureObjects.end())
+		{
+			for (auto& data : it->second)
+			{
+				objects.push_back(data->Clone());
+			}
+			return;
+		}
+
+		auto meshes = CreateFractureMeshes(filepath.c_str());
+		mFractureObjects[keyFilepath] = meshes;
+		for (auto& mesh : meshes){
+			objects.push_back(mesh->Clone());
+		}
 	}
 
 	const Ray3& GetWorldRayFromCursor(){
@@ -259,6 +335,34 @@ public:
 		auto light = mMainScene->GetDirectionalLight(idx);
 		return light->GetDirection();
 	}
+
+	const Vec3& GetLightDiffuse(DirectionalLightIndex::Enum idx){
+		if (!mMainScene){
+			Logger::Log(FB_ERROR_LOG_ARG, "No main scene found");
+			return Vec3::UNIT_Y;
+		}
+		auto light = mMainScene->GetDirectionalLight(idx);
+		return light->GetDiffuse();
+	}
+
+	const Real GetLightIntensity(DirectionalLightIndex::Enum idx){
+		if (!mMainScene){
+			Logger::Log(FB_ERROR_LOG_ARG, "No main scene found");
+			return 0.5f;
+		}
+		auto light = mMainScene->GetDirectionalLight(idx);
+		return light->GetIntensity();
+	}
+
+	void SetLightIntensity(IScenePtr iscene, DirectionalLightIndex::Enum idx, Real intensity){
+		if (!iscene){
+			Logger::Log(FB_ERROR_LOG_ARG, "Not valid scene");
+			return;
+		}
+		auto scene = std::static_pointer_cast<Scene>(iscene);
+		auto light = scene->GetDirectionalLight(idx);
+		light->SetIntensity(intensity);
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -298,6 +402,10 @@ HWindowId EngineFacade::CreateEngineWindow(int x, int y, int width, int height,
 	return mImpl->CreateEngineWindow(x, y, width, height, wndClass, title, style, exStyle, winProc);
 }
 
+HWindowId EngineFacade::GetMainWindowHandleId() const{
+	return mImpl->GetMainWindowHandleId();
+}
+
 bool EngineFacade::InitRenderer(const char* pluginName) {
 	return mImpl->InitRenderer(pluginName);
 }
@@ -326,11 +434,16 @@ ScenePtr EngineFacade::CreateScene(const char* uniquename){
 	return SceneManager::GetInstance().CreateScene(uniquename);
 }
 
-void EngineFacade::OverrideMainScene(ScenePtr scene){
-	if (scene)
-		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(scene);
-	else
-		Renderer::GetInstance().GetMainRenderTarget()->RegisterScene(mImpl->mMainScene);
+void EngineFacade::OverrideMainScene(IScenePtr scene){
+	mImpl->OverrideMainScene(scene);
+}
+
+void EngineFacade::OverrideMainScene(){
+	mImpl->OverrideMainScene();
+}
+
+void EngineFacade::LockSceneOverriding(bool lock){
+	mImpl->mLockSceneOverriding = lock;
 }
 
 void EngineFacade::SetDrawClouds(bool draw){
@@ -397,8 +510,24 @@ const Vec3& EngineFacade::GetLightDirection(DirectionalLightIndex::Enum idx){
 	return mImpl->GetLightDirection(idx);
 }
 
-void EngineFacade::DetachBlendingSky(ScenePtr scene){
-	auto sky = scene->GetSkySphere();
+const Vec3& EngineFacade::GetLightDiffuse(DirectionalLightIndex::Enum idx){
+	return mImpl->GetLightDiffuse(idx);
+}
+const Real EngineFacade::GetLightIntensity(DirectionalLightIndex::Enum idx){
+	return mImpl->GetLightIntensity(idx);
+}
+
+void EngineFacade::SetLightIntensity(IScenePtr scene, DirectionalLightIndex::Enum idx, Real intensity){
+	mImpl->SetLightIntensity(scene, idx, intensity);
+}
+
+DirectionalLightPtr EngineFacade::GetMainSceneLight(DirectionalLightIndex::Enum idx){
+	return mImpl->mMainScene->GetDirectionalLight(idx);
+}
+
+
+void EngineFacade::DetachBlendingSky(IScenePtr scene){
+	auto sky = std::static_pointer_cast<Scene>(scene)->GetSkySphere();
 	if (sky){
 		sky->DetachBlendingSky();
 	}
@@ -443,6 +572,26 @@ void* EngineFacade::MapBigBuffer(){
 
 void EngineFacade::UnmapBigBuffer(){
 	return Renderer::GetInstance().UnmapBigBuffer();
+}
+
+void EngineFacade::SetEnable3DUIs(bool enable){
+	Logger::Log(FB_DEFAULT_LOG_ARG, "3D UI featrue is not available.");
+}
+
+void EngineFacade::SetRendererFadeAlpha(Real alpha){
+	Renderer::GetInstance().SetFadeAlpha(alpha);
+}
+
+void EngineFacade::ClearDurationTexts(){
+	Renderer::GetInstance().ClearDurationTexts();
+}
+
+bool EngineFacade::GetResolutionList(unsigned& outNum, Vec2I* list){
+	return Renderer::GetInstance().GetResolutionList(outNum, list);
+}
+
+Vec2 EngineFacade::ToNdcPos(HWindowId id, const Vec2I& screenPos) const{
+	return Renderer::GetInstance().ToNdcPos(id, screenPos);
 }
 
 intptr_t EngineFacade::WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp){
@@ -636,9 +785,47 @@ void EngineFacade::QueueDrawText(const Vec2I& pos, const char* text, const Color
 	Renderer::GetInstance().QueueDrawText(pos, text, color, size);
 }
 
+void EngineFacade::QueueDraw3DText(const Vec3& worldpos, WCHAR* text, const Color& color){
+	Renderer::GetInstance().QueueDraw3DText(worldpos, text, color);
+}
+
+void EngineFacade::QueueDraw3DText(const Vec3& worldpos, WCHAR* text, const Color& color, Real size){
+	Renderer::GetInstance().QueueDraw3DText(worldpos, text, color, size);
+}
+
+void EngineFacade::QueueDraw3DText(const Vec3& worldpos, const char* text, const Color& color){
+	Renderer::GetInstance().QueueDraw3DText(worldpos, text, color);
+}
+
+void EngineFacade::QueueDraw3DText(const Vec3& worldpos, const char* text, const Color& color, Real size){
+	Renderer::GetInstance().QueueDraw3DText(worldpos, text, color, size);
+}
+
 void EngineFacade::QueueDrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end,
 	const Color& color0, const Color& color1){
 	Renderer::GetInstance().QueueDrawLineBeforeAlphaPass(start, end, color0, color1);
+}
+
+void EngineFacade::QueueDrawLine(const Vec3& start, const Vec3& end,
+	const Color& color0, const Color& color1){
+	Renderer::GetInstance().QueueDrawLine(start, end, color0, color1);
+}
+
+void EngineFacade::QueueDrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, Real thickness,
+	const char* texture, bool textureFlow) {
+	Renderer::GetInstance().QueueDrawTexturedThickLine(start, end, color0, color1, thickness, texture, textureFlow);
+}
+
+void EngineFacade::QueueDrawSphere(const Vec3& pos, Real radius, const Color& color){
+	Renderer::GetInstance().QueueDrawSphere(pos, radius, color);
+}
+
+void EngineFacade::QueueDrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha){
+	Renderer::GetInstance().QueueDrawBox(boxMin, boxMax, color, alpha);
+}
+
+void EngineFacade::QueueDrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha){
+	Renderer::GetInstance().QueueDrawTriangle(a, b, c, color, alpha);
 }
 
 FontPtr EngineFacade::GetFont(float fontHeight){
@@ -680,6 +867,14 @@ RenderTargetPtr EngineFacade::CreateRenderTarget(const RenderTargetParamEx& para
 
 VoxelizerPtr EngineFacade::CreateVoxelizer(){
 	return Voxelizer::Create();
+}
+
+void EngineFacade::AddTempMesh(MeshFacadePtr mesh){
+	mImpl->AddTempMesh(mesh);
+}
+
+void EngineFacade::GetFractureMeshObjects(const char* daeFilePath, std::vector<MeshFacadePtr>& objects){
+	mImpl->GetFractureMeshObjects(daeFilePath, objects);
 }
 
 void EngineFacade::StopAllParticles(){

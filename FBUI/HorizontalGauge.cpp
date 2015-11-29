@@ -46,7 +46,7 @@ namespace fastbird
 		, mBlinkTime(0)
 	{
 		mUIObject = UIObject::Create(GetRenderTargetSize());
-		mUIObject->SetMaterial("es/Materials/UIHorizontalGauge.material");
+		mUIObject->SetMaterial("EssentialEngineData/materials/UIHorizontalGauge.material");
 		mUIObject->mOwnerUI = this;
 		mUIObject->mTypeString = ComponentType::ConvertToString(GetType());
 

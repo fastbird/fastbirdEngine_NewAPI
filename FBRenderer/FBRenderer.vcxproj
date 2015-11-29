@@ -39,6 +39,7 @@
     <ClInclude Include="PixelFormats.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="PointLightManager.h" />
+    <ClInclude Include="PrimitiveTopology.h" />
     <ClInclude Include="RenderableObject.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="RendererEnums.h" />
@@ -83,6 +84,7 @@
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
+    <ClCompile Include="RendererDLL.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
     <ClCompile Include="RendererOptions.cpp" />
     <ClCompile Include="RenderEventMarker.cpp" />

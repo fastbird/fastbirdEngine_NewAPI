@@ -14,6 +14,7 @@
     <ClInclude Include="MeshGroup.h" />
     <ClInclude Include="TrailObject.h" />
     <ClInclude Include="MeshAuxiliary.h" />
+    <ClInclude Include="MeshVertexBufferType.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MeshObject.cpp" />

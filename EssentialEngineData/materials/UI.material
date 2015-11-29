@@ -3,7 +3,7 @@
 		RenderTargetWriteMask="COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE"/>
 	<DepthStencilDesc DepthEnable="false" DepthWriteMask="DEPTH_WRITE_MASK_ZERO"/>
 	
-	<ShaderFile>es/Shaders/UI.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/UI.hlsl</ShaderFile>
 	<MaterialConstants>
 		<AmbientColor>0., 0., 0., 1</AmbientColor>
 		<DiffuseColor_Alpha>0, 0, 0, 0.7</DiffuseColor_Alpha>

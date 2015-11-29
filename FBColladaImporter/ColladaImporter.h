@@ -27,6 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
+#include "FBCommonHeaders/IteratorWrapper.h"
 #include "FBColladaImporter/FBColladaData.h"
 namespace COLLADAFW
 {
@@ -43,6 +44,7 @@ namespace fastbird
 		struct MeshGroup;
 		typedef std::shared_ptr<MeshGroup> MeshGroupPtr;
 	}
+	typedef std::map<std::string, collada::MeshPtr> ColladaMeshObjects;
 	struct ImportOptions;		
 	FB_DECLARE_SMART_PTR(ColladaImporter);		
 	class FB_DLL_COLLADA ColladaImporter
@@ -78,5 +80,6 @@ namespace fastbird
 		bool ImportCollada(const char* filepath, const ImportOptions& options);			
 		collada::MeshPtr GetMeshObject() const;
 		collada::MeshGroupPtr GetMeshGroup() const;
+		IteratorWrapper<ColladaMeshObjects> GetMeshIterator();
 	};
 }

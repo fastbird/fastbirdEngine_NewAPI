@@ -89,7 +89,7 @@ public:
 		, mVideoBufReady(false)
 		, mIsFirstFrame(true)
 	{
-		mPS = Renderer::GetInstance().CreateShader("es/shaders/YUVMovie.hlsl", BINDING_SHADER_PS);
+		mPS = Renderer::GetInstance().CreateShader("EssentialEnginedata/shaders/YUVMovie.hlsl", BINDING_SHADER_PS);
 		if (!gpTimer){
 			gpTimer = Timer::GetMainTimer().get();
 		}

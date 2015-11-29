@@ -122,6 +122,7 @@ namespace fastbird
 		auto timer = TimerPtr(new Timer, [](Timer* obj){ delete obj; });
 		if (!sTimer){
 			sTimer = timer;
+			gpTimer = timer.get();
 		}
 		return timer;
 	}

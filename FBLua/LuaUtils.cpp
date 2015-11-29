@@ -34,69 +34,6 @@
 using namespace fastbird;
 
 // luawapper util
-template<>
-struct luaU_Impl < std::string >
-{
-	static std::string luaU_check(lua_State* L, int index);
-	static std::string luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const std::string& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec2ITuple >
-{
-	static fastbird::Vec2ITuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec2ITuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec2ITuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec2Tuple >
-{
-	static fastbird::Vec2Tuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec2Tuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec2Tuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec3ITuple >
-{
-	static fastbird::Vec3ITuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec3ITuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec3ITuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec3Tuple >
-{
-	static fastbird::Vec3Tuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec3Tuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec3Tuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::Vec4Tuple >
-{
-	static fastbird::Vec4Tuple luaU_check(lua_State* L, int index);
-	static fastbird::Vec4Tuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::Vec4Tuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::QuatTuple >
-{
-	static fastbird::QuatTuple luaU_check(lua_State* L, int index);
-	static fastbird::QuatTuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::QuatTuple& val);
-};
-
-template<>
-struct luaU_Impl < fastbird::TransformationTuple >
-{
-	static fastbird::TransformationTuple luaU_check(lua_State* L, int index);
-	static fastbird::TransformationTuple luaU_to(lua_State* L, int index);
-	static void luaU_push(lua_State* L, const fastbird::TransformationTuple& val);
-};
 
 namespace fastbird
 {
@@ -429,20 +366,19 @@ namespace fastbird
 			return DoFile(sLuaState, filepath);
 		}
 		Logger::Log(FB_ERROR_LOG_ARG, "Main lua state is not prepared.");
-		return false;
+		return true; // true when error.
 	}
 
 	bool LuaUtils::DoFile(lua_State* L, const char* filepath){
-		int error = luaL_dofile(L, filepath);
+		bool error = luaL_dofile(L, filepath);
 		if (error)
 		{
 			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Running script(%s) is failed: %s", filepath, lua_tostring(L, -1)).c_str());			
 			char buf[1024];
 			sprintf_s(buf, "\n%s/%s\n", GetCWD(), lua_tostring(L, -1));
 			Logger::Log(buf);
-			return false;
 		}
-		return true;
+		return error;
 	}
 
 	bool LuaUtils::LoadConfig(const char* filename){
@@ -782,6 +718,14 @@ namespace fastbird
 
 	bool LuaUtils::isstring(lua_State* L, int index){
 		return lua_isstring(L, index) != 0;
+	}
+
+	bool LuaUtils::istable(int index){
+		return lua_istable(sLuaState, index);
+	}
+
+	bool LuaUtils::istable(lua_State* L, int index){
+		return lua_istable(L, index);
 	}
 
 	bool LuaUtils::isuserdata(int index){
@@ -1170,246 +1114,248 @@ void PullNumbers(lua_State* L, int index, int& n, std::tuple<Args...>& t)
 	TupleIteratorPull<decltype(t), sizeof...(Args)>::iterate(L, index, n, t);
 }
 
-//---------------------------------------------------------------------------
-// string
-//---------------------------------------------------------------------------
-std::string luaU_Impl<std::string>::luaU_check(lua_State* L, int index) {
-	return std::string(luaL_checkstring(L, index));
+namespace fastbird{
+	//---------------------------------------------------------------------------
+	// string
+	//---------------------------------------------------------------------------
+	std::string luaU_Impl<std::string>::luaU_check(lua_State* L, int index) {
+		return std::string(luaL_checkstring(L, index));
+	}
+
+	std::string luaU_Impl<std::string>::luaU_to(lua_State* L, int index){
+		return std::string(lua_tostring(L, index));
+	}
+
+	void luaU_Impl<std::string>::luaU_push(lua_State* L, const std::string& val){
+		lua_pushstring(L, val.c_str());
+	}
+
+	//---------------------------------------------------------------------------
+	// Vec2ITuple
+	//---------------------------------------------------------------------------
+	fastbird::Vec2ITuple luaU_Impl< fastbird::Vec2ITuple >::luaU_check(lua_State* L, int index){
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::Vec2ITuple luaU_Impl< fastbird::Vec2ITuple >::luaU_to(lua_State* L, int index)
+	{
+		fastbird::Vec2ITuple ret;
+		lua_rawgeti(L, index, 1);
+		std::get<0>(ret) = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 2);
+		std::get<1>(ret) = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::Vec2ITuple >::luaU_push(lua_State* L, const fastbird::Vec2ITuple& val)
+	{
+		lua_createtable(L, 2, 0);
+		lua_pushinteger(L, std::get<0>(val));
+		lua_rawseti(L, -2, 1);
+		lua_pushinteger(L, std::get<1>(val));
+		lua_rawseti(L, -2, 2);
+	}
+
+	//---------------------------------------------------------------------------
+	// Vec2Tuple
+	//---------------------------------------------------------------------------
+	fastbird::Vec2Tuple luaU_Impl< fastbird::Vec2Tuple >::luaU_check(lua_State* L, int index)
+	{
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::Vec2Tuple luaU_Impl< fastbird::Vec2Tuple >::luaU_to(lua_State* L, int index)
+	{
+		fastbird::Vec2Tuple ret;
+		lua_rawgeti(L, index, 1);
+		std::get<0>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 2);
+		std::get<1>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::Vec2Tuple >::luaU_push(lua_State* L, const fastbird::Vec2Tuple& val)
+	{
+		lua_createtable(L, 2, 0);
+		lua_pushnumber(L, std::get<0>(val));
+		lua_rawseti(L, -2, 1);
+		lua_pushnumber(L, std::get<1>(val));
+		lua_rawseti(L, -2, 2);
+	}
+
+	//---------------------------------------------------------------------------
+	// Vec3ITuple
+	//---------------------------------------------------------------------------
+	fastbird::Vec3ITuple luaU_Impl< fastbird::Vec3ITuple >::luaU_check(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3I luaU_check(lua_State* L, int index)");
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::Vec3ITuple luaU_Impl< fastbird::Vec3ITuple >::luaU_to(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3I luaU_to(lua_State* L, int index)");
+		fastbird::Vec3ITuple ret;
+		lua_rawgeti(L, index, 1);
+		std::get<0>(ret) = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 2);
+		std::get<1>(ret) = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 3);
+		std::get<2>(ret) = lua_tointeger(L, -1);
+		lua_pop(L, 1);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::Vec3ITuple >::luaU_push(lua_State* L, const fastbird::Vec3ITuple& val)
+	{
+		lua_createtable(L, 3, 0);
+		lua_pushinteger(L, std::get<0>(val));
+		lua_rawseti(L, -2, 1);
+		lua_pushinteger(L, std::get<1>(val));
+		lua_rawseti(L, -2, 2);
+		lua_pushinteger(L, std::get<2>(val));
+		lua_rawseti(L, -2, 3);
+	}
+
+	//---------------------------------------------------------------------------
+	// Vec3Tuple
+	//---------------------------------------------------------------------------
+	fastbird::Vec3Tuple luaU_Impl< fastbird::Vec3Tuple >::luaU_check(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3Tuple luaU_check(lua_State* L, int index)");
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::Vec3Tuple luaU_Impl< fastbird::Vec3Tuple >::luaU_to(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3Tuple luaU_to(lua_State* L, int index)");
+		fastbird::Vec3Tuple ret;
+		lua_rawgeti(L, index, 1);
+		std::get<0>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 2);
+		std::get<1>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 3);
+		std::get<2>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::Vec3Tuple >::luaU_push(lua_State* L, const fastbird::Vec3Tuple& val)
+	{
+		lua_createtable(L, 3, 0);
+		lua_pushnumber(L, std::get<0>(val));
+		lua_rawseti(L, -2, 1);
+		lua_pushnumber(L, std::get<1>(val));
+		lua_rawseti(L, -2, 2);
+		lua_pushnumber(L, std::get<2>(val));
+		lua_rawseti(L, -2, 3);
+	}
+
+	//---------------------------------------------------------------------------
+	// Vec4Tuple
+	//---------------------------------------------------------------------------
+	fastbird::Vec4Tuple luaU_Impl< fastbird::Vec4Tuple >::luaU_check(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec4Tuple luaU_check(lua_State* L, int index)");
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::Vec4Tuple luaU_Impl< fastbird::Vec4Tuple >::luaU_to(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec4Tuple luaU_to(lua_State* L, int index)");
+		fastbird::Vec4Tuple ret;
+		lua_rawgeti(L, index, 1);
+		std::get<0>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 2);
+		std::get<1>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 3);
+		std::get<2>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		lua_rawgeti(L, index, 4);
+		std::get<3>(ret) = (float)lua_tonumber(L, -1);
+		lua_pop(L, 1);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::Vec4Tuple >::luaU_push(lua_State* L, const fastbird::Vec4Tuple& val)
+	{
+		lua_createtable(L, 3, 0);
+		lua_pushnumber(L, std::get<0>(val));
+		lua_rawseti(L, -2, 1);
+		lua_pushnumber(L, std::get<1>(val));
+		lua_rawseti(L, -2, 2);
+		lua_pushnumber(L, std::get<2>(val));
+		lua_rawseti(L, -2, 3);
+		lua_pushnumber(L, std::get<3>(val));
+		lua_rawseti(L, -2, 4);
+	}
+
+	//---------------------------------------------------------------------------
+	// QuatTuple
+	//---------------------------------------------------------------------------
+	fastbird::QuatTuple luaU_Impl< fastbird::QuatTuple>::luaU_check(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, " fastbird::QuatTuple luaU_check(lua_State* L, int index)");
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::QuatTuple luaU_Impl< fastbird::QuatTuple>::luaU_to(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, " fastbird::QuatTuple luaU_to(lua_State* L, int index)");
+		fastbird::QuatTuple ret;
+		int n = 1;
+		PullNumbers(L, index, n, ret.value);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::QuatTuple>::luaU_push(lua_State* L, const fastbird::QuatTuple& val)
+	{
+		lua_createtable(L, 0, 3);
+		int n = 1;
+		PushNumbers(L, n, val.value);
+	}
+
+	//---------------------------------------------------------------------------
+	// TransformationTuple
+	//---------------------------------------------------------------------------
+	fastbird::TransformationTuple luaU_Impl< fastbird::TransformationTuple>::luaU_check(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::TransformationTuple luaU_check(lua_State* L, int index)");
+		luaL_checktype(L, index, LUA_TTABLE);
+		return luaU_to(L, index);
+	}
+
+	fastbird::TransformationTuple luaU_Impl< fastbird::TransformationTuple>::luaU_to(lua_State* L, int index)
+	{
+		fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::TransformationTuple luaU_to(lua_State* L, int index)");
+		int n = 1;
+		fastbird::TransformationTuple ret;
+		PullNumbers(L, index, n, ret);
+		return ret;
+	}
+
+	void luaU_Impl< fastbird::TransformationTuple>::luaU_push(lua_State* L, const fastbird::TransformationTuple& val)
+	{
+		lua_createtable(L, 22, 0);
+
+		int n = 1;
+		PushNumbers(L, n, val);
+	}
+
 }
-
-std::string luaU_Impl<std::string>::luaU_to(lua_State* L, int index){
-	return std::string(lua_tostring(L, index));
-}
-
-void luaU_Impl<std::string>::luaU_push(lua_State* L, const std::string& val){
-	lua_pushstring(L, val.c_str());
-}
-
-//---------------------------------------------------------------------------
-// Vec2ITuple
-//---------------------------------------------------------------------------
-fastbird::Vec2ITuple luaU_Impl< fastbird::Vec2ITuple >::luaU_check(lua_State* L, int index){
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::Vec2ITuple luaU_Impl< fastbird::Vec2ITuple >::luaU_to(lua_State* L, int index)
-{
-	fastbird::Vec2ITuple ret;
-	lua_rawgeti(L, index, 1);
-	std::get<0>(ret) = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 2);
-	std::get<1>(ret) = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	return ret;
-}
-
-void luaU_Impl< fastbird::Vec2ITuple >::luaU_push(lua_State* L, const fastbird::Vec2ITuple& val)
-{
-	lua_createtable(L, 2, 0);
-	lua_pushinteger(L, std::get<0>(val));
-	lua_rawseti(L, -2, 1);
-	lua_pushinteger(L, std::get<1>(val));
-	lua_rawseti(L, -2, 2);
-}
-
-//---------------------------------------------------------------------------
-// Vec2Tuple
-//---------------------------------------------------------------------------
-fastbird::Vec2Tuple luaU_Impl< fastbird::Vec2Tuple >::luaU_check(lua_State* L, int index)
-{
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::Vec2Tuple luaU_Impl< fastbird::Vec2Tuple >::luaU_to(lua_State* L, int index)
-{
-	fastbird::Vec2Tuple ret;
-	lua_rawgeti(L, index, 1);
-	std::get<0>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 2);
-	std::get<1>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	return ret;
-}
-
-void luaU_Impl< fastbird::Vec2Tuple >::luaU_push(lua_State* L, const fastbird::Vec2Tuple& val)
-{
-	lua_createtable(L, 2, 0);
-	lua_pushnumber(L, std::get<0>(val));
-	lua_rawseti(L, -2, 1);
-	lua_pushnumber(L, std::get<1>(val));
-	lua_rawseti(L, -2, 2);
-}
-
-//---------------------------------------------------------------------------
-// Vec3ITuple
-//---------------------------------------------------------------------------
-fastbird::Vec3ITuple luaU_Impl< fastbird::Vec3ITuple >::luaU_check(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3I luaU_check(lua_State* L, int index)");
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::Vec3ITuple luaU_Impl< fastbird::Vec3ITuple >::luaU_to(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3I luaU_to(lua_State* L, int index)");
-	fastbird::Vec3ITuple ret;
-	lua_rawgeti(L, index, 1);
-	std::get<0>(ret) = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 2);
-	std::get<1>(ret) = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 3);
-	std::get<2>(ret) = lua_tointeger(L, -1);
-	lua_pop(L, 1);
-	return ret;
-}
-
-void luaU_Impl< fastbird::Vec3ITuple >::luaU_push(lua_State* L, const fastbird::Vec3ITuple& val)
-{
-	lua_createtable(L, 3, 0);
-	lua_pushinteger(L, std::get<0>(val));
-	lua_rawseti(L, -2, 1);
-	lua_pushinteger(L, std::get<1>(val));
-	lua_rawseti(L, -2, 2);
-	lua_pushinteger(L, std::get<2>(val));
-	lua_rawseti(L, -2, 3);
-}
-
-//---------------------------------------------------------------------------
-// Vec3Tuple
-//---------------------------------------------------------------------------
-fastbird::Vec3Tuple luaU_Impl< fastbird::Vec3Tuple >::luaU_check(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3Tuple luaU_check(lua_State* L, int index)");
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::Vec3Tuple luaU_Impl< fastbird::Vec3Tuple >::luaU_to(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec3Tuple luaU_to(lua_State* L, int index)");
-	fastbird::Vec3Tuple ret;
-	lua_rawgeti(L, index, 1);
-	std::get<0>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 2);
-	std::get<1>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 3);
-	std::get<2>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	return ret;
-}
-
-void luaU_Impl< fastbird::Vec3Tuple >::luaU_push(lua_State* L, const fastbird::Vec3Tuple& val)
-{
-	lua_createtable(L, 3, 0);
-	lua_pushnumber(L, std::get<0>(val));
-	lua_rawseti(L, -2, 1);
-	lua_pushnumber(L, std::get<1>(val));
-	lua_rawseti(L, -2, 2);
-	lua_pushnumber(L, std::get<2>(val));
-	lua_rawseti(L, -2, 3);
-}
-
-//---------------------------------------------------------------------------
-// Vec4Tuple
-//---------------------------------------------------------------------------
-fastbird::Vec4Tuple luaU_Impl< fastbird::Vec4Tuple >::luaU_check(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec4Tuple luaU_check(lua_State* L, int index)");
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::Vec4Tuple luaU_Impl< fastbird::Vec4Tuple >::luaU_to(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::Vec4Tuple luaU_to(lua_State* L, int index)");
-	fastbird::Vec4Tuple ret;
-	lua_rawgeti(L, index, 1);
-	std::get<0>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 2);
-	std::get<1>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 3);
-	std::get<2>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	lua_rawgeti(L, index, 4);
-	std::get<3>(ret) = (float)lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	return ret;
-}
-
-void luaU_Impl< fastbird::Vec4Tuple >::luaU_push(lua_State* L, const fastbird::Vec4Tuple& val)
-{
-	lua_createtable(L, 3, 0);
-	lua_pushnumber(L, std::get<0>(val));
-	lua_rawseti(L, -2, 1);
-	lua_pushnumber(L, std::get<1>(val));
-	lua_rawseti(L, -2, 2);
-	lua_pushnumber(L, std::get<2>(val));
-	lua_rawseti(L, -2, 3);
-	lua_pushnumber(L, std::get<3>(val));
-	lua_rawseti(L, -2, 4);
-}
-
-//---------------------------------------------------------------------------
-// QuatTuple
-//---------------------------------------------------------------------------
-fastbird::QuatTuple luaU_Impl< fastbird::QuatTuple>::luaU_check(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, " fastbird::QuatTuple luaU_check(lua_State* L, int index)");
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::QuatTuple luaU_Impl< fastbird::QuatTuple>::luaU_to(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, " fastbird::QuatTuple luaU_to(lua_State* L, int index)");
-	fastbird::QuatTuple ret;
-	int n = 1;
-	PullNumbers(L, index, n, ret.value);
-	return ret;
-}
-
-void luaU_Impl< fastbird::QuatTuple>::luaU_push(lua_State* L, const fastbird::QuatTuple& val)
-{
-	lua_createtable(L, 0, 3);
-	int n = 1;
-	PushNumbers(L, n, val.value);
-}
-
-//---------------------------------------------------------------------------
-// TransformationTuple
-//---------------------------------------------------------------------------
-fastbird::TransformationTuple luaU_Impl< fastbird::TransformationTuple>::luaU_check(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::TransformationTuple luaU_check(lua_State* L, int index)");
-	luaL_checktype(L, index, LUA_TTABLE);
-	return luaU_to(L, index);
-}
-
-fastbird::TransformationTuple luaU_Impl< fastbird::TransformationTuple>::luaU_to(lua_State* L, int index)
-{
-	fastbird::LUA_STACK_WATCHER watcher(L, "fastbird::TransformationTuple luaU_to(lua_State* L, int index)");
-	int n = 1;
-	fastbird::TransformationTuple ret;
-	PullNumbers(L, index, n, ret);
-	return ret;
-}
-
-void luaU_Impl< fastbird::TransformationTuple>::luaU_push(lua_State* L, const fastbird::TransformationTuple& val)
-{
-	lua_createtable(L, 22, 0);
-
-	int n = 1;
-	PushNumbers(L, n, val);
-}
-

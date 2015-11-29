@@ -48,7 +48,6 @@
 //#ifndef LUAW_NO_EXTERN_C
 //}
 //#endif // LUAW_NO_EXTERN_C
-#include "assert.h"
 
 #define LUAW_POSTCTOR_KEY "__postctor"
 #define LUAW_EXTENDS_KEY "__extends"
@@ -530,12 +529,12 @@ int luaW_gc(lua_State* L)
 // stack. 
 //
 // This function is only called from LuaWrapper internally. 
-void luaW_registerfuncs(lua_State* L, const luaL_Reg defaulttable[], const luaL_Reg table[]);
+FB_DLL_LUA void luaW_registerfuncs(lua_State* L, const luaL_Reg defaulttable[], const luaL_Reg table[]);
 
 // Initializes the LuaWrapper tables used to track internal state. 
 //
 // This function is only called from LuaWrapper internally. 
-void luaW_initialize(lua_State* L);
+FB_DLL_LUA void luaW_initialize(lua_State* L);
 
 // Run luaW_register or luaW_setfuncs to create a table and metatable for your
 // class.  These functions create a table with filled with the function from
@@ -613,7 +612,7 @@ void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table, c
 
     // Open metatable, set up extends table
     int result = LuaUtils::Lnewmetatable(L, classname); // ... T mt
-	if_assert_fail (result)
+	if (!result)
 	{
 		fastbird::Log("Metatable %s already exists.", classname);
 	}

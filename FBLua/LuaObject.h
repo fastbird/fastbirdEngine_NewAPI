@@ -30,7 +30,6 @@
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBCommonHeaders/SpinLock.h"
 #include "LuaUtils.h"
-#include "luawrapper.hpp"
 namespace fastbird
 {
 	class FB_DLL_LUA LuaObject;
@@ -142,8 +141,8 @@ namespace fastbird
 			LUA_STACK_WATCHER w(mL, "void SetSeq(int n, T* val)");
 			PushToStack();
 			luaW_push(mL, val);
-			lua_rawseti(mL, -2, n);
-			lua_pop(mL, 1);
+			LuaUtils::rawseti(mL, -2, n);
+			LuaUtils::pop(mL, 1);
 		}
 		template <class T>
 		void SetSeqTemplate(int n, T v) const
@@ -151,8 +150,8 @@ namespace fastbird
 			LUA_STACK_WATCHER w(mL, "void SetSeqTemplate(int n, T v)");
 			PushToStack();
 			luaW_push(mL, v);
-			lua_rawseti(mL, -2, n);
-			lua_pop(mL, 1);
+			LuaUtils::rawseti(mL, -2, n);
+			LuaUtils::pop(mL, 1);
 		}
 
 		void AppendTable(LuaObject& table) const;

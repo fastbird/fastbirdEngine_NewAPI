@@ -404,7 +404,8 @@ namespace fastbird
 		virtual Vec2I GetRenderTargetSize() const;
 		virtual Vec2I GetParentSize() const;
 
-		virtual WinBasePtr GetRootWnd() const;
+		WinBasePtr GetRootWnd() const;
+		WinBase* GetRootWndRaw() const;
 
 		virtual bool IsAlwaysOnTop() const{ return false; }
 

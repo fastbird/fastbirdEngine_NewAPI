@@ -35,6 +35,8 @@
 #include "RenderTargetParamEx.h"
 namespace fastbird{
 	class ProfilerSimple;
+	FB_DECLARE_SMART_PTR(MeshFacade);
+	FB_DECLARE_SMART_PTR(DirectionalLight);
 	FB_DECLARE_SMART_PTR(Task);
 	FB_DECLARE_SMART_PTR(Voxelizer);
 	FB_DECLARE_SMART_PTR(Font);
@@ -45,6 +47,7 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(IInputInjector);
 	FB_DECLARE_SMART_PTR(EngineOptions);
 	FB_DECLARE_SMART_PTR(Scene);
+	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(EngineFacade);
 	FB_DECLARE_SMART_PTR(RenderTarget);
 	class FB_DLL_ENGINEFACADE EngineFacade{
@@ -65,6 +68,7 @@ namespace fastbird{
 		HWindowId CreateEngineWindow(int x, int y, int width, int height,
 			const char* wndClass, const char* title, unsigned style, unsigned exStyle,
 			WNDPROC winProc);
+		HWindowId GetMainWindowHandleId() const;
 		/// for windows;
 		intptr_t WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp);
 		EngineOptionsPtr GetEngineOptions() const;
@@ -84,7 +88,9 @@ namespace fastbird{
 		void AddFileChangeObserver(int fileChangeObserverType, IFileChangeObserverPtr observer);
 		IVideoPlayerPtr CreateVideoPlayer(VideoPlayerType::Enum type);
 		VoxelizerPtr CreateVoxelizer();
-		
+		/// Keep the strong ptr.
+		void AddTempMesh(MeshFacadePtr mesh);
+		void GetFractureMeshObjects(const char* daeFilePath, std::vector<MeshFacadePtr>& objects);		
 
 		//---------------------------------------------------------------------------
 		// Renderer Interfaces
@@ -102,8 +108,24 @@ namespace fastbird{
 		void QueueDrawText(const Vec2I& pos, WCHAR* text, const Color& color, Real size);
 		void QueueDrawText(const Vec2I& pos, const char* text, const Color& color);
 		void QueueDrawText(const Vec2I& pos, const char* text, const Color& color, Real size);
+		void QueueDraw3DText(const Vec3& worldpos, WCHAR* text, const Color& color);
+		void QueueDraw3DText(const Vec3& worldpos, WCHAR* text, const Color& color, Real size);
+		void QueueDraw3DText(const Vec3& worldpos, const char* text, const Color& color);
+		void QueueDraw3DText(const Vec3& worldpos, const char* text, const Color& color, Real size);
 		void QueueDrawLineBeforeAlphaPass(const Vec3& start, const Vec3& end,
 			const Color& color0, const Color& color1);
+		void QueueDrawLine(const Vec3& start, const Vec3& end,
+			const Color& color0, const Color& color1);
+		/**Rendered before the transparent object.*/
+		void QueueDrawTexturedThickLine(const Vec3& start, const Vec3& end, const Color& color0, const Color& color1, Real thickness,
+			const char* texture, bool textureFlow);
+		/**Rendered before the transparent object.*/
+		void QueueDrawSphere(const Vec3& pos, Real radius, const Color& color);
+		/**Rendered before the transparent object.*/
+		void QueueDrawBox(const Vec3& boxMin, const Vec3& boxMax, const Color& color, Real alpha);
+		/**Rendered before the transparent object.*/
+		void QueueDrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c, const Color& color, Real alpha);
+
 		FontPtr GetFont(float fontHeight);
 		unsigned GetNumLoadingTexture() const;
 		RenderTargetPtr CreateRenderTarget(const RenderTargetParamEx& param);
@@ -112,6 +134,7 @@ namespace fastbird{
 		Real GetMainCameraFov() const;
 		const Vec3& GetMainCameraPos() const;
 		const Vec3& GetMainCameraDirection() const;
+		/// Get matrices of the main camera
 		const Mat44& GetCameraMatrix(ICamera::MatrixType type) const;
 		const Ray3& GetWorldRayFromCursor();
 		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName);
@@ -122,6 +145,11 @@ namespace fastbird{
 		void UnmapMaterialParameterBuffer();
 		void* MapBigBuffer();
 		void UnmapBigBuffer();
+		void SetEnable3DUIs(bool enable);
+		void SetRendererFadeAlpha(Real alpha);
+		void ClearDurationTexts();
+		bool GetResolutionList(unsigned& outNum, Vec2I* list);
+		Vec2 ToNdcPos(HWindowId id, const Vec2I& screenPos) const;
 
 		//---------------------------------------------------------------------------
 		// Scene Manipulations
@@ -135,15 +163,18 @@ namespace fastbird{
 		/// Remove a scene observer from the main scene
 		void RemoveSceneObserver(ISceneObserver::Type type, ISceneObserverPtr observer);
 		ScenePtr CreateScene(const char* uniquename);
-		void OverrideMainScene(ScenePtr scene);
+		void OverrideMainScene(IScenePtr scene);
+		/// Create temporary scene, lasting until OverrideMainScene(0) called.
+		void OverrideMainScene();
+		void LockSceneOverriding(bool lock);
 		void SetDrawClouds(bool draw);				
 		void AddDirectionalLightCoordinates(DirectionalLightIndex::Enum idx, Real phi, Real theta);
 		const Vec3& GetLightDirection(DirectionalLightIndex::Enum idx);
 		const Vec3& GetLightDiffuse(DirectionalLightIndex::Enum idx);
 		const Real GetLightIntensity(DirectionalLightIndex::Enum idx);
-		void DetachBlendingSky(ScenePtr scene);
-
-
+		void SetLightIntensity(IScenePtr scene, DirectionalLightIndex::Enum idx, Real intensity);
+		DirectionalLightPtr GetMainSceneLight(DirectionalLightIndex::Enum idx);
+		void DetachBlendingSky(IScenePtr scene);
 		void StopAllParticles();
 		void AddTask(TaskPtr NewTask);
 	};

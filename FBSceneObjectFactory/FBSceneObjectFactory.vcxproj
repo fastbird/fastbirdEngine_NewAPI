@@ -78,6 +78,7 @@
     <ClInclude Include="MeshGroup.h" />
     <ClInclude Include="MeshImportDesc.h" />
     <ClInclude Include="MeshObject.h" />
+    <ClInclude Include="MeshVertexBufferType.h" />
     <ClInclude Include="SceneObjectFactory.h" />
     <ClInclude Include="SceneObjectType.h" />
     <ClInclude Include="SkySphere.h" />

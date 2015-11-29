@@ -76,9 +76,15 @@ namespace fastbird{
 		@return 'false' if \b path did not exist in the first place, otherwise true.
 		*/
 		static bool Remove(const char* path);		
-		/** If filepath exists, rename it to preserve. \a numKeeping decides how many backup files
-		need to be kept.\n*/
+		/** If filepath exists, rename it to preserve. 
+		\param numKeeping decides how many backup files need to be kept.
+		*/
 		static void BackupFile(const char* filepath, unsigned numKeeping);
+		/** If filepath exists, rename it to preserve. 
+		\param numKeeping decides how many backup files need to be kept.
+		\param directory directory to move the original file.
+		*/
+		static void BackupFile(const char* filepath, unsigned numKeeping, const char* directory);
 		/** Compares the last modified time
 		\return -1, if a is older. 0, if the same. 1, if b is older
 		*/
@@ -127,5 +133,8 @@ namespace fastbird{
 		static std::string ConcatPath(const char* path1, const char* path2);
 		static std::string UnifyFilepath(const char* path);
 		static std::string Absolute(const char* path);
+		/** Add '/' if it doesn't exists at the end of the \a directory.
+		*/
+		static std::string MakrEndingSlashIfNot(const char* directory);
 	};
 }

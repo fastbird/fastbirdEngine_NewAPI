@@ -9,6 +9,7 @@
 using namespace fastbird;
 class MeshFacade::Impl{
 public:
+	MeshFacadeWeakPtr mSelfPtr;
 	MeshObjectPtr mMeshObject;
 	MeshGroupPtr mMeshGroup;
 
@@ -41,6 +42,11 @@ public:
 			return true;
 		}
 		return false;
+	}
+
+	void CreateEmptyMeshObject(){
+		mMeshGroup = 0;
+		mMeshObject = MeshObject::Create();
 	}
 
 	bool LoadMeshGroup(const char* daePath){
@@ -129,6 +135,21 @@ public:
 			mMeshObject->SetMaterial(path, PASS_NORMAL);
 		else if (mMeshGroup)
 			mMeshGroup->SetMaterial(path, PASS_NORMAL);
+	}
+
+	void SetVisible(bool visible){
+		if (mMeshObject)
+			mMeshObject->SetVisible(visible);
+		else if (mMeshGroup)
+			mMeshGroup->SetVisible(visible);
+	}
+
+	bool GetVisible() const{
+		if (mMeshObject)
+			return mMeshObject->GetVisible();
+		else if (mMeshGroup)
+			return mMeshGroup->GetVisible();
+		return false;
 	}
 
 	bool AttachToScene(){
@@ -446,11 +467,27 @@ public:
 			mMeshGroup->SetPosition(pos);
 	}
 
+	const Vec3& GetPosition() const{
+		if (mMeshObject)
+			return mMeshObject->GetPosition();
+		else if (mMeshGroup)
+			return mMeshGroup->GetPosition();
+		return Vec3::ZERO;
+	}
+
 	void SetRotation(const Quat& rot){
 		if (mMeshObject)
 			mMeshObject->SetRotation(rot);
 		else if (mMeshGroup)
 			mMeshGroup->SetRotation(rot);
+	}
+
+	const Quat& GetRotation() const{
+		if (mMeshObject)
+			return mMeshObject->GetRotation();
+		else if (mMeshGroup)
+			return mMeshGroup->GetRotation();
+		return Quat::IDENTITY;
 	}
 
 	void SetScale(const Vec3& scale){
@@ -485,7 +522,7 @@ public:
 		return false;
 	}
 
-	bool CheckNarrowCollision(BoundingVolumePtr bv){
+	bool CheckNarrowCollision(const BoundingVolume* bv){
 		if (mMeshObject)
 			return mMeshObject->CheckNarrowCollision(bv);
 		else if (mMeshGroup){
@@ -604,9 +641,9 @@ public:
 
 	SpatialObjectPtr GetSpatialObject() const{
 		if (mMeshObject)
-			return std::static_pointer_cast<SpatialObject>(mMeshObject);
+			return std::dynamic_pointer_cast<SpatialObject>(mMeshObject);
 		else if (mMeshGroup)
-			return std::static_pointer_cast<SpatialObject>(mMeshGroup);
+			return std::dynamic_pointer_cast<SpatialObject>(mMeshGroup);
 		return 0;
 	}
 
@@ -617,6 +654,7 @@ std::vector<MeshFacadeWeakPtr> sMeshes;
 MeshFacadePtr MeshFacade::Create(){
 	MeshFacadePtr p(new MeshFacade, [](MeshFacade* obj){ delete obj; });
 	sMeshes.push_back(p);
+	p->mImpl->mSelfPtr = p;
 	return p;
 }
 
@@ -630,16 +668,51 @@ MeshFacade::~MeshFacade(){
 
 }
 
-bool MeshFacade::LoadMeshObject(const char* daePath) {
-	return mImpl->LoadMeshObject(daePath, MeshLoadOptions());
+MeshFacadePtr MeshFacade::LoadMeshObject(const char* daePath) {
+	if (mImpl->LoadMeshObject(daePath, MeshLoadOptions()))
+		return mImpl->mSelfPtr.lock();
+	return 0;
 }
 
-bool MeshFacade::LoadMeshObject(const char* daePath, const MeshLoadOptions& options){
-	return mImpl->LoadMeshObject(daePath, options);
+MeshFacadePtr MeshFacade::LoadMeshObject(const char* daePath, const MeshLoadOptions& options){
+	if (mImpl->LoadMeshObject(daePath, options))
+		return mImpl->mSelfPtr.lock();
+	return 0;
 }
 
-bool MeshFacade::LoadMeshGroup(const char* daePath){
-	return mImpl->LoadMeshGroup(daePath);
+MeshFacadePtr MeshFacade::CreateEmptyMeshObject(){
+	mImpl->CreateEmptyMeshObject();
+	return mImpl->mSelfPtr.lock();
+}
+
+MeshFacadePtr MeshFacade::LoadMeshGroup(const char* daePath){
+	if (mImpl->LoadMeshGroup(daePath))
+		return mImpl->mSelfPtr.lock();
+	return 0;
+}
+
+void MeshFacade::SetMeshObject(MeshObjectPtr mesh){
+	mImpl->mMeshObject = mesh;
+	mImpl->mMeshGroup = 0;
+}
+
+MeshFacadePtr MeshFacade::Clone(){
+	MeshFacadePtr newMesh = MeshFacade::Create();
+	if (mImpl->mMeshObject){
+		newMesh->mImpl->mMeshObject = mImpl->mMeshObject->Clone();
+	}
+	else if (mImpl->mMeshGroup){
+		newMesh->mImpl->mMeshGroup = mImpl->mMeshGroup->Clone();
+	}
+	return newMesh;
+}
+
+const char* MeshFacade::GetName() const{
+	if (mImpl->mMeshObject)
+		return mImpl->mMeshObject->GetName();
+	else if (mImpl->mMeshGroup)
+		return mImpl->mMeshGroup->GetName();
+	return "";
 }
 
 bool MeshFacade::IsVaildMesh() const{
@@ -690,6 +763,13 @@ void MeshFacade::SetMaterial(const char* path) {
 	mImpl->SetMaterial(path);
 }
 
+void MeshFacade::SetVisible(bool visible){
+	mImpl->SetVisible(visible);
+}
+bool MeshFacade::GetVisible() const{
+	return mImpl->GetVisible();
+}
+
 bool MeshFacade::AttachToScene() {
 	return mImpl->AttachToScene();
 }
@@ -735,6 +815,10 @@ const AUXILIARIES* MeshFacade::GetAuxiliaries() const {
 	return mImpl->GetAuxiliaries();
 }
 
+const AUXILIARIES* MeshFacade::GetAuxiliaries(unsigned idx) const{
+	return mImpl->GetAuxiliaries(idx);
+}
+
 Transformation MeshFacade::GetAuxiliaryWorldTransformation(const char* name, bool& outFound) const{
 	return mImpl->GetAuxiliaryWorldTransformation(name, outFound);
 }
@@ -767,8 +851,16 @@ void MeshFacade::SetPosition(const Vec3& pos) {
 	mImpl->SetPosition(pos);
 }
 
+const Vec3& MeshFacade::GetPosition() const{
+	return mImpl->GetPosition();
+}
+
 void MeshFacade::SetRotation(const Quat& rot) {
 	mImpl->SetRotation(rot);
+}
+
+const Quat& MeshFacade::GetRotation() const{
+	return mImpl->GetRotation();
 }
 
 void MeshFacade::SetScale(const Vec3& scale) {
@@ -787,7 +879,7 @@ bool MeshFacade::RayCast(const Ray3& ray, Vec3& pos, const ModelTriangle** tri) 
 	return mImpl->RayCast(ray, pos, tri);
 }
 
-bool MeshFacade::CheckNarrowCollision(BoundingVolumePtr bv) {
+bool MeshFacade::CheckNarrowCollision(const BoundingVolume* bv) {
 	return mImpl->CheckNarrowCollision(bv);
 }
 
@@ -838,4 +930,69 @@ SpatialObjectPtr MeshFacade::GetSpatialObject() const{
 void MeshFacade::AddAsCloudVolume(ScenePtr scene){
 	if (mImpl->mMeshObject)
 		scene->AddCloudVolume(mImpl->mMeshObject);
+}
+
+void MeshFacade::SetUseDynamicVB(MeshVertexBufferType::Enum type, bool use){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetUseDynamicVB(type, use);
+}
+
+void MeshFacade::StartModification(){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->StartModification();
+}
+
+void MeshFacade::SetPositions(int matGroupIdx, const Vec3* p, size_t numVertices){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetPositions(matGroupIdx, p, numVertices);
+}
+
+void MeshFacade::SetNormals(int matGroupIdx, const Vec3* n, size_t numNormals){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetNormals(matGroupIdx, n, numNormals);
+}
+
+void MeshFacade::SetUVs(int matGroupIdx, const Vec2* uvs, size_t numUVs){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetUVs(matGroupIdx, uvs, numUVs);
+}
+
+void MeshFacade::SetColors(int matGroupIdx, const DWORD* colors, size_t numColors){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetColors(matGroupIdx, colors, numColors);
+}
+
+void MeshFacade::EndModification(bool keepMeshData){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->EndModification(keepMeshData);
+}
+
+void MeshFacade::SetTopology(PRIMITIVE_TOPOLOGY topology){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetTopology(topology);
+}
+
+void MeshFacade::ClearVertexBuffers(){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->ClearVertexBuffers();
+}
+
+void MeshFacade::SetRadius(Real r){
+	if (mImpl->mMeshObject)
+		mImpl->mMeshObject->SetRadius(r);
+}
+
+Real MeshFacade::GetRadius() const{
+	if (mImpl->mMeshObject)
+		return mImpl->mMeshObject->GetRadius();
+
+	Logger::Log(FB_ERROR_LOG_ARG, "Mesh is not loaded.");
+	return 0.5f;
+}
+
+Vec3* MeshFacade::GetPositionVertices(int matGroupIdx, size_t& outNumPositions){
+	if (mImpl->mMeshObject)
+		return mImpl->mMeshObject->GetPositions(matGroupIdx, outNumPositions);
+
+	return 0;
 }

@@ -54,6 +54,7 @@ Required libraries: \b FBMemoryManager, \b FBDebugLib, \b FBMath
 #include <D3Dcompiler.h>
 #include <map>
 #include <d3d9.h>
+#include <assert.h>
 #include "zlib.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBMathLib/Math.h"

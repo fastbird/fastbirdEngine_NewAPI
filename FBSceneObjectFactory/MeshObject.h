@@ -30,6 +30,7 @@
 #include "FBCollisionShape.h"
 #include "CollisionInfo.h"
 #include "MeshAuxiliary.h"
+#include "MeshVertexBufferType.h"
 #include "FBSceneManager/SpatialSceneObject.h"
 #include "FBRenderer/RenderParam.h"
 #include "FBRenderer/RendererEnums.h"
@@ -62,18 +63,7 @@ namespace fastbird{
 
 		//---------------------------------------------------------------------------
 		// Own functions
-		//---------------------------------------------------------------------------
-
-		enum BUFFER_TYPE
-		{
-			BUFFER_TYPE_POSITION,
-			BUFFER_TYPE_NORMAL,
-			BUFFER_TYPE_UV,
-			BUFFER_TYPE_COLOR,
-			BUFFER_TYPE_TANGENT,
-
-			BUFFER_TYPE_NUM
-		};
+		//---------------------------------------------------------------------------		
 
 		MeshObjectPtr Clone() const;
 		void SetMaterial(const char* filepath);
@@ -116,13 +106,13 @@ namespace fastbird{
 		unsigned GetNumCollisionShapes() const;
 		bool HasCollisionShapes() const;
 		FBCollisionShapeConstPtr GetCollisionShape(unsigned idx) const;
-		bool CheckNarrowCollision(BoundingVolumeConstPtr pBV) const;
+		bool CheckNarrowCollision(const BoundingVolume* pBV) const;
 		Ray3::IResult CheckNarrowCollisionRay(const Ray3& ray) const;
 		Vec3 GetRandomPosInVolume(const Vec3* nearWorld = 0) const;
 		void DeleteCollisionShapes();
-		void SetUseDynamicVB(BUFFER_TYPE type, bool useDynamicVB);
-		MapData MapVB(BUFFER_TYPE type, size_t materialGroupIdx);
-		void UnmapVB(BUFFER_TYPE type, size_t materialGroupIdx);
+		void SetUseDynamicVB(MeshVertexBufferType::Enum type, bool useDynamicVB);
+		MapData MapVB(MeshVertexBufferType::Enum type, size_t materialGroupIdx);
+		void UnmapVB(MeshVertexBufferType::Enum type, size_t materialGroupIdx);
 		bool RayCast(const Ray3& ray, Vec3& location, const ModelTriangle** outTri = 0) const;
 		BoundingVolumeConstPtr GetAABB() const;
 		void ClearVertexBuffers();

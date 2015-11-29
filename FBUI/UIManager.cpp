@@ -157,23 +157,7 @@ public:
 		, mMultiLocating(false), mAtlasStaging(0)
 		, mPrevTooltipNPos(-1, -1)
 	{	
-		mL = LuaUtils::GetLuaState();
-		/*gFBEnv->pEngine->AddInputListener(this,
-		fastbird::IInputListener::INPUT_LISTEN_PRIORITY_UI, 0);*/
-		mKeyboardCursor = KeyboardCursor::Create();
-		RegisterLuaFuncs(mL);
-		RegisterLuaEnums(mL);
-		mUICommands = UICommands::Create();
-		SetStyle("blue");
-		PrepareTooltipUI();
-		WinBase::InitMouseCursor();		
-		//gFBEnv->pEngine->RegisterFileChangeListener(this);
-		//gFBEnv->pRenderer->AddRenderListener(this);
-		mTextManipulator = TextManipulator::Create();
-		LuaObject textSizeMod(mL, "ui_textSizeMod");
-		if (textSizeMod.IsValid()){
-			gTextSizeMod = textSizeMod.GetFloat(0);
-		}
+		
 	}
 
 	~Impl(){
@@ -195,6 +179,26 @@ public:
 		DeleteWindow(mPopup);
 		Shutdown();
 		assert(mWindows.empty());
+	}
+
+	void Initialize(){
+		mL = LuaUtils::GetLuaState();
+		/*gFBEnv->pEngine->AddInputListener(this,
+		fastbird::IInputListener::INPUT_LISTEN_PRIORITY_UI, 0);*/
+		mKeyboardCursor = KeyboardCursor::Create();
+		RegisterLuaFuncs(mL);
+		RegisterLuaEnums(mL);
+		mUICommands = UICommands::Create();
+		SetStyle("blue");
+		PrepareTooltipUI();
+		WinBase::InitMouseCursor();
+		//gFBEnv->pEngine->RegisterFileChangeListener(this);
+		//gFBEnv->pRenderer->AddRenderListener(this);
+		mTextManipulator = TextManipulator::Create();
+		LuaObject textSizeMod(mL, "ui_textSizeMod");
+		if (textSizeMod.IsValid()){
+			gTextSizeMod = textSizeMod.GetFloat(0);
+		}
 	}
 
 	WinBasePtr CreateComponent(ComponentType::Enum type){
@@ -713,7 +717,7 @@ public:
 		const char* sz = pRoot->Attribute("script");
 		if (sz && strlen(sz) != 0)
 		{
-			if (!LuaUtils::DoFile(sz))
+			if (LuaUtils::DoFile(sz))
 			{
 				return false;				
 			}
@@ -1988,9 +1992,9 @@ public:
 		GetCurrentDirectory(MAX_PATH, buf);
 		mStyle = style;
 		tinyxml2::XMLDocument doc;
-		int err = doc.LoadFile("es/ui/style.xml");
+		int err = doc.LoadFile("EssentialEngineData/ui/style.xml");
 		if (err){
-			Error("parsing style file(es/ui/style.xml) failed.");
+			Error("parsing style file(EssentialEngineData/ui/style.xml) failed.");
 			if (doc.GetErrorStr1())
 				Error(doc.GetErrorStr1());
 			if (doc.GetErrorStr2())
@@ -2125,7 +2129,7 @@ public:
 				return 0;
 
 			// GenerateAlphaTexture
-			auto atlas = Renderer::GetInstance().GetTextureAtlas("es/textures/ui.xml");
+			auto atlas = Renderer::GetInstance().GetTextureAtlas("EssentialEngineData/textures/ui.xml");
 			if (!atlas)
 				return 0;
 
@@ -2265,7 +2269,7 @@ public:
 			}
 			if (FileSystem::Exists(newfile))
 			{
-				BackupFile(newfile);
+				FileSystem::BackupFile(newfile, 5, "Backup_UI");				
 			}
 
 			auto oldFilepath = root->GetUIFilePath();
@@ -2465,13 +2469,6 @@ public:
 		return bakName;
 	}
 
-	void BackupFile(const char* filename){
-		if (FileSystem::Exists(filename))
-		{
-			FileSystem::Rename(filename, GetBackupName(filename).c_str());
-		}
-	}
-
 	void DragUI(){
 		assert(mUIEditor);
 		static bool sDragStarted = false;
@@ -2647,6 +2644,7 @@ UIManagerPtr UIManager::Create(){
 	if (sUIManager.expired()){
 		UIManagerPtr p(new UIManager, [](UIManager* obj){ delete obj; });
 		sUIManager = p;
+		p->mImpl->Initialize();
 		return p;
 	}
 	return sUIManager.lock();

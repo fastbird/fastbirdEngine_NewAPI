@@ -57,7 +57,7 @@ KeyboardCursor::KeyboardCursor()
 	: mVisible(false)
 {	
 	mUIObject = UIObject::Create(Renderer::GetInstance().GetMainRenderTargetSize());
-	mUIObject->SetMaterial("es/materials/KeyboardCursor.material");
+	mUIObject->SetMaterial("EssentialEngineData/materials/KeyboardCursor.material");
 	mUIObject->SetDebugString("KeyboardCursor");
 }
 

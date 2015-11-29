@@ -3,7 +3,7 @@
 		RenderTargetWriteMask="COLOR_WRITE_MASK_RED | COLOR_WRITE_MASK_GREEN | COLOR_WRITE_MASK_BLUE"/>
 	<DepthStencilDesc DepthEnable="false" DepthWriteMask="DEPTH_WRITE_MASK_ZERO"/>
 	
-	<ShaderFile>es/shaders/UIVerticalGaugeImage.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/UIVerticalGaugeImage.hlsl</ShaderFile>
 	<MaterialConstants>
 		<AmbientColor>0, 0, 0, 1</AmbientColor>
 		<DiffuseColor_Alpha>0.8, 0.8, 0.8, 1</DiffuseColor_Alpha>

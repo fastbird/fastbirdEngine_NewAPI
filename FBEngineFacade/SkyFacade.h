@@ -2,7 +2,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/RenderPass.h"
 namespace fastbird{
-	FB_DECLARE_SMART_PTR(Scene);
+	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(SkyFacade);
 	class FB_DLL_ENGINEFACADE SkyFacade{
@@ -16,7 +16,7 @@ namespace fastbird{
 
 		void SetMaterial(const char* path, RENDER_PASS pass);
 		void AttachToScene();
-		void AttachToScene(ScenePtr scene);
+		void AttachToScene(IScenePtr scene);
 		void DetachFromScene();
 		MaterialPtr GetMaterial() const;
 		void UpdateEnvironmentMap(const Vec3& pos);

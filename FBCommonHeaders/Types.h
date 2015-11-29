@@ -100,14 +100,14 @@ namespace fastbird{
 		return a.lock() != b;
 	}
 
-
 	template <typename T>
 	bool operator == (const std::weak_ptr<T>& a, const std::weak_ptr<T>& b)
 	{
 		return a.lock() == b.lock();
 	}	
 }
-
+using fastbird::operator==;
+using fastbird::operator!=;
 
 
 #define FB_DECLARE_NON_COPYABLE(className) \

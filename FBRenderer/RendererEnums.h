@@ -27,6 +27,7 @@
 
 #pragma once
 #include "PixelFormats.h"
+#include "PrimitiveTopology.h"
 namespace fastbird
 {
 	enum BUFFER_USAGE
@@ -258,17 +259,6 @@ namespace fastbird
     };
 
 	COLOR_WRITE_MASK ColorWriteMaskFromString(const char* str);
-
-	enum PRIMITIVE_TOPOLOGY
-	{
-		PRIMITIVE_TOPOLOGY_UNKNOWN,
-		PRIMITIVE_TOPOLOGY_POINTLIST,
-		PRIMITIVE_TOPOLOGY_LINELIST,
-		PRIMITIVE_TOPOLOGY_LINESTRIP,
-		PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ,
-		PRIMITIVE_TOPOLOGY_TRIANGLELIST,
-		PRIMITIVE_TOPOLOGY_TRIANGLESTRIP,
-	};
 
 	enum DEPTH_WRITE_MASK
 	{

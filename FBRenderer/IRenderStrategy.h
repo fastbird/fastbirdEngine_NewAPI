@@ -29,6 +29,7 @@
 #include <memory>
 #include "FBCommonHeaders/Types.h"
 namespace fastbird{
+	FB_DECLARE_SMART_PTR(Texture);
 	FB_DECLARE_SMART_PTR(Camera);
 	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(RenderTarget);	
@@ -52,5 +53,8 @@ namespace fastbird{
 		virtual void GlowRenderTarget(bool bind) = 0;
 		virtual void DepthTexture(bool bind) = 0;
 		virtual void OnRendererOptionChanged(RendererOptionsPtr options, const char* optionName) = 0;
+
+		// debugging feature
+		virtual TexturePtr GetShadowMap() = 0;
 	};
 }

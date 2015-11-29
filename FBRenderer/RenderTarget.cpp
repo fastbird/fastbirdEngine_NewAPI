@@ -88,6 +88,7 @@ public:
 		, mDrawOnEvent(false), mDrawEventTriggered(false)
 		, mFace(0)
 		, mId(NextRenderTargetId++)
+		, mCamera(Camera::Create())
 	{
 		mStrategy = RenderStrategyDefault::Create();
 	}
@@ -280,6 +281,10 @@ public:
 
 	void OnRendererOptionChanged(RendererOptionsPtr options, const char* name){
 		return mStrategy->OnRendererOptionChanged(options, name);
+	}
+
+	TexturePtr GetShadowMap() const{
+		return mStrategy->GetShadowMap();
 	}
 
 	//---------------------------------------------------------------------------
@@ -584,5 +589,9 @@ bool RenderTarget::SetBigSilouetteBuffer(){
 
 void RenderTarget::OnRendererOptionChanged(RendererOptionsPtr options, const char* name){
 	return mImpl->OnRendererOptionChanged(options, name);
+}
+
+TexturePtr RenderTarget::GetShadowMap() const{
+	return mImpl->GetShadowMap();
 }
 }

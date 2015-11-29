@@ -57,10 +57,8 @@ namespace fastbird{
 		virtual const Color& GetFogColor() const = 0;
 		virtual void AttachSkySphere(SkySpherePtr p) = 0;
 		virtual void DetachSkySphere() = 0;
-
 		virtual bool AttachObjectFB(SceneObjectPtr object, SceneObject* rawPointer) = 0;
 		virtual bool DetachObject(SceneObject* object) = 0;
-
 		virtual bool AttachObjectFB(SpatialSceneObjectPtr object, SpatialSceneObject* rawPointer) = 0;
 		virtual bool DetachObject(SpatialSceneObject* object) = 0;
 	};

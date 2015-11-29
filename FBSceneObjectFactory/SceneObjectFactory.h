@@ -54,6 +54,10 @@ namespace fastbird{
 		.dae file for another mesh object, the new mesh will be cloned from the archetype. */
 		MeshObjectPtr CreateMeshObject(const char* daeFilePath);
 		MeshObjectPtr CreateMeshObject(const char* daeFilePath, const MeshImportDesc& desc);
+		/// Create mesh objects.
+		/// Use this function for loading seperated meshes in a .dae file.
+		/// Currently using for fracture meshes.
+		std::vector<MeshObjectPtr> CreateMeshObjects(const char* daeFilePath, const MeshImportDesc& desc);
 		/** Get an archetype mesh already loaded. */
 		MeshObjectConstPtr GetMeshArcheType(const char* name);
 

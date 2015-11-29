@@ -91,7 +91,7 @@ public:
 		pCam->SetPosition(Vec3(0, 0, 0));
 		auto scene = pDepthRT->GetScene();
 		scene->AttachObjectFB(mMeshObject);
-		mMeshObject->SetMaterial("es/materials/collada_mesh.material", PASS_NORMAL);
+		mMeshObject->SetMaterial("EssentialEngineData/materials/collada_mesh.material", PASS_NORMAL);
 		auto material = mMeshObject->GetMaterial();
 		material->SetRasterizerState(rd_cull_back);
 		TexturePtr pDepthTexture = pDepthRT->GetDepthStencilTexture();

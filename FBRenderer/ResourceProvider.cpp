@@ -55,7 +55,7 @@ public:
 		switch (ResourceTypes_Textures){		
 		case ResourceTypes::Textures::Noise:
 		{
-			auto texture = renderer.CreateTexture("es/textures/pnoise.dds");
+			auto texture = renderer.CreateTexture("EssentialEngineData/textures/pnoise.dds");
 			if (!texture){
 				Logger::Log(FB_ERROR_LOG_ARG, "Failed to create noise texture.");				
 			}
@@ -154,56 +154,56 @@ public:
 		switch (ResourceTypes_Shaders){
 		case ResourceTypes::Shaders::FullscreenQuadNearVS:
 		{
-			return renderer.CreateShader("es/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS);
 		}
 		case ResourceTypes::Shaders::FullscreenQuadFarVS:
 		{
 			shaderDefines.push_back(ShaderDefine("_FAR_SIDE_QUAD", "1"));
-			return renderer.CreateShader("es/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS, shaderDefines);			
+			return renderer.CreateShader("EssentialEnginedata/shaders/fullscreenquadvs.hlsl", BINDING_SHADER_VS, shaderDefines);			
 		}
 		case ResourceTypes::Shaders::CopyPS:
 		{
-			return renderer.CreateShader("es/shaders/copyps.hlsl", BINDING_SHADER_PS);			
+			return renderer.CreateShader("EssentialEnginedata/shaders/copyps.hlsl", BINDING_SHADER_PS);			
 		}
 		case ResourceTypes::Shaders::CopyPSMS:
 		{
 			shaderDefines.push_back(ShaderDefine("_MULTI_SAMPLE", "1"));
-			return renderer.CreateShader("es/shaders/copyps.hlsl", BINDING_SHADER_PS, shaderDefines);
+			return renderer.CreateShader("EssentialEnginedata/shaders/copyps.hlsl", BINDING_SHADER_PS, shaderDefines);
 		}
 		case ResourceTypes::Shaders::ShadowMapVSPS:
 		{
-			return renderer.CreateShader("es/shaders/shadowdepth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/shadowdepth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::DepthWriteVSPS:
 		{
-			return renderer.CreateShader("es/shaders/depth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/depth.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::DepthOnlyVSPS:
 		{
-			return renderer.CreateShader("es/shaders/DepthOnly.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/DepthOnly.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::CloudDepthWriteVSPS:
 		{
-			return renderer.CreateShader("es/shaders/depth_cloud.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/depth_cloud.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::SampleLumInitialPS:
 		{
 			if (renderer.GetMultiSampleCount() != 1) {
 				shaderDefines.push_back(ShaderDefine("_MULTI_SAMPLE", "1"));				
 			}
-			return renderer.CreateShader("es/shaders/SampleLumInitialNew.hlsl", BINDING_SHADER_PS, shaderDefines);
+			return renderer.CreateShader("EssentialEnginedata/shaders/SampleLumInitialNew.hlsl", BINDING_SHADER_PS, shaderDefines);
 		}
 		case ResourceTypes::Shaders::SampleLumIterativePS:
 		{
-			return renderer.CreateShader("es/shaders/SampleLumIterativeNew.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/SampleLumIterativeNew.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::SampleLumFinalPS:
 		{
-			return renderer.CreateShader("es/shaders/SampleLumFinalNew.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/SampleLumFinalNew.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::CalcAdaptedLumPS:
 		{
-			return renderer.CreateShader("es/shaders/CalculateAdaptedLum.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/CalculateAdaptedLum.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::ToneMappingPS:
 		{
@@ -215,7 +215,7 @@ public:
 
 			if (renderer.GetFilmicToneMapping())
 				shaderDefines.push_back(ShaderDefine("_FILMIC_TONEMAP", "1"));
-			return renderer.CreateShader("es/shaders/tonemapping.hlsl", BINDING_SHADER_PS, shaderDefines);
+			return renderer.CreateShader("EssentialEnginedata/shaders/tonemapping.hlsl", BINDING_SHADER_PS, shaderDefines);
 
 		}
 		case ResourceTypes::Shaders::BrightPassPS:
@@ -223,53 +223,53 @@ public:
 			if (renderer.GetMultiSampleCount() != 1) {
 				shaderDefines.push_back(ShaderDefine("_MULTI_SAMPLE", "1"));
 			}
-			return renderer.CreateShader("es/shaders/brightpassps.hlsl", BINDING_SHADER_PS, shaderDefines);
+			return renderer.CreateShader("EssentialEnginedata/shaders/brightpassps.hlsl", BINDING_SHADER_PS, shaderDefines);
 		}
 		case ResourceTypes::Shaders::BloomPS:
 		{
-			return renderer.CreateShader("es/shaders/bloomps.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/bloomps.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::Blur5x5PS:
 		{
 			if (renderer.GetMultiSampleCount() != 1) {
 				shaderDefines.push_back(ShaderDefine("_MULTI_SAMPLE", "1"));
 			}
-			return renderer.CreateShader("es/shaders/gaussblur5x5.hlsl", BINDING_SHADER_PS, shaderDefines);
+			return renderer.CreateShader("EssentialEnginedata/shaders/gaussblur5x5.hlsl", BINDING_SHADER_PS, shaderDefines);
 		}
 		case ResourceTypes::Shaders::StarGlarePS:
 		{
-			return renderer.CreateShader("es/shaders/starglare.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/starglare.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::MergeTextures2PS:
 		{
-			return renderer.CreateShader("es/shaders/mergetextures2ps.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/mergetextures2ps.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::GodRayPS:
 		{
-			return renderer.CreateShader("es/shaders/GodRayPS.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/GodRayPS.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::OcclusionPrePassVSPS:
 		{
-			return renderer.CreateShader("es/shaders/OccPrePass.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/OccPrePass.hlsl", BINDING_SHADER_VS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::OcclusionPrePassVSGSPS:
 		{
-			return renderer.CreateShader("es/shaders/OccPrePassGS.hlsl", BINDING_SHADER_VS | BINDING_SHADER_GS | BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/OccPrePassGS.hlsl", BINDING_SHADER_VS | BINDING_SHADER_GS | BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::GlowPS:
 		{
 			if (renderer.GetMultiSampleCount() != 1) {
 				shaderDefines.push_back(ShaderDefine("_MULTI_SAMPLE", "1"));
 			}
-			return renderer.CreateShader("es/shaders/BloomPS.hlsl", BINDING_SHADER_PS, shaderDefines);
+			return renderer.CreateShader("EssentialEnginedata/shaders/BloomPS.hlsl", BINDING_SHADER_PS, shaderDefines);
 		}
 		case ResourceTypes::Shaders::SilouettePS:
 		{
-			return renderer.CreateShader("es/shaders/silouette.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/silouette.hlsl", BINDING_SHADER_PS);
 		}
 		case ResourceTypes::Shaders::GGXGenPS:
 		{
-			return renderer.CreateShader("es/shaders/GGXGen.hlsl", BINDING_SHADER_PS);
+			return renderer.CreateShader("EssentialEnginedata/shaders/GGXGen.hlsl", BINDING_SHADER_PS);
 		}
 		default:
 			Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Unknown shader type");
@@ -301,16 +301,16 @@ public:
 		auto& renderer = Renderer::GetInstance();
 		switch (ResourceTypes_Materials){
 		case ResourceTypes::Materials::Missing:{
-			return renderer.CreateMaterial("es/materials/missing.material");
+			return renderer.CreateMaterial("EssentialEngineData/materials/missing.material");
 		}
 		case ResourceTypes::Materials::Quad:{
-			return renderer.CreateMaterial("es/materials/quad.material");
+			return renderer.CreateMaterial("EssentialEngineData/materials/quad.material");
 		}
 		case ResourceTypes::Materials::QuadTextured:{
-			return renderer.CreateMaterial("es/materials/QuadWithTexture.material");
+			return renderer.CreateMaterial("EssentialEngineData/materials/QuadWithTexture.material");
 		}
 		case ResourceTypes::Materials::BillboardQuad:{
-			return renderer.CreateMaterial("es/materials/billboardQuad.material");
+			return renderer.CreateMaterial("EssentialEngineData/materials/billboardQuad.material");
 		}
 		default:
 			Logger::Log(FB_ERROR_LOG_ARG, "Resource Provider - Unknown resource type.");

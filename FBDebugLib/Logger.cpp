@@ -40,12 +40,13 @@
 using namespace fastbird;
 
 static int sInitialized = false;
-static std::ofstream sLogFile;
+static std::ofstream* sLogFile = 0;
 static std::streambuf* sOriginalErrorStream = 0;
 
-void Logger::Init(const char* filepath){		
-	sLogFile.open(filepath);
-	auto errStream = std::cerr.rdbuf(sLogFile.rdbuf());
+void Logger::Init(const char* filepath){	
+	sLogFile = new std::ofstream;
+	sLogFile->open(filepath);
+	auto errStream = std::cerr.rdbuf(sLogFile->rdbuf());
 	if (!sOriginalErrorStream){
 		sOriginalErrorStream = errStream;
 	}
@@ -53,8 +54,8 @@ void Logger::Init(const char* filepath){
 }
 
 void Logger::Init(const WCHAR* filepath){
-	sLogFile.open(filepath);
-	auto errStream = std::cerr.rdbuf(sLogFile.rdbuf());
+	sLogFile->open(filepath);
+	auto errStream = std::cerr.rdbuf(sLogFile->rdbuf());
 	if (!sOriginalErrorStream){
 		sOriginalErrorStream = errStream;
 	}
@@ -67,7 +68,8 @@ void Logger::Release(){
 		std::cerr.rdbuf(sOriginalErrorStream);
 		sOriginalErrorStream = 0;
 	}
-	sLogFile.close();	
+	sLogFile->close();	
+	delete sLogFile;
 }
 
 void Logger::Log(const char* str, ...){
@@ -84,9 +86,9 @@ void Logger::Log(const char* str, ...){
 	vsprintf_s(buffer, str, args);
 	va_end(args);
 
-	if (sLogFile.is_open()){
-		sLogFile << buffer;
-		sLogFile.flush();
+	if (sLogFile && sLogFile->is_open()){
+		*sLogFile << buffer;
+		sLogFile->flush();
 	}
 	else{
 		// fallback
@@ -161,9 +163,9 @@ void Logger::Log(FRAME_PRECISION curFrame, TIME_PRECISION curTime, const char* s
 		}
 	}
 
-	if (sLogFile.is_open()){
-		sLogFile << buffer;
-		sLogFile.flush();
+	if (sLogFile && sLogFile->is_open()){
+		*sLogFile << buffer;
+		sLogFile->flush();
 	}
 	else{
 		// fallback

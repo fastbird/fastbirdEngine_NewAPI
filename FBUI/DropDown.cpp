@@ -78,7 +78,7 @@ void DropDown::OnCreated()
 		std::bind(&DropDown::OnMouseClick, this, std::placeholders::_1));
 
 	//mButton->SetProperty(UIProperty::NO_BACKGROUND, "true");
-	button->SetProperty(UIProperty::TEXTUREATLAS, "es/textures/ui.xml");
+	button->SetProperty(UIProperty::TEXTUREATLAS, "EssentialEngineData/textures/ui.xml");
 	button->SetProperty(UIProperty::REGION, "dropdown");
 	button->SetProperty(UIProperty::HOVER_IMAGE, "dropdown_hover");
 	button->SetRuntimeChild(true);

@@ -2,7 +2,7 @@
 	<BlendDesc BlendEnalbe="true" BlendOp="BLEND_OP_ADD" SrcBlend="BLEND_SRC_ALPHA" DestBlend="BLEND_INV_SRC_ALPHA"/>
 	<DepthStencilDesc DepthEnable="true" DepthWriteMask="DEPTH_WRITE_MASK_ZERO"/>
 	<RasterizerDesc CullMode="CULL_MODE_NONE"/>
-	<ShaderFile>es/Shaders/ThickLine.hlsl</ShaderFile>
+	<ShaderFile>EssentialEngineData/shaders/ThickLine.hlsl</ShaderFile>
 	<Shaders>VS|PS</Shaders>
 	<MaterialConstants>
 		<AmbientColor>0.15, 0.15, 0.15, 1</AmbientColor>

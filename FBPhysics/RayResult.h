@@ -30,7 +30,7 @@
 namespace fastbird
 {
 	class RigidBody;
-	struct RayResultClosest
+	struct FB_DLL_PHYSICS RayResultClosest
 	{
 		RayResultClosest();
 		RayResultClosest(RigidBody* body, const Vec3& hitPoint, const Vec3& normal, int index);
@@ -41,7 +41,7 @@ namespace fastbird
 		int mIndex; // child index for compound shapes
 	};
 
-	struct RayResultWithObj
+	struct FB_DLL_PHYSICS RayResultWithObj
 	{
 		RayResultWithObj(RigidBody* body);
 
@@ -52,7 +52,7 @@ namespace fastbird
 		int mIndex; // child index for compound shapes
 	};
 
-	struct RayResultAll
+	struct FB_DLL_PHYSICS RayResultAll
 	{
 		static const int SIZE = 200;
 		RayResultAll();

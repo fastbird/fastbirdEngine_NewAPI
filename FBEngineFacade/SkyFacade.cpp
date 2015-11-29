@@ -57,7 +57,7 @@ void SkyFacade::AttachToScene(){
 	EngineFacade::GetInstance().GetMainScene()->AttachObjectFB(mImpl->mSkySphere);
 }
 
-void SkyFacade::AttachToScene(ScenePtr scene){
+void SkyFacade::AttachToScene(IScenePtr scene){
 	if (scene)
 		scene->AttachObjectFB(mImpl->mSkySphere);
 }
