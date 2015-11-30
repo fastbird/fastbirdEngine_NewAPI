@@ -48,9 +48,9 @@ namespace fastbird{
 
 		bool IsOpen() const;
 		bool HasNext() const;
-		/** Get next file name
+		/** Get next file path
 		Order is undefined.
-		\return A file name or the empty string _T("") when every file names
+		\return a file path.
 		returned.
 		*/
 		const char* GetNextFilePath(bool* outIsDirectory);

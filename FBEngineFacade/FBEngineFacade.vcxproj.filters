@@ -26,6 +26,6 @@
     <ClCompile Include="DustFacade.cpp" />
     <ClCompile Include="BillboardQuadFacade.cpp" />
     <ClCompile Include="ParticleEmitterFacade.cpp" />
-    <ClCompile Include="EngineFacadeDLL.cpp" />
+    <ClCompile Include="EngineLua.cpp" />
   </ItemGroup>
 </Project>

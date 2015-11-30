@@ -36,11 +36,11 @@ class TrailObject::Impl
 {
 public:
 	struct TrailVertex{
-		TrailVertex(const Vec4& pos)
+		TrailVertex(const Vec4f& pos)
 			: mPos(pos)
 		{
 		}
-		Vec4 mPos;
+		Vec4f mPos;
 	};
 
 	typedef std::vector<TrailVertex> Points;

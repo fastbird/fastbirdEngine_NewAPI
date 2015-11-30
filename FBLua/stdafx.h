@@ -28,6 +28,7 @@
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define FB_DLL_LUA __declspec(dllexport)
+#define FB_DLL_FILESYSTEM __declspec(dllimport)
 #else
 #define FB_DLL_LUA
 #endif

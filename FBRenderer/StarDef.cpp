@@ -82,7 +82,7 @@ namespace fastbird
 	//-----------------------------------------------------------------------
 	StarDef::~StarDef()
 	{
-		Destruct();
+		Release();
 	}
 
 	//-----------------------------------------------------------------------
@@ -97,11 +97,6 @@ namespace fastbird
 		m_bRotation = false;
 
 		return true;
-	}
-
-	void StarDef::Destruct()
-	{
-		Release();
 	}
 
 	void StarDef::Release()

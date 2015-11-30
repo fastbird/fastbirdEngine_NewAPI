@@ -2,19 +2,19 @@
  -----------------------------------------------------------------------------
  This source file is part of fastbird engine
  For the latest info, see http://www.jungwan.net/
- 
+
  Copyright (c) 2013-2015 Jungwan Byun
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  -----------------------------------------------------------------------------
-*/
+ */
 
 #include "stdafx.h"
 #include "LuaObject.h"
@@ -39,7 +39,7 @@ void LuaObject::AddUsedCount(int ref)
 	if (ref == LUA_NOREF)
 		return;
 	sUsedCountGuard.Lock();
-	sUsedCount[ref]+=1;
+	sUsedCount[ref] += 1;
 	sUsedCountGuard.Unlock();
 }
 bool LuaObject::ReleaseUsedCount(int ref)
@@ -49,7 +49,7 @@ bool LuaObject::ReleaseUsedCount(int ref)
 	sUsedCountGuard.Lock();
 	auto itFind = sUsedCount.Find(ref);
 	assert(itFind != sUsedCount.end());
-	if (--(itFind->second)==0)
+	if (--(itFind->second) == 0)
 	{
 		sUsedCountGuard.Unlock();
 		return true; // remove it
@@ -61,13 +61,13 @@ bool LuaObject::ReleaseUsedCount(int ref)
 
 
 LuaObject::LuaObject()
-:LuaObject((lua_State*)0)
+	:LuaObject((lua_State*)0)
 {
 
 }
 
 LuaObject::LuaObject(lua_State* L, int index, bool pop)
-: LuaObject(L)
+	: LuaObject(L)
 {
 	// the vaile at index is not poped.
 	if (!pop)
@@ -78,7 +78,7 @@ LuaObject::LuaObject(lua_State* L, int index, bool pop)
 }
 
 LuaObject::LuaObject(lua_State* L, const char* globalName)
-: LuaObject(L)
+	: LuaObject(L)
 {
 	assert(globalName != 0);
 	lua_getglobal(L, globalName);
@@ -95,7 +95,7 @@ LuaObject::LuaObject(const char* globalName)
 }
 
 LuaObject::LuaObject(const LuaObject& other)
-:LuaObject(other.mL)
+	: LuaObject(other.mL)
 {
 	if (ReleaseUsedCount(mRef))
 		luaL_unref(mL, LUA_REGISTRYINDEX, mRef);
@@ -117,7 +117,7 @@ LuaObject& LuaObject::operator=(const LuaObject& other)
 	mRef = LUA_NOREF;
 	FB_SAFE_DELETE(mSelf);
 
-	if(ReleaseUsedCount(mRef))
+	if (ReleaseUsedCount(mRef))
 		luaL_unref(mL, LUA_REGISTRYINDEX, mRef);
 
 	mRef = other.mRef;
@@ -132,10 +132,10 @@ LuaObject& LuaObject::operator=(const LuaObject& other)
 }
 
 LuaObject::LuaObject(lua_State* L)
-: mL(L)
-, mType(LUA_TNONE)
-, mRef(LUA_NOREF)
-, mSelf(0)
+	: mL(L)
+	, mType(LUA_TNONE)
+	, mRef(LUA_NOREF)
+	, mSelf(0)
 {
 }
 
@@ -180,7 +180,7 @@ void LuaObject::FindFunction(lua_State* L, const char* funcName)
 		obj = obj.GetField(splited2[u].c_str());
 	}
 	FB_SAFE_DELETE(mSelf);
-	if (splited.size()==2)
+	if (splited.size() == 2)
 	{
 		*this = obj.GetField(splited[1].c_str());
 		mSelf = FB_NEW(LuaObject)(obj);
@@ -216,7 +216,7 @@ void LuaObject::SetGlobalName(lua_State* L, const char* globalName)
 {
 	ReleaseUsedCount(mRef);
 	mRef = LUA_NOREF;
-	
+
 	mL = L;
 	assert(globalName != 0);
 	lua_getglobal(L, globalName);
@@ -252,13 +252,28 @@ bool LuaObject::Call()
 
 // You need to push the function manually before call this function
 // Push this LuaObject(Function) and then push args
-bool LuaObject::CallWithManualArgs(unsigned numArgs, unsigned numRets)
+bool LuaObject::CallWithManualArgs(unsigned arg, unsigned ret)
 {
 	if (mSelf)
 	{
-		numArgs++; // for self.
+		arg++; // for self.
 	}
-	LUA_PCALL_RET_FALSE(mL, numArgs, numRets);
+	int cfuncbase = LuaUtils::gettop(mL) - (arg);  /* function index */
+	LuaUtils::pushcfunction(mL, LuaUtils::Traceback);  /* push traceback function */
+	LuaUtils::insert(mL, cfuncbase);  /* put it under chunk and args */
+	if (int error = LuaUtils::pcall((mL), (arg), ret, cfuncbase))
+	{
+		LuaUtils::remove(mL, cfuncbase);
+		const char* errorString = LuaUtils::tostring(mL, -1);
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to call lua function. Error(%d)", error).c_str());
+		LuaUtils::PrintLuaErrorString(mL, errorString);
+		LuaUtils::pop(mL, 1);
+		assert(0);
+		return false;
+	}
+	else{
+		LuaUtils::remove(mL, cfuncbase);
+	}
 	return true;
 }
 
@@ -586,7 +601,7 @@ void LuaObject::SetSeq(int n, const Vec3Tuple& val) const{
 }
 
 void LuaObject::SetSeq(int n, LuaObject& value) const{
-	if (value.IsTable()){		
+	if (value.IsTable()){
 		auto newTable = SetSeqTable(n);;
 		newTable.AppendTable(value);
 	}
@@ -613,7 +628,7 @@ void LuaObject::AppendTable(LuaObject& table) const{
 	auto it = table.GetTableIterator();
 	LuaTableIterator::KeyValue kv;
 	while (it.GetNext(kv)){
-		SetField(kv.first, kv.second);		
+		SetField(kv.first, kv.second);
 	}
 }
 
@@ -649,7 +664,7 @@ LuaObject LuaObject::GetTableAt(int index) const
 	LUA_STACK_WATCHER watcher(mL, "unsigned LuaObject::GetUnsignedAt(int index) const");
 	PushToStack();
 	lua_rawgeti(mL, -1, index);
-	if(lua_istable(mL, -1))
+	if (lua_istable(mL, -1))
 	{
 		LuaObject table(mL, -1);
 		unsigned v = lua_tounsigned(mL, -1);
@@ -667,7 +682,7 @@ std::string LuaObject::GetString() const{
 //----------------------------------------------------------------
 std::string LuaObject::GetString(std::string& def) const
 {
-	if(!IsString())
+	if (!IsString())
 		return def;
 	LUA_STACK_WATCHER watcher(mL, "std::string LuaObject::GetString(std::string& def) const");
 	PushToStack();
@@ -703,7 +718,7 @@ float LuaObject::GetFloat() const{
 
 float	LuaObject::GetFloat(float def) const
 {
-	if(!IsNumber())
+	if (!IsNumber())
 		return def;
 	LUA_STACK_WATCHER watcher(mL, "float	LuaObject::GetFloat(float def) const");
 	PushToStack();
@@ -747,7 +762,7 @@ int LuaObject::GetInt() const{
 
 int LuaObject::GetInt(int def) const
 {
-	if(!IsNumber())
+	if (!IsNumber())
 		return def;
 
 	LUA_STACK_WATCHER watcher(mL, "int LuaObject::GetInt(int def) const");
@@ -855,7 +870,7 @@ bool LuaObject::GetBoolWithDef(bool def) const
 	}
 	LUA_STACK_WATCHER watcher(mL, "bool LuaObject::GetBoolWithDef(bool def) const");
 	PushToStack();
-	bool b = lua_toboolean(mL, -1)!=0;
+	bool b = lua_toboolean(mL, -1) != 0;
 	lua_pop(mL, 1);
 	return b;
 }
@@ -1075,7 +1090,7 @@ TransformationTuple LuaObject::GetTransformation(const TransformationTuple& def)
 	LUA_STACK_WATCHER watcher(mL, "Transformation LuaObject::GetTransformation(const Transformation& def) const");
 	PushToStack();
 	TransformationTuple ret = luaU_check<TransformationTuple>(mL, -1);
-	lua_pop(mL, 1);	
+	lua_pop(mL, 1);
 
 	return ret;
 }
@@ -1134,7 +1149,7 @@ unsigned LuaObject::GetLen() const
 	PushToStack();
 	lua_len(mL, -1);
 	unsigned len = luaL_checkunsigned(mL, -1);
-	return len;	
+	return len;
 }
 
 bool LuaObject::operator == (const LuaObject& other) const
@@ -1184,7 +1199,7 @@ bool LuaTableIterator::GetNext(KeyValue& outKeyValue)
 
 //---------------------------------------------------------------------------
 LuaSequenceIterator::LuaSequenceIterator(const LuaObject& sequence)
-: mCurIdx(0)
+	: mCurIdx(0)
 {
 	assert(sequence.IsTable());
 	mL = sequence.GetLuaState();
@@ -1212,7 +1227,7 @@ bool LuaSequenceIterator::GetNext(LuaObject& out)
 //---------------------------------------------------------------------------------------------------------------------
 fastbird::LuaObject fastbird::GetLuaVar(lua_State* L, const char* var, const char* file)
 {
-	if(!var)
+	if (!var)
 		return LuaObject();
 	auto splitted = Split(var, ".");
 	if (!LuaUtils::CheckLuaGlobalExist(L, splitted[0].c_str()))
@@ -1225,7 +1240,7 @@ fastbird::LuaObject fastbird::GetLuaVar(lua_State* L, const char* var, const cha
 		if (luaL_dofile(L, file))
 		{
 			Logger::Log(FB_ERROR_LOG_ARG, lua_tostring(L, -1));
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Script error! %s", file).c_str());			
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Script error! %s", file).c_str());
 			lua_pop(L, 1);
 			return LuaObject();
 		}

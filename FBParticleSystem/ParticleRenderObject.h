@@ -67,12 +67,12 @@ namespace fastbird
 
 		struct Vertex
 		{
-			Vec3 mPos;
-			Vec4 mUDirection_Intensity;
-			Vec3 mVDirection;
-			Vec4 mPivot_Size;
-			Vec4 mRot_Alpha_uv;
-			Vec2 mUVStep;
+			Vec3f mPos;
+			Vec4f mUDirection_Intensity;
+			Vec3f mVDirection;
+			Vec4f mPivot_Size;
+			Vec4f mRot_Alpha_uv;
+			Vec2f mUVStep;
 			DWORD mColor;
 		};
 		Vertex* Map(UINT numVertices, unsigned& canWrite);

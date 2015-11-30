@@ -48,8 +48,8 @@ namespace fastbird{
 		change binding slots and shader stages, only the instance you are handling
 		will be affected.
 		*/
-		explicit Texture(const Texture&); // cloning
-		Texture& operator=(const Texture& other);
+		explicit Texture(const Texture&) = delete;
+		Texture& operator=(const Texture& other) = delete;
 
 	public:		
 		static unsigned sNextTextureID;

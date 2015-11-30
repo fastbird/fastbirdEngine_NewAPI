@@ -36,6 +36,8 @@ namespace fastbird{
 
 	public:
 		ColorRamp();
+		ColorRamp(const ColorRamp& other);
+		ColorRamp& operator=(const ColorRamp& other);
 		bool operator==(const ColorRamp& other) const;
 		const Color& operator[] (int idx) const;
 

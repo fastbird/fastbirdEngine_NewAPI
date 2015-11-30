@@ -50,14 +50,16 @@ namespace fastbird{
 	{
 	public:
 		/**Start logging.
-		You can call this functino several time but only the first call only takes the effect.
+		You can call this function several time but only the first call only takes the effect.
 		*/
-		static void StartLoggingIfNot(const char* path);
+		static void StartLoggingIfNot();
 		static void StopLogging();
 		enum {
 			FB_NO_ERROR = 0,
 			RENAME_NO_SOURCE = 1,
 			RENAME_DEST_EXISTS = 2,
+			FILE_NO_EXISTS = 3,
+			SECURITY_NOT_OK = 4,
 		};
 		//---------------------------------------------------------------------------
 		// File Operataions
@@ -86,7 +88,8 @@ namespace fastbird{
 		*/
 		static void BackupFile(const char* filepath, unsigned numKeeping, const char* directory);
 		/** Compares the last modified time
-		\return -1, if a is older. 0, if the same. 1, if b is older
+		\return -1, if a is older. 0, if the same. 1, if b is older. 
+		If file1 or file2 does not exists, returns FILE_NO_EXISTS.
 		*/
 		static int CompareFileModifiedTime(const char* file1, const char* file2);
 		static bool SecurityOK(const char* filepath);		

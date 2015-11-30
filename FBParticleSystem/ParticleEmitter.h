@@ -70,6 +70,6 @@ namespace fastbird
 		void SetRelativeVelocity(const Vec3& dir, float speed);
 		void RemoveShaderDefine(const char* def);
 		void AddShaderDefine(const char* def, const char* val);
-		void ApplyShaderDefine();	
+		//void ApplyShaderDefine();	
 	};
 }

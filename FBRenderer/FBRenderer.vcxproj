@@ -84,7 +84,6 @@
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="PointLightManager.cpp" />
     <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="RendererDLL.cpp" />
     <ClCompile Include="RendererEnums.cpp" />
     <ClCompile Include="RendererOptions.cpp" />
     <ClCompile Include="RenderEventMarker.cpp" />

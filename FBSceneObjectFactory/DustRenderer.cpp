@@ -106,7 +106,7 @@ public:
 		auto& renderer = Renderer::GetInstance();
 
 		mVBPos = renderer.CreateVertexBuffer(&pos[0],
-			sizeof(Vec3), count, BUFFER_USAGE_IMMUTABLE, BUFFER_CPU_ACCESS_NONE);
+			sizeof(Vec3f), count, BUFFER_USAGE_IMMUTABLE, BUFFER_CPU_ACCESS_NONE);
 		assert(mVBPos);
 
 		mVBColor = renderer.CreateVertexBuffer(&color[0],

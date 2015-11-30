@@ -60,7 +60,7 @@ struct v2p
 {
 	float4 Position   : SV_Position;
 #if defined(DIFFUSE_TEXTURE) || defined(_ALPHA_TEXTURE)	
-	float2 UV		: TEXCOORD;
+	float2 UV		: TEXCOORD0;
 #endif
 #if defined(_ALPHA_TEXTURE_SEPERATED_UV)
 	float2 UV2 : TEXCOORD1;

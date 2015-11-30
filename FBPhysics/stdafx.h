@@ -28,6 +28,7 @@
 #include "FBCommonHeaders/platform.h"
 #if defined(_PLATFORM_WINDOWS_)
 #define FB_DLL_PHYSICS __declspec(dllexport)
+#define FB_DLL_FILESYSTEM __declspec(dllimport)
 #else
 #endif
 

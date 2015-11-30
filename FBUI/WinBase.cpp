@@ -115,25 +115,27 @@ WinBase::WinBase()
 
 WinBase::~WinBase()
 {
-	auto& um = UIManager::GetInstance();	
-	if (mShowingTooltip)
-	{
-		um.CleanTooltip();
-	}
-	if (mModal)
-	{
-		if (mVisibility.IsVisible())
-		{
-			
-			um.IgnoreInput(false, mSelfPtr.lock());
-		}
-	}
 	mAnimations.clear();
-	um.DirtyRenderList(GetHwndId());
-	/*for (auto ib : mBorders)
-	{
+	if (UIManager::HasInstance()){
+		auto& um = UIManager::GetInstance();
+		if (mShowingTooltip)
+		{
+			um.CleanTooltip();
+		}
+		if (mModal)
+		{
+			if (mVisibility.IsVisible())
+			{
+
+				um.IgnoreInput(false, mSelfPtr.lock());
+			}
+		}
+		um.DirtyRenderList(GetHwndId());
+		/*for (auto ib : mBorders)
+		{
 		um.DeleteComponent(ib);
-	}*/
+		}*/
+	}
 }
 
 void WinBase::SuppressPropertyWarning(bool warning){
@@ -2277,8 +2279,9 @@ void WinBase::SetUseBorder(bool use)
 		mBorders.clear();		
 		if (mUIObject){
 			auto mat = mUIObject->GetMaterial();
-			if (mat && mat->RemoveShaderDefine("_ALPHA_TEXTURE"))
-				mat->ApplyShaderDefines();
+			if (mat)
+				mat->RemoveShaderDefine("_ALPHA_TEXTURE");
+				//mat->ApplyShaderDefines();
 		}
 		auto& um = UIManager::GetInstance();
 		um.DirtyRenderList(GetHwndId());
@@ -2469,8 +2472,8 @@ void WinBase::UpdateAlphaTexture(){
 		auto texture = UIManager::GetInstance().GetBorderAlphaInfoTexture(finalSize, callmeLater);
 		if (texture && mat){
 			mat->SetTexture(texture, BINDING_SHADER_PS, 1);
-			if (mat->AddShaderDefine("_ALPHA_TEXTURE", "1"))
-				mat->ApplyShaderDefines();
+			mat->AddShaderDefine("_ALPHA_TEXTURE", "1");
+				//mat->ApplyShaderDefines();
 
 			if (!mUIObject->HasTexCoord()){
 				Vec2 texcoords[4] = {
@@ -2488,8 +2491,8 @@ void WinBase::UpdateAlphaTexture(){
 			}
 		}
 		else{
-			if (mat->RemoveShaderDefine("_ALPHA_TEXTURE"))
-				mat->ApplyShaderDefines();
+			mat->RemoveShaderDefine("_ALPHA_TEXTURE");
+				//mat->ApplyShaderDefines();
 
 			if (!texture && callmeLater){
 				mUpdateAlphaTexture = true;

@@ -157,7 +157,9 @@ public:
 		, mMultiLocating(false), mAtlasStaging(0)
 		, mPrevTooltipNPos(-1, -1)
 	{	
-		
+		auto filepath = "_FBUI.log";
+		FileSystem::BackupFile(filepath, 5, "Backup_Log");
+		Logger::Init(filepath);
 	}
 
 	~Impl(){
@@ -179,6 +181,7 @@ public:
 		DeleteWindow(mPopup);
 		Shutdown();
 		assert(mWindows.empty());
+		Logger::Release();
 	}
 
 	void Initialize(){
@@ -483,7 +486,10 @@ public:
 	}
 
 	void RenderUI(HWindowId hwndId, HWindow hwnd){
-
+		auto uis = mRenderUIs.find(hwndId);
+		for (auto& ui : uis->second){
+			ui->Render();
+		}
 	}
 
 	void BeforeDebugHudRendering(HWindowId hwndId, HWindow hwnd){
@@ -617,8 +623,7 @@ public:
 				it.second = false;
 				{
 					Profiler p("GatherRenderList");
-					auto& windows = mWindows[hwndId];
-					uiObjects.reserve(200);
+					auto& windows = mWindows[hwndId];					
 					bool hideAll = !mHideUIExcepts.empty();
 					WINDOWS::iterator it = windows.begin(), itEnd = windows.end();
 					size_t start = 0;

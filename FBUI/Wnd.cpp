@@ -58,10 +58,12 @@ Wnd::Wnd()
 
 Wnd::~Wnd()
 {
-	if (mAlwaysOnTop)
-	{
-		UIManager::GetInstance().UnRegisterAlwaysOnTopWnd(mSelfPtr.lock());
-	}	
+	if (UIManager::HasInstance()){
+		if (mAlwaysOnTop)
+		{
+			UIManager::GetInstance().UnRegisterAlwaysOnTopWnd(mSelfPtr.lock());
+		}
+	}
 	mFrames.clear();
 }
 

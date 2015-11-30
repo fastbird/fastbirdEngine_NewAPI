@@ -156,9 +156,9 @@ public:
 		return mDefines; 
 	}
 
-	void ApplyShaderDefines(){
+	/*void ApplyShaderDefines(){
 		Renderer::GetInstance().ReapplyShaderDefines(mSelf);
-	}
+	}*/
 
 	void SetDebugName(const char* debugName){
 		if (mPlatformShader)
@@ -227,7 +227,7 @@ Shader::~Shader(){
 	for (auto it = sAllShaders.begin(); it != itEnd; it++){
 		if (it->expired()){
 			sAllShaders.erase(it);
-			return;
+			break;
 		}
 	}
 }
@@ -289,9 +289,9 @@ const SHADER_DEFINES& Shader::GetShaderDefines() const{
 	return mImpl->GetShaderDefines();
 }
 
-void Shader::ApplyShaderDefines(){
-	mImpl->ApplyShaderDefines();
-}
+//void Shader::ApplyShaderDefines(){
+//	mImpl->ApplyShaderDefines();
+//}
 
 void Shader::SetDebugName(const char* debugName){
 	mImpl->SetDebugName(debugName);

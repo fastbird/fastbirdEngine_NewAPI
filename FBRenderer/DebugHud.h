@@ -46,7 +46,7 @@ namespace fastbird
 	FB_DECLARE_SMART_PTR(DebugHud);
 	class DebugHud
 	{
-		FB_DECLARE_PIMPL(DebugHud);
+		FB_DECLARE_PIMPL_NON_COPYABLE(DebugHud);
 		DebugHud();
 
 	public:

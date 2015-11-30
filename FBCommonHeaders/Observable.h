@@ -49,9 +49,6 @@ namespace fastbird{
 			if (!ValueExistsInVector(observers, observer)){
 				observers.push_back(observer);
 			}
-			else{
-				std::cerr << "Observable : (error) observer is already registered.";
-			}
 		}
 
 		bool RemoveObserver(ObserverEventType type, ObserverPtr observer){

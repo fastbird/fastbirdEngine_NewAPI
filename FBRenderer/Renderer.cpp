@@ -50,6 +50,8 @@
 #include "ResourceTypes.h"
 #include "Camera.h"
 #include "ConsoleRenderer.h"
+#include "StarDef.h"
+#include "FBMathLib/MurmurHash.h"
 #include "FBConsole/Console.h"
 #include "EssentialEngineData/shaders/Constants.h"
 #include "FBStringLib/StringConverter.h"
@@ -78,6 +80,8 @@ using namespace fastbird;
 static const float defaultFontSize = 20.f;
 const HWindow Renderer::INVALID_HWND = (HWindow)-1;
 Timer* fastbird::gpTimer = 0;
+BinaryData tempData;
+unsigned tempSize;
 class Renderer::Impl{
 public:
 	typedef fastbird::Factory<IPlatformRenderer>::CreateCallback CreateCallback;
@@ -210,8 +214,13 @@ public:
 		, mWindowSizeInternallyChanging(false)
 		, mConsoleRenderer(ConsoleRenderer::Create())
 		, mRendererOptions(RendererOptions::Create())
+		, mPointLightMan(PointLightManager::Create())
 		, mMainWindowStyle(0)
 	{
+		auto filepath = "_FBRenderer.log";
+		FileSystem::BackupFile(filepath, 5, "Backup_Log");
+		Logger::Init(filepath);
+
 		gpTimer = Timer::GetMainTimer().get();
 		mLastRenderedTime = gpTimer->GetTickCount();
 		auto& envBindings = mSystemTextureBindings[SystemTextures::Environment];
@@ -237,6 +246,8 @@ public:
 	}
 
 	~Impl(){
+		StarDef::FinalizeStatic();
+		Logger::Release();
 	}	
 
 	bool PrepareRenderEngine(const char* type){
@@ -629,6 +640,9 @@ public:
 	}
 
 	void Render(){
+		auto mainRT = GetMainRenderTarget();
+		if (!mainRT)
+			return;
 		Real dt = (gpTimer->GetTickCount() - mLastRenderedTime) / (Real)gpTimer->GetFrequency();
 		InitFrameProfiler(dt);
 		UpdateFrameConstantsBuffer();
@@ -641,7 +655,6 @@ public:
 		}
 
 		Render3DUIsToTexture();		
-		auto mainRT = GetMainRenderTarget();
 		for (auto it : mWindowRenderTargets)
 		{
 			RenderEventMarker mark(FormatString("Processing render target for %u", it.first).c_str());
@@ -660,7 +673,18 @@ public:
 					++it;
 					observer->BeforeUIRendering(hwndId, GetWindowHandle(hwndId));
 				}
-				RenderUI(hwndId);
+
+				for (auto it = observers.begin(); it != observers.end(); /**/){
+					auto observer = it->lock();
+					if (!observer){
+						it = observers.erase(it);
+						continue;
+					}
+					++it;
+					observer->RenderUI(hwndId, GetWindowHandle(hwndId));
+				}
+
+				//RenderUI(hwndId);
 
 				for (auto it = observers.begin(); it != observers.end(); /**/){
 					auto observer = it->lock();
@@ -685,6 +709,7 @@ public:
 		RenderFade();
 
 		mConsoleRenderer->Render();
+		GetPlatformRenderer().Present();
 	}
 
 	//-------------------------------------------------------------------
@@ -858,12 +883,12 @@ public:
 		SHADER_DEFINES sortedDefines(defines);
 		std::string loweredPath(filepath);		
 		std::sort(sortedDefines.begin(), sortedDefines.end());
-		auto key = ShaderCreationInfo(loweredPath.c_str(), shaders, sortedDefines);
-
+		auto key = ShaderCreationInfo(loweredPath.c_str(), shaders, sortedDefines);		
 		auto platformShader = FindPlatformShader(key);
 		if (platformShader){
 			auto shader = GetShaderFromExistings(platformShader);
-			if (shader && shader->GetShaderDefines() == sortedDefines){				
+			if (shader){				
+				assert(shader->GetShaderDefines() == sortedDefines);
 				return shader;
 			}
 		}
@@ -876,6 +901,13 @@ public:
 			shader->SetPath(filepath);
 			shader->SetBindingShaders(shaders);
 			sPlatformShaders[key] = platformShader;
+			if (strcmp(filepath, "EssentialEngineData/shaders/UI.hlsl") == 0 && defines.size() == 1){
+				if (!tempData && defines[0].name == "DIFFUSE_TEXTURE"){
+					void* data = platformShader->GetVSByteCode(tempSize);
+					tempData = BinaryData(new char[tempSize], [](char* obj){ delete[] obj; });
+					memcpy(tempData.get(), data, tempSize);
+				}
+			}
 			return shader;
 		}
 		Logger::Log(FB_ERROR_LOG_ARG, FormatString("Failed to create a shader(%s)", filepath).c_str());
@@ -917,7 +949,7 @@ public:
 			return 0;
 		}
 		std::string loweredPath(file);
-		ToLowerCase(loweredPath);
+		ToLowerCase(loweredPath);		
 		auto it = sLoadedMaterials.Find(loweredPath);
 		if (it != sLoadedMaterials.end()){
 			auto material = it->second.lock();
@@ -930,21 +962,30 @@ public:
 			return 0;
 
 		sLoadedMaterials[loweredPath] = material;
-		return material->Clone();
+		return material;
 
 	}
 	
-	VectorMap<INPUT_ELEMENT_DESCS, InputLayoutWeakPtr> sInputLayouts;
+	VectorMap<unsigned, InputLayoutWeakPtr> sInputLayouts;
 	// use this if you are sure there is instance of the descs.
 	InputLayoutPtr CreateInputLayout(const INPUT_ELEMENT_DESCS& descs, ShaderPtr shader){
+		if (!shader || descs.empty()){
+			Logger::Log(FB_ERROR_LOG_ARG, "Invalid param.");
+			return 0;
+		}
 		unsigned size;
 		void* data = shader->GetVSByteCode(size);
 		if (!data){
 			Logger::Log(FB_ERROR_LOG_ARG, "Invalid shader");
 			return 0;
 		}
-
-		auto it = sInputLayouts.Find(descs);
+		auto descsSize = sizeof(INPUT_ELEMENT_DESCS) * descs.size();
+		auto totalSize = descsSize + size;
+		BinaryData temp(new char[totalSize]);
+		memcpy(temp.get(), &descs[0], sizeof(descs));
+		memcpy(temp.get() + descsSize, data, size);
+		unsigned key = murmur3_32(temp.get(), totalSize, murmurSeed);
+		auto it = sInputLayouts.Find(key);
 		if (it != sInputLayouts.end()){
 			auto inputLayout = it->second.lock();
 			if (inputLayout)
@@ -953,7 +994,7 @@ public:
 		auto platformInputLayout = GetPlatformRenderer().CreateInputLayout(descs, data, size);
 		auto inputLayout = InputLayout::Create();
 		inputLayout->SetPlatformInputLayout(platformInputLayout);
-		sInputLayouts[descs] = inputLayout;
+		sInputLayouts[key] = inputLayout;
 		return inputLayout;
 	}
 
@@ -1185,11 +1226,11 @@ public:
 		mCurrentDSViewIndex = dsViewIndex;
 		IPlatformTexturePtr platformRTs[4] = { 0 };
 		for (int i = 0; i < num; ++i){
-			platformRTs[i] = pRenderTargets[i]->GetPlatformTexture();
+			platformRTs[i] = pRenderTargets[i] ? pRenderTargets[i]->GetPlatformTexture() : 0;
 		}
 
 		GetPlatformRenderer().SetRenderTarget(platformRTs, rtViewIndex, num,
-			pDepthStencil->GetPlatformTexture(), dsViewIndex);
+			pDepthStencil ? pDepthStencil->GetPlatformTexture() : 0, dsViewIndex);
 
 		if (pRenderTargets && num>0 && pRenderTargets[0])
 		{
@@ -1246,7 +1287,7 @@ public:
 		IPlatformVertexBuffer const *  platformBuffers[numMaxVertexInputSlot];
 		numBuffers = std::min(numMaxVertexInputSlot, numBuffers);		
 		for (unsigned i = 0; i < numBuffers; ++i){
-			platformBuffers[i] = pVertexBuffers[i]->GetPlatformBuffer().get();
+			platformBuffers[i] = pVertexBuffers[i] ? pVertexBuffers[i]->GetPlatformBuffer().get() : 0;
 		}
 		GetPlatformRenderer().SetVertexBuffers(startSlot, numBuffers, platformBuffers, strides, offsets);
 	}
@@ -1263,7 +1304,7 @@ public:
 		IPlatformTexturePtr textures[maxBindableTextures];
 		num = std::min(num, maxBindableTextures);
 		for (int i = 0; i < num; ++i){
-			textures[i] = pTextures[i]->GetPlatformTexture();
+			textures[i] = pTextures[i] ? pTextures[i]->GetPlatformTexture() : 0;
 		}
 		GetPlatformRenderer().SetTextures(textures, num, shaderType, startSlot);
 	}
@@ -1274,8 +1315,15 @@ public:
 			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Cannot find the binding information for the system texture(%d)", type).c_str());
 			return;
 		}
-		for (const auto& binding : it->second){
-			texture->Bind(binding.mShader, binding.mSlot);
+		if (texture){
+			for (const auto& binding : it->second){
+				texture->Bind(binding.mShader, binding.mSlot);
+			}
+		}
+		else{
+			for (const auto& binding : it->second){
+				UnbindTexture(binding.mShader, binding.mSlot);				
+			}
 		}
 	}
 	

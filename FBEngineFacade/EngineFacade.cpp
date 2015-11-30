@@ -31,9 +31,13 @@
 #include "Voxelizer.h"
 #include "MeshFacade.h"
 #include "FBTimer/Profiler.h"
+#include "FBFileSystem/FileSystem.h"
+#include "FBSystemLib/System.h"
+#include "FBLua/LuaObject.h"
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/Camera.h"
 #include "FBRenderer/RendererOptions.h"
+#include "FBRenderer/Font.h"
 #include "FBSceneManager/SceneManager.h"
 #include "FBSceneManager/Scene.h"
 #include "FBSceneManager/DirectionalLight.h"
@@ -46,6 +50,9 @@
 #include "FBVideoPlayer/VideoPlayerOgg.h"
 #include "FBParticleSystem/ParticleSystem.h"
 using namespace fastbird;
+namespace fastbird{
+	void InitEngineLua();
+}
 class EngineFacade::Impl{
 public:
 	static const int MainWindowId = 1;	
@@ -61,17 +68,19 @@ public:
 	RendererPtr mRenderer;
 	SceneManagerPtr mSceneManager;
 	ScenePtr mMainScene;
+	CameraPtr mMainCamera;
 	ScenePtr mTemporalOverridingScene;
 	bool mLockSceneOverriding;
 	SceneObjectFactoryPtr mSceneObjectFactory;
-	ParticleSystemPtr mParticleSystem;
-	CameraPtr mMainCamera;
+	ParticleSystemPtr mParticleSystem;	
 	EngineOptionsPtr mEngineOptions;
+	FileMonitorPtr mFileMonitor;
 	bool mRayFromCursorCalced;
 
 	// EngineFacade
 	std::vector<MeshFacadePtr> mTempMeshes;
 	std::map<std::string, std::vector< MeshFacadePtr> > mFractureObjects;
+	LuaObject mInputOverride;
 
 	//---------------------------------------------------------------------------
 	Impl()
@@ -80,7 +89,12 @@ public:
 		, mRayFromCursorCalced(false)
 		, mLockSceneOverriding(false)
 	{
+		FileSystem::StartLoggingIfNot();
+		auto filepath = "_FBEngineFacade.log";		
+		FileSystem::BackupFile(filepath, 5, "Backup_Log");
+		Logger::Init(filepath);
 		mL = LuaUtils::OpenLuaState();
+		InitEngineLua();
 		mInputManager = InputManager::Create();
 		mConsole = Console::Create();
 		mTaskSchedular = TaskScheduler::Create(6);
@@ -94,14 +108,15 @@ public:
 			if (!mMainScene){
 				Logger::Log(FB_ERROR_LOG_ARG, "Cannot create the main scene.");
 			}
-		}
-
+		}		
 		mEngineOptions = EngineOptions::Create();
 		mRenderer = Renderer::Create();
 	}
 
 	~Impl(){
 		LuaUtils::CloseLuaState(mL);
+		FileSystem::StopLogging();
+		Logger::Release();
 	}
 
 	HWindowId FindEmptyHwndId()
@@ -152,6 +167,7 @@ public:
 			if (id == MainWindowId){
 				Renderer::GetInstance().SetMainWindowStyle(style);
 				InputManager::GetInstance().SetMainWindowHandle((HWindow)hWnd);
+				mFileMonitor = FileMonitor::Create();
 			}
 
 			mWindowById[id] = (HWindow)hWnd;
@@ -169,10 +185,7 @@ public:
 	bool InitRenderer(const char* pluginName){		
 		bool success = Renderer::GetInstance().PrepareRenderEngine(pluginName);		
 		if (success){			
-			mParticleSystem = ParticleSystem::Create();
-			if (!mSceneObjectFactory){
-				Logger::Log(FB_ERROR_LOG_ARG, "SceneObjectFactory is not initialized.");
-			}
+			mParticleSystem = ParticleSystem::Create();			
 		}
 		return success;
 	}
@@ -203,6 +216,22 @@ public:
 			return true;
 		}
 	}
+
+	bool InitCanvas(HWindow hwnd){
+		auto idIt = mWindowIdByHandle.find(hwnd);
+		HWindowId id;
+		if (idIt == mWindowIdByHandle.end()){
+			id = FindEmptyHwndId();
+			mWindowIdByHandle[hwnd] = id;
+			mWindowById[id] = hwnd;
+		}
+		else{
+			id = idIt->second;
+		}
+		Vec2I size = GetWindowClientSize(hwnd);
+		return mRenderer->InitCanvas(id, hwnd, size.x, size.y);
+	}
+	
 
 	void OverrideMainScene(IScenePtr scene){
 		if (mLockSceneOverriding)
@@ -414,6 +443,14 @@ bool EngineFacade::InitCanvas(HWindowId id, int width, int height) {
 	return mImpl->InitCanvas(id, width, height);
 }
 
+bool EngineFacade::InitCanvas(HWindow hwnd){
+	return mImpl->InitCanvas(hwnd);
+}
+
+void EngineFacade::SetClearColor(const Color& color){
+	Renderer::GetInstance().SetClearColor(GetMainWindowHandleId(), color);
+}
+
 ScenePtr EngineFacade::GetMainScene() const {
 	return mImpl->GetMainScene();
 }
@@ -492,6 +529,14 @@ const Vec3& EngineFacade::GetMainCameraDirection() const{
 
 const Mat44& EngineFacade::GetCameraMatrix(ICamera::MatrixType type) const{
 	return Renderer::GetInstance().GetMainCamera()->GetMatrix(type);
+}
+
+void EngineFacade::SetMainCameraTarget(ISpatialObjectPtr spatialObject){
+	mImpl->mMainCamera->SetTarget(spatialObject);
+}
+
+void EngineFacade::EnableCameraInput(bool enable){
+	mImpl->mMainCamera->SetEnalbeInput(enable);
 }
 
 const Ray3& EngineFacade::GetWorldRayFromCursor(){
@@ -830,7 +875,7 @@ void EngineFacade::QueueDrawTriangle(const Vec3& a, const Vec3& b, const Vec3& c
 
 FontPtr EngineFacade::GetFont(float fontHeight){
 	if (Renderer::HasInstance())
-		Renderer::GetInstance().GetFont(fontHeight);
+		return Renderer::GetInstance().GetFont(fontHeight);
 	Logger::Log(FB_ERROR_LOG_ARG, "Renderer is deleted.");
 	return 0;
 }
@@ -875,6 +920,21 @@ void EngineFacade::AddTempMesh(MeshFacadePtr mesh){
 
 void EngineFacade::GetFractureMeshObjects(const char* daeFilePath, std::vector<MeshFacadePtr>& objects){
 	mImpl->GetFractureMeshObjects(daeFilePath, objects);
+}
+
+std::wstring EngineFacade::StripTextTags(const char* text){
+	auto font = GetFont(22.f);
+	if (font){
+		return font->StripTags(fastbird::AnsiToWide(text));		
+	}
+	else{
+		Logger::Log(FB_ERROR_LOG_ARG, FormatString("No font found.").c_str());
+		return std::wstring(fastbird::AnsiToWide(text));
+	}
+}
+
+void EngineFacade::QueueProcessConsoleCommand(const char* command, bool history){
+	Console::GetInstance().QueueProcessCommand(command, history);
 }
 
 void EngineFacade::StopAllParticles(){

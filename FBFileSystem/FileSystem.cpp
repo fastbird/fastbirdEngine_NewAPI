@@ -36,10 +36,10 @@ using namespace fastbird;
 static bool gLogginStarted = false;
 static boost::filesystem::path gWorkingPath;
 
-void FileSystem::StartLoggingIfNot(const char* path){
+void FileSystem::StartLoggingIfNot(){
 	if (gLogginStarted)
 		return;
-	auto filepath = "FileSystem.log";
+	auto filepath = "_FBFileSystem.log";
 	FileSystem::BackupFile(filepath, 5, "Backup_Log");
 	Logger::Init(filepath);
 	gLogginStarted = true;
@@ -69,6 +69,8 @@ int FileSystem::Rename(const char* path, const char* newpath){
 		return RENAME_DEST_EXISTS;
 	}
 	
+	if (!SecurityOK(path) || !SecurityOK(newpath))
+		return SECURITY_NOT_OK;
 	try{
 		boost::filesystem::rename(path, newpath);
 	}
@@ -180,6 +182,11 @@ void FileSystem::BackupFile(const char* filepath, unsigned numKeeping, const cha
 }
 
 int FileSystem::CompareFileModifiedTime(const char* file1, const char* file2){
+	if (!Exists(file1) || !Exists(file2))
+		return FILE_NO_EXISTS;	
+	if (!SecurityOK(file1) || !SecurityOK(file2))
+		return SECURITY_NOT_OK;
+
 	try{
 		auto time1 = boost::filesystem::last_write_time(file1);
 		auto time2 = boost::filesystem::last_write_time(file2);

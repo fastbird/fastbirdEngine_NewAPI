@@ -35,6 +35,10 @@ public:
 	std::vector<Color> mColors;
 	bool mGenerated;
 
+	Impl(){
+
+	}
+
 	const Color& operator[] (int idx) const{
 		assert(idx < (int)mColors.size());
 		return mColors[idx];
@@ -147,6 +151,15 @@ ColorRamp::ColorRamp()
 {
 }
 
+ColorRamp::ColorRamp(const ColorRamp& other)
+	: mImpl(new Impl(*other.mImpl.get()))
+{
+}
+
+ColorRamp& ColorRamp::operator = (const ColorRamp& other){
+	*mImpl = *other.mImpl;
+	return *this;
+}
 bool ColorRamp::operator==(const ColorRamp& other) const{
 	return mImpl->operator==(other);
 }

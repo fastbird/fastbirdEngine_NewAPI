@@ -382,10 +382,10 @@ public:
 						refreshDefines = mThickLineMaterial->RemoveShaderDefine("_TEXTURE_FLOW") || refreshDefines;
 					}
 
-					if (refreshDefines)
+					/*if (refreshDefines)
 					{
 						mThickLineMaterial->ApplyShaderDefines();
-					}
+					}*/
 
 					mThickLineMaterial->Bind(true);
 

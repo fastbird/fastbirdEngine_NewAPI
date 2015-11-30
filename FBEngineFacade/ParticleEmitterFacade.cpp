@@ -141,11 +141,11 @@ void ParticleEmitterFacade::AddShaderDefine(const char* def, const char* val){
 	}
 }
 
-void ParticleEmitterFacade::ApplyShaderDefine(){
-	if (mImpl->mParticleEmitter){
-		return mImpl->mParticleEmitter->ApplyShaderDefine();
-	}
-}
+//void ParticleEmitterFacade::ApplyShaderDefine(){
+//	if (mImpl->mParticleEmitter){
+//		return mImpl->mParticleEmitter->ApplyShaderDefine();
+//	}
+//}
 
 void ParticleEmitterFacade::SetRelativeVelocity(const Vec3& dir, float speed){
 	if (mImpl->mParticleEmitter){

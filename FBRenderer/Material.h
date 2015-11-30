@@ -95,7 +95,6 @@ namespace fastbird{
 		void RefreshColorRampTexture(int slot, BINDING_SHADER shader);
 		bool AddShaderDefine(const char* def, const char* val);
 		bool RemoveShaderDefine(const char* def);
-		void ApplyShaderDefines();
 		void SetMaterialParameter(unsigned index, const Vec4& value);
 		const SHADER_DEFINES& GetShaderDefines() const;
 		const Vec4f& GetAmbientColor() const;
@@ -142,5 +141,8 @@ namespace fastbird{
 		void ClearBlendState(const BLEND_DESC& desc);
 		void ClearDepthStencilState(const DEPTH_STENCIL_DESC& desc);
 		void SetInputLayout(const INPUT_ELEMENT_DESCS& desc);
+
+		/// internal only.
+		//void ApplyShaderDefines();
 	};
 }

@@ -93,6 +93,9 @@
     <ProjectReference Include="..\FBDebugLib\FBDebugLib.vcxproj">
       <Project>{7da79d73-7e78-48a6-a052-177cdf5e3b3c}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\FBFileSystem\FBFileSystem.vcxproj">
+      <Project>{970770a8-f3c4-43ad-b4a0-c076ec6fe610}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\FBMemoryManagerLib\FBMemoryManagerLib.vcxproj">
       <Project>{5fe91c18-2729-4291-80fb-3400c58602b3}</Project>
     </ProjectReference>

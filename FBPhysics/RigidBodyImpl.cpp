@@ -73,7 +73,7 @@ public:
 			Physics::GetInstance().AddRef(colShape);
 		}
 		mRotationInfo = FB_NEW(RotationInfo);
-		mSelf->setUserPointer(this);
+		mSelf->setUserPointer(self);
 	}
 	~Impl(){
 		UnregisterFromWorld();
@@ -252,7 +252,7 @@ public:
 
 	void SetPhysicsInterface(IPhysicsInterface* obj){
 		mPhysicsInterface = obj;
-		mSelf->setUserPointer(this); // to avoid dynamic_cast
+		mSelf->setUserPointer(mSelf); // to avoid dynamic_cast
 
 		// save actor;
 		mGamePtr = obj->GetUserPtr();
@@ -260,7 +260,7 @@ public:
 
 	void SetPhysicsInterface(IPhysicsInterface* obj, const Vec3I& groupIdx){
 		mPhysicsInterface = obj;
-		mSelf->setUserPointer(this); // to avoid dynamic_cast
+		mSelf->setUserPointer(mSelf); // to avoid dynamic_cast
 
 		// save actor;
 		mGamePtr = obj->GetUserPtr();
@@ -468,7 +468,7 @@ public:
 				auto b = &con->getRigidBodyB();
 				auto trA = fixedCon->getFrameOffsetA();
 				auto trB = fixedCon->getFrameOffsetB();
-				if (b->getUserPointer() == this){
+				if (b->getUserPointer() == mSelf){
 					std::swap(a, b);
 					std::swap(trA, trB);
 				}

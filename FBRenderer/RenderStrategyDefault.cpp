@@ -2,19 +2,19 @@
  -----------------------------------------------------------------------------
  This source file is part of fastbird engine
  For the latest info, see http://www.jungwan.net/
- 
+
  Copyright (c) 2013-2015 Jungwan Byun
- 
+
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
- 
+
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
- 
+
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,7 +23,7 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
  -----------------------------------------------------------------------------
-*/
+ */
 
 #include "stdafx.h"
 #include "RenderStrategyDefault.h"
@@ -55,7 +55,6 @@ static const int starGlareMaxPasses = 3;
 static const int starGlareSamples = 8;
 static const Real starGlareChromaticAberration = 0.5f;
 static const Real starGlareInclination = HALF_PI;
-static StarDef* starGlareDef = 0;
 
 //IRenderStrategyPtr RenderStrategyDefault::Create(){
 //	return IRenderStrategyPtr(FB_NEW(RenderStrategyDefault), [](RenderStrategyDefault* obj){FB_DELETE(obj); });
@@ -73,7 +72,7 @@ public:
 	TexturePtr mGlowTarget;
 	TexturePtr mGlowTexture[2];
 	bool mGlowSet;
-	CameraPtr mLightCamera;	
+	CameraPtr mLightCamera;
 	TexturePtr mShadowMap;
 	TexturePtr mCloudVolumeDepth;
 	ShaderPtr mCloudDepthWriteShader;
@@ -92,13 +91,18 @@ public:
 	TexturePtr mBloomTexture[FB_NUM_BLOOM_TEXTURES];
 	TexturePtr mStarTextures[FB_NUM_STAR_TEXTURES];
 	size_t mRenderingFace;
+	StarDef* mStarGlareDef;
 
 	//-------------------------------------------------------------------
 	Impl()
 		:mGlowSet(false), mFrameLuminanceCalced(0), mLuminance(0.5f)
 		, mRenderingFace(0)
+		, mStarGlareDef(0)
 	{
 
+	}
+	~Impl(){
+		FB_DELETE(mStarGlareDef);
 	}
 
 	//-------------------------------------------------------------------
@@ -112,7 +116,7 @@ public:
 		mRenderTarget = renderTarget;
 		mSize = renderTarget->GetSize();
 		mId = renderTarget->GetId();
-	}	
+	}
 
 	void UpdateLightCamera()
 	{
@@ -194,7 +198,7 @@ public:
 
 		GlowTarget(true);
 		renderer.Clear(0., 0., 0., 1.);
-		GlowTarget(false);		
+		GlowTarget(false);
 		{
 			RenderEventMarker marker("Shadow Pass");
 			memset(&renderParam, 0, sizeof(RenderParam));
@@ -227,15 +231,15 @@ public:
 			CloudVolumeTarget(true);
 			auto provider = renderer.GetResourceProvider();
 			renderer.SetLockDepthStencilState(true);
-			provider->BindBlendState(ResourceTypes::BlendStates::BlueMask);		
+			provider->BindBlendState(ResourceTypes::BlendStates::BlueMask);
 			renderParam.mCamera = renderer.GetCamera().get();
 			renderParam.mLightCamera = mLightCamera.get();
 			scene->Render(renderParam, 0);
 			renderer.SetLockDepthStencilState(false);
 			DepthWriteShaderCloud();
-			provider->BindRasterizerState(ResourceTypes::RasterizerStates::CullFrontFace);		
+			provider->BindRasterizerState(ResourceTypes::RasterizerStates::CullFrontFace);
 			provider->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthWrite_LessEqual);
-			provider->BindBlendState(ResourceTypes::BlendStates::GreenAlphaMaskAddMinus);				
+			provider->BindBlendState(ResourceTypes::BlendStates::GreenAlphaMaskAddMinus);
 			scene->PreRenderCloudVolumes(renderParam, 0);
 			scene->RenderCloudVolumes(renderParam, 0);
 			renderer.RestoreRasterizerState();
@@ -396,7 +400,7 @@ public:
 	void DepthTexture(bool bind) {
 		auto& renderer = Renderer::GetInstance();
 		if (bind){
-			renderer.SetSystemTexture(SystemTextures::Depth, mDepthTarget);			
+			renderer.SetSystemTexture(SystemTextures::Depth, mDepthTarget);
 		}
 		else{
 			renderer.SetSystemTexture(SystemTextures::Depth, 0);
@@ -426,9 +430,9 @@ public:
 				You may use any combination of render targets slots (up to 8). However, a resource view cannot be bound to
 				multiple render-target-slots simultaneously. A view may be reused as long as the resources are not used simultaneously.
 
-				*/				
+				*/
 				mGlowTarget = renderer.CreateTexture(0, mSize.x, mSize.y, PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
-					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);				
+					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV | TEXTURE_TYPE_MULTISAMPLE);
 				mGlowTarget->SetDebugName(FormatString("rt%u_%u_%u_GlowTarget", rt->GetId(), mSize.x, mSize.y).c_str());
 
 				mGlowTexture[0] = renderer.CreateTexture(0, (int)(mSize.x * 0.25f), (int)(mSize.y * 0.25f), PIXEL_FORMAT_R16G16B16A16_FLOAT, BUFFER_USAGE_DEFAULT,
@@ -486,7 +490,7 @@ public:
 					width, height,
 					PIXEL_FORMAT_D32_FLOAT, BUFFER_USAGE_DEFAULT,
 					BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_DEPTH_STENCIL_SRV);
-				assert(mShadowMap);				
+				assert(mShadowMap);
 				mShadowMap->SetDebugName(FormatString("rt%u_%u_%u_ShadowMap", rt->GetId(), width, height).c_str());
 			}
 
@@ -526,7 +530,7 @@ public:
 
 	void CloudVolumeTarget(bool bind)
 	{
-		auto& renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();
 		if (bind){
 
 			const auto& size = mSize;
@@ -564,7 +568,7 @@ public:
 	void GodRayTarget(bool bind)
 	{
 		auto& renderer = Renderer::GetInstance();
-		if (bind){			
+		if (bind){
 			const auto& size = mSize;
 			if (!mGodRayTarget[0])
 			{
@@ -574,7 +578,7 @@ public:
 						BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 				}
 				mNoMSDepthStencil = renderer.CreateTexture(0, size.x / 2, size.y / 2, PIXEL_FORMAT_D24_UNORM_S8_UINT,
-					BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_DEPTH_STENCIL);				
+					BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_DEPTH_STENCIL);
 			}
 
 
@@ -593,7 +597,7 @@ public:
 	void GodRay()
 	{
 		auto& renderer = Renderer::GetInstance();
-		auto rt = mRenderTarget.lock();		
+		auto rt = mRenderTarget.lock();
 		auto scene = mScene.lock();
 		if (scene){
 			const auto& lightDir = scene->GetMainLightDirection();
@@ -632,7 +636,7 @@ public:
 	//---------------------------------------------------------------------------
 	void HDRTarget(bool bind)
 	{
-		auto& renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();
 		const auto& size = mSize;
 		if (!mHDRTarget)
 		{
@@ -642,7 +646,7 @@ public:
 			{
 				Logger::Log(FB_ERROR_LOG_ARG, "Cannot create HDR RenderTarget.");
 				return;
-			}			
+			}
 			mHDRTarget->SetDebugName(FormatString("rt%u_%u_%u_HDRTargetTexture", mId, size.x, size.y).c_str());
 		}
 
@@ -715,7 +719,7 @@ public:
 			rt[0] = mGlowTexture[0];
 			renderer.SetRenderTarget(rt, index, 1, 0, 0);
 			mGlowTexture[1]->Bind(BINDING_SHADER_PS, 0);
-			renderer.DrawFullscreenQuad(renderer.GetResourceProvider()->GetShader(ResourceTypes::Shaders::GlowPS), false);			
+			renderer.DrawFullscreenQuad(renderer.GetResourceProvider()->GetShader(ResourceTypes::Shaders::GlowPS), false);
 		}
 
 	{
@@ -724,7 +728,7 @@ public:
 		mGlowTexture[0]->Bind(BINDING_SHADER_PS, 0);
 		auto provider = renderer.GetResourceProvider();
 		provider->BindBlendState(ResourceTypes::BlendStates::Additive);
-		provider->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthStencil);		
+		provider->BindDepthStencilState(ResourceTypes::DepthStencilStates::NoDepthStencil);
 		if (renderer.GetMultiSampleCount() == 1)
 			renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::CopyPS), false);
 		else
@@ -781,9 +785,9 @@ public:
 		renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::SampleLumInitialPS), false);
 		--dwCurTexture;
 
-		while (dwCurTexture>0)
+		while (dwCurTexture > 0)
 		{
-			TexturePtr src = provider->GetTexture(ResourceTypes::Textures::ToneMap, dwCurTexture+1);
+			TexturePtr src = provider->GetTexture(ResourceTypes::Textures::ToneMap, dwCurTexture + 1);
 			TexturePtr renderTarget = provider->GetTexture(ResourceTypes::Textures::ToneMap, dwCurTexture);
 
 			TexturePtr rts[] = { renderTarget };
@@ -800,7 +804,7 @@ public:
 
 		// Perform the final pass of the average luminance calculation.
 	{
-		TexturePtr src = provider->GetTexture(ResourceTypes::Textures::ToneMap, dwCurTexture + 1); 
+		TexturePtr src = provider->GetTexture(ResourceTypes::Textures::ToneMap, dwCurTexture + 1);
 		TexturePtr renderTarget = provider->GetTexture(ResourceTypes::Textures::ToneMap, dwCurTexture);
 		TexturePtr rts[] = { renderTarget };
 		size_t index[] = { 0 };
@@ -815,7 +819,7 @@ public:
 
 	// AdaptedLum
 	{
-		provider->SwapTexture(ResourceTypes::Textures::LuminanceMap, 0, 1);		
+		provider->SwapTexture(ResourceTypes::Textures::LuminanceMap, 0, 1);
 		auto luminanceMap0 = provider->GetTexture(ResourceTypes::Textures::LuminanceMap, 0);
 		auto luminanceMap1 = provider->GetTexture(ResourceTypes::Textures::LuminanceMap, 1);
 		TexturePtr rts[] = { luminanceMap0 };
@@ -843,7 +847,7 @@ public:
 				CropSize8((int)(size.y * 0.25f))
 				);
 			mBrightPassTexture = renderer.CreateTexture(0, size.x, size.y, PIXEL_FORMAT_R8G8B8A8_UNORM,
-				BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);			
+				BUFFER_USAGE_DEFAULT, BUFFER_CPU_ACCESS_NONE, TEXTURE_TYPE_RENDER_TARGET_SRV);
 			mBrightPassTexture->SetDebugName(FormatString("rt%u_%u_%u_BrightPass", rt->GetId(), size.x, size.y).c_str());
 		}
 
@@ -855,7 +859,7 @@ public:
 			size_t index[] = { 0 };
 			renderer.SetRenderTarget(rts, index, 1, 0, 0); // no depth buffer;
 			auto provider = renderer.GetResourceProvider();
-			TexturePtr rvs[] = { mHDRTarget,  provider->GetTexture(ResourceTypes::Textures::LuminanceMap, 0) };
+			TexturePtr rvs[] = { mHDRTarget, provider->GetTexture(ResourceTypes::Textures::LuminanceMap, 0) };
 			renderer.SetTextures(rvs, 2, BINDING_SHADER_PS, 0);
 
 			Viewport vp = { 0, 0, (float)resol.x, (float)resol.y, 0, 1 };
@@ -879,7 +883,7 @@ public:
 	//---------------------------------------------------------------------------
 	void BrightPassToStarSource()
 	{
-		auto& renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();
 		const auto& size = mSize;
 		if (!mStarSourceTex)
 		{
@@ -920,14 +924,14 @@ public:
 			}
 		}
 		auto provider = renderer.GetResourceProvider();
-		renderer.DrawFullscreenQuad( provider->GetShader(ResourceTypes::Shaders::Blur5x5PS), false);
+		renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::Blur5x5PS), false);
 	}
 
 	//---------------------------------------------------------------------------
 	void StarSourceToBloomSource()
 	{
 		RenderEventMarker mark("StarSourceToBloomSource");
-		auto& renderer = Renderer::GetInstance();		
+		auto& renderer = Renderer::GetInstance();
 		const auto& size = mSize;
 		if (!mBloomSourceTex)
 		{
@@ -1059,7 +1063,7 @@ public:
 		renderer.UnmapBigBuffer();
 		renderer.UnbindTexture(BINDING_SHADER_PS, 0);
 		renderer.UnbindTexture(BINDING_SHADER_PS, 1);
-		renderer.UnbindTexture(BINDING_SHADER_PS, 2);		
+		renderer.UnbindTexture(BINDING_SHADER_PS, 2);
 		rts[0] = mBloomTexture[0];
 		renderer.SetRenderTarget(rts, index, 1, 0, 0);
 		mBloomTexture[1]->Bind(BINDING_SHADER_PS, 0);
@@ -1067,12 +1071,12 @@ public:
 		renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::BloomPS), false);
 	}
 	}
-	
-	
+
+
 	//static  function
 	void ReleaseStarDef()
 	{
-		FB_DELETE(starGlareDef);
+		
 	}
 	void CalcStarGlareConst(Vec4 s_aaColor[starGlareMaxPasses][starGlareSamples])
 	{
@@ -1089,8 +1093,9 @@ public:
 			}
 		}
 		StarDef::InitializeStatic();
-		starGlareDef = FB_NEW(StarDef);
-		starGlareDef->Initialize(STLT_VERTICAL);
+		assert(!mStarGlareDef);
+		mStarGlareDef = FB_NEW(StarDef);
+		mStarGlareDef->Initialize(STLT_VERTICAL);
 	}
 
 	//---------------------------------------------------------------------------
@@ -1136,16 +1141,16 @@ public:
 
 
 		Real radOffset;
-		radOffset = starGlareInclination + starGlareDef->m_fInclination;
+		radOffset = starGlareInclination + mStarGlareDef->m_fInclination;
 
 		TexturePtr pSrcTexture = 0;
 		TexturePtr pDestTexture = 0;
 
 		auto provider = renderer.GetResourceProvider();
 		// Direction loop
-		for (int d = 0; d < starGlareDef->m_nStarLines; ++d)
+		for (int d = 0; d < mStarGlareDef->m_nStarLines; ++d)
 		{
-			const STARLINE& starLine = starGlareDef->m_pStarLine[d];
+			const STARLINE& starLine = mStarGlareDef->m_pStarLine[d];
 
 			pSrcTexture = mStarSourceTex;
 
@@ -1194,7 +1199,7 @@ public:
 					}
 
 				}
-				
+
 				BIG_BUFFER* pData = (BIG_BUFFER*)renderer.MapBigBuffer();
 				memcpy(pData->gSampleOffsets, avSampleOffsets, sizeof(Vec4f)* FB_MAX_SAMPLES);
 				memcpy(pData->gSampleWeights, avSampleWeights, sizeof(Vec4f)* FB_MAX_SAMPLES);
@@ -1204,32 +1209,32 @@ public:
 				size_t index[] = { 0 };
 				renderer.SetRenderTarget(rts, index, 1, 0, 0);
 				pSrcTexture->Bind(BINDING_SHADER_PS, 0);
-				
+
 				renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::StarGlarePS), false);
 
-// Setup next expansion
-vtStepUV *= starGlareSamples;
-attnPowScale *= starGlareSamples;
+				// Setup next expansion
+				vtStepUV *= starGlareSamples;
+				attnPowScale *= starGlareSamples;
 
-// Set the work drawn just before to next texture source.
-pSrcTexture = mStarTextures[iWorkTexture];
+				// Set the work drawn just before to next texture source.
+				pSrcTexture = mStarTextures[iWorkTexture];
 
-iWorkTexture += 1;
-if (iWorkTexture > 2)
-{
-	iWorkTexture = 1;
-}
+				iWorkTexture += 1;
+				if (iWorkTexture > 2)
+				{
+					iWorkTexture = 1;
+				}
 			}
 		}
 
 		pDestTexture = mStarTextures[0];
 
 		std::vector<TexturePtr> textures;
-		textures.reserve(starGlareDef->m_nStarLines);
-		for (int i = 0; i < starGlareDef->m_nStarLines; i++)
+		textures.reserve(mStarGlareDef->m_nStarLines);
+		for (int i = 0; i < mStarGlareDef->m_nStarLines; i++)
 		{
 			textures.push_back(mStarTextures[i + 4]);
-			avSampleWeights[i] = vWhite.GetVec4() * (1.0f / (Real)starGlareDef->m_nStarLines);
+			avSampleWeights[i] = vWhite.GetVec4() * (1.0f / (Real)mStarGlareDef->m_nStarLines);
 		}
 
 		{
@@ -1239,7 +1244,7 @@ if (iWorkTexture > 2)
 		}
 		renderer.SetTextures(&textures[0], textures.size(), BINDING_SHADER_PS, 0);
 
-		switch (starGlareDef->m_nStarLines)
+		switch (mStarGlareDef->m_nStarLines)
 		{
 		case 2:
 			renderer.DrawFullscreenQuad(provider->GetShader(ResourceTypes::Shaders::MergeTextures2PS), false);
@@ -1250,11 +1255,11 @@ if (iWorkTexture > 2)
 		}
 
 		textures.clear();
-		for (int i = 0; i < starGlareDef->m_nStarLines; i++)
+		for (int i = 0; i < mStarGlareDef->m_nStarLines; i++)
 		{
 			textures.push_back(0);
 		}
-		renderer.SetTextures(&textures[0], starGlareDef->m_nStarLines, BINDING_SHADER_PS, 0);
+		renderer.SetTextures(&textures[0], mStarGlareDef->m_nStarLines, BINDING_SHADER_PS, 0);
 	}
 
 	//---------------------------------------------------------------------------
@@ -1317,7 +1322,7 @@ if (iWorkTexture > 2)
 
 //---------------------------------------------------------------------------
 RenderStrategyDefault::RenderStrategyDefault()
-: mImpl(new Impl){
+	: mImpl(new Impl){
 
 }
 RenderStrategyDefault::~RenderStrategyDefault(){
@@ -1348,7 +1353,7 @@ bool RenderStrategyDefault::IsGlowSupported(){
 }
 
 CameraPtr RenderStrategyDefault::GetLightCamera() const{
-	
+
 	return mImpl->mLightCamera;
 }
 

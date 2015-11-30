@@ -74,6 +74,7 @@ public:
 	//---------------------------------------------------------------------------
 	Impl(ColladaImporter* self)
 		: mSelf(self)
+		, mMeshGroup(collada::MeshGroupPtr(new collada::MeshGroup))
 	{
 
 	}
@@ -638,9 +639,9 @@ public:
 		bool auxiliaryNode = name.find("_POS") == 0;
 		bool collisionNode = name.find("_COL") == 0;
 		bool parsingChildMesh = parentMeshIdx != -1;
-		assert(mMeshGroup->mMeshes[parentMeshIdx].mMesh);
 		if (auxiliaryNode)
 		{
+			assert(mMeshGroup->mMeshes[parentMeshIdx].mMesh);
 			assert(parsingChildMesh);
 			mMeshGroup->mMeshes[parentMeshIdx].mMesh->mAuxiliaries.push_back(collada::AUXILIARIES::value_type(name, location));
 		}
@@ -649,13 +650,14 @@ public:
 			collada::CollisionInfo colInfo(GetColShape(name.c_str()), location, 0);
 			if (mOptions.mUseMeshGroup)
 			{
+				assert(mMeshGroup->mMeshes[parentMeshIdx].mMesh);
 				assert(parsingChildMesh);
 				mMeshGroup->mMeshes[parentMeshIdx].mMesh->mCollisionInfo.push_back(colInfo);
 			}
 			else
 			{
 				assert(!mMeshObjects.empty());
-				mMeshObjects[0]->mCollisionInfo.push_back(colInfo);				
+				mMeshObjects.begin()->second->mCollisionInfo.push_back(colInfo);				
 			}
 		}
 
@@ -668,7 +670,7 @@ public:
 		if (gaCount > 0)
 		{
 			std::string id = ga[0]->getInstanciatedObjectId().toAscii();
-			collada::MeshPtr pMeshObject(new collada::Mesh, [](collada::Mesh* obj){ delete obj; });
+			collada::MeshPtr pMeshObject = GetMeshObject(id.c_str());
 			if (pMeshObject)
 			{
 				// write node name
@@ -691,7 +693,7 @@ public:
 				else if (collisionNode) // This collision has seperated mesh object for physics.
 				{
 					assert(!mMeshObjects.empty());
-					mMeshObjects[0]->mCollisionInfo.back().mCollisionMesh = pMeshObject;	
+					mMeshObjects.begin()->second->mCollisionInfo.back().mCollisionMesh = pMeshObject;	
 				}
 			}
 		}
@@ -774,7 +776,7 @@ public:
 					{
 						// node name;
 						pMeshObject->mName = name; 
-						auto idx = mMeshGroup->mMeshes.size();
+						idx = mMeshGroup->mMeshes.size();
 						mMeshGroup->mMeshes[idx].mMesh = pMeshObject;
 						mMeshGroup->mMeshes[idx].mParentMeshIdx = -1;
 						mMeshGroup->mMeshes[idx].mTransformation = location;

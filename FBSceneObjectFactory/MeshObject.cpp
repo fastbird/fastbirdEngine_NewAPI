@@ -611,7 +611,7 @@ public:
 			if (!it.mPositions.empty())
 			{
 				it.mVBPos = renderer.CreateVertexBuffer(
-					&it.mPositions[0], sizeof(Vec3), it.mPositions.size(),
+					&it.mPositions[0], sizeof(Vec3f), it.mPositions.size(),
 					mUseDynamicVB[MeshVertexBufferType::Position] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[MeshVertexBufferType::Position] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
 				mAABB->AddComputeData(&it.mPositions[0], it.mPositions.size());
@@ -624,7 +624,7 @@ public:
 			{
 				assert(it.mPositions.size() == it.mNormals.size());
 				it.mVBNormal = renderer.CreateVertexBuffer(
-					&it.mNormals[0], sizeof(Vec3), it.mNormals.size(),
+					&it.mNormals[0], sizeof(Vec3f), it.mNormals.size(),
 					mUseDynamicVB[MeshVertexBufferType::Normal] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[MeshVertexBufferType::Normal] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
 			}
@@ -636,7 +636,7 @@ public:
 			{
 				assert(it.mPositions.size() == it.mUVs.size());
 				it.mVBUV = renderer.CreateVertexBuffer(
-					&it.mUVs[0], sizeof(Vec2), it.mUVs.size(),
+					&it.mUVs[0], sizeof(Vec2f), it.mUVs.size(),
 					mUseDynamicVB[MeshVertexBufferType::UV] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[MeshVertexBufferType::UV] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);				
 			}
@@ -662,7 +662,7 @@ public:
 			{
 				assert(it.mPositions.size() == it.mTangents.size());
 				it.mVBTangent = renderer.CreateVertexBuffer(
-					&it.mTangents[0], sizeof(Vec3), it.mTangents.size(),
+					&it.mTangents[0], sizeof(Vec3f), it.mTangents.size(),
 					mUseDynamicVB[MeshVertexBufferType::Tangent] ? BUFFER_USAGE_DYNAMIC : BUFFER_USAGE_IMMUTABLE,
 					mUseDynamicVB[MeshVertexBufferType::Tangent] ? BUFFER_CPU_ACCESS_WRITE : BUFFER_CPU_ACCESS_NONE);
 				
@@ -1045,7 +1045,7 @@ public:
 						it.mForceAlphaMaterial = it.mMaterial->Clone();						
 						if (forceGlow != 0.f){
 							it.mForceAlphaMaterial->AddShaderDefine("_FORCE_GLOW", FormatString(".2f", forceGlow).c_str());
-							it.mForceAlphaMaterial->ApplyShaderDefines();
+							//it.mForceAlphaMaterial->ApplyShaderDefines();
 						}
 					}
 					BLEND_DESC bdesc;

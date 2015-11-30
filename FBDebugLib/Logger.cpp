@@ -40,16 +40,16 @@
 using namespace fastbird;
 
 static int sInitialized = false;
-static std::ofstream* sLogFile = 0;
+static std::shared_ptr<std::ofstream> sLogFile;
 static std::streambuf* sOriginalErrorStream = 0;
 
 void Logger::Init(const char* filepath){	
-	sLogFile = new std::ofstream;
+	sLogFile = std::make_shared<std::ofstream>();
 	sLogFile->open(filepath);
-	auto errStream = std::cerr.rdbuf(sLogFile->rdbuf());
-	if (!sOriginalErrorStream){
-		sOriginalErrorStream = errStream;
-	}
+	//auto errStream = std::cerr.rdbuf(sLogFile->rdbuf());
+	//if (!sOriginalErrorStream){
+		//sOriginalErrorStream = errStream;
+	//}
 	sInitialized = true;
 }
 
@@ -69,7 +69,6 @@ void Logger::Release(){
 		sOriginalErrorStream = 0;
 	}
 	sLogFile->close();	
-	delete sLogFile;
 }
 
 void Logger::Log(const char* str, ...){
@@ -89,6 +88,10 @@ void Logger::Log(const char* str, ...){
 	if (sLogFile && sLogFile->is_open()){
 		*sLogFile << buffer;
 		sLogFile->flush();
+#if defined(_PLATFORM_WINDOWS_)
+		OutputDebugStringA(buffer);
+#else
+#endif
 	}
 	else{
 		// fallback

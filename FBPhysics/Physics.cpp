@@ -36,6 +36,7 @@
 #include "IFilterCallback.h"
 #include "BulletFilterCallback.h"
 #include "BulletDebugDraw.h"
+#include "FBFileSystem/FileSystem.h"
 #include <BulletCollision/Gimpact/btGImpactShape.h>
 #include <BulletCollision/NarrowPhaseCollision/btRaycastCallback.h>
 #include <BulletCollision/NarrowPhaseCollision/btGjkEpaPenetrationDepthSolver.h>
@@ -131,9 +132,13 @@ public:
 		, mEnabled(true)
 	{
 		Initilaize();
+		auto filepath = "_FBPhysics.log";
+		FileSystem::BackupFile(filepath, 5, "Backup_Log");
+		Logger::Init(filepath);
 	}
 	~Impl(){
 		Deinitialize();
+		Logger::Release();
 	}
 
 

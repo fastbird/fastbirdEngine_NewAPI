@@ -34,7 +34,9 @@
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/Camera.h"
 using namespace fastbird;
-
+namespace fastbird{
+	void ClearParticleRenderObjects();
+}
 Timer* fastbird::gpTimer = Timer::GetMainTimer().get();
 class ParticleSystem::Impl
 {
@@ -62,6 +64,9 @@ public:
 		, mParticleOptions(ParticleOptions::Create())
 		, mOverridingCamera(Camera::Create())
 	{
+	}
+	~Impl(){
+		ClearParticleRenderObjects();
 	}
 
 	void Update(float elapsedTime){
@@ -289,7 +294,7 @@ public:
 
 		auto iterator = FileSystem::GetDirectoryIterator(particleFolder, false);
 		while (iterator->HasNext()){
-			std::string filename = iterator->GetNextFilePath();
+			std::string filename = FileSystem::GetFileName(iterator->GetNextFilePath());
 			auto sv = Split(filename, "_");
 			if (sv.size() >= 2)
 			{

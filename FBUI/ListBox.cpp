@@ -384,7 +384,8 @@ void ListBox::Clear(bool immediately)
 	mSelectedIndices.clear();
 	mHighlighted.clear();
 	TriggerRedraw();
-	UIManager::GetInstance().DirtyRenderList(GetHwndId());
+	if (UIManager::HasInstance())
+		UIManager::GetInstance().DirtyRenderList(GetHwndId());
 	
 	auto scrollerV = mScrollerV.lock();
 	auto contentUI = mWndContentUI.lock();

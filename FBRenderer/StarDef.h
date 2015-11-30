@@ -98,7 +98,6 @@ namespace fastbird
 		}
 
 		bool	            Construct();
-		void                Destruct();
 		void                Release();
 
 		bool             Initialize(const StarDef& src);

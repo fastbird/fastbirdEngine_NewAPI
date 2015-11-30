@@ -56,6 +56,10 @@ public:
 	{
 	}
 
+	~Impl(){
+
+	}
+
 	void Bind(){
 		RendererD3D11::GetInstance().SetShaders(mSelf);
 	}

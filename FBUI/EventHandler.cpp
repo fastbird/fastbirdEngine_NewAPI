@@ -114,9 +114,8 @@ bool EventHandler::OnEvent(UIEvents::Enum e)
 			LUA_STACK_CLIPPER lsc(L);
 			it->second.PushToStack();
 			WinBase* pComp = dynamic_cast<WinBase*>(this);
-			LuaUtils::pushstring(pComp->GetName());
-			int args = it->second.IsMethod() ? 2 : 1;
-			it->second.CallWithManualArgs(args, 0);
+			LuaUtils::pushstring(pComp->GetName());			
+			it->second.CallWithManualArgs(1, 0);
 			processed = processed || true;
 		}
 		

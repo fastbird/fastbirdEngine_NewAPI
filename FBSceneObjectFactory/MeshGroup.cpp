@@ -91,7 +91,7 @@ public:
 		, mCollisions(other.mCollisions)
 		, mLastPreRendered(0)
 	{
-		for (auto it : mMeshObjects)
+		for (auto it : other.mMeshObjects)
 		{
 			mMeshObjects.push_back(MESH_OBJECTS::value_type(it.first->Clone(), it.second));			
 			mChanges.push_back(true);			
@@ -247,7 +247,7 @@ public:
 		else{
 			assert(idx < mMeshObjects.size());
 			if (idx < mMeshObjects.size()){
-				mMeshObjects[idx].first->GetAuxiliaries();
+				return mMeshObjects[idx].first->GetAuxiliaries();
 			}			
 		}
 		return 0;

@@ -523,43 +523,45 @@ public:
 				assert(pro);
 				auto material = pro->GetMaterial();
 				assert(material);
+				bool defineChanged = false;
 				if (created)
 				{
 					switch (pt.mBlendMode)
 					{
 					case ParticleBlendMode::InvColorBlend:
 					{
-						material->AddShaderDefine("_INV_COLOR_BLEND", "1");
+						defineChanged = material->AddShaderDefine("_INV_COLOR_BLEND", "1") || defineChanged;
 						break;
 					}
 					case ParticleBlendMode::Replace:
 					{
-						material->AddShaderDefine("_PRE_MULTIPLIED_ALPHA", "1");
+						defineChanged = material->AddShaderDefine("_PRE_MULTIPLIED_ALPHA", "1") || defineChanged;
 						break;
 					}
 					}
 
 					if (pt.mPreMultiAlpha)
 					{
-						material->AddShaderDefine("_PRE_MULTIPLIED_ALPHA", "1");
+						defineChanged = material->AddShaderDefine("_PRE_MULTIPLIED_ALPHA", "1") || defineChanged;
 					}
 
 					if (glow == 0.f)
 					{
-						material->AddShaderDefine("_NO_GLOW", "1");
+						defineChanged = material->AddShaderDefine("_NO_GLOW", "1") || defineChanged;
 						material->SetGlow(false);
 					}
 					else
 					{
-						material->RemoveShaderDefine("_NO_GLOW");
+						defineChanged = material->RemoveShaderDefine("_NO_GLOW") || defineChanged;
 						material->SetGlow(true);
 					}
 
 					if (!pt.mDepthFade)
 					{
-						material->AddShaderDefine("_NO_DEPTH_FADE", "1");
+						defineChanged = material->AddShaderDefine("_NO_DEPTH_FADE", "1") || defineChanged;
 					}
-					pro->GetMaterial()->ApplyShaderDefines();
+					/*if (defineChanged)
+						pro->GetMaterial()->ApplyShaderDefines();*/
 					material->SetMaterialParameter(0, Vec4(glow, 0, 0, 0));
 				}
 			}
@@ -1309,7 +1311,7 @@ public:
 		}
 	}
 
-	void ApplyShaderDefine(){
+	/*void ApplyShaderDefine(){
 		for (auto& pt : *(mTemplates.const_get()))
 		{
 			PARTICLES& particles = *(mParticlesPerTemplate[&pt]);
@@ -1323,7 +1325,7 @@ public:
 				}
 			}
 		}
-	}
+	}*/
 
 
 	Particle* Emit(unsigned templateIdx){
@@ -1495,7 +1497,7 @@ public:
 						for (auto& it : mShaderDefines){
 							mat->AddShaderDefine(it.first.c_str(), it.second.c_str());
 						}
-						mat->ApplyShaderDefines();
+						//mat->ApplyShaderDefines();
 					}
 				}
 			}
@@ -1664,7 +1666,7 @@ void ParticleEmitter::AddShaderDefine(const char* def, const char* val) {
 	mImpl->AddShaderDefine(def, val);
 }
 
-void ParticleEmitter::ApplyShaderDefine() {
-	mImpl->ApplyShaderDefine();
-}
+//void ParticleEmitter::ApplyShaderDefine() {
+//	mImpl->ApplyShaderDefine();
+//}
 

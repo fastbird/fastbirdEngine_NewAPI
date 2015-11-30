@@ -30,11 +30,12 @@
 #include "RendererD3D11.h"
 
 fastbird::IPlatformRenderer* CreateRenderEngine(){
-	// Calling serveral times is fine.
-	fastbird::Logger::Init("RendererD3D11.log");
+	
+	fastbird::Logger::Init("_FBRendererD3D11.log");
 	return fastbird::RendererD3D11::Create();
 }
 
 void DeleteRenderEngine(){
 	fastbird::RendererD3D11::Destroy();
+	fastbird::Logger::Release();
 }

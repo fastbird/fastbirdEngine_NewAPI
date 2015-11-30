@@ -153,7 +153,7 @@ public:
 			auto& d = ret.back();
 			d.mColShapeType = (FBColShape::Enum)it.mColShapeType;
 			d.mTransform = ConvertCollada(it.mTransform);
-			d.mCollisionMesh = ConvertMeshData(it.mCollisionMesh, false, false);			
+			d.mCollisionMesh = ConvertMeshData(it.mCollisionMesh, false, true);			
 		}
 		return ret;
 	}
@@ -168,12 +168,18 @@ public:
 		for (auto& group : meshData->mMaterialGroups){
 			std::vector<Vec3> data = ConvertCollada(group.second.mPositions);
 			mesh->SetPositions(group.first, &data[0], data.size());
-			data = ConvertCollada(group.second.mNormals);
-			mesh->SetNormals(group.first, &data[0], data.size());
-			std::vector<Vec2> data2 = ConvertCollada(group.second.mUVs);
-			mesh->SetUVs(group.first, &data2[0], data2.size());
-			std::vector<ModelTriangle> triangles = ConvertCollada(group.second.mTriangles);
-			mesh->SetTriangles(group.first, &triangles[0], triangles.size());	
+			if (!group.second.mNormals.empty()){
+				data = ConvertCollada(group.second.mNormals);
+				mesh->SetNormals(group.first, &data[0], data.size());
+			}
+			if (!group.second.mUVs.empty()){
+				std::vector<Vec2> data2 = ConvertCollada(group.second.mUVs);
+				mesh->SetUVs(group.first, &data2[0], data2.size());
+			}
+			if (!group.second.mTriangles.empty()){
+				std::vector<ModelTriangle> triangles = ConvertCollada(group.second.mTriangles);
+				mesh->SetTriangles(group.first, &triangles[0], triangles.size());
+			}
 			MaterialPtr material;
 			if (!group.second.mMaterialPath.empty()){
 				material = Renderer::GetInstance().CreateMaterial(group.second.mMaterialPath.c_str());
@@ -184,7 +190,12 @@ public:
 			}
 			mesh->SetMaterialFor(group.first, material);
 			if (buildTangent){
-				mesh->GenerateTangent(group.first, &group.second.mIndexBuffer[0], group.second.mIndexBuffer.size());
+				if (group.second.mIndexBuffer.empty()){
+					mesh->GenerateTangent(group.first, 0, 0);
+				}
+				else{
+					mesh->GenerateTangent(group.first, &group.second.mIndexBuffer[0], group.second.mIndexBuffer.size());
+				}
 			}
 		}
 		mesh->EndModification(keepDataInMesh);

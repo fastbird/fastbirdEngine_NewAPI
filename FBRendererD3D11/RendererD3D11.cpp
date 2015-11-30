@@ -231,7 +231,7 @@ public:
 		Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		Desc.MiscFlags = 0;		
 		for (int i = 0; i < ShaderConstants::Num; ++i){
-			Desc.ByteWidth = sizeof(FRAME_CONSTANTS);
+			Desc.ByteWidth = shaderBufferSizes[i];
 			ID3D11Buffer* buffer = 0;
 			hr = mDevice->CreateBuffer(&Desc, NULL, &buffer);
 			if (FAILED(hr))
@@ -459,7 +459,7 @@ public:
 		}
 
 		TextureD3D11Ptr color, depth;
-		auto successful = CreateTargetTexturesFor(pSwapChain, Vec2I(width, height), color, depth);
+		auto successful = CreateTargetTexturesFor(pSwapChain, Vec2I(sd.BufferDesc.Width, sd.BufferDesc.Height), color, depth);
 		if (!successful){
 			Logger::Log(FB_ERROR_LOG_ARG, "Create swap-chain target texture is failed!");
 			return false;
@@ -1012,6 +1012,7 @@ public:
 
 	IPlatformShaderPtr CreateShader(const char* path, int shaders,
 		const SHADER_DEFINES& defines) {
+		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Creating shader %s", path).c_str());		
 		std::string filepath(path);
 		ToLowerCase(filepath);
 
@@ -1351,7 +1352,7 @@ public:
 			for (int i = 0; i < num; i++)
 			{
 				TextureD3D11* pTextureD3D11 = static_cast<TextureD3D11*>(pRenderTargets[i].get());
-				auto renderTargetView = pTextureD3D11 ? pTextureD3D11->GetRenderTargetView(i) : 0;
+				auto renderTargetView = pTextureD3D11 ? pTextureD3D11->GetRenderTargetView(rtViewIndex[i]) : 0;
 				mCurrentRTViews.push_back(renderTargetView);				
 			}
 		}

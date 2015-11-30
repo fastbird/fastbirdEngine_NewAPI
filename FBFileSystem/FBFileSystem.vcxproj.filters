@@ -10,6 +10,5 @@
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="DirectoryIterator.cpp" />
     <ClCompile Include="FileSystem.cpp" />
-    <ClCompile Include="FileSystemDLL.cpp" />
   </ItemGroup>
 </Project>

@@ -29,8 +29,8 @@
 #include "LuaUtils.h"
 #include "LuaObject.h"
 #include "FBCommonHeaders/Helpers.h"
-#include "luawrapperutil.hpp"
 #include "FBCommonHeaders/RecursiveSpinLock.h"
+#include "FBFileSystem/FileSystem.h"
 using namespace fastbird;
 
 // luawapper util
@@ -51,8 +51,12 @@ namespace fastbird
 	lua_State* LuaUtils::OpenLuaState(){
 		auto L = luaL_newstate();
 		luaL_openlibs(L);
-		if (sLuaState == 0)
+		if (sLuaState == 0){
 			sLuaState = L;
+			auto filepath = "_FBLua.log";
+			FileSystem::BackupFile(filepath, 5, "Backup_Log");
+			Logger::Init(filepath);
+		}
 		return L;
 	}
 
@@ -197,8 +201,9 @@ namespace fastbird
 	{
 		std::regex e(":(\\d+):");
 		char buf[1024];
-		sprintf_s(buf, "\n%s/%s %s", GetCWD(), std::regex_replace(luaString, e, "($1):").c_str(), "Error");
-		Logger::Log(FB_ERROR_LOG_ARG, buf);		
+		sprintf_s(buf, "\n\n*****\n%s/%s (%s)\n", GetCWD(), std::regex_replace(luaString, e, "($1):").c_str(), "error");
+		Logger::Log(FB_ERROR_LOG_ARG, buf);	
+		Logger::Output(buf);
 		PrintLuaDebugInfo(L, 0);
 	}
 
@@ -373,10 +378,8 @@ namespace fastbird
 		bool error = luaL_dofile(L, filepath);
 		if (error)
 		{
-			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Running script(%s) is failed: %s", filepath, lua_tostring(L, -1)).c_str());			
-			char buf[1024];
-			sprintf_s(buf, "\n%s/%s\n", GetCWD(), lua_tostring(L, -1));
-			Logger::Log(buf);
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("Running script(%s) is failed", filepath).c_str());			
+			PrintLuaErrorString(L, tostring(L, -1));			
 		}
 		return error;
 	}

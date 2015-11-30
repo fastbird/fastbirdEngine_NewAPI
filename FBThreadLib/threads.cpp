@@ -303,8 +303,8 @@ public:
 
 	void Join()
 	{
-		assert(mThreadHandle);
-		mThreadHandle->Join();
+		if (mThreadHandle)
+			mThreadHandle->Join();
 	}
 
 	bool IsJoinable(){

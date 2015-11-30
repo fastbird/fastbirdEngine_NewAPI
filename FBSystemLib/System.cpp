@@ -85,4 +85,13 @@ namespace fastbird{
 		assert(0 && "Not implemented");		
 #endif
 	}
+
+	Vec2ITuple GetWindowClientSize(HWindow handle){
+#if defined(_PLATFORM_WINDOWS_)
+		RECT rect;
+		GetClientRect((HWND)handle, &rect);
+		return Vec2ITuple{ rect.right - rect.left, rect.bottom - rect.top };
+#else
+#endif
+	}
 }

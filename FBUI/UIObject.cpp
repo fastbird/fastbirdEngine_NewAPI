@@ -101,7 +101,7 @@ public:
 		mTextColor = Color(0.8f, 0.8f, 0.8f);
 
 		mVertexBuffer = Renderer::GetInstance().CreateVertexBuffer(0,
-			sizeof(Vec4), 4, BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
+			sizeof(Vec4f), 4, BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
 	}
 	void SetTexCoord(Vec2 coord[], DWORD num, unsigned index)
 	{
@@ -255,10 +255,10 @@ public:
 		{
 			renderer.SetScissorRects(&mScissorRect, 1);
 		}
-
-		mMaterial->Bind(true);
+		
 		if (!mNoDrawBackground)
 		{
+			mMaterial->Bind(true);
 			PrepareVBs();
 
 			//renderer.UpdateObjectConstantsBuffer(&mObjectConstants);		
@@ -364,12 +364,12 @@ public:
 				{
 					if (!mVBTexCoords[i]){
 						mVBTexCoords[i] = renderer.CreateVertexBuffer(&mTexcoords[i][0],
-							sizeof(Vec2), mTexcoords[i].size(), BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
+							sizeof(Vec2f), mTexcoords[i].size(), BUFFER_USAGE_DYNAMIC, BUFFER_CPU_ACCESS_WRITE);
 					}
 					else{
 						auto map = mVBTexCoords[i]->Map(0, MAP_TYPE_WRITE_DISCARD, MAP_FLAG_NONE);
 						if (map.pData){
-							memcpy(map.pData, &mTexcoords[i][0], sizeof(Vec2)* mTexcoords[i].size());
+							memcpy(map.pData, &mTexcoords[i][0], sizeof(Vec2f)* mTexcoords[i].size());
 							mVBTexCoords[i]->Unmap(0);
 						}
 					}
@@ -473,11 +473,11 @@ public:
 		if (mMaterial){			
 			if (linear){
 				mMaterial->AddShaderDefine("_USE_LINEAR_SAMPLER", "1");
-				mMaterial->ApplyShaderDefines();
+				//mMaterial->ApplyShaderDefines();
 			}
 			else{
-				if (mMaterial->RemoveShaderDefine("_USE_LINEAR_SAMPLER"))
-					mMaterial->ApplyShaderDefines();
+				mMaterial->RemoveShaderDefine("_USE_LINEAR_SAMPLER");
+					//mMaterial->ApplyShaderDefines();
 			}
 		}
 	}

@@ -717,7 +717,7 @@ namespace fastbird
 			else{
 				mat->RemoveShaderDefine("_ALPHA_TEXTURE");
 			}
-			mat->ApplyShaderDefines();
+			//mat->ApplyShaderDefines();
 			SetAlphaRegionTexture();
 			return true;
 		}

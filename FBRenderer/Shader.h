@@ -36,7 +36,7 @@ namespace fastbird
 	FB_DECLARE_SMART_PTR(Shader);
 	class FB_DLL_RENDERER Shader
 	{
-		FB_DECLARE_PIMPL(Shader);
+		FB_DECLARE_PIMPL_NON_COPYABLE(Shader);
 		Shader();
 
 	public:
@@ -69,7 +69,7 @@ namespace fastbird
 		const char* GetPath() const;
 		void SetShaderDefines(const SHADER_DEFINES& defines);
 		const SHADER_DEFINES& GetShaderDefines() const;
-		void ApplyShaderDefines();
+		//void ApplyShaderDefines();
 		void SetDebugName(const char* debugName);
 		bool CheckIncludes(const char* shaderHeaderFile) const;
 		void SetPlatformShader(IPlatformShaderPtr shader);

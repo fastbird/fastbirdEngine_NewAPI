@@ -41,8 +41,9 @@
 #include "FBStringLib/StringConverter.h"
 #include "TinyXmlLib/tinyxml2.h"
 
-
 using namespace fastbird;
+extern BinaryData tempData;
+extern unsigned tempSize;
 class Material::Impl{
 public:
 	struct TextureSignature
@@ -69,15 +70,11 @@ public:
 	struct SharedData {
 		SharedData()			
 			: mRenderPass(RENDER_PASS::PASS_NORMAL)			
-			, mInputDescChanged(true)
 		{
 		}
-		std::string mName;
-		INPUT_ELEMENT_DESCS mInputElementDescs;
-		InputLayoutPtr mInputLayout;
+		std::string mName;		
 		std::vector<MaterialPtr> mSubMaterials;
 		RENDER_PASS mRenderPass;
-		bool mInputDescChanged;
 		
 	};
 
@@ -109,14 +106,22 @@ public:
 	};
 
 	struct ShaderData{
-		ShaderData() : mShaders(0), mShaderChanged(true)
+		ShaderData() : mShaders(0)
 		{
 		}
+		ShaderData(const ShaderData& other)
+			: mInputElementDescs(other.mInputElementDescs)
+			, mShaders(other.mShaders)
+			, mShaderFile(other.mShaderFile)
+			, mShaderDefines(other.mShaderDefines)
+		{
+		}
+		INPUT_ELEMENT_DESCS mInputElementDescs;
+		InputLayoutPtr mInputLayout;
 		int mShaders; // combination of enum BINDING_SHADER;
 		std::string mShaderFile;
 		SHADER_DEFINES mShaderDefines;
 		ShaderPtr mShader;
-		bool mShaderChanged;
 	};
 
 	// shared all across the cloned materials but its unique. 
@@ -125,6 +130,8 @@ public:
 	CowPtr<MaterialData> mMaterialData;
 	CowPtr<RenderStatesData> mRenderStatesData;
 	CowPtr<ShaderData> mShaderData;
+	bool mShaderDefinesChanged;
+	bool mInputDescChanged;
 
 
 	//---------------------------------------------------------------------------
@@ -133,6 +140,8 @@ public:
 		, mMaterialData(new MaterialData)
 		, mRenderStatesData(new RenderStatesData)
 		, mShaderData(new ShaderData)
+		, mShaderDefinesChanged(false)
+		, mInputDescChanged(false)
 	{
 	}
 
@@ -141,6 +150,8 @@ public:
 		, mMaterialData(other.mMaterialData)
 		, mRenderStatesData(other.mRenderStatesData)
 		, mShaderData(other.mShaderData)
+		, mShaderDefinesChanged(other.mShaderDefinesChanged)
+		, mInputDescChanged(other.mInputDescChanged)
 	{
 	}
 
@@ -182,8 +193,6 @@ public:
 		}
 
 		return LoadFromXml(pRoot);
-
-
 	}
 
 	bool LoadFromXml(tinyxml2::XMLElement* pRoot)
@@ -367,6 +376,7 @@ public:
 			}
 		}
 
+		mShaderDefinesChanged = true;
 		tinyxml2::XMLElement* pDefines = pRoot->FirstChildElement("ShaderDefines");		
 		mShaderData->mShaderDefines.clear();
 		if (pDefines)
@@ -472,14 +482,13 @@ public:
 			const char* shaderFile = pShaderFileElem->GetText();
 			if (shaderFile)
 			{
-				mShaderData->mShaderFile = shaderFile;
-				mShaderData->mShaderChanged = true;
+				mShaderData->mShaderFile = shaderFile;				
 			}
 		}
 
 		tinyxml2::XMLElement* pInputLayoutElem = pRoot->FirstChildElement("InputLayout");
-		auto& inputElementDesc = mUniqueData->mInputElementDescs;		
-		mUniqueData->mInputDescChanged = true;
+		auto& inputElementDesc = mShaderData->mInputElementDescs;		
+		mInputDescChanged = true;
 		if (pInputLayoutElem)
 		{
 			tinyxml2::XMLElement* pElem = pInputLayoutElem->FirstChildElement();
@@ -512,6 +521,7 @@ public:
 			}
 		}
 		ApplyShaderDefines();
+
 		tinyxml2::XMLElement* subMat = pRoot->FirstChildElement("Material");
 		auto& subMaterials = mUniqueData->mSubMaterials;
 		while (subMat)
@@ -736,6 +746,16 @@ public:
 	{
 		if (name == 0 || val == 0)
 			return false;
+		// check
+		{
+			auto& shaderDefines = mShaderData.const_get()->mShaderDefines;
+			auto it = std::find_if(shaderDefines.cbegin(), shaderDefines.cend(), [&](const ShaderDefine& sd){
+				return sd.name == name && sd.value == val;
+			});
+			if (it != shaderDefines.end())
+				return false; // already exists
+			
+		}
 		auto& shaderDefines = mShaderData->mShaderDefines;
 		for (auto& d : shaderDefines)
 		{
@@ -744,6 +764,7 @@ public:
 				if (d.value != val)
 				{
 					d.value = val;
+					mShaderDefinesChanged = true;
 					return true;
 				}
 				else
@@ -755,6 +776,7 @@ public:
 		shaderDefines.push_back(ShaderDefine());
 		shaderDefines.back().name = name;
 		shaderDefines.back().value = val;
+		mShaderDefinesChanged = true;
 		return true;
 	}
 
@@ -762,28 +784,42 @@ public:
 	{
 		if (def == 0)
 			return false;
+		// exists?
+		{
+			const auto& currentDefines = mShaderData.const_get()->mShaderDefines;
+			auto found = std::find_if(currentDefines.cbegin(), currentDefines.cend(), [&def](const ShaderDefine& define){
+				return define.name == def;
+			});
+			if (found == currentDefines.end())
+				return false;
+		}
 		auto& shaderDefines = mShaderData->mShaderDefines;
 
-		unsigned deleted = 0;
 		shaderDefines.erase(
-			std::remove_if(shaderDefines.begin(), shaderDefines.end(), [&def, &deleted](ShaderDefine& define){
-			bool match = define.name == def;
-			if (match) 
-				++deleted;
-			return match;
+			std::remove_if(shaderDefines.begin(), shaderDefines.end(), [&def](ShaderDefine& define){
+			return define.name == def;			
 		}), shaderDefines.end());
-		
-		return deleted > 0;
+		mShaderDefinesChanged = true;
+		return true;
 	}
 
 	void ApplyShaderDefines()
 	{
-		auto& renderer = Renderer::GetInstance();
-		mShaderData->mShader = renderer.CreateShader(
-			mShaderData->mShaderFile.c_str(), mShaderData->mShaders, mShaderData->mShaderDefines);
-		if (mUniqueData->mInputDescChanged){
-			mUniqueData->mInputDescChanged = false;
-			mUniqueData->mInputLayout = renderer.CreateInputLayout(mUniqueData->mInputElementDescs, mShaderData->mShader);
+		if (mShaderDefinesChanged){
+			mShaderDefinesChanged = false;
+			auto& renderer = Renderer::GetInstance();
+			std::sort(mShaderData->mShaderDefines.begin(), mShaderData->mShaderDefines.end());
+			mShaderData->mShader = renderer.CreateShader(
+				mShaderData->mShaderFile.c_str(), mShaderData->mShaders, mShaderData->mShaderDefines);
+			if (!mShaderData->mInputLayout){
+				mInputDescChanged = true;
+			}
+		}
+		if (mInputDescChanged){
+			mInputDescChanged = false;
+			auto& renderer = Renderer::GetInstance();
+			if (!mShaderData->mInputElementDescs.empty())
+				mShaderData->mInputLayout = renderer.CreateInputLayout(mShaderData->mInputElementDescs, mShaderData->mShader);
 		}
 	}
 
@@ -892,29 +928,40 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void Bind(bool inputLayout, unsigned stencilRef) const
+	void Bind(bool inputLayout, unsigned stencilRef)
 	{
-		mRenderStatesData->mRenderStates->Bind(stencilRef);
+		auto shaderData = mShaderData.const_get();
+		if (!shaderData->mShader || mShaderDefinesChanged || mInputDescChanged ||
+			(inputLayout && !shaderData->mInputLayout))
+		{
+			ApplyShaderDefines();
+		}
 
-		auto& renderer = Renderer::GetInstance();		
-		if (mShaderData->mShader)
+		auto renderStatesData = mRenderStatesData.const_get();
+		renderStatesData->mRenderStates->Bind(stencilRef);
+
+		auto& renderer = Renderer::GetInstance();				
+		if (shaderData->mShader)
 		{
-			mShaderData->mShader->Bind();
+			shaderData->mShader->Bind();
 		}
-		if (mUniqueData->mInputLayout && inputLayout)
+
+		if (shaderData->mInputLayout && inputLayout)
 		{
-			mUniqueData->mInputLayout->Bind();
+			shaderData->mInputLayout->Bind();
 		}
-		renderer.UpdateMaterialConstantsBuffer(&mMaterialData->mMaterialConstants);
+		auto materialData = mMaterialData.const_get();
+		renderer.UpdateMaterialConstantsBuffer(&materialData->mMaterialConstants);
 
 		BindMaterialParams();
 
-		auto& textures = mMaterialData->mBindingsByTexture;
+		auto& textures = materialData->mBindingsByTexture;
 		for (auto it : textures){
 			it.first->Bind(it.second.mShader, it.second.mSlot);
 		}		
 
-		if (mRenderStatesData->mGlow)
+		
+		if (renderStatesData->mGlow)
 		{
 			auto rt = renderer.GetCurrentRenderTarget();
 			if (rt->IsGlowSupported())
@@ -924,7 +971,8 @@ public:
 
 	void Unbind()
 	{
-		if (mRenderStatesData->mGlow)
+		auto renderStatesData = mRenderStatesData.const_get();
+		if (renderStatesData->mGlow)
 		{
 			auto& renderer = Renderer::GetInstance();
 			auto rt = renderer.GetCurrentRenderTarget();
@@ -1028,6 +1076,7 @@ public:
 
 	void CopyShaderDefinesFrom(const MaterialPtr src) {
 		mShaderData->mShaderDefines = src->GetShaderDefines();
+		mShaderDefinesChanged = true;
 	}
 
 	void SetRasterizerState(const RASTERIZER_DESC& desc)
@@ -1067,16 +1116,14 @@ public:
 	}
 
 	void SetInputLayout(const INPUT_ELEMENT_DESCS& desc){
-		auto& inputLayoutDesc = mUniqueData->mInputElementDescs;
-		if (inputLayoutDesc == desc){
+		
+		auto& constInputLayoutDesc = mShaderData.const_get()->mInputElementDescs;
+		if (constInputLayoutDesc == desc){
 			return;
 		}
 
-		inputLayoutDesc = desc;
-		mUniqueData->mInputDescChanged = true;
-		if (mShaderData->mShader){
-			ApplyShaderDefines();
-		}
+		mShaderData->mInputElementDescs = desc;
+		mInputDescChanged = true;
 	}
 
 	unsigned IGetMaxMaterialParameter(){
@@ -1085,8 +1132,8 @@ public:
 
 	TexturePtr CreateColorRampTexture(ColorRamp& cr){
 		cr.GenerateColorRampTextureData(128);
-		char imgBuf[128];
-		unsigned int *pixels = (unsigned int *)imgBuf;
+		unsigned imgBuf[128];
+		unsigned *pixels = (unsigned int *)imgBuf;
 		for (unsigned x = 0; x < 128; x++)
 		{
 			pixels[127 - x] = cr[x].Get4Byte();
@@ -1260,9 +1307,9 @@ bool Material::RemoveShaderDefine(const char* def) {
 	return mImpl->RemoveShaderDefine(def);
 }
 
-void Material::ApplyShaderDefines() {
-	mImpl->ApplyShaderDefines();
-}
+//void Material::ApplyShaderDefines() {
+//	mImpl->ApplyShaderDefines();
+//}
 
 void Material::SetMaterialParameter(unsigned index, const Vec4& value) {
 	mImpl->SetMaterialParameter(index, value);

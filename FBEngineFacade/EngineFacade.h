@@ -35,6 +35,8 @@
 #include "RenderTargetParamEx.h"
 namespace fastbird{
 	class ProfilerSimple;
+	class LuaObject;
+	FB_DECLARE_SMART_PTR(ISpatialObject);
 	FB_DECLARE_SMART_PTR(MeshFacade);
 	FB_DECLARE_SMART_PTR(DirectionalLight);
 	FB_DECLARE_SMART_PTR(Task);
@@ -45,6 +47,7 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(IFileChangeObserver);
 	FB_DECLARE_SMART_PTR(IRendererObserver);
 	FB_DECLARE_SMART_PTR(IInputInjector);
+	FB_DECLARE_SMART_PTR(IInputConsumer);
 	FB_DECLARE_SMART_PTR(EngineOptions);
 	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(IScene);
@@ -91,6 +94,8 @@ namespace fastbird{
 		/// Keep the strong ptr.
 		void AddTempMesh(MeshFacadePtr mesh);
 		void GetFractureMeshObjects(const char* daeFilePath, std::vector<MeshFacadePtr>& objects);		
+		std::wstring StripTextTags(const char* text);		
+		void QueueProcessConsoleCommand(const char* command, bool history = true);
 
 		//---------------------------------------------------------------------------
 		// Renderer Interfaces
@@ -98,6 +103,9 @@ namespace fastbird{
 		/// \param pluginName "FBRendererD3D11" is provided.
 		bool InitRenderer(const char* pluginName);
 		bool InitCanvas(HWindowId id, int width, int height);
+		/// Use this function if you didn't create a window with EngienFacade.
+		bool InitCanvas(HWindow hwnd);
+		void SetClearColor(const Color& color);
 		void AddRendererObserver(int rendererObserverType, IRendererObserverPtr observer);
 		RenderTargetPtr GetMainRenderTarget() const;
 		const Vec2I& GetMainRenderTargetSize() const;
@@ -136,6 +144,9 @@ namespace fastbird{
 		const Vec3& GetMainCameraDirection() const;
 		/// Get matrices of the main camera
 		const Mat44& GetCameraMatrix(ICamera::MatrixType type) const;
+		void SetMainCameraTarget(ISpatialObjectPtr spatialObject);
+		// enable internal input mechanism for the main camera
+		void EnableCameraInput(bool enable);
 		const Ray3& GetWorldRayFromCursor();
 		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName);
 		void DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName, int tab);

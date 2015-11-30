@@ -194,10 +194,10 @@ Texture::~Texture(){
 	}
 }
 
-Texture& Texture::operator = (const Texture& other){
-	assert(0 && "not implemented");
-	return *this;
-}
+//Texture& Texture::operator = (const Texture& other){
+//	assert(0 && "not implemented");
+//	return *this;
+//}
 
 size_t Texture::GetTextureID() const{
 	return mImpl->mTextureID;

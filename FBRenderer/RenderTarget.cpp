@@ -93,6 +93,10 @@ public:
 		mStrategy = RenderStrategyDefault::Create();
 	}
 
+	void Initialize(){
+		mStrategy->SetRenderTarget(mSelfPtr.lock());
+	}
+
 	//-------------------------------------------------------------------
 	// Observable<IRenderTargetObserver>
 	//-------------------------------------------------------------------
@@ -174,6 +178,10 @@ public:
 		mViewport.mHeight = (float)mSize.y;
 		mViewport.mMinDepth = 0.f;
 		mViewport.mMaxDepth = 1.0f;
+
+		if (mStrategy){
+			mStrategy->SetRenderTarget(mSelfPtr.lock());
+		}
 	}
 
 	void SetDepthStencilDesc(int width, int height, PIXEL_FORMAT format, bool srv, bool cubeMap){
@@ -377,6 +385,10 @@ public:
 		{
 			mRenderPipeline->SetStep(RenderSteps::HDR, false);
 		}*/
+
+		if (mStrategy){
+			mStrategy->SetRenderTarget(mSelfPtr.lock());
+		}
 	}
 
 	void SetDepthTexture(TexturePtr texture){
@@ -388,6 +400,7 @@ public:
 RenderTargetPtr RenderTarget::Create(){
 	auto p = RenderTargetPtr(FB_NEW(RenderTarget), [](RenderTarget* obj){ FB_DELETE(obj); });
 	p->mImpl->mSelfPtr = p;
+	p->mImpl->Initialize();
 	return p;
 }
 

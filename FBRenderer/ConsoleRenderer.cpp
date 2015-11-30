@@ -42,7 +42,7 @@ public:
 			return;
 
 		auto& console = Console::GetInstance();
-		if (console.IsOpen())
+		if (!console.IsOpen())
 			return;
 		
 		auto& renderer = Renderer::GetInstance();

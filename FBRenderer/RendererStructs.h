@@ -306,7 +306,7 @@ namespace fastbird
 	{
 		POSITION_V() {}
 		POSITION_V(const Vec3& _p) : p(_p) { }
-		Vec3 p;
+		Vec3f p;
 	};
 	typedef POSITION_V V_P;
 
@@ -315,7 +315,7 @@ namespace fastbird
 		POSITION_COLOR_V() {}
 		POSITION_COLOR_V(const Vec3& _p, unsigned int _c)
 			: p(_p), color(_c) {}
-		Vec3 p;
+		Vec3f p;
 		unsigned int color;
 	};
 	typedef POSITION_COLOR_V V_PC;
@@ -323,11 +323,11 @@ namespace fastbird
 	struct POSITION_COLOR_TEXCOORD_V
 	{
 		POSITION_COLOR_TEXCOORD_V() {}
-		POSITION_COLOR_TEXCOORD_V(const Vec3& _p, unsigned int _c, Vec2 _tex)
+		POSITION_COLOR_TEXCOORD_V(const Vec3& _p, unsigned int _c, Vec2f _tex)
 			: p(_p), color(_c), t(_tex) {}
-		Vec3 p;
+		Vec3f p;
 		unsigned int color;
-		Vec2 t;
+		Vec2f t;
 	};
 	typedef POSITION_COLOR_TEXCOORD_V V_PCT;
 
@@ -336,7 +336,7 @@ namespace fastbird
 		POSITION_HDRCOLOR_V() {}
 		POSITION_HDRCOLOR_V(const Vec3& _p, const Color& _c)
 			: p(_p), color(_c) {}
-		Vec3 p;
+		Vec3f p;
 		Color color;
 	};
 	typedef POSITION_HDRCOLOR_V V_PhC;
@@ -346,8 +346,8 @@ namespace fastbird
 		POSITION_NORMAL_V() {}
 		POSITION_NORMAL_V(const Vec3& _p, const Vec3& _n)
 			: p(_p), n(_n) {}
-		Vec3 p;
-		Vec3 n;
+		Vec3f p;
+		Vec3f n;
 	};
 	typedef POSITION_NORMAL_V V_PN;
 
@@ -356,8 +356,8 @@ namespace fastbird
 		POSITION_TEXCOORD_V(){}
 		POSITION_TEXCOORD_V(const Vec3& _p, const Vec2& _uv)
 			: p(_p), uv(_uv) {}
-		Vec3 p;
-		Vec2 uv;
+		Vec3f p;
+		Vec2f uv;
 	};
 	typedef POSITION_TEXCOORD_V V_PT;
 
@@ -367,9 +367,9 @@ namespace fastbird
 		POSITION_COLOR_TEXCOORD_BLENDINDICES_V(const Vec3& _p, unsigned int _c,
 			const Vec2& _uv, unsigned int _bindex)
 			: p(_p), color(_c), uv(_uv), bindex(_bindex){}
-		Vec3 p;		// 12
+		Vec3f p;		// 12
 		unsigned int color;		// 4
-		Vec2 uv;		// 8
+		Vec2f uv;		// 8
 		unsigned int bindex;	// 4
 	};
 	typedef POSITION_COLOR_TEXCOORD_BLENDINDICES_V V_PCTB;
@@ -378,7 +378,7 @@ namespace fastbird
 	{
 		POSITION_NORMAL_TEXCOORD_V() {}
 		POSITION_NORMAL_TEXCOORD_V(const Vec3& _p, const Vec3& _n, 
-			const Vec2 _uv)
+			const Vec2f _uv)
 			: p(_p), n(_n),  uv(_uv){}
 
 		bool operator==(const POSITION_NORMAL_TEXCOORD_V& other) const
@@ -390,9 +390,9 @@ namespace fastbird
 		{
 			return memcmp(this, &other, sizeof(POSITION_NORMAL_TEXCOORD_V)) < 0;
 		}
-		Vec3 p;	// 12
-		Vec3 n;	// 12
-		Vec2 uv;	// 8
+		Vec3f p;	// 12
+		Vec3f n;	// 12
+		Vec2f uv;	// 8
 	};
 	typedef POSITION_NORMAL_TEXCOORD_V V_PNT;
 
@@ -401,7 +401,7 @@ namespace fastbird
 		POSITION_VEC4_V(){}
 		POSITION_VEC4_V(const Vec3& _p, const Vec4& _v4)
 			: p(_p), v4(_v4){}
-		Vec3 p;		// 12
+		Vec3f p;		// 12
 		Vec4 v4;		// 4
 	};
 	typedef POSITION_VEC4_V V_PV4;
@@ -411,7 +411,7 @@ namespace fastbird
 		POSITION_VEC4_COLOR_V(){}
 		POSITION_VEC4_COLOR_V(const Vec3& _p, const Vec4& _v4, DWORD _color)
 			: p(_p), v4(_v4), color(_color){}
-		Vec3 p;		// 12
+		Vec3f p;		// 12
 		Vec4 v4;		// 28
 		DWORD color;			// 32
 	};

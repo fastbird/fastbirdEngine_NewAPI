@@ -21,6 +21,7 @@
     <ClCompile Include="GeomUtils.cpp" />
     <ClCompile Include="Mat33.cpp" />
     <ClCompile Include="Mat44.cpp" />
+    <ClCompile Include="MurmurHash.cpp" />
     <ClCompile Include="Plane3.cpp" />
     <ClCompile Include="Quat.cpp" />
     <ClCompile Include="Ray3.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="Mat33.h" />
     <ClInclude Include="Mat44.h" />
     <ClInclude Include="MathDefines.h" />
+    <ClInclude Include="MurmurHash.h" />
     <ClInclude Include="OBB.h" />
     <ClInclude Include="Plane3.h" />
     <ClInclude Include="Quat.h" />

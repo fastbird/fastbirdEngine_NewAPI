@@ -41,6 +41,9 @@ namespace fastbird{
 	static size_t sNumDrawCalls;
 	static size_t sNumDrawPrimitives;
 	const int ParticleRenderObject::MAX_SHARED_VERTICES = 5000;
+	void ClearParticleRenderObjects(){
+		sRenderObjects.clear();
+	}
 }
 
 class ParticleRenderObject::Impl{
