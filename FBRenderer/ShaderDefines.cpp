@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "ShaderDefines.h"
-namespace fastbird{
+namespace fb{
 	ShaderDefine::ShaderDefine(){
 	}
 

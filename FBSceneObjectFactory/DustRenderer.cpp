@@ -30,7 +30,7 @@
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/Material.h"
 #include "FBRenderer/VertexBuffer.h"
-using namespace fastbird;
+using namespace fb;
 
 class DustRenderer::Impl{
 public:

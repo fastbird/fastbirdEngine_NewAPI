@@ -28,7 +28,7 @@
 #pragma once
 #include "Vec2I.h"
 #include "FBCommonHeaders\String.h"
-namespace fastbird
+namespace fb
 {
 	class Vec2
 	{
@@ -110,12 +110,12 @@ namespace fastbird
 
 //// luawapper util
 //template<>
-//struct luaU_Impl<fastbird::Vec2>
+//struct luaU_Impl<fb::Vec2>
 //{
-//	static fastbird::Vec2 luaU_check(lua_State* L, int index)
+//	static fb::Vec2 luaU_check(lua_State* L, int index)
 //	{
 //		luaL_checktype(L, index, LUA_TTABLE);
-//		fastbird::Vec2 ret;
+//		fb::Vec2 ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.x = (Real)luaL_checknumber(L, -1);
 //		lua_pop(L, 1);
@@ -125,9 +125,9 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static fastbird::Vec2 luaU_to(lua_State* L, int index)
+//	static fb::Vec2 luaU_to(lua_State* L, int index)
 //	{
-//		fastbird::Vec2 ret;
+//		fb::Vec2 ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.x = (Real)lua_tonumber(L, -1);
 //		lua_pop(L, 1);
@@ -137,7 +137,7 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static void luaU_push(lua_State* L, const fastbird::Vec2& val)
+//	static void luaU_push(lua_State* L, const fb::Vec2& val)
 //	{
 //		lua_createtable(L, 2, 0);
 //		lua_pushnumber(L, val.x);

@@ -37,7 +37,7 @@
 #include "FBRenderer/RenderParam.h"
 #include "FBStringLib/StringLib.h"
 #include <map>
-using namespace fastbird;
+using namespace fb;
 class MeshGroup::Impl{
 public:
 	struct Hierarchy

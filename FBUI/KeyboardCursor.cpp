@@ -28,7 +28,7 @@
 #include "StdAfx.h"
 #include "KeyboardCursor.h"
 #include "UIObject.h"
-namespace fastbird
+namespace fb
 {
 
 //---------------------------------------------------------------------------------------

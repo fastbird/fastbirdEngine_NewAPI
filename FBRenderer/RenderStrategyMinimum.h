@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "IRenderStrategy.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(RenderStrategyMinimum);
 	class FB_DLL_RENDERER RenderStrategyMinimum : public IRenderStrategy{
 		FB_DECLARE_PIMPL_NON_COPYABLE(RenderStrategyMinimum);

@@ -32,7 +32,7 @@
 #include "Plane3.h"
 #include "Ray3.h"
 
-namespace fastbird
+namespace fb
 {
 BVaabb::BVaabb()
 	: mCenter(0, 0, 0)

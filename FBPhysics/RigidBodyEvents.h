@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	struct RigidBodyEvents
 	{
 		RigidBodyEvents();

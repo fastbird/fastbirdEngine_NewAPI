@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/platform.h"
 #include <memory>
 #include <chrono>
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(Timer);
 	class FB_DLL_TIMER Timer

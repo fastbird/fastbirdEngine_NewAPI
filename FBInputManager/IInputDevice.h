@@ -35,7 +35,7 @@ Required libraries: \b FBDebugLib \b FBTimerLib
 #include <memory>
 #include "FBCommonHeaders/Types.h"
 #include "FBTimer/Timer.h"
-namespace fastbird
+namespace fb
 {
 	class IInputDevice;
 	typedef std::shared_ptr<IInputDevice> IInputDevicePtr;

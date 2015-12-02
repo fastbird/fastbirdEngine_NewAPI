@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "BulletFilterCallback.h"
 #include "IFilterCallback.h"
-using namespace fastbird;
+using namespace fb;
 BulletFilterCallback::BulletFilterCallback(IFilterCallback* callback) : mAppCallback(callback)
 {
 

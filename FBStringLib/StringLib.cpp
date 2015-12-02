@@ -41,7 +41,7 @@
 #include <iostream>
 #include <clocale>
 
-namespace fastbird{
+namespace fb{
 
 	void ReplaceCharacter(TCHAR* s, TCHAR target, TCHAR replace){
 		auto size = _tstrlen(s);

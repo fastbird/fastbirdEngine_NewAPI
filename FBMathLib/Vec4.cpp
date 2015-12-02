@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "Vec4.h"
 #include "Math.h"
-namespace fastbird
+namespace fb
 {
 const Vec4 Vec4::UNIT_X(1.f, 0, 0, 0);
 const Vec4 Vec4::UNIT_Y(0, 1.f, 0, 0);

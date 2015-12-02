@@ -38,7 +38,7 @@
 #include "UIObject.h"
 #include "IUIEditor.h"
 
-namespace fastbird
+namespace fb
 {
 const float TextField::LEFT_GAP = 0.001f;
 

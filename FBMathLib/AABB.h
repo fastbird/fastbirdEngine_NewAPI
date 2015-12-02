@@ -29,7 +29,7 @@
 #include "Vec3.h"
 #include <algorithm>
 
-namespace fastbird
+namespace fb
 {
 	class AABB
 	{

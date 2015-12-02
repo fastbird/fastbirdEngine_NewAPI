@@ -32,7 +32,7 @@
 #include <memory>
 #include "Types.h"
 #include "Helpers.h"
-namespace fastbird{
+namespace fb{
 	template <typename Observer>
 	class Observable{
 	public:
@@ -45,9 +45,13 @@ namespace fastbird{
 	public:
 
 		void AddObserver(ObserverEventType type, ObserverPtr observer){
+			if (!observer){				
+				return;
+			}
 			auto& observers = mObservers_[type];
 			if (!ValueExistsInVector(observers, observer)){
 				observers.push_back(observer);
+				OnObserverAdded(observer);
 			}
 		}
 

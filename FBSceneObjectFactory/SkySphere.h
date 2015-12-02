@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBSceneManager/SceneObject.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(SkySphere);
 	class FB_DLL_SCENEOBJECTFACTORY SkySphere : public SceneObject{
@@ -46,6 +46,7 @@ namespace fastbird{
 		void Render(const RenderParam& param, RenderParamOut* paramOut);
 		void PostRender(const RenderParam& param, RenderParamOut* paramOut);		
 
+		virtual SceneObjectType::Enum GetType() const { return SceneObjectType::SkySphere; }
 		// SkySphere
 		void SetMaterial(const char* filepath, int pass);
 		void SetMaterial(MaterialPtr pMat, int pass);

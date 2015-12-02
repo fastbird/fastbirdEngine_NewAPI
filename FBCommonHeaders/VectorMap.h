@@ -30,7 +30,7 @@
 #include <vector>
 #include <algorithm>
 
-namespace fastbird
+namespace fb
 {
 	template<class _Kty, class _Ty>
 	class VectorMapLess

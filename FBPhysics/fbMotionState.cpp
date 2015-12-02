@@ -29,7 +29,7 @@
 #include "fbMotionState.h"
 #include "IPhysicsInterface.h"
 
-using namespace fastbird;
+using namespace fb;
 
 fbMotionState::fbMotionState(IPhysicsInterface* obj)
 	: mVisualObj(obj)

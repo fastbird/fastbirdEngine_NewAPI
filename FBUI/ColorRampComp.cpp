@@ -31,7 +31,7 @@
 #include "StaticText.h"
 #include "UIObject.h"
 
-using namespace fastbird;
+using namespace fb;
 
 ColorRampCompPtr ColorRampComp::Create(){
 	ColorRampCompPtr p(new ColorRampComp, [](ColorRampComp* obj){ delete obj; });

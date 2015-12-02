@@ -27,7 +27,7 @@
 
 #pragma once
 #include <BulletCollision/BroadphaseCollision/btOverlappingPairCache.h>
-namespace fastbird{
+namespace fb{
 	struct IFilterCallback;
 	struct BulletFilterCallback : public btOverlapFilterCallback
 	{

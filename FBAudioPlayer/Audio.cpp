@@ -29,11 +29,11 @@
 #include "Audio.h"
 #include "AudioHelper.h"
 
-namespace fastbird{
+namespace fb{
 	LPALBUFFERSAMPLESSOFT alBufferSamplesSOFT = wrap_BufferSamples;
 	LPALISBUFFERFORMATSUPPORTEDSOFT alIsBufferFormatSupportedSOFT;
 }
-using namespace fastbird;
+using namespace fb;
 
 class Audio::Impl
 {

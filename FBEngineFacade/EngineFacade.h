@@ -33,7 +33,7 @@
 #include "FBVideoPlayer/VideoPlayerType.h"
 #include "FBRenderer/ICamera.h"
 #include "RenderTargetParamEx.h"
-namespace fastbird{
+namespace fb{
 	class ProfilerSimple;
 	class LuaObject;
 	FB_DECLARE_SMART_PTR(ISpatialObject);
@@ -161,6 +161,7 @@ namespace fastbird{
 		void ClearDurationTexts();
 		bool GetResolutionList(unsigned& outNum, Vec2I* list);
 		Vec2 ToNdcPos(HWindowId id, const Vec2I& screenPos) const;
+		void SetFontTextureAtlas(const char* path);
 
 		//---------------------------------------------------------------------------
 		// Scene Manipulations

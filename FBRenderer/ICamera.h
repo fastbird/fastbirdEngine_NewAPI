@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	class BoundingVolume;
 	class Mat44;
 	class ICamera{

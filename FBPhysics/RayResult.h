@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBMathLib/Vec3.h"
-namespace fastbird
+namespace fb
 {
 	class RigidBody;
 	struct FB_DLL_PHYSICS RayResultClosest

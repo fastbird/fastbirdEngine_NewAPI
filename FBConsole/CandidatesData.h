@@ -28,7 +28,7 @@
 #pragma once
 #include <string>
 #include "FBCommonHeaders/Types.h"
-namespace fastbird
+namespace fb
 {
 	struct FB_DLL_CONSOLE Candidate
 	{

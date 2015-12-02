@@ -32,7 +32,7 @@
 #include <Windows.h>
 #else
 #endif
-namespace fastbird{
+namespace fb{
 	void FBDebugBreak(){
 #if defined(_DEBUG) && defined(_PLATFORM_WINDOWS_)
 		DebugBreak();

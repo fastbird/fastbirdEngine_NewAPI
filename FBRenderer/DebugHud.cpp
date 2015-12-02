@@ -40,7 +40,7 @@
 #include "FBSceneManager/IScene.h"
 #include "EssentialEngineData/shaders/Constants.h"
 #undef DrawText
-using namespace fastbird;
+using namespace fb;
 
 class DebugHud::Impl{
 public:

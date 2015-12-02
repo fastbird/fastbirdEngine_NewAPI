@@ -33,11 +33,11 @@
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/RenderTarget.h"
 #include "FBRenderer/Camera.h"
-using namespace fastbird;
-namespace fastbird{
+using namespace fb;
+namespace fb{
 	void ClearParticleRenderObjects();
 }
-Timer* fastbird::gpTimer = Timer::GetMainTimer().get();
+Timer* fb::gpTimer = Timer::GetMainTimer().get();
 class ParticleSystem::Impl
 {
 public:

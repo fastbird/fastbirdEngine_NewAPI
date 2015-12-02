@@ -29,7 +29,7 @@
 #include <mutex>
 #include <atomic>
 #include <condition_variable>
-namespace fastbird
+namespace fb
 {
 	//---------------------------------------------------------------------------
 	struct FB_CRITICAL_SECTION

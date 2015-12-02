@@ -45,9 +45,9 @@
 #include "DustRenderer.h"
 #include "TrailObject.h"
 
-using namespace fastbird;
+using namespace fb;
 
-Timer* fastbird::gpTimer = 0;
+Timer* fb::gpTimer = 0;
 class SceneObjectFactory::Impl
 {
 public:

@@ -32,7 +32,7 @@
 #include "Plane3.h"
 #include "Ray3.h"
 
-namespace fastbird
+namespace fb
 {
 	class Plane;
 	class Mat44;
@@ -146,14 +146,14 @@ namespace fastbird
 
 //// luawapper util
 //template<>
-//struct luaU_Impl<fastbird::Transformation>
+//struct luaU_Impl<fb::Transformation>
 //{
-//	static fastbird::Transformation luaU_check(lua_State* L, int index)
+//	static fb::Transformation luaU_check(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Transformation luaU_check(lua_State* L, int index)");
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Transformation luaU_check(lua_State* L, int index)");
 //		luaL_checktype(L, index, LUA_TTABLE);
 //		int n = 1;
-//		fastbird::Transformation ret;
+//		fb::Transformation ret;
 //		auto& mat33 = ret._GetMat33();
 //		for (int r = 0; r < 3; ++r)
 //			for (int c = 0; c < 3; ++c){
@@ -204,11 +204,11 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static fastbird::Transformation luaU_to(lua_State* L, int index)
+//	static fb::Transformation luaU_to(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Transformation luaU_to(lua_State* L, int index)");
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Transformation luaU_to(lua_State* L, int index)");
 //		int n = 1;
-//		fastbird::Transformation ret;
+//		fb::Transformation ret;
 //		auto& mat33 = ret._GetMat33();
 //		for (int r = 0; r < 3; ++r)
 //			for (int c = 0; c < 3; ++c){
@@ -256,13 +256,13 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static void luaU_push(lua_State* L, const fastbird::Transformation& val)
+//	static void luaU_push(lua_State* L, const fb::Transformation& val)
 //	{
-//		fastbird::Transformation& val2 = const_cast<fastbird::Transformation&>(val);
+//		fb::Transformation& val2 = const_cast<fb::Transformation&>(val);
 //		luaU_push(L, val2);
 //	}
 //
-//	static void luaU_push(lua_State* L, fastbird::Transformation& val)
+//	static void luaU_push(lua_State* L, fb::Transformation& val)
 //	{
 //		lua_createtable(L, 22, 0);
 //

@@ -36,7 +36,7 @@
 namespace tinyxml2{
 	class XMLElement;
 }
-namespace fastbird{
+namespace fb{
 	struct MATERIAL_CONSTANTS;
 	FB_DECLARE_SMART_PTR(ColorRamp);
 	FB_DECLARE_SMART_PTR(Texture);
@@ -128,10 +128,10 @@ namespace fastbird{
 		bool IsNoShadowCast() const;
 		bool IsDoubleSided() const;		
 		int GetBindingShaders() const;
-		void CopyMaterialParamFrom(const MaterialPtr src);
-		void CopyMaterialConstFrom(const MaterialPtr src);
-		void CopyTexturesFrom(const MaterialPtr src);
-		void CopyShaderDefinesFrom(const MaterialPtr src);
+		void CopyMaterialParamFrom(MaterialConstPtr src);
+		void CopyMaterialConstFrom(MaterialConstPtr src);
+		void CopyTexturesFrom(MaterialConstPtr src);
+		void CopyShaderDefinesFrom(MaterialConstPtr src);
 		void SetRasterizerState(const RASTERIZER_DESC& desc);
 		void SetBlendState(const BLEND_DESC& desc);
 		void SetDepthStencilState(const DEPTH_STENCIL_DESC& desc);

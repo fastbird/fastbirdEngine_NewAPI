@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "threads.h"
 #include "AsyncObjects.h"
-namespace fastbird
+namespace fb
 {
 class TaskScheduler;
 FB_DECLARE_SMART_PTR(Task);

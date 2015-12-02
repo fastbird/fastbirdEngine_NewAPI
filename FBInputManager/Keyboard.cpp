@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "Keyboard.h"
 
-namespace fastbird
+namespace fb
 {
 template <class T>
 static	void ClearWithSwap(T& m)

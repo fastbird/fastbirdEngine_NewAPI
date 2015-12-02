@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "VertexBuffer.h"
 #include "IPlatformVertexBuffer.h"
-using namespace fastbird;
+using namespace fb;
 
 class VertexBuffer::Impl{
 public:
@@ -77,12 +77,15 @@ public:
 
 //---------------------------------------------------------------------------
 VertexBufferPtr VertexBuffer::Create(unsigned stride, unsigned numVertices){
-	return VertexBufferPtr(FB_NEW(VertexBuffer)(stride, numVertices), [](VertexBuffer* obj){ FB_DELETE(obj); });
+	return VertexBufferPtr(new VertexBuffer(stride, numVertices), [](VertexBuffer* obj){ delete obj; });
 }
 
 VertexBuffer::VertexBuffer(unsigned stride, unsigned numVertices)
 	: mImpl(new Impl(stride, numVertices))
 {
+}
+
+VertexBuffer::~VertexBuffer(){
 }
 
 void VertexBuffer::Bind(){

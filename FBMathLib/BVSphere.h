@@ -28,7 +28,7 @@
 #pragma once
 #include "BoundingVolume.h"
 #include "Vec3.h"
-namespace fastbird
+namespace fb
 {
 	class BVSphere : public BoundingVolume
 	{
@@ -58,7 +58,7 @@ namespace fastbird
 		virtual bool TestIntersection(BoundingVolume* pBV) const;
 		virtual void Merge(const BoundingVolume* pBV);
 		virtual void Merge(const Vec3& pos);		
-		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal);
+		virtual fb::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal);
 		virtual void Invalidate();
 		virtual bool Contain(const Vec3& pos) const;
 		virtual Vec3 GetRandomPosInVolume(const Vec3* nearLocal=0) const;

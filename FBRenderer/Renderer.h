@@ -44,7 +44,7 @@
 #include "FBInputManager/IInputConsumer.h"
 #include "FBMathLib/Math.h"
 struct lua_State;
-namespace fastbird{	
+namespace fb{	
 	struct POINT_LIGHT_CONSTANTS;	
 	typedef unsigned RenderTargetId;
 	FB_DECLARE_SMART_PTR(ResourceProvider);
@@ -121,6 +121,7 @@ namespace fastbird{
 		bool InitCanvas(HWindowId id, HWindow window, int width, int height);
 		void ReleaseCanvas(HWindowId id);
 		void Render();
+		void Update(TIME_PRECISION dt);
 
 		//-------------------------------------------------------------------
 		// Resource Creation
@@ -279,7 +280,8 @@ namespace fastbird{
 		bool IsLuminanceOnCpu() const;
 		void SetLockDepthStencilState(bool lock);
 		void SetLockBlendState(bool lock);
-		void Update(TIME_PRECISION dt);
+		void SetFontTextureAtlas(const char* path);
+		
 
 		//-------------------------------------------------------------------
 		// Queries

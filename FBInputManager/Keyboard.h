@@ -31,7 +31,7 @@
 
 #include "IKeyboard.h"
 #include <queue>
-namespace fastbird
+namespace fb
 {
 	class Keyboard : public IKeyboard
 	{

@@ -29,7 +29,7 @@
 #include "UIAnimation.h"
 #include "WinBase.h"
 
-namespace fastbird
+namespace fb
 {
 //---------------------------------------------------------------------------
 FB_IMPLEMENT_STATIC_CREATE(UIAnimation);

@@ -31,7 +31,7 @@
 #include <vector>
 #include <map>
 #include <memory>
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(AnimationData);
 	namespace collada{
 		typedef std::vector<unsigned> IndexBuffer;

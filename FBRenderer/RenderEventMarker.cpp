@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "RenderEventMarker.h"
 #include "Renderer.h"
-using namespace fastbird;
+using namespace fb;
 
 RenderEventMarker::RenderEventMarker(const char* name){
 	auto& renderer = Renderer::GetInstance();

@@ -28,7 +28,7 @@
 #include "StdAfx.h"
 #include "ListBoxData.h"
 
-namespace fastbird{
+namespace fb{
 	ListBoxData::ListBoxData(ListItemDataType::Enum type, const wchar_t* text, bool checked)
 		: mDataType(type)
 		, mChecked(checked)

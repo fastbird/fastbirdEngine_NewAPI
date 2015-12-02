@@ -38,7 +38,7 @@ Handling file operations. Implemented on the top of boost::filesystem
 #include <memory>
 #include <string>
 #undef CreateDirectory
-namespace fastbird{
+namespace fb{
 	class DirectoryIterator;
 	typedef std::shared_ptr<DirectoryIterator> DirectoryIteratorPtr;
 	typedef std::weak_ptr<DirectoryIterator> DirectoryIteratorWeakPtr;

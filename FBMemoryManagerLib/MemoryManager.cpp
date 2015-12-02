@@ -35,7 +35,7 @@
 #include <stdlib.h>
 #endif
 
-namespace fastbird
+namespace fb
 {
 	std::recursive_mutex gMutex;
 	unsigned long long gNumMemoryAllocation = 0;	

@@ -30,7 +30,7 @@
 #include "FBMathLib/Color.h"
 #include "FBMathLib/Vec2I.h"
 #include "FBMathLib/Vec3.h"
-namespace fastbird{
+namespace fb{
 	struct RenderParamOut;
 	struct RenderParam;
 	FB_DECLARE_SMART_PTR(GeometryRenderer);

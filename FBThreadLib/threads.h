@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBThreadLib/AsyncObjects.h"
 #include <thread>
-namespace fastbird
+namespace fb
 {
 
 //---------------------------------------------------------------------------
@@ -55,6 +55,7 @@ class ThreadSafeCounter
 public:
 	ThreadSafeCounter();
 	ThreadSafeCounter(int _Value);
+	~ThreadSafeCounter();
 
 	int operator *() const;
 	int operator ++();

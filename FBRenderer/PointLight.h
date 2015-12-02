@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Math.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(PointLight);
 	class FB_DLL_RENDERER PointLight
@@ -36,6 +36,7 @@ namespace fastbird
 		FB_DECLARE_PIMPL_NON_COPYABLE(PointLight);
 		friend class PointLightMan;
 		PointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion);
+		~PointLight();
 
 	public:
 		static PointLightPtr Create(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion);		

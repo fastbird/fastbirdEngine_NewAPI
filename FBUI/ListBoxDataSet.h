@@ -28,7 +28,7 @@
 #pragma once
 #include "ListItemDataType.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(Texture);
 	class ListBoxData;

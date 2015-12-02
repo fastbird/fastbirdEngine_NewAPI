@@ -10,7 +10,6 @@
     <ClInclude Include="TextureAtlas.h" />
     <ClInclude Include="IRenderTargetObserver.h" />
     <ClInclude Include="IRendererObserver.h" />
-    <ClInclude Include="Spatial.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="IndexBuffer.h" />
     <ClInclude Include="Material.h" />
@@ -84,7 +83,6 @@
     <ClCompile Include="RenderTarget.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureAtlas.cpp" />
-    <ClCompile Include="Spatial.cpp" />
     <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="IndexBuffer.cpp" />
     <ClCompile Include="Material.cpp" />

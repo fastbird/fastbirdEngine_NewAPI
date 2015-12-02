@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird
+namespace fb
 {
 	//---------------------------------------------------------------------------
 	// SpinLocks are efficient if threads are only likely to be blocked for 

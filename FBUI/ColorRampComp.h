@@ -29,7 +29,7 @@
 
 #include "Container.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(StaticText);
 	FB_DECLARE_SMART_PTR(Button);

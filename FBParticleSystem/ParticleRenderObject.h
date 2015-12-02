@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBSceneManager/SpatialSceneObject.h"
-namespace fastbird
+namespace fb
 {
 	struct ParticleRenderKey;
 	FB_DECLARE_SMART_PTR(Material);

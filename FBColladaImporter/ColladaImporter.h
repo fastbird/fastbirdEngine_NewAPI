@@ -36,7 +36,7 @@ namespace COLLADAFW
 	class Node;
 	class FloatOrDoubleArray;
 }
-namespace fastbird
+namespace fb
 {
 	namespace collada{
 		struct Mesh;

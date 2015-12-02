@@ -31,7 +31,7 @@
 #include "IPhysicsInterface.h"
 #include "RotationInfo.h"
 #include "IPhysics.h"
-using namespace fastbird;
+using namespace fb;
 
 class RigidBodyImpl::Impl{
 public:

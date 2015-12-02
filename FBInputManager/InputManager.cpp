@@ -33,9 +33,9 @@
 #include "IInputInjector.h"
 #include "FBCommonHeaders/Helpers.h"
 #include "FBTimer/Timer.h"
-using namespace fastbird;
+using namespace fb;
 
-Timer* fastbird::gpTimer = 0;
+Timer* fb::gpTimer = 0;
 
 class InputManager::Impl{
 public:
@@ -188,6 +188,15 @@ public:
 	IInputInjectorPtr GetInputInjector() const{
 		return mInjector;
 	}
+
+	RenderTargetObservers GetRenderTargetObservers() const{
+		RenderTargetObservers ret;
+		auto mouse = std::static_pointer_cast<Mouse>(mMouse);
+		if (mouse)
+			ret.push_back(std::dynamic_pointer_cast<IRenderTargetObserver>(mouse));
+
+		return ret;
+	}
 };
 
 //---------------------------------------------------------------------------
@@ -299,6 +308,10 @@ void InputManager::SetInputInjector(IInputInjectorPtr injector){
 
 IInputInjectorPtr InputManager::GetInputInjector() const{
 	return mImpl->GetInputInjector();
+}
+
+InputManager::RenderTargetObservers InputManager::GetRenderTargetObservers() const{
+	return mImpl->GetRenderTargetObservers();
 }
 
 //-------------------------------------------------------------------

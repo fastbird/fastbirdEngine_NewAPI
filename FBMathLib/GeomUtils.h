@@ -28,7 +28,7 @@
 #pragma once
 #include "Vec3.h"
 
-namespace fastbird
+namespace fb
 {
 	// model triangle
 	struct ModelTriangle {

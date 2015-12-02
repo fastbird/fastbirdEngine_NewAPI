@@ -46,7 +46,7 @@
 #include "FBLua/LuaUtils.h"
 //--------------------------------------------------------------------------------
 
-namespace fastbird
+namespace fb
 {
 	int LoadLuaUI(lua_State* L);
 	int IsLoadedUI(lua_State* L);

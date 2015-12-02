@@ -36,7 +36,7 @@
 #include "Button.h"
 #include "UIObject.h"
 
-using namespace fastbird;
+using namespace fb;
 
 CardScrollerPtr CardScroller::Create(){
 	CardScrollerPtr p(new CardScroller, [](CardScroller* obj){ delete obj; });

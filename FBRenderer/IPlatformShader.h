@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "ShaderDefines.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IPlatformShader);
 	class IPlatformShader

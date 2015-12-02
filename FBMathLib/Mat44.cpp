@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "Mat44.h"
 
-namespace fastbird
+namespace fb
 {
 	const Mat44 Mat44::IDENTITY(1, 0, 0, 0,
 								0, 1, 0, 0,

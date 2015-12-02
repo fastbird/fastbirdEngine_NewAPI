@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
-namespace fastbird{
+namespace fb{
 	class FB_DLL_RENDERER RenderEventMarker{
 	public:
 		RenderEventMarker(const char* name);

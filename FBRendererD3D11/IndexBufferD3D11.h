@@ -33,7 +33,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/IPlatformIndexBuffer.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IndexBufferD3D11);
 	class IndexBufferD3D11 : public IPlatformIndexBuffer

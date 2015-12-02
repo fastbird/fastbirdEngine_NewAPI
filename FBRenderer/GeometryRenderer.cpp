@@ -42,7 +42,7 @@
 #include "FBSceneManager/SceneManager.h"
 #include "FBSceneManager/Scene.h"
 #include "EssentialEngineData/shaders/Constants.h"
-using namespace fastbird;
+using namespace fb;
 
 class GeometryRenderer::Impl{
 public:

@@ -28,7 +28,7 @@
 #pragma once
 #include <atomic>
 #include <thread>
-namespace fastbird
+namespace fb
 {
 	/** SpinLocks are efficient if threads are only likely to be blocked for 
 	a short period of time, as they avoid overhead from operating

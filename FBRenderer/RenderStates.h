@@ -29,12 +29,13 @@
 #include "IPlatformRenderStates.h"
 #include "RendererStructs.h"
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{	
+namespace fb{	
 	//---------------------------------------------------------------------------
 	FB_DECLARE_SMART_PTR(RasterizerState);
 	class FB_DLL_RENDERER RasterizerState{
 		FB_DECLARE_PIMPL_NON_COPYABLE(RasterizerState);
 		RasterizerState();
+		~RasterizerState();
 
 	public:
 		static RasterizerStatePtr Create();		
@@ -49,6 +50,7 @@ namespace fastbird{
 	class FB_DLL_RENDERER BlendState{
 		FB_DECLARE_PIMPL_NON_COPYABLE(BlendState);
 		BlendState();
+		~BlendState();
 
 	public:
 		static BlendStatePtr Create();
@@ -64,6 +66,7 @@ namespace fastbird{
 	class FB_DLL_RENDERER DepthStencilState{
 		FB_DECLARE_PIMPL_NON_COPYABLE(DepthStencilState);
 		DepthStencilState();
+		~DepthStencilState();
 
 	public:
 		static DepthStencilStatePtr Create();
@@ -80,6 +83,7 @@ namespace fastbird{
 	class FB_DLL_RENDERER SamplerState{
 		FB_DECLARE_PIMPL_NON_COPYABLE(SamplerState);
 		SamplerState();
+		~SamplerState();
 
 	public:
 		static SamplerStatePtr Create();
@@ -97,13 +101,16 @@ namespace fastbird{
 	*/
 	class FB_DLL_RENDERER RenderStates
 	{
-		FB_DECLARE_PIMPL(RenderStates);
-		RenderStates();
+		FB_DECLARE_PIMPL(RenderStates);		
 
 	public:
 		static RenderStatesPtr Create();
+		static RenderStatesPtr Create(const RenderStates& other);		
+
+		RenderStates();
 		RenderStates(const RenderStates& other);
 		~RenderStates();
+		RenderStates& operator==(const RenderStates& other) = delete;
 
 		void Reset();
 		void ResetRasterizerState();

@@ -28,7 +28,7 @@
 #pragma once
 #include "AABB.h"
 #include "Transformation.h"
-namespace fastbird
+namespace fb
 {
 
 class OBB

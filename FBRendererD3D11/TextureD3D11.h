@@ -28,7 +28,7 @@
 #pragma once
 
 #include "FBRenderer/IPlatformTexture.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(TextureD3D11);
 	class TextureD3D11 : public IPlatformTexture

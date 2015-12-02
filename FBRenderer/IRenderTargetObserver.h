@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	class IRenderTargetObserver{
 	public:
 		virtual void OnRenderTargetSizeChanged(int x, int y, HWindow associatedWindow){}

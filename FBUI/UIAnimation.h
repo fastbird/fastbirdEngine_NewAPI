@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(WinBase);
 	FB_DECLARE_SMART_PTR(UIAnimation);

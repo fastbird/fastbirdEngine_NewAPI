@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
-namespace fastbird{
+namespace fb{
 	class Transformation;
 	FB_DECLARE_SMART_PTR(AnimationData);
 	FB_DECLARE_SMART_PTR(Animation);

@@ -27,6 +27,6 @@
 
 #include "stdafx.h"
 
-namespace fastbird{
+namespace fb{
 	Timer* gpTimer = Timer::GetMainTimer().get();
 }

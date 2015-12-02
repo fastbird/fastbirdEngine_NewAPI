@@ -59,7 +59,6 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderConstants.h" />
     <ClInclude Include="ShaderDefines.h" />
-    <ClInclude Include="Spatial.h" />
     <ClInclude Include="StarDef.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SystemTextures.h" />
@@ -94,7 +93,6 @@
     <ClCompile Include="ResourceProvider.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderDefines.cpp" />
-    <ClCompile Include="Spatial.cpp" />
     <ClCompile Include="StarDef.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

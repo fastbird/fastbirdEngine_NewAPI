@@ -27,7 +27,7 @@
 
 #pragma once
 #include <vector>
-namespace fastbird{
+namespace fb{
 	struct ShaderDefine
 	{
 		ShaderDefine();

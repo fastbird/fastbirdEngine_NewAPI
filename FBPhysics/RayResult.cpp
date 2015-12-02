@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "RayResult.h"
-using namespace fastbird;
+using namespace fb;
 
 RayResultClosest::RayResultClosest()
 	: mRigidBody(0), mHitNormalWorld(0, 1, 0), mHitPointWorld(0, 0, 0), mIndex(-1)

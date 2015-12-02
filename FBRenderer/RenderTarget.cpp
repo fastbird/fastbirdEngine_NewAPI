@@ -38,7 +38,7 @@
 #include "FBInputManager/IInputInjector.h"
 #include "FBCommonHeaders/Observable.h"
 
-namespace fastbird
+namespace fb
 {
 RenderTargetId NextRenderTargetId = 1;
 
@@ -70,7 +70,6 @@ public:
 	UINT8 mStencilClear;
 	unsigned mFace;
 	TexturePtr mEnvTexture;
-	std::vector<IRenderTargetListener*> mListeners;
 	bool mDrawOnEvent;
 	bool mDrawEventTriggered;
 
@@ -100,7 +99,7 @@ public:
 	//-------------------------------------------------------------------
 	// Observable<IRenderTargetObserver>
 	//-------------------------------------------------------------------
-	void OnObserverAdded(IRenderTargetObserver* observer){
+	void OnObserverAdded(IRenderTargetObserverPtr observer){
 		auto& renderer = Renderer::GetInstance();
 		HWindow hwnd = renderer.GetWindowHandle(mId);
 		if (hwnd){
@@ -223,6 +222,7 @@ public:
 		if (mCamera)
 			mCamera->ProcessInputData();
 		
+		renderer.SetCurrentScene(scene);
 		mStrategy->SetScene(scene);
 		mStrategy->UpdateLightCamera();
 
@@ -360,7 +360,7 @@ public:
 	{
 		if (!injector->IsValid(InputDevice::Mouse))
 			return;			
-		
+		return;
 		mCamera->SetCurrent(true);
 		mCamera->ConsumeInput(injector);
 		mCamera->SetCurrent(false);
@@ -416,11 +416,8 @@ RenderTarget::~RenderTarget()
 //-------------------------------------------------------------------
 // Observable<IRenderTargetObserver>
 //-------------------------------------------------------------------
-void RenderTarget::OnObserverAdded(IRenderTargetObserver* observer){
+void RenderTarget::OnObserverAdded(IRenderTargetObserverPtr observer){
 	mImpl->OnObserverAdded(observer);
-}
-void RenderTarget::OnObserverRemoved(IRenderTargetObserver* observer){
-	mImpl->OnObserverRemoved(observer);
 }
 
 //-------------------------------------------------------------------
@@ -433,7 +430,7 @@ bool RenderTarget::CheckOptions(const RenderTargetParam& param)
 	return mImpl->CheckOptions(param);
 }
 
-IRenderStrategyPtr RenderTarget::SetRenderStrategy(IRenderStrategyPtr strategy){
+IRenderStrategyPtr RenderTarget::SetRenderStrategy(IRenderStrategyPtr strategy) {
 	return mImpl->SetRenderStrategy(strategy);
 }
 

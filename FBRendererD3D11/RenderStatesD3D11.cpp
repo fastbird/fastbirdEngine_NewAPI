@@ -30,7 +30,7 @@
 #include "IUnknownDeleter.h"
 #include "RendererD3D11.h"
 
-using namespace fastbird;
+using namespace fb;
 
 //----------------------------------------------------------------------------
 // RASTERIZER STATE

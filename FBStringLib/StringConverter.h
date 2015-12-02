@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/String.h"
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	class StringConverter{
 	public:
 		static TString ToString(Real val, unsigned short precision = 6,

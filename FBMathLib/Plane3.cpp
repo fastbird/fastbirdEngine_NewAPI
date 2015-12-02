@@ -29,7 +29,7 @@
 #include "stdafx.h"
 #include "Plane3.h"
 
-namespace fastbird
+namespace fb
 {
 	
 Plane3::Plane3()

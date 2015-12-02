@@ -47,7 +47,7 @@
 #include "FBSceneManager/ISpatialObject.h"
 #include "FBMathLib/BoundingVolume.h"
 #include "EssentialEngineData/shaders/Constants.h"
-using namespace fastbird;
+using namespace fb;
 
 static const int FB_NUM_BLOOM_TEXTURES = 3;
 static const int FB_NUM_STAR_TEXTURES = 12;
@@ -195,7 +195,7 @@ public:
 		param.mCamera = renderer.GetCamera().get();
 		param.mLightCamera = mLightCamera.get();
 		scene->PreRender(param, 0);
-
+		mGlowSet = false;
 		GlowTarget(true);
 		renderer.Clear(0., 0., 0., 1.);
 		GlowTarget(false);

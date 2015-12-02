@@ -34,7 +34,7 @@
 #include "ShaderConstants.h"
 #include <memory>
 
-namespace fastbird{
+namespace fb{
 	class IPlatformShader;	
 	FB_DECLARE_SMART_PTR(IPlatformSamplerState);
 	FB_DECLARE_SMART_PTR(IPlatformRasterizerState);

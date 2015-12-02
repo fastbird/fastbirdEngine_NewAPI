@@ -29,7 +29,7 @@
 #include "GeomUtils.h"
 
 #include "MathDefines.h"
-namespace fastbird
+namespace fb
 {
 void CreateSphereMesh(Real radius, int nRings, int nSegments,
 	std::vector<Vec3>& pos, std::vector<unsigned short>& index, std::vector<Vec3>* normal, std::vector<Vec2>* uv)

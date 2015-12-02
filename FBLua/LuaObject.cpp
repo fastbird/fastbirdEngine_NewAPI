@@ -30,10 +30,10 @@
 #include "LuaUtils.h"
 #include "FBStringLib/StringConverter.h"
 #include "luawrapperutil.hpp"
-using namespace fastbird;
+using namespace fb;
 
-fastbird::VectorMap<int, unsigned> LuaObject::sUsedCount;
-fastbird::SpinLock<true, false> LuaObject::sUsedCountGuard;
+fb::VectorMap<int, unsigned> LuaObject::sUsedCount;
+fb::SpinLock<true, false> LuaObject::sUsedCountGuard;
 void LuaObject::AddUsedCount(int ref)
 {
 	if (ref == LUA_NOREF)
@@ -1225,7 +1225,7 @@ bool LuaSequenceIterator::GetNext(LuaObject& out)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-fastbird::LuaObject fastbird::GetLuaVar(lua_State* L, const char* var, const char* file)
+fb::LuaObject fb::GetLuaVar(lua_State* L, const char* var, const char* file)
 {
 	if (!var)
 		return LuaObject();

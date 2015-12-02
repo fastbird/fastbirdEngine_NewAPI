@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "Vec3I.h"
 
-namespace fastbird
+namespace fb
 {
 	const Vec3I Vec3I::UNIT_X = Vec3I(1, 0, 0);
 	const Vec3I Vec3I::UNIT_Y = Vec3I(0, 1, 0);

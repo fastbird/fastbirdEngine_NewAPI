@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Math.h"
-namespace fastbird
+namespace fb
 {
 	struct POINT_LIGHT_CONSTANTS;
 	FB_DECLARE_SMART_PTR(PointLight);

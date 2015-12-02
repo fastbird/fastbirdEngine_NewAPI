@@ -31,7 +31,7 @@
 #include "RendererD3D11.h"
 #include "IUnknownDeleter.h"
 #include "FBRenderer/RendererEnums.h"
-using namespace fastbird;
+using namespace fb;
 
 FB_IMPLEMENT_STATIC_CREATE(IndexBufferD3D11);
 

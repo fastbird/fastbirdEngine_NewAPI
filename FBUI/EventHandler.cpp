@@ -30,7 +30,7 @@
 #include "WinBase.h"
 #include "UIManager.h"
 
-namespace fastbird
+namespace fb
 {
 
 size_t EventHandler::UNIQUE_ID = 0;

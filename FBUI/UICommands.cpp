@@ -30,7 +30,7 @@
 #include "UIManager.h"
 #include "FBConsole/ConsoleDataType.h"
 #include "FBConsole/Console.h"
-using namespace fastbird;
+using namespace fb;
 
 static void StartUIEditor(StringVector& arg);
 static void KillUIEditor(StringVector& arg);
@@ -74,7 +74,7 @@ void StartUIEditor(StringVector& arg)
 	auto moduleHandle = gFBEnv->pUIManager->GetUIEditorModuleHandle();
 	if (!moduleHandle)
 	{
-		moduleHandle = fastbird::LoadFBLibrary("FBUIEditor.dll");
+		moduleHandle = fb::LoadFBLibrary("FBUIEditor.dll");
 		gFBEnv->pUIManager->SetUIEditorModuleHandle(moduleHandle);
 	}
 	if (moduleHandle)

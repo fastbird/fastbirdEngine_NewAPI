@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "AudioHelper.h"
 
-namespace fastbird{
+namespace fb{
 
 	/* GetFormat retrieves a compatible buffer format given the channel config and
 	* sample type. If an alIsBufferFormatSupportedSOFT-compatible function is

@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "System.h"
 
-namespace fastbird{
+namespace fb{
 	int GetNumProcessors(){
 #if defined(_PLATFORM_WINDOWS_)
 		SYSTEM_INFO SI;

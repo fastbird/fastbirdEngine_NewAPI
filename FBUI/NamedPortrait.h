@@ -27,7 +27,7 @@
 
 #pragma once
 #include "Container.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(ImageBox);
 	FB_DECLARE_SMART_PTR(TextBox);

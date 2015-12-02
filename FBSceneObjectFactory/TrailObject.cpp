@@ -31,7 +31,7 @@
 #include "FBRenderer/Material.h"
 #include "FBRenderer/VertexBuffer.h"
 #include "FBRenderer/Camera.h"
-using namespace fastbird;
+using namespace fb;
 class TrailObject::Impl
 {
 public:

@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "AudioManager.h"
 
-using namespace fastbird;
+using namespace fb;
 
 class AudioManager::Impl{
 public:

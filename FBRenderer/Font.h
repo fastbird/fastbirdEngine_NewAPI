@@ -33,7 +33,8 @@
 #include "FBMathLib/Vec2I.h"
 #include  "TextTags.h"
 
-namespace fastbird{
+namespace fb{
+	FB_DECLARE_SMART_PTR(TextureAtlas);
 	FB_DECLARE_SMART_PTR(Texture);
 	FB_DECLARE_SMART_PTR(VertexBuffer);
 	FB_DECLARE_SMART_PTR(Shader);
@@ -45,6 +46,7 @@ namespace fastbird{
 	{
 		FB_DECLARE_PIMPL_NON_COPYABLE(Font);
 		Font();
+		~Font();
 
 	public:
 		enum EFontTextEncoding
@@ -62,34 +64,32 @@ namespace fastbird{
 			FONT_ALIGN_JUSTIFY
 		};
 
-		static FontPtr Create();		
-		//--------------------------------------------------------------------
-		// IFont
-		//--------------------------------------------------------------------
-		virtual int Init(const char *fontFile);
-		virtual void SetTextEncoding(EFontTextEncoding encoding);
+		static FontPtr Create();				
+		int Init(const char *fontFile);
+		void SetTextEncoding(EFontTextEncoding encoding);
 
-		virtual void PreRender(){}
-		virtual void Render(){}
-		virtual void PostRender(){}
-		virtual void Write(Real x, Real y, Real z, unsigned int color,
+		void PreRender(){}
+		void Render(){}
+		void PostRender(){}
+		void Write(Real x, Real y, Real z, unsigned int color,
 			const char *text, int count, FONT_ALIGN mode);
 
-		virtual void SetHeight(Real h);
-		virtual Real GetHeight() const;
-		virtual Real GetBaseHeight() const;
-		virtual void SetBackToOrigHeight();
-		virtual Real GetTextWidth(const char *text, int count = -1, Real *minY = 0, Real *maxY = 0);
-		virtual std::wstring InsertLineFeed(const char *text, int count, unsigned wrapAt, Real* outWidth, unsigned* outLines);
-		virtual void PrepareRenderResources();
-		virtual void SetRenderStates(bool depthEnable = false, bool scissorEnable = false);
+		void SetHeight(Real h);
+		Real GetHeight() const;
+		Real GetBaseHeight() const;
+		void SetBackToOrigHeight();
+		Real GetTextWidth(const char *text, int count = -1, Real *minY = 0, Real *maxY = 0);
+		std::wstring InsertLineFeed(const char *text, int count, unsigned wrapAt, Real* outWidth, unsigned* outLines);
+		void PrepareRenderResources();
+		void SetRenderStates(bool depthEnable = false, bool scissorEnable = false);
 
 		Real GetBottomOffset();
 		Real GetTopOffset();
 
-		virtual void SetRenderTargetSize(const Vec2I& rtSize);
-		virtual void RestoreRenderTargetSize();
+		void SetRenderTargetSize(const Vec2I& rtSize);
+		void RestoreRenderTargetSize();
 		std::wstring StripTags(const wchar_t* text);
+		void SetTextureAtlas(TextureAtlasPtr atlas);
 
 	protected:
 		friend class FontLoader;

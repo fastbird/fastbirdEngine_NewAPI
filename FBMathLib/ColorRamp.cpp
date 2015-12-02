@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "ColorRamp.h"
-using namespace fastbird;
+using namespace fb;
 class ColorRamp::Impl{
 public:
 	typedef std::vector<Bar> BAR_VECTOR;
@@ -154,6 +154,10 @@ ColorRamp::ColorRamp()
 ColorRamp::ColorRamp(const ColorRamp& other)
 	: mImpl(new Impl(*other.mImpl.get()))
 {
+}
+
+ColorRamp::~ColorRamp(){
+
 }
 
 ColorRamp& ColorRamp::operator = (const ColorRamp& other){

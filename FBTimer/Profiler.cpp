@@ -37,7 +37,7 @@
 #else
 #endif
 
-namespace fastbird
+namespace fb
 {
 	static std::ofstream profileLogFile("fb_profile_result.log");
 	int Profiler::indent = 0;

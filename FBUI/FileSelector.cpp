@@ -34,7 +34,7 @@
 #include "Button.h"
 #include "UIObject.h"
 
-namespace fastbird
+namespace fb
 {
 FileSelectorPtr FileSelector::Create(){
 	FileSelectorPtr p(new FileSelector, [](FileSelector* obj){ delete obj; });

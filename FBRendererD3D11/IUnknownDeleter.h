@@ -27,7 +27,7 @@
 
 #pragma once
 #include <D3D11.h>
-namespace fastbird{
+namespace fb{
 	struct IUnknownDeleter{
 		void operator()(IUnknown* p);
 	};

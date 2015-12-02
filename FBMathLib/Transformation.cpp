@@ -29,7 +29,7 @@
 #include "Transformation.h"
 #include "Math.h"
 
-namespace fastbird
+namespace fb
 {
 
 //----------------------------------------------------------------------------

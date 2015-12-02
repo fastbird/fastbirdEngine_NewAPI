@@ -28,7 +28,7 @@
 #pragma once
 #include <cstring>
 #include <vector>
-namespace fastbird{
+namespace fb{
 	enum VERTEX_COMPONENT
 	{
 		VC_POSITION = 0x1,

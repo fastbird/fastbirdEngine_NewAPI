@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBSceneManager/SceneObject.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(TrailObject);
 	class FB_DLL_SCENEOBJECTFACTORY TrailObject : public SceneObject

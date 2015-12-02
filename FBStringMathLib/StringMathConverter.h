@@ -37,7 +37,7 @@
 #include "FBMathLib/Quat.h"
 #include "FBMathLib/Rect.h"
 #include "FBMathLib/Color.h"
-namespace fastbird{
+namespace fb{
 	class StringMathConverter{
 	public:
 		static std::string ToString(const Vec2& val);

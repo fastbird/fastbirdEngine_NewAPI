@@ -32,7 +32,7 @@
 #include "UIObject.h"
 #include "TextBox.h"
 
-namespace fastbird
+namespace fb
 {
 
 	NamedPortraitPtr NamedPortrait::Create(){

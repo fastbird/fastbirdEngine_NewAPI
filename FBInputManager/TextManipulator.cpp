@@ -31,7 +31,7 @@
 #include "FBSystemLib/ClipboardData.h"
 #undef min
 #undef max
-namespace fastbird
+namespace fb
 {
 
 FB_IMPLEMENT_STATIC_CREATE(TextManipulator);

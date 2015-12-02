@@ -33,9 +33,9 @@
 #include "FBRenderer/Material.h"
 #include "FBSceneManager/SceneManager.h"
 #include "FBSceneManager/Scene.h"
-using namespace fastbird;
+using namespace fb;
 
-namespace fastbird{
+namespace fb{
 	typedef VectorMap< ParticleRenderKey, ParticleRenderObjectPtr > RENDER_OBJECTS;
 	static RENDER_OBJECTS sRenderObjects;
 	static size_t sNumDrawCalls;

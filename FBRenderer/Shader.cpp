@@ -32,11 +32,11 @@
 #include "FBCommonHeaders/Helpers.h"
 #include "FBTimer/Profiler.h"
 #include "FBStringLib/StringLib.h"
-using namespace fastbird;
+using namespace fb;
 
 static std::vector<ShaderWeakPtr> sAllShaders;
 
-namespace fastbird{
+namespace fb{
 	ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformTexture) {
 		for (auto it = sAllShaders.begin(); it != sAllShaders.end();){
 			auto shader = it->lock();

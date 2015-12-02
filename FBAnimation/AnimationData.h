@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
-namespace fastbird{
+namespace fb{
 	class Transformation;
 	class Vec3;
 	class Quat;

@@ -29,7 +29,7 @@
 #include "WorkerThread.h"
 #include "Task.h"
 #include "TaskScheduler.h"
-namespace fastbird
+namespace fb
 {
 
 WorkerThread::WorkerThread(TaskScheduler* scheduler)

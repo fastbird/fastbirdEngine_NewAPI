@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{	
+namespace fb{	
 	FB_DECLARE_SMART_PTR(Camera);
 	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(Scene);
@@ -35,6 +35,7 @@ namespace fastbird{
 	class FB_DLL_SCENEMANAGER SceneManager{
 		FB_DECLARE_PIMPL_NON_COPYABLE(SceneManager);
 		SceneManager();		
+		~SceneManager();
 		
 	public:
 		/** You have the ownership of returned scene. */

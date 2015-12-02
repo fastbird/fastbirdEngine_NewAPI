@@ -29,7 +29,7 @@
 #include "BulletDebugDraw.h"
 #include "IDebugDrawer.h"
 
-using namespace fastbird;
+using namespace fb;
 
 BulletDebugDraw::BulletDebugDraw()
 : mDrawer(0)

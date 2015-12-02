@@ -32,7 +32,7 @@
 
 class btTypedConstraint;
 class btCollisionShape;
-namespace fastbird
+namespace fb
 {
 	class Vec3;
 	class Vec3I;
@@ -116,4 +116,4 @@ namespace fastbird
 	};
 }
 
-extern fastbird::IPhysics* gFBPhysics;
+extern fb::IPhysics* gFBPhysics;

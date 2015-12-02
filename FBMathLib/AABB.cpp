@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "AABB.h"
-using namespace fastbird;
+using namespace fb;
 #undef min
 #undef max
 

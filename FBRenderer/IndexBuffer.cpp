@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "IndexBuffer.h"
 #include "IPlatformIndexBuffer.h"
-using namespace fastbird;
+using namespace fb;
 class IndexBuffer::Impl{
 public:
 	INDEXBUFFER_FORMAT mFormat;
@@ -77,12 +77,14 @@ public:
 
 //---------------------------------------------------------------------------
 IndexBufferPtr IndexBuffer::Create(unsigned numIndices, INDEXBUFFER_FORMAT format){
-	return IndexBufferPtr(FB_NEW(IndexBuffer)(numIndices, format), [](IndexBuffer* obj){ FB_DELETE(obj); });
+	return IndexBufferPtr(new IndexBuffer(numIndices, format), [](IndexBuffer* obj){ delete obj; });
 }
 
 IndexBuffer::IndexBuffer(unsigned numIndices, INDEXBUFFER_FORMAT format)
 	: mImpl(new Impl(numIndices, format)){
 }
+
+IndexBuffer::~IndexBuffer(){}
 
 bool IndexBuffer::IsReady() const{
 	return mImpl->IsReady();

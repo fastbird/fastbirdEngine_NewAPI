@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "ParticleRenderKey.h"
-namespace fastbird{
+namespace fb{
 	ParticleRenderKey::ParticleRenderKey()
 		: mGlow(false), mDepthFade(true)
 	{

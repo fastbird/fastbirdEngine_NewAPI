@@ -29,7 +29,7 @@
 #include "Scroller.h"
 #include "Container.h"
 #include "UIObject.h"
-namespace fastbird
+namespace fb
 {
 ScrollerPtr Scroller::Create(){
 	ScrollerPtr p(new Scroller, [](Scroller* obj){ delete obj; });

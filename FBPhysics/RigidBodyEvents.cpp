@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "RigidBodyEvents.h"
-using namespace fastbird;
+using namespace fb;
 
 RigidBodyEvents::RigidBodyEvents()
 	: mForward(0), mBackward(0), mLeft(0), mRight(0), mUp(0), mDown(0), mHori(0), mVert(0)

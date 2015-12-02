@@ -79,6 +79,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SceneObject.h" />
     <ClInclude Include="SceneObjectFlag.h" />
+    <ClInclude Include="SceneObjectType.h" />
     <ClInclude Include="SpatialObject.h" />
     <ClInclude Include="SpatialSceneObject.h" />
     <ClInclude Include="stdafx.h" />

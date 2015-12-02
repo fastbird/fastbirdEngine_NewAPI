@@ -30,7 +30,7 @@
 #include "VisibleStatus.h"
 #include "UIProperty.h"
 #include "ComponentType.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(UIAnimation);	
 	FB_DECLARE_SMART_PTR(ImageBox);
@@ -200,7 +200,7 @@ namespace fastbird
 		virtual WinBasePtr AddChild(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type){
 			return 0;
 		}
-		virtual WinBasePtr AddChild(const fastbird::LuaObject& compTable) {
+		virtual WinBasePtr AddChild(const fb::LuaObject& compTable) {
 			return 0;
 		}
 		virtual WinBasePtr AddChild(ComponentType::Enum type) {
@@ -238,7 +238,7 @@ namespace fastbird
 		virtual bool GetFillY() const;
 
 		virtual void ModifySize(const Vec2I& sizemod);
-		virtual void SetWNSize(const fastbird::Vec2& size);
+		virtual void SetWNSize(const fb::Vec2& size);
 		virtual void OnParentSizeChanged();
 		void SetAspectRatio(float ratio) { mAspectRatioSet = true; mAspectRatio = ratio; }
 		// called when the parent size has changed.
@@ -262,13 +262,13 @@ namespace fastbird
 		void SetPosWithTranslatorX(int x);
 		void SetPosWithTranslatorY(int y);
 		
-		virtual void SetNPos(const fastbird::Vec2& pos); // normalized pos (0.0~1.0)
+		virtual void SetNPos(const fb::Vec2& pos); // normalized pos (0.0~1.0)
 		virtual void SetNPosX(float x);
 		virtual void SetNPosY(float y);
 
 		virtual void SetInitialOffset(Vec2I offset);
 		virtual void Move(Vec2I amount);
-		virtual void SetWNPos(const fastbird::Vec2& wnPos);
+		virtual void SetWNPos(const fb::Vec2& wnPos);
 		virtual void OnParentPosChanged();
 		virtual void NotifyPosChange(){
 			/*nothing to do if this is not a container.*/
@@ -353,9 +353,9 @@ namespace fastbird
 		virtual const Rect& GetRegion() const;
 		// OWN
 		// local space.
-		fastbird::Vec2 ConvertToAlignedPos(const fastbird::Vec2& beforeAlign) const;
-		fastbird::Vec2I ConvertToScreen(const fastbird::Vec2 npos) const;
-		fastbird::Vec2 ConvertToNormalized(const fastbird::Vec2I pos) const; // convert to 0~1
+		fb::Vec2 ConvertToAlignedPos(const fb::Vec2& beforeAlign) const;
+		fb::Vec2I ConvertToScreen(const fb::Vec2 npos) const;
+		fb::Vec2 ConvertToNormalized(const fb::Vec2I pos) const; // convert to 0~1
 
 
 		void SetParent(ContainerPtr parent);
@@ -371,7 +371,7 @@ namespace fastbird
 
 		virtual bool ParseXML(tinyxml2::XMLElement* pelem);
 		virtual void Save(tinyxml2::XMLElement& elem);
-		virtual bool ParseLua(const fastbird::LuaObject& compTable);
+		virtual bool ParseLua(const fb::LuaObject& compTable);
 		virtual float GetTextBottomGap() const;
 
 		virtual void RefreshScissorRects();

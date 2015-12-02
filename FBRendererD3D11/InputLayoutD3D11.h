@@ -30,7 +30,7 @@
 #include "FBRenderer/IPlatformInputLayout.h"
 #include "D3D11Types.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(InputLayoutD3D11);
 	class InputLayoutD3D11 : public IPlatformInputLayout

@@ -31,7 +31,7 @@
 #include "Mat33.h"
 #include "Math.h"
 
-namespace fastbird
+namespace fb
 {
 	const Vec3 Vec3::UNIT_X(1.f, 0, 0);
 	const Vec3 Vec3::UNIT_Y(0, 1.f, 0);
@@ -450,13 +450,13 @@ namespace fastbird
 }
 
 
-std::istream& operator>>(std::istream& stream, fastbird::Vec3& v)
+std::istream& operator>>(std::istream& stream, fb::Vec3& v)
 {
 	stream >> v.x >> v.y >> v.z;
 	return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const fastbird::Vec3& v)
+std::ostream& operator<<(std::ostream& stream, const fb::Vec3& v)
 {
 	stream << v.x << v.y << v.z;
 	return stream;

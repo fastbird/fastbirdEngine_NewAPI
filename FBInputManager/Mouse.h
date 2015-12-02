@@ -32,7 +32,7 @@
 #include "IMouse.h"
 #include "FBRenderer/IRenderTargetObserver.h"
 
-namespace fastbird
+namespace fb
 {
 	class Mouse : public IMouse, public IRenderTargetObserver
 	{

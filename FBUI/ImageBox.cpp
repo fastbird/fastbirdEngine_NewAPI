@@ -33,7 +33,7 @@
 #include "FBRenderer/Camera.h"
 #include "FBRenderer/TextureAtlas.h"
 #include "FBRenderer/Texture.h"
-namespace fastbird
+namespace fb
 {
 
 ImageBoxPtr ImageBox::Create(){

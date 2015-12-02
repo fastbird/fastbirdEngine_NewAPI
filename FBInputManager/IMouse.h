@@ -33,7 +33,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "MouseEvent.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IMouse);	
 	class IMouse : public IInputDevice

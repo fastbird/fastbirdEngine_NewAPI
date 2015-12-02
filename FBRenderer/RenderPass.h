@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	enum RENDER_PASS
 	{
 		PASS_NORMAL = 0,

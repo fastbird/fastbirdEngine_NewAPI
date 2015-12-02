@@ -27,6 +27,6 @@
 
 #pragma once
 #include "Logger.h"
-namespace fastbird{
+namespace fb{
 	void FBDebugBreak();
 }

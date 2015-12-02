@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include <string>
-namespace fastbird
+namespace fb
 {
 	class FB_DLL_TIMER TimeString{
 	public:

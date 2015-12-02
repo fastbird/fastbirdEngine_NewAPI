@@ -44,7 +44,7 @@
 #include <set>
 
 #define _RENDERER_FRAME_PROFILER_
-using namespace fastbird;
+using namespace fb;
 
 static void Error(const char* szFmt, ...){
 	char buf[2048];
@@ -1011,8 +1011,7 @@ public:
 	}
 
 	IPlatformShaderPtr CreateShader(const char* path, int shaders,
-		const SHADER_DEFINES& defines) {
-		Logger::Log(FB_DEFAULT_LOG_ARG, FormatString("Creating shader %s", path).c_str());		
+		const SHADER_DEFINES& defines) {		
 		std::string filepath(path);
 		ToLowerCase(filepath);
 

@@ -33,7 +33,7 @@
 #include "ICameraObserver.h"
 #include "ICamera.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IInputInjector);
 	FB_DECLARE_SMART_PTR(IMouse);
@@ -66,6 +66,8 @@ namespace fastbird
 		~Camera();
 		Camera& operator= (const Camera& other);
 
+		void SetMainCamera(bool main);
+		bool IsMainCamera() const;
 		//-------------------------------------------------------------------------
 		void SetOrthogonal(bool ortho);
 		void SetPosition(const Vec3& pos);

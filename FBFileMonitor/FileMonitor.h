@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBCommonHeaders/Observable.h"
 #include "IFileChangeObserver.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(FileMonitor);
 	class FB_DLL_FILEMONITOR FileMonitor : public Observable<IFileChangeObserver>{
 		FB_DECLARE_PIMPL_NON_COPYABLE(FileMonitor);

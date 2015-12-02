@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird
+namespace fb
 {
 	class WinBase;
 	FB_DECLARE_SMART_PTR(UIObject);

@@ -28,7 +28,7 @@
 #pragma once
 #include "RendererEnums.h"
 #include "RendererStructs.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(IPlatformTexture);
 	FB_DECLARE_SMART_PTR(Texture);
 	/** Texture.

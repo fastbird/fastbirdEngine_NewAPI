@@ -33,7 +33,7 @@
 #include "FBCommonHeaders/Helpers.h"
 #include "FBStringLib/StringLib.h"
 
-using namespace fastbird;
+using namespace fb;
 class ShaderD3D11::Impl
 {
 public:

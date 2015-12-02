@@ -28,7 +28,7 @@
 #pragma once
 #include "InputElementDesc.h"
 #include "FBCommonHeaders/Types.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IPlatformInputLayout);
 	class IPlatformInputLayout

@@ -49,8 +49,8 @@
 #include "FBFileMonitor/FileMonitor.h"
 #include "FBVideoPlayer/VideoPlayerOgg.h"
 #include "FBParticleSystem/ParticleSystem.h"
-using namespace fastbird;
-namespace fastbird{
+using namespace fb;
+namespace fb{
 	void InitEngineLua();
 }
 class EngineFacade::Impl{
@@ -93,6 +93,8 @@ public:
 		auto filepath = "_FBEngineFacade.log";		
 		FileSystem::BackupFile(filepath, 5, "Backup_Log");
 		Logger::Init(filepath);
+		FileSystem::BackupFile("_Global.log", 5, "Backup_Log");
+		Logger::InitGlobalLog("_Global.log");
 		mL = LuaUtils::OpenLuaState();
 		InitEngineLua();
 		mInputManager = InputManager::Create();
@@ -201,6 +203,7 @@ public:
 			return INVALID_HWND_ID;
 		}
 		else{			
+			mInputManager->AddHwndInterested(window);
 			if (id == MainWindowId){
 				mSceneObjectFactory = SceneObjectFactory::Create();
 				auto rt = mRenderer->GetRenderTarget(id);
@@ -209,7 +212,12 @@ public:
 				}
 				else{
 					rt->RegisterScene(mMainScene);
-					mMainCamera = rt->GetCamera();					
+					mMainCamera = rt->GetCamera();
+					mMainCamera->SetMainCamera(true);
+					auto rtObservers = mInputManager->GetRenderTargetObservers();
+					for (auto observer : rtObservers){
+						rt->AddObserver(IRendererObserver::DefaultRenderEvent, observer);
+					}
 				}
 			}
 
@@ -270,6 +278,7 @@ public:
 		mRenderer->Update(dt);
 		mSceneManager->Update(dt);
 		mSceneObjectFactory->Update(dt);
+		mInputManager->EndFrame(gpTimer->GetTime());
 	}
 
 	void Render(){
@@ -583,13 +592,13 @@ void EngineFacade::DrawProfileResult(const ProfilerSimple& profiler, const char*
 }
 
 void EngineFacade::DrawProfileResult(const ProfilerSimple& profiler, const char* posVarName, int tab){
-	wchar_t buf[256];
-	std::wstring tapString;
+	char buf[256];
+	std::string tapString;
 	while (tab--)
 	{
 		tapString.push_back('\t');
 	}
-	swprintf_s(buf, L"%s%s : %f", tapString.c_str(), profiler.GetName(), profiler.GetDT());
+	sprintf_s(buf, "%s%s : %f", tapString.c_str(), profiler.GetName(), profiler.GetDT());
 	Vec2I pos = LuaUtils::GetLuaVarAsVec2I(posVarName);
 	Renderer::GetInstance().QueueDrawText(pos, buf, Color::White);
 }
@@ -637,6 +646,10 @@ bool EngineFacade::GetResolutionList(unsigned& outNum, Vec2I* list){
 
 Vec2 EngineFacade::ToNdcPos(HWindowId id, const Vec2I& screenPos) const{
 	return Renderer::GetInstance().ToNdcPos(id, screenPos);
+}
+
+void EngineFacade::SetFontTextureAtlas(const char* path){
+	Renderer::GetInstance().SetFontTextureAtlas(path);
 }
 
 intptr_t EngineFacade::WinProc(HWindow window, unsigned msg, uintptr_t wp, uintptr_t lp){
@@ -925,11 +938,11 @@ void EngineFacade::GetFractureMeshObjects(const char* daeFilePath, std::vector<M
 std::wstring EngineFacade::StripTextTags(const char* text){
 	auto font = GetFont(22.f);
 	if (font){
-		return font->StripTags(fastbird::AnsiToWide(text));		
+		return font->StripTags(fb::AnsiToWide(text));		
 	}
 	else{
 		Logger::Log(FB_ERROR_LOG_ARG, FormatString("No font found.").c_str());
-		return std::wstring(fastbird::AnsiToWide(text));
+		return std::wstring(fb::AnsiToWide(text));
 	}
 }
 

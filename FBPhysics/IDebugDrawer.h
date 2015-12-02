@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird
+namespace fb
 {
 	class Vec3;
 	class Color;

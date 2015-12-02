@@ -30,7 +30,7 @@
 #include "IKeyboard.h"
 #include "IMouse.h"
 #include "InputManager.h"
-using namespace fastbird;
+using namespace fb;
 
 class InputInjector::Impl{
 public:

@@ -41,7 +41,7 @@ Provide a ceteralized method for memory allocation and deallocation
 #define FB_ARRAY_DELETE(ptr) delete[] ptr
 #else
 
-namespace fastbird
+namespace fb
 {
 	/// \ingroup FBMemoryManager
 	void FBReportMemoryForModule();
@@ -94,18 +94,18 @@ namespace fastbird
 	{
 		if (!p)
 			return;
-		fastbird::DestructN(p);
+		fb::DestructN(p);
 		DeallocBytes(p, file, line, func);
 	}
 }
 /// \addtogroup FBMemoryManagerLib
 /// @{
-#define FB_NEW(T) new (fastbird::AllocBytes(sizeof(T), __TFILE__, __LINE__, __TFUNCTION__)) T
-#define FB_ARRAY_NEW(T, count) fastbird::ConstructN(static_cast<T*>(fastbird::AllocBytes(sizeof(T)*count, __TFILE__, __LINE__, __TFUNCTION__)), count)
-#define FB_DELETE(ptr) fastbird::Delete( (ptr), __TFILE__, __LINE__, __TFUNCTION__)
-#define FB_ARRAY_DELETE(ptr) fastbird::DeleteArr(ptr, __TFILE__, __LINE__, __TFUNCTION__)
+#define FB_NEW(T) new (fb::AllocBytes(sizeof(T), __TFILE__, __LINE__, __TFUNCTION__)) T
+#define FB_ARRAY_NEW(T, count) fb::ConstructN(static_cast<T*>(fb::AllocBytes(sizeof(T)*count, __TFILE__, __LINE__, __TFUNCTION__)), count)
+#define FB_DELETE(ptr) fb::Delete( (ptr), __TFILE__, __LINE__, __TFUNCTION__)
+#define FB_ARRAY_DELETE(ptr) fb::DeleteArr(ptr, __TFILE__, __LINE__, __TFUNCTION__)
 #define FB_SAFE_DELETE(ptr) (ptr) ? FB_DELETE((ptr)) : 0; (ptr) = 0;
-#define FB_NEW_ALIGNED(T, A) new (fastbird::AllocBytesAligned(sizeof(T), A, __TFILE__, __LINE__, __TFUNCTION__)) T
-#define FB_DELETE_ALIGNED(ptr) (ptr) ? fastbird::DeleteAligned( (ptr), __TFILE__, __LINE__, __TFUNCTION__) : 0;
+#define FB_NEW_ALIGNED(T, A) new (fb::AllocBytesAligned(sizeof(T), A, __TFILE__, __LINE__, __TFUNCTION__)) T
+#define FB_DELETE_ALIGNED(ptr) (ptr) ? fb::DeleteAligned( (ptr), __TFILE__, __LINE__, __TFUNCTION__) : 0;
 /// @}
 #endif

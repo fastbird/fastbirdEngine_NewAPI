@@ -29,7 +29,7 @@
 
 class btRigidBody;
 class btDiscreteDynamicsWorld;
-namespace fastbird
+namespace fb
 {
 	class IPhysicsInterface;
 	struct RotationInfo;

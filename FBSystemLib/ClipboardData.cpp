@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "ClipboardData.h"
-namespace fastbird{
+namespace fb{
 	std::string GetClipboardDataAsString(HWindow hwnd)
 	{
 		if (OpenClipboard((HWND)hwnd))

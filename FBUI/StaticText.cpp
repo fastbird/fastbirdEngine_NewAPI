@@ -31,7 +31,7 @@
 #include "UIManager.h"
 #include "UIObject.h"
 
-namespace fastbird
+namespace fb
 {
 
 StaticTextPtr StaticText::Create(){

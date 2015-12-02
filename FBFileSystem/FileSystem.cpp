@@ -31,7 +31,7 @@
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 #include "FBCommonHeaders/Helpers.h"
-using namespace fastbird;
+using namespace fb;
 
 static bool gLogginStarted = false;
 static boost::filesystem::path gWorkingPath;

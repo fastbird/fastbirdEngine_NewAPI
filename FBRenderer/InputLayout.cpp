@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "InputLayout.h"
-using namespace fastbird;
+using namespace fb;
 
 class InputLayout::Impl
 {
@@ -52,6 +52,10 @@ FB_IMPLEMENT_STATIC_CREATE(InputLayout);
 InputLayout::InputLayout()
 	:mImpl(new Impl)
 {
+}
+
+InputLayout::~InputLayout(){
+
 }
 
 void InputLayout::Bind(){

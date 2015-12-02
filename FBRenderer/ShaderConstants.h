@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	namespace ShaderConstants{
 		enum Enum{
 			Frame,

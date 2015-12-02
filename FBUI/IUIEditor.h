@@ -28,7 +28,7 @@
 #pragma once
 #include "UIProperty.h"
 #include "FBCommonHeaders/IteratorWrapper.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(WinBase);
 	class IUIEditor

@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "MeshImportDesc.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(TrailObject);
 	FB_DECLARE_SMART_PTR(DustRenderer);
 	FB_DECLARE_SMART_PTR(BillboardQuad);

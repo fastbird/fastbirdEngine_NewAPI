@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCollisionShape.h"
-namespace fastbird
+namespace fb
 {
 	class IMeshObject;
 	struct CollisionInfo

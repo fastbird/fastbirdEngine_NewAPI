@@ -31,7 +31,7 @@
 #include "MeshAuxiliary.h"
 #include "CollisionInfo.h"
 #include "FBRenderer/RenderPass.h"
-namespace fastbird
+namespace fb
 {
 	class Color;
 	class AnimationData;

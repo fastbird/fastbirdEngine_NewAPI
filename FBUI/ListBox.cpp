@@ -41,7 +41,7 @@
 #include "FBInputManager/TextManipulator.h"
 
 
-namespace fastbird
+namespace fb
 {
 
 ListBoxPtr ListBox::Create(){

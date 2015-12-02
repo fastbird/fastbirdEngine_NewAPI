@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "InputElementDesc.h"
 #include "FBStringLib/StringLib.h"
-namespace fastbird{
+namespace fb{
 
 	INPUT_ELEMENT_FORMAT InputElementFromString(const char* sz)
 	{

@@ -28,21 +28,31 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/RenderableObject.h"
-#include "SceneObjectFlag.h"
-namespace fastbird{	
+#include "SceneObjectFlag.h" // convenient include
+#include "SceneObjectType.h"
+#include <vector>
+#include <string>
+namespace fb{	
 	FB_DECLARE_SMART_PTR(Scene);
 	FB_DECLARE_SMART_PTR(SceneObject);
 	class FB_DLL_SCENEMANAGER SceneObject : public RenderableObject{
-		FB_DECLARE_PIMPL_CLONEABLE(SceneObject);				
+		std::string mName;
+		mutable std::vector<SceneWeakPtr> mScenes;
+		int mObjFlag;
+		int mGameType;
+		unsigned mGameId;
+		void* mGamePtr;
 
 	protected:
 		SceneObject();
+		SceneObject(const SceneObject& other);
 		~SceneObject();
 
 
 	public:
+		virtual SceneObjectType::Enum GetType() const;
 		void SetName(const char* name);
-		const char* GetName() const;		
+		const char* GetName() const;
 		void OnAttachedToScene(ScenePtr pScene);
 		void OnDetachedFromScene(ScenePtr pScene);
 		
@@ -55,6 +65,8 @@ namespace fastbird{
 		/// not including rtt
 		bool DetachFromScene();
 		bool DetachFromScene(bool includingRtt);
+
+		std::vector<ScenePtr> GetScenes();
 
 		//-------------------------------------------------------------------
 		// Object Flags

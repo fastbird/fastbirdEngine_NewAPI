@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 
-namespace fastbird{
+namespace fb{
 	void Error(const char* szFmt, ...){
 		char buf[2048];
 		va_list args;

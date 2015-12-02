@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "PointLight.h"
 #include "Renderer.h"
-using namespace fastbird;
+using namespace fb;
 class PointLight::Impl{
 public:
 	Vec3 mPosition;
@@ -142,12 +142,16 @@ public:
 };
 //---------------------------------------------------------------------------
 PointLightPtr PointLight::Create(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion){
-	return PointLightPtr(FB_NEW(PointLight)(pos, range, color, intensity, lifeTime, manualDeletion));
+	return PointLightPtr(new PointLight(pos, range, color, intensity, lifeTime, manualDeletion), [](PointLight* obj){ delete obj; });
 }
 
 PointLight::PointLight(const Vec3& pos, Real range, const Vec3& color, Real intensity, Real lifeTime, bool manualDeletion)
 	:mImpl(new Impl(pos, range, color, intensity, lifeTime, manualDeletion))
 {
+}
+
+PointLight::~PointLight(){
+
 }
 
 const Vec3& PointLight::GetPosition() const{

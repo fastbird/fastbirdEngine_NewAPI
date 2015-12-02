@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird
+namespace fb
 {
 	class Mat33;
 	class Vec3;
@@ -98,18 +98,18 @@ namespace fastbird
 
 //-----------------------------------------------------------------------
 // serialization
-std::istream& operator>>(std::istream& stream, fastbird::Quat& v);
-std::ostream& operator<<(std::ostream& stream, const fastbird::Quat& v);
+std::istream& operator>>(std::istream& stream, fb::Quat& v);
+std::ostream& operator<<(std::ostream& stream, const fb::Quat& v);
 
 //// luawapper util
 //template<>
-//struct luaU_Impl<fastbird::Quat>
+//struct luaU_Impl<fb::Quat>
 //{
-//	static fastbird::Quat luaU_check(lua_State* L, int index)
+//	static fb::Quat luaU_check(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Quat luaU_check(lua_State* L, int index)");
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Quat luaU_check(lua_State* L, int index)");
 //		luaL_checktype(L, index, LUA_TTABLE);
-//		fastbird::Quat ret;
+//		fb::Quat ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.w = (Real)luaL_checknumber(L, -1);
 //		lua_pop(L, 1);
@@ -125,10 +125,10 @@ std::ostream& operator<<(std::ostream& stream, const fastbird::Quat& v);
 //		return ret;
 //	}
 //
-//	static fastbird::Quat luaU_to(lua_State* L, int index)
+//	static fb::Quat luaU_to(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Quat luaU_to(lua_State* L, int index)");
-//		fastbird::Quat ret;
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Quat luaU_to(lua_State* L, int index)");
+//		fb::Quat ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.w = (Real)lua_tonumber(L, -1);
 //		lua_pop(L, 1);
@@ -144,7 +144,7 @@ std::ostream& operator<<(std::ostream& stream, const fastbird::Quat& v);
 //		return ret;
 //	}
 //
-//	static void luaU_push(lua_State* L, const fastbird::Quat& val)
+//	static void luaU_push(lua_State* L, const fb::Quat& val)
 //	{
 //		lua_createtable(L, 0, 3);
 //		lua_pushnumber(L, val.w);

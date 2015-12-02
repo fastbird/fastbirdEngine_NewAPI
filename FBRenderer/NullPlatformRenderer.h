@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "IPlatformRenderer.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(NullPlatformRenderer);
 	class NullPlatformRenderer : public IPlatformRenderer {
 		NullPlatformRenderer();

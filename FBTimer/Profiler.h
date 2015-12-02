@@ -29,7 +29,7 @@
 #include <stack>
 #include "FBCommonHeaders/platform.h"
 #include "Timer.h"
-namespace fastbird
+namespace fb
 {
 	class FB_DLL_TIMER Profiler
 	{

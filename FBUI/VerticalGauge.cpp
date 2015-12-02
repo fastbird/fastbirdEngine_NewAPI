@@ -30,7 +30,7 @@
 #include "UIObject.h"
 #include "FBRenderer/TextureAtlas.h"
 
-namespace fastbird
+namespace fb
 {
 
 VerticalGaugePtr VerticalGauge::Create(){

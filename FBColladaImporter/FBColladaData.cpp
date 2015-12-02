@@ -30,7 +30,7 @@
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 
-namespace fastbird{
+namespace fb{
 	namespace collada{
 		ColShape ConvertColShapeStringToEnum(const char* colShape){
 			if (strcmp(colShape, "sphere") == 0){

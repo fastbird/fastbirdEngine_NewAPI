@@ -274,7 +274,7 @@ void luaW_push(lua_State* L, T* obj)
         }
         else
         {
-			//fastbird::Log("LuaWrapper pushing cached one for typeid : %s", typeid(T).name());
+			//fb::Log("LuaWrapper pushing cached one for typeid : %s", typeid(T).name());
             LuaUtils::replace(L, -3); // ... obj cache
             LuaUtils::pop(L, 1); // ... obj
 			luaW_Userdata* ud = static_cast<luaW_Userdata*>(LuaUtils::touserdata(L, -1));
@@ -614,7 +614,7 @@ void luaW_setfuncs(lua_State* L, const char* classname, const luaL_Reg* table, c
     int result = LuaUtils::Lnewmetatable(L, classname); // ... T mt
 	if (!result)
 	{
-		fastbird::Log("Metatable %s already exists.", classname);
+		fb::Log("Metatable %s already exists.", classname);
 	}
     LuaUtils::newtable(L); // ... T mt {}
     LuaUtils::setfield(L, -2, LUAW_EXTENDS_KEY); // ... T mt

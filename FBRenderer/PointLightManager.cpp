@@ -30,7 +30,7 @@
 #include "PointLight.h"
 #include "FBCommonHeaders/Helpers.h"
 #include "EssentialEngineData/shaders/Constants.h"
-using namespace fastbird;
+using namespace fb;
 
 class PointLightManager::Impl{
 public:

@@ -30,7 +30,7 @@
 #include "Container.h"
 #include "ButtonImages.h"
 
-namespace fastbird
+namespace fb
 {
 FB_DECLARE_SMART_PTR(HorizontalGauge);
 FB_DECLARE_SMART_PTR(ImageBox);

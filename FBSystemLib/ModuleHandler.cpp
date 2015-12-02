@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "ModuleHandler.h"
 #include "FBDebugLib/Logger.h"
-namespace fastbird{
+namespace fb{
 	// intended redundancy
 	static std::string FormatString(const char* str, ...){
 		static char buf[2048];

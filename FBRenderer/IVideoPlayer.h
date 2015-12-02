@@ -28,7 +28,7 @@
 #pragma once
 #include <functional>
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(IVideoPlayer);
 	class IVideoPlayer{
 	public:

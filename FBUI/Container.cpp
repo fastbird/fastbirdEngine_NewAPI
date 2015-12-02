@@ -33,7 +33,7 @@
 #include "TextField.h"
 #include "UIManager.h"
 
-namespace fastbird
+namespace fb
 {
 
 Container::Container()
@@ -113,8 +113,8 @@ WinBasePtr Container::AddChild(float posX, float posY, float width, float height
 	auto child = AddChild(type);
 	if (child)
 	{
-		child->ChangeNSize(fastbird::Vec2(width, height));
-		child->ChangeNPos(fastbird::Vec2(posX, posY));
+		child->ChangeNSize(fb::Vec2(width, height));
+		child->ChangeNPos(fb::Vec2(posX, posY));
 		child->OnCreated();
 	}
 
@@ -162,7 +162,7 @@ WinBasePtr Container::AddChild(float posX, float posY, const Vec2& width_aspectR
 	return winbase;
 }
 
-WinBasePtr Container::AddChild(const fastbird::LuaObject& compTable)
+WinBasePtr Container::AddChild(const fb::LuaObject& compTable)
 {
 	mChildrenChanged = true;
 	std::string typeText = compTable.GetField("type_").GetString();
@@ -823,7 +823,7 @@ void Container::SaveChildren(tinyxml2::XMLElement& elem){
 	}
 }
 
-bool Container::ParseLua(const fastbird::LuaObject& compTable)
+bool Container::ParseLua(const fb::LuaObject& compTable)
 {
 	__super::ParseLua(compTable);
 	auto children = compTable.GetField("children");

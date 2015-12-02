@@ -39,7 +39,7 @@
 #include "FBRenderer/IRendererObserver.h"
 #include "FBInputManager/IInputConsumer.h"
 
-namespace fastbird
+namespace fb
 {
 	void RegisterLuaFuncs(lua_State* mL);
 	void RegisterLuaEnums(lua_State* mL);

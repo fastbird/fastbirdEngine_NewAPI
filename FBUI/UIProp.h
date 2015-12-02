@@ -29,7 +29,7 @@
 #include "UIPropTypes.h"
 #include "UIProperty.h"
 
-namespace fastbird
+namespace fb
 {
 	// NOT USING
 	template <class T>

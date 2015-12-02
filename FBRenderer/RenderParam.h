@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	class ICamera;
 	struct RenderParam{
 		/// Vaild while rendering.

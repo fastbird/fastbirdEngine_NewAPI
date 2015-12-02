@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "SceneObject.h"
 #include "SpatialObject.h"
-namespace fastbird{		
+namespace fb{		
 	FB_DECLARE_SMART_PTR(SpatialSceneObject);
 	class FB_DLL_SCENEMANAGER SpatialSceneObject : public SceneObject, public SpatialObject{
 	protected:

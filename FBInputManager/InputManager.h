@@ -31,7 +31,8 @@
 #include "FBInputDevice.h"
 #include "IInputInjector.h" // convenient include
 #include "FBTimer/Timer.h"
-namespace fastbird{
+namespace fb{
+	FB_DECLARE_SMART_PTR(IRenderTargetObserver);
 	FB_DECLARE_SMART_PTR(IMouse);
 	FB_DECLARE_SMART_PTR(IKeyboard);
 	FB_DECLARE_SMART_PTR(IInputConsumer);
@@ -91,6 +92,8 @@ namespace fastbird{
 		void AddHwndInterested(HWindow wnd);
 		void SetInputInjector(IInputInjectorPtr injector);
 		IInputInjectorPtr GetInputInjector() const;
+		typedef std::vector<IRenderTargetObserverPtr> RenderTargetObservers;
+		RenderTargetObservers GetRenderTargetObservers() const;
 
 		//-------------------------------------------------------------------
 		// Keyboard

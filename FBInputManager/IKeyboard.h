@@ -31,7 +31,7 @@
 
 #include "IInputDevice.h"
 #include "KeyboardEvent.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IKeyboard);
 	class IKeyboard : public IInputDevice

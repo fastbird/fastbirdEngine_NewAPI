@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "RendererEnums.h"
 #include "RendererStructs.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IPlatformTexture);
 	class IPlatformTexture

@@ -32,7 +32,7 @@
 #include "FBInputManager/KeyCodes.h"
 #include "FBSceneManager/ISpatialObject.h"
 
-using namespace fastbird;
+using namespace fb;
 
 class Camera::Impl{
 public:
@@ -73,6 +73,8 @@ public:
 		Real pitch;
 	} mInternalParams;
 
+	Camera* mSelf;
+	bool mMainCamera;
 	bool mViewPropertyChanged;
 	bool mProjPropertyChanged;
 	bool mOrthogonal;
@@ -95,7 +97,10 @@ public:
 	Vec3 mPrevTargetPos;
 	std::mutex mMutex;
 
-	Impl() :mViewPropertyChanged(true)
+	Impl(Camera* self) 
+		: mSelf(self)
+		, mMainCamera(false)
+		, mViewPropertyChanged(true)
 		, mProjPropertyChanged(true)
 		, mOrthogonal(false)
 		, mYZSwap(true)
@@ -239,23 +244,23 @@ public:
 				mInternalParams.dist = 300.0;
 
 			mInternalParams.pitch += mUserParams.dPitch;
-			if (mInternalParams.pitch > fastbird::HALF_PI - fastbird::Radian(5))
+			if (mInternalParams.pitch > fb::HALF_PI - fb::Radian(5))
 			{
-				mInternalParams.pitch = fastbird::HALF_PI - fastbird::Radian(5);
+				mInternalParams.pitch = fb::HALF_PI - fb::Radian(5);
 			}
-			else if (mInternalParams.pitch <  -fastbird::HALF_PI + fastbird::Radian(5))
+			else if (mInternalParams.pitch <  -fb::HALF_PI + fb::Radian(5))
 			{
-				mInternalParams.pitch = -fastbird::HALF_PI + fastbird::Radian(5);
+				mInternalParams.pitch = -fb::HALF_PI + fb::Radian(5);
 			}
 
 			mInternalParams.yaw += mUserParams.dYaw;
-			if (mInternalParams.yaw > fastbird::TWO_PI)
+			if (mInternalParams.yaw > fb::TWO_PI)
 			{
-				mInternalParams.yaw -= fastbird::TWO_PI;
+				mInternalParams.yaw -= fb::TWO_PI;
 			}
-			else if (mInternalParams.yaw < -fastbird::TWO_PI)
+			else if (mInternalParams.yaw < -fb::TWO_PI)
 			{
-				mInternalParams.yaw += fastbird::TWO_PI;
+				mInternalParams.yaw += fb::TWO_PI;
 			}
 
 			Vec3 defaultDir = -Vec3::UNIT_Y;
@@ -280,7 +285,7 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	void Update(Camera* cam)
+	void Update()
 	{
 		// world coordinates (Blender style)
 		// x: right
@@ -294,7 +299,7 @@ public:
 			Vec3 forward = mTransformation.GetMatrix().Column(1);
 			Vec3 up = mTransformation.GetMatrix().Column(2);
 			const Vec3& pos = mTransformation.GetTranslation();
-			mMatrices[View] = fastbird::MakeViewMatrix(pos, right, forward, up);			
+			mMatrices[View] = fb::MakeViewMatrix(pos, right, forward, up);			
 			mTransformation.GetHomogeneous(mMatrices[InverseView]);
 		}
 
@@ -331,8 +336,8 @@ public:
 
 			UpdateFrustum();
 
-			if (viewChanged && !cam->mObservers_.empty()){
-				auto& observers = cam->mObservers_[TransformChanged];
+			if (viewChanged && !mSelf->mObservers_.empty()){
+				auto& observers = mSelf->mObservers_[TransformChanged];
 				for (auto it = observers.begin(); it != observers.end(); /**/){
 					auto observer = it->lock();
 					if (!observer){
@@ -343,8 +348,8 @@ public:
 					observer->OnViewMatrixChanged();
 				}				
 			}
-			if (projChanged && !cam->mObservers_.empty()){
-				auto& observers = cam->mObservers_[TransformChanged];
+			if (projChanged && !mSelf->mObservers_.empty()){
+				auto& observers = mSelf->mObservers_[TransformChanged];
 				for (auto it = observers.begin(); it != observers.end(); /**/){
 					auto observer = it->lock();
 					if (!observer){
@@ -417,9 +422,9 @@ public:
 	}
 
 	//----------------------------------------------------------------------------
-	Ray3 ScreenPosToRay(Camera* cam, long x, long y)
+	Ray3 ScreenPosToRay(long x, long y)
 	{
-		Update(cam);
+		Update();
 
 		Real fx = 2.0f * x / mWidth - 1.0f;
 		Real fy = 1.0f - 2.0f * y / mHeight;
@@ -548,12 +553,12 @@ public:
 FB_IMPLEMENT_STATIC_CREATE(Camera);
 
 Camera::Camera()
-	: mImpl(new Impl){
+	: mImpl(new Impl(this)){
 	
 }
 
 Camera::Camera(const Camera& other)
-	: mImpl(new Impl)
+	: mImpl(new Impl(this))
 {
 	*mImpl = *other.mImpl;
 }
@@ -565,6 +570,14 @@ Camera& Camera::operator= (const Camera& other)
 {
 	*mImpl = *other.mImpl;
 	return *this;
+}
+
+void Camera::SetMainCamera(bool main){
+	mImpl->mMainCamera = main;
+}
+
+bool Camera::IsMainCamera() const{
+	return mImpl->mMainCamera;
 }
 
 //----------------------------------------------------------------------------
@@ -637,7 +650,7 @@ void Camera::ProcessInputData(){
 
 //----------------------------------------------------------------------------
 void Camera::Update(){
-	mImpl->Update(this);
+	mImpl->Update();
 }
 
 //----------------------------------------------------------------------------
@@ -647,6 +660,8 @@ void Camera::UpdateFrustum(){
 
 //----------------------------------------------------------------------------
 const Mat44& Camera::GetMatrix(MatrixType type){
+	if (mImpl->mViewPropertyChanged || mImpl->mProjPropertyChanged)
+		mImpl->Update();
 	return mImpl->GetMatrix(type);
 }
 //----------------------------------------------------------------------------
@@ -656,7 +671,7 @@ bool Camera::IsCulled(BoundingVolume* pBV) const{
 
 //----------------------------------------------------------------------------
 Ray3 Camera::ScreenPosToRay(long x, long y){
-	return mImpl->ScreenPosToRay(this, x, y);
+	return mImpl->ScreenPosToRay(x, y);
 }
 
 Vec2I Camera::WorldToScreen(const Vec3& worldPos) const{

@@ -42,7 +42,7 @@
 #include "FBSceneObjectFactory/MeshObject.h"
 #include "FBSceneObjectFactory/SceneObjectFactory.h"
 
-using namespace fastbird;
+using namespace fb;
 class ParticleEmitter::Impl
 {
 public:
@@ -69,7 +69,7 @@ public:
 
 	// not using currently
 	// Assuming Y is the direction.
-	fastbird::Vec3 mEmitterDirection;
+	fb::Vec3 mEmitterDirection;
 
 	unsigned mEmitterID;
 	float mLifeTime;
@@ -977,7 +977,7 @@ public:
 		return mInActiveList;
 	}
 
-	void SetEmitterDirection(const fastbird::Vec3& dir){
+	void SetEmitterDirection(const fb::Vec3& dir){
 		mEmitterDirection = dir;
 	}
 
@@ -1618,7 +1618,7 @@ bool ParticleEmitter::IsActive() const {
 	return mImpl->IsActive();
 }
 
-void ParticleEmitter::SetEmitterDirection(const fastbird::Vec3& dir) {
+void ParticleEmitter::SetEmitterDirection(const fb::Vec3& dir) {
 	mImpl->SetEmitterDirection(dir);
 }
 

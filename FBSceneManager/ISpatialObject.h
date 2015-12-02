@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	class Vec3;
 	FB_DECLARE_SMART_PTR(ISpatialObject);
 	FB_DECLARE_SMART_PTR(BoundingVolume);

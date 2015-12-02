@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "DirectionalLight.h"
-using namespace fastbird;
+using namespace fb;
 
 class DirectionalLight::Impl{
 public:
@@ -203,7 +203,9 @@ DirectionalLight::DirectionalLight()
 	:mImpl(new Impl)
 {
 }
+DirectionalLight::~DirectionalLight(){
 
+}
 
 const Vec3& DirectionalLight::GetDirection(){
 	return mImpl->mDirection;

@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird
+namespace fb
 {
 	static const Real PI = 3.1415926535897932384626433832795f;
 	static const Real INV_PI = 0.31830988618379067153776752674503f;

@@ -28,7 +28,7 @@
 #pragma once
 #include "UIEvents.h"
 
-namespace fastbird
+namespace fb
 {
 	class FB_DLL_UI EventHandler
 	{
@@ -62,7 +62,7 @@ namespace fastbird
 		FUNC_MAP mFuncMap;
 		EVENT_FUNC_MAP mEventFuncMap;
 
-		typedef std::map<UIEvents::Enum, fastbird::LuaObject> LUA_EVENT_FUNC_MAP;
+		typedef std::map<UIEvents::Enum, fb::LuaObject> LUA_EVENT_FUNC_MAP;
 		LUA_EVENT_FUNC_MAP mLuaFuncMap;
 
 		std::set<UIEvents::Enum> mDisabledEvent;

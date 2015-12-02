@@ -34,16 +34,16 @@
 #include "FBStringLib/StringConverter.h"
 #include "FBDebugLib/Logger.h"
 #include "TinyXmlLib/tinyxml2.h"
-using namespace fastbird;
+using namespace fb;
 class AnimationData::Impl{
 public:
 	friend class Animation;
 	std::string mName;
-	fastbird::VectorMap<float, Vec3> mScale;
-	fastbird::VectorMap<float, Quat> mRot;
-	fastbird::VectorMap<float, Vec3> mEuler;
-	fastbird::VectorMap<float, Vec3> mPos;
-	fastbird::VectorMap<std::string, Action> mActions;
+	fb::VectorMap<float, Vec3> mScale;
+	fb::VectorMap<float, Quat> mRot;
+	fb::VectorMap<float, Vec3> mEuler;
+	fb::VectorMap<float, Vec3> mPos;
+	fb::VectorMap<std::string, Action> mActions;
 
 	//---------------------------------------------------------------------------
 	void AddPosition(float time, float v, PosComp comp){

@@ -28,7 +28,7 @@
 #include "StdAfx.h"
 #include "KeyValueDataSet.h"
 
-namespace fastbird
+namespace fb
 {
 	KeyValueDataSet::KeyValueDataSet()
 		: mLastTime(0)

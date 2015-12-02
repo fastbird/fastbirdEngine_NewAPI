@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/platform.h"
 #include "FBSceneManager/SpatialSceneObject.h"
 #include "FBMathLib/Color.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(Material);
 	FB_DECLARE_SMART_PTR(DustRenderer);

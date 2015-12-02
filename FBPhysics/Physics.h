@@ -28,7 +28,7 @@
 #pragma once
 #include "IPhysics.h"
 #include "FBCommonHeaders/Types.h"
-namespace fastbird
+namespace fb
 {
 	struct FBFilterCallback;
 	class BulletDebugDraw;

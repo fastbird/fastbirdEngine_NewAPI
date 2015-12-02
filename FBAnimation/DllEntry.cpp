@@ -27,8 +27,8 @@
 
 #include "stdafx.h"
 #include "FBTimer/Timer.h"
-namespace fastbird{
-	fastbird::Timer* gpTimer = 0;
+namespace fb{
+	fb::Timer* gpTimer = 0;
 	class FBAnimationDllentry{
 	public:
 		FBAnimationDllentry(){

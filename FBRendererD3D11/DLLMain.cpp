@@ -29,13 +29,13 @@
 #include "DLLMain.h"
 #include "RendererD3D11.h"
 
-fastbird::IPlatformRenderer* CreateRenderEngine(){
+fb::IPlatformRenderer* CreateRenderEngine(){
 	
-	fastbird::Logger::Init("_FBRendererD3D11.log");
-	return fastbird::RendererD3D11::Create();
+	fb::Logger::Init("_FBRendererD3D11.log");
+	return fb::RendererD3D11::Create();
 }
 
 void DeleteRenderEngine(){
-	fastbird::RendererD3D11::Destroy();
-	fastbird::Logger::Release();
+	fb::RendererD3D11::Destroy();
+	fb::Logger::Release();
 }

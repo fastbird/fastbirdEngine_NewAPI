@@ -30,7 +30,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
-namespace fastbird{
+namespace fb{
 	template <typename T>
 	class Factory{
 	public:

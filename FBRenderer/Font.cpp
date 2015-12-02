@@ -42,7 +42,7 @@
 #include "FBStringLib/StringLib.h"
 #include "FBStringLib/StringConverter.h"
 #include "EssentialEngineData/shaders/Constants.h"
-namespace fastbird{
+namespace fb{
 struct SCharDescr
 {
 	SCharDescr() : srcX(0), srcY(0), srcW(0), srcH(0), xOff(0), yOff(0), xAdv(0), page(0) {}
@@ -265,12 +265,13 @@ public:
 					}
 					mTextureMaterial->SetDiffuseColor(Vec4(1, 1, 1, ((mColor & 0xff000000) >> 24) / 255.f));
 					renderer.DrawQuadWithTextureUV(Vec2I(x, y + yoffset), imgSize, region->mUVStart, region->mUVEnd,
-						Color::White, mTextureAtlas->GetTexture(), mTextureMaterial);
-
+						Color::White, mTextureAtlas->GetTexture(), mTextureMaterial);					
 					x += imgSize.x;
 					return true;
 				}
 			}
+			x += 24;
+			return true;
 			break;
 		}
 		case TextTags::ColorStart:
@@ -324,14 +325,18 @@ public:
 					{
 						*tag = tagType;
 					}
-					if (imgLen && tagType == TextTags::Img && mTextureAtlas){
-						auto region = mTextureAtlas->GetRegion(buf);
-						if (region)
-						{
-							auto& regionSize = region->GetSize();
-							*imgLen = regionSize.x;
-						}
-
+					if (tagType == TextTags::Img){
+						if (imgLen){
+							*imgLen = 24;
+							if (mTextureAtlas){
+								auto region = mTextureAtlas->GetRegion(buf);
+								if (region)
+								{
+									auto& regionSize = region->GetSize();
+									*imgLen = regionSize.x;
+								}
+							}
+						}						
 					}
 					return endLen;
 				}
@@ -924,6 +929,10 @@ public:
 		}
 		return newText;
 	}
+
+	void SetTextureAtlas(TextureAtlasPtr atlas){
+		mTextureAtlas = atlas;
+	}
 };
 
 //----------------------------------------------------------------------------
@@ -935,6 +944,10 @@ FontPtr Font::Create(){
 Font::Font()
 	: mImpl(new Impl)
 {
+}
+
+Font::~Font(){
+
 }
 
 int Font::Init(const char *fontFile) {
@@ -1037,6 +1050,10 @@ void Font::RestoreRenderTargetSize(){
 
 std::wstring Font::StripTags(const wchar_t* text){
 	return mImpl->StripTags(text);
+}
+
+void Font::SetTextureAtlas(TextureAtlasPtr atlas){
+	mImpl->SetTextureAtlas(atlas);
 }
 
 //=============================================================================

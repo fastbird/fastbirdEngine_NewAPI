@@ -28,7 +28,7 @@
 #pragma once
 #include "BoundingVolume.h"
 #include "AABB.h"
-namespace fastbird
+namespace fb
 {
 	class BVaabb: public BoundingVolume
 	{
@@ -56,7 +56,7 @@ namespace fastbird
 		virtual void Merge(const BoundingVolume* pBV);
 		virtual void Merge(const Vec3& worldPos);
 
-		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& source, Vec3& normal);
+		virtual fb::Vec3 GetSurfaceFrom(const Vec3& source, Vec3& normal);
 		virtual void Invalidate(){ mAABB.Invalidate(); }
 
 		void SetAABB(const AABB& aabb);

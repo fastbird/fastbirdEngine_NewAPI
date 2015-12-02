@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	namespace SceneObjectFlag{
 		enum Enum{
 			Hide = 1,

@@ -32,7 +32,7 @@
 #include <iomanip>
 #include <assert.h>
 
-namespace fastbird{
+namespace fb{
 
 std::string StringMathConverter::ToString(const Vec2& val){
 	std::stringstream stream;

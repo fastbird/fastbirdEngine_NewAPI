@@ -31,7 +31,7 @@
 #include "FBInputManager/IInputConsumer.h"
 #include "ICVarObserver.h"
 #include "ConsoleDataType.h"
-namespace fastbird{
+namespace fb{
 	class IConsoleRenderer;
 	class StdOutRedirect;
 	FB_DECLARE_SMART_PTR(Console);

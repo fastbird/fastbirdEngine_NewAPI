@@ -28,7 +28,7 @@
 #pragma once
 #include "RendererEnums.h"
 #include <vector>
-namespace fastbird{
+namespace fb{
 	struct TextureBinding{
 		bool operator==(const TextureBinding& other) const;
 		bool operator<(const TextureBinding& other) const;

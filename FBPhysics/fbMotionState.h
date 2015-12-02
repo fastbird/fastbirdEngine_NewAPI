@@ -27,7 +27,7 @@
 
 #pragma once
 #include <LinearMath/btMotionState.h>
-namespace fastbird
+namespace fb
 {
 	class IPhysicsInterface;
 	class RigidBody;

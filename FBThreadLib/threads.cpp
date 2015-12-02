@@ -31,7 +31,7 @@
 #include <thread>
 #include <atomic>
 
-namespace fastbird
+namespace fb
 {
 __declspec(thread) ThreadInfo* GThreadDesc = 0;
 
@@ -126,6 +126,10 @@ ThreadSafeCounter::ThreadSafeCounter()
 ThreadSafeCounter::ThreadSafeCounter(int _Value)
 	: mImpl(new Impl(_Value))
 {
+
+}
+
+ThreadSafeCounter::~ThreadSafeCounter(){
 
 }
 

@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	class RigidBody;
 	struct IFilterCallback{
 		virtual bool needCollision(RigidBody* a, RigidBody* b) = 0;

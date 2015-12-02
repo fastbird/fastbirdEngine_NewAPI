@@ -28,7 +28,7 @@
 #include "StdAfx.h"
 #include "DragBox.h"
 
-namespace fastbird
+namespace fb
 {
 DragBox::DragBox()
 	: mStarted(false)

@@ -29,7 +29,7 @@
 #include "Mouse.h"
 #include "FBCommonHeaders/Helpers.h"
 
-namespace fastbird
+namespace fb
 {
 static int Round(Real v)
 {

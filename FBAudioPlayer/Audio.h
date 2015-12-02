@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	
 	FB_DECLARE_SMART_PTR(Audio);
 	class FB_DLL_AUDIO Audio{

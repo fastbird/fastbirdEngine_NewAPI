@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "Mat33.h"
 
-using namespace fastbird;
+using namespace fb;
 
 const Mat33 Mat33::IDENTITY(1, 0, 0, 0, 1, 0, 0, 0, 1);
 const Mat33 Mat33::ZERO(0, 0, 0, 0, 0, 0, 0, 0, 0);

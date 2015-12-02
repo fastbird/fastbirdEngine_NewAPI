@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "SpatialSceneObject.h"
-using namespace fastbird;
+using namespace fb;
 SpatialSceneObject::SpatialSceneObject(){
 
 }

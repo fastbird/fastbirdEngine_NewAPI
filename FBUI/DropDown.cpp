@@ -32,7 +32,7 @@
 #include "UIObject.h"
 #include "UIManager.h"
 
-namespace fastbird
+namespace fb
 {
 
 const float DropDown::LEFT_GAP = 0.001f;

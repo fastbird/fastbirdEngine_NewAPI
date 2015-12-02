@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/IVideoPlayer.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(VideoPlayerOgg);
 	class FB_DLL_VIDEOPLAYER VideoPlayerOgg : public IVideoPlayer{		
 	public:

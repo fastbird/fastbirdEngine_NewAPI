@@ -30,7 +30,7 @@
 #include "Vec3.h"
 #include "Math.h"
 
-namespace fastbird
+namespace fb
 {
 const Real Quat::ms_fEpsilon = 1e-03f;
 const Quat Quat::ZERO(0, 0, 0, 0);
@@ -346,20 +346,20 @@ Real Quat::Dot(const Quat& other) const
 
 bool Quat::IsNaN() const
 {
-		return fastbird::IsNaN(w) || fastbird::IsNaN(x) ||
-			fastbird::IsNaN(y) || fastbird::IsNaN(z);
+		return fb::IsNaN(w) || fb::IsNaN(x) ||
+			fb::IsNaN(y) || fb::IsNaN(z);
 }
 
 }
 
 //-----------------------------------------------------------------------
-std::istream& operator>>(std::istream& stream, fastbird::Quat& v)
+std::istream& operator>>(std::istream& stream, fb::Quat& v)
 {
 	stream >> v.w >> v.x >> v.y >> v.z;
 	return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const fastbird::Quat& v)
+std::ostream& operator<<(std::ostream& stream, const fb::Quat& v)
 {
 	stream << v.w << v.x << v.y << v.z;
 	return stream;

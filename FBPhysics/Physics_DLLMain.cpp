@@ -28,17 +28,17 @@
 #include <Physics/StdAfx.h>
 #include <Physics/Physics.h>
 
-fastbird::IPhysics* gFBPhysics = 0;
+fb::IPhysics* gFBPhysics = 0;
 
 extern "C"
 {
 	//-------------------------------------------------------------------------
-	__declspec(dllexport) fastbird::IPhysics* _cdecl Create_fastbird_Physics()
+	__declspec(dllexport) fb::IPhysics* _cdecl Create_fastbird_Physics()
 	{
 		if (gFBPhysics)
 			return gFBPhysics;
 
-		auto pPhysics = FB_NEW(fastbird::Physics)();
+		auto pPhysics = FB_NEW(fb::Physics)();
 		gFBPhysics = pPhysics;
 		assert(gFBPhysics);
 		pPhysics->Initilaize();
@@ -52,13 +52,13 @@ extern "C"
 		if (!gFBPhysics)
 			return;
 
-		fastbird::Physics* physics = (fastbird::Physics*)gFBPhysics;
+		fb::Physics* physics = (fb::Physics*)gFBPhysics;
 		physics->Deinitilaize();
 		FB_DELETE(physics);
 		gFBPhysics = 0;
 
 #ifdef USING_FB_MEMORY_MANAGER
-			fastbird::FBReportMemoryForModule();
+			fb::FBReportMemoryForModule();
 #endif
 	}
 }

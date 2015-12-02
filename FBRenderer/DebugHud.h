@@ -33,7 +33,7 @@
 #include <list>
 #include <map>
 #undef DrawText
-namespace fastbird
+namespace fb
 {
 	struct RenderParam;
 	struct RenderParamOut;

@@ -29,7 +29,7 @@
 #include "Timer.h"
 
 using namespace std::chrono;
-namespace fastbird
+namespace fb
 {
 	Timer* gpTimer = 0;
 	class Timer::Impl{

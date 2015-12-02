@@ -30,7 +30,7 @@
 #include "ImageBox.h"
 #include "StaticText.h"
 #include "UIObject.h"
-namespace fastbird
+namespace fb
 {
 
 RadioBoxPtr RadioBox::Create(){

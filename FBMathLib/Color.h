@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBMathLib/Math.h"
-namespace fastbird
+namespace fb
 {
 	class Color
 	{

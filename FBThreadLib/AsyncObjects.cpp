@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "AsyncObjects.h"
-using namespace fastbird;
+using namespace fb;
 
 //---------------------------------------------------------------------------
 FB_CRITICAL_SECTION::FB_CRITICAL_SECTION()
@@ -161,7 +161,7 @@ public:
 #else
 #endif
 
-SyncEventPtr fastbird::CreateSyncEvent(bool ManualReset, char* Name)
+SyncEventPtr fb::CreateSyncEvent(bool ManualReset, char* Name)
 {
 #if defined(_PLATFORM_WINDOWS_)
 	return SyncEventPtr(new SyncEventWin(ManualReset, Name), [](SyncEventWin* obj){ delete obj; });

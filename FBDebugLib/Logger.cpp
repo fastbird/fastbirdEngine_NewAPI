@@ -37,19 +37,17 @@
 #include <iostream>
 #include <set>
 
-using namespace fastbird;
+using namespace fb;
 
 static int sInitialized = false;
 static std::shared_ptr<std::ofstream> sLogFile;
 static std::streambuf* sOriginalErrorStream = 0;
+static std::shared_ptr<std::ofstream> sGlobalErrorLog;
 
 void Logger::Init(const char* filepath){	
 	sLogFile = std::make_shared<std::ofstream>();
 	sLogFile->open(filepath);
-	//auto errStream = std::cerr.rdbuf(sLogFile->rdbuf());
-	//if (!sOriginalErrorStream){
-		//sOriginalErrorStream = errStream;
-	//}
+	
 	sInitialized = true;
 }
 
@@ -62,6 +60,15 @@ void Logger::Init(const WCHAR* filepath){
 	sInitialized = true;
 }
 
+void Logger::InitGlobalLog(const char* filepath){
+	sGlobalErrorLog = std::make_shared<std::ofstream>();
+	sGlobalErrorLog->open(filepath);
+	auto errStream = std::cerr.rdbuf(sGlobalErrorLog->rdbuf());
+	if (!sOriginalErrorStream){
+		sOriginalErrorStream = errStream;
+	}
+}
+
 void Logger::Release(){
 	sInitialized = false;
 	if (sOriginalErrorStream){
@@ -69,6 +76,9 @@ void Logger::Release(){
 		sOriginalErrorStream = 0;
 	}
 	sLogFile->close();	
+	if (sGlobalErrorLog){
+		sGlobalErrorLog->close();
+	}
 }
 
 void Logger::Log(const char* str, ...){
@@ -84,6 +94,9 @@ void Logger::Log(const char* str, ...){
 	va_start(args, str);
 	vsprintf_s(buffer, str, args);
 	va_end(args);
+
+	//if (strstr(buffer, "(error)") || strstr(buffer, "(log)") || strstr(buffer, "(info)"))
+	std::cerr << buffer;
 
 	if (sLogFile && sLogFile->is_open()){
 		*sLogFile << buffer;

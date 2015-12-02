@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	namespace ResourceTypes{
 		namespace Textures{
 			// Only textures independent from the render target size.

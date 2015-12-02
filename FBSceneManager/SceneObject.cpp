@@ -29,139 +29,23 @@
 #include "SceneObject.h"
 #include "FBCommonHeaders/Helpers.h"
 #include "Scene.h"
-#include <vector>
-using namespace fastbird;
-
-class SceneObject::Impl{
-public:
-	std::string mName;
-	std::vector<SceneWeakPtr> mScenes;
-	int mObjFlag;
-	int mGameType;
-	unsigned mGameId;
-	void* mGamePtr;
-
-	//---------------------------------------------------------------------------
-	Impl()
-		: mObjFlag(0)
-		, mGameType(-1)
-		, mGameId(-1)
-		, mGamePtr(0)		
-	{
-	}
-
-	Impl(const Impl& other)
-		: mName(other.mName)
-		, mScenes(other.mScenes)
-		, mObjFlag(other.mObjFlag)
-		, mGameType(-1)
-		, mGameId(-1)
-		, mGamePtr(0)		
-	{
-	}
-
-	void SetName(const char* name){
-		if (name)
-			mName = name;
-	}
-
-	const char* GetName() const{
-		return mName.c_str();
-	}
-
-	void OnAttachedToScene(ScenePtr pScene)
-	{
-		if (pScene == 0)
-			return;
-
-		if (!ValueExistsInVector(mScenes, pScene)) {
-			mScenes.push_back(pScene);
-		}
-	}
-
-	void OnDetachedFromScene(ScenePtr pScene)
-	{
-		DeleteValuesInVector(mScenes, pScene);
-	}
-
-	bool IsAttached(ScenePtr pScene) const {
-		if (!pScene)
-		{
-			return !mScenes.empty();
-		}
-		return ValueExistsInVector(mScenes, pScene);
-	}
-
-	//-------------------------------------------------------------------
-	// Object Flags
-	//-------------------------------------------------------------------
-	void SetObjFlag(unsigned flag) {
-		mObjFlag = flag;
-	}
-
-	unsigned GetObjFlag() const {
-		return mObjFlag;
-	}
-
-	void ModifyObjFlag(unsigned flag, bool enable) {
-		if (enable)
-		{
-			mObjFlag |= flag;
-		}
-		else
-		{
-			mObjFlag = mObjFlag  & ~flag;
-		}
-	}
-
-	bool HasObjFlag(unsigned flag) {
-		return (mObjFlag & flag) != 0;
-	}
-
-	void SetVisible(bool visible) {
-		ModifyObjFlag(SceneObjectFlag::Hide, !visible);
-	}
-
-	bool GetVisible() const {
-		return mObjFlag & SceneObjectFlag::Hide ? false : true;
-	}
-
-	//-------------------------------------------------------------------
-	// Debugging features
-	//-------------------------------------------------------------------
-	void SetGameType(int type){
-		mGameType = type;
-	}
-
-	int GetGameType() const { 
-		return mGameType;
-	}
-
-	void SetGameId(unsigned id) {
-		mGameId = id;
-	}
-
-	unsigned GetGameId() const { 
-		return mGameId;
-	}
-
-	void SetGamePtr(void* ptr) {
-		mGamePtr = ptr;
-	}
-
-	void* GetGamePtr() const { 
-		return mGamePtr;
-	}
-};
-
+using namespace fb;
 //---------------------------------------------------------------------------
 SceneObject::SceneObject()
-: mImpl(new Impl)
+	: mObjFlag(0)
+	, mGameType(-1)
+	, mGameId(-1)
+	, mGamePtr(0)
 {
 }
 
 SceneObject::SceneObject(const SceneObject& other)
-	: mImpl(new Impl(*other.mImpl))
+	: mName(other.mName)
+	, mScenes(other.mScenes)
+	, mObjFlag(other.mObjFlag)
+	, mGameType(-1)
+	, mGameId(-1)
+	, mGamePtr(0)
 {
 }
 
@@ -169,41 +53,121 @@ SceneObject::~SceneObject()
 {
 }
 
+SceneObjectType::Enum SceneObject::GetType() const{
+	return SceneObjectType::Unknown;
+}
+
 void SceneObject::SetName(const char* name){
-	mImpl->SetName(name);
+	if (name)
+		mName = name;
 }
 
 const char* SceneObject::GetName() const{
-	return mImpl->GetName();
+	return mName.c_str();
 }
 
-void SceneObject::OnAttachedToScene(ScenePtr pScene){
-	mImpl->OnAttachedToScene(pScene);
+void SceneObject::OnAttachedToScene(ScenePtr pScene)
+{
+	if (pScene == 0)
+		return;
+
+	if (!ValueExistsInVector(mScenes, pScene)) {
+		mScenes.push_back(pScene);
+	}
 }
 
-void SceneObject::OnDetachedFromScene(ScenePtr pScene){
-	mImpl->OnDetachedFromScene(pScene);
+void SceneObject::OnDetachedFromScene(ScenePtr pScene)
+{
+	DeleteValuesInVector(mScenes, pScene);
 }
 
 bool SceneObject::IsAttached() const{
-	return mImpl->IsAttached(0);
+	for (auto it = mScenes.begin(); it != mScenes.end();/**/){
+		IteratingWeakContainer(mScenes, it, scene);
+	}
+	return !mScenes.empty();
 }
 
-bool SceneObject::IsAttached(ScenePtr pScene) const{
-	return mImpl->IsAttached(pScene);
+bool SceneObject::IsAttached(ScenePtr pScene) const {
+	if (!pScene)
+	{
+		return !mScenes.empty();
+	}
+	return ValueExistsInVector(mScenes, pScene);
+}
+
+//-------------------------------------------------------------------
+// Object Flags
+//-------------------------------------------------------------------
+void SceneObject::SetObjFlag(unsigned flag) {
+	mObjFlag = flag;
+}
+
+unsigned SceneObject::GetObjFlag() const {
+	return mObjFlag;
+}
+
+void SceneObject::ModifyObjFlag(unsigned flag, bool enable) {
+	if (enable)
+	{
+		mObjFlag |= flag;
+	}
+	else
+	{
+		mObjFlag = mObjFlag  & ~flag;
+	}
+}
+
+bool SceneObject::HasObjFlag(unsigned flag) {
+	return (mObjFlag & flag) != 0;
+}
+
+void SceneObject::SetVisible(bool visible) {
+	ModifyObjFlag(SceneObjectFlag::Hide, !visible);
+}
+
+bool SceneObject::GetVisible() const {
+	return mObjFlag & SceneObjectFlag::Hide ? false : true;
+}
+
+//-------------------------------------------------------------------
+// Debugging features
+//-------------------------------------------------------------------
+void SceneObject::SetGameType(int type){
+	mGameType = type;
+}
+
+int SceneObject::GetGameType() const {
+	return mGameType;
+}
+
+void SceneObject::SetGameId(unsigned id) {
+	mGameId = id;
+}
+
+unsigned SceneObject::GetGameId() const {
+	return mGameId;
+}
+
+void SceneObject::SetGamePtr(void* ptr) {
+	mGamePtr = ptr;
+}
+
+void* SceneObject::GetGamePtr() const {
+	return mGamePtr;
 }
 
 bool SceneObject::DetachFromScene(){
 	return DetachFromScene(false);
 }
+
 bool SceneObject::DetachFromScene(bool includingRtt){
-	auto& scenes = mImpl->mScenes;
-	unsigned limit = scenes.size();
+	unsigned limit = mScenes.size();
 	unsigned count = 0;
 	bool detached = false;
-	for (unsigned i = 0; i < scenes.size() && count < limit;)
+	for (unsigned i = 0; i < mScenes.size() && count < limit;)
 	{
-		auto scene = scenes[i].lock();
+		auto scene = mScenes[i].lock();
 		if (scene){
 			if (includingRtt)
 			{
@@ -226,57 +190,11 @@ bool SceneObject::DetachFromScene(bool includingRtt){
 	return detached;
 }
 
-//-------------------------------------------------------------------
-// Object Flags
-//-------------------------------------------------------------------
-void SceneObject::SetObjFlag(unsigned flag){
-	mImpl->SetObjFlag(flag);
-}
-
-unsigned SceneObject::GetObjFlag() const{
-	return mImpl->GetObjFlag();
-}
-
-void SceneObject::ModifyObjFlag(unsigned flag, bool enable){
-	mImpl->ModifyObjFlag(flag, enable);
-}
-
-bool SceneObject::HasObjFlag(unsigned flag){
-	return mImpl->HasObjFlag(flag);
-}
-
-void SceneObject::SetVisible(bool visible){
-	mImpl->SetVisible(visible);
-}
-
-bool SceneObject::GetVisible() const{
-	return mImpl->GetVisible();
-
-}
-
-//-------------------------------------------------------------------
-// Debugging features
-//-------------------------------------------------------------------
-void SceneObject::SetGameType(int type){
-	mImpl->SetGameType(type);
-}
-
-int SceneObject::GetGameType() const{
-	return mImpl->GetGameType();
-}
-
-void SceneObject::SetGameId(unsigned id){
-	mImpl->SetGameId(id);
-}
-
-unsigned SceneObject::GetGameId() const{
-	return mImpl->GetGameId();
-}
-
-void SceneObject::SetGamePtr(void* ptr){
-	mImpl->SetGamePtr(ptr);
-}
-
-void* SceneObject::GetGamePtr() const{
-	return mImpl->GetGamePtr();
+std::vector<ScenePtr> SceneObject::GetScenes(){
+	std::vector<ScenePtr> scenes;
+	for (auto it = mScenes.begin(); it != mScenes.end(); /**/){
+		IteratingWeakContainer(mScenes, it, scene);
+		scenes.push_back(scene);
+	}
+	return scenes;
 }

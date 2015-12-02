@@ -29,7 +29,7 @@
 #include "CardData.h"
 
 
-using namespace fastbird;
+using namespace fb;
 
 CardData::TextureData::TextureData(TexturePtr t, const char* cname)
 	: texture(t)

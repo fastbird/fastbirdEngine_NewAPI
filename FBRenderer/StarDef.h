@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBMathLib/Color.h"
-namespace fastbird
+namespace fb
 {
 	//-----------------------------------------------------------------------
 	typedef struct STARDEF

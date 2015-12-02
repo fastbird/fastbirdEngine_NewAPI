@@ -29,7 +29,7 @@
 
 // codes are from alhelpers.h in OpenALSoft Examples.
 
-namespace fastbird{
+namespace fb{
 	/* Some helper functions to get the name from the channel and type enums. */
 	const char *ChannelsName(ALenum chans);
 	const char *TypeName(ALenum type);

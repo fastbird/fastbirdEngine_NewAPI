@@ -56,8 +56,8 @@
 #include "UIObject.h"
 #include "FBRenderer/TextureAtlas.h"
 #include "FBRenderer/Texture.h"
-using namespace fastbird;
-namespace fastbird{
+using namespace fb;
+namespace fb{
 	static float gTooltipFontSize = 24;
 	static float gDelayForTooltip = 0.7f;
 	extern float gTextSizeMod;
@@ -187,7 +187,7 @@ public:
 	void Initialize(){
 		mL = LuaUtils::GetLuaState();
 		/*gFBEnv->pEngine->AddInputListener(this,
-		fastbird::IInputListener::INPUT_LISTEN_PRIORITY_UI, 0);*/
+		fb::IInputListener::INPUT_LISTEN_PRIORITY_UI, 0);*/
 		mKeyboardCursor = KeyboardCursor::Create();
 		RegisterLuaFuncs(mL);
 		RegisterLuaEnums(mL);
@@ -488,6 +488,7 @@ public:
 	void RenderUI(HWindowId hwndId, HWindow hwnd){
 		auto uis = mRenderUIs.find(hwndId);
 		for (auto& ui : uis->second){
+			ui->PreRender();
 			ui->Render();
 		}
 	}
@@ -619,6 +620,7 @@ public:
 
 				HWindowId hwndId = it.first;
 				auto& uiObjects = mRenderUIs[it.first];				
+				uiObjects.clear();
 				//std::map<std::string, std::vector<UIObject*>> render3DList;
 				it.second = false;
 				{
@@ -1401,7 +1403,7 @@ public:
 		{
 			Log(buf);
 			Renderer::GetInstance().QueueDrawTextForDuration(4.0f, Vec2I(100, 200),
-					buf, fastbird::Color::White);			
+					buf, fb::Color::White);			
 		}
 	}
 

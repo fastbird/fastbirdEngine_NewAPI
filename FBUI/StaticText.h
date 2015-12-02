@@ -29,7 +29,7 @@
 
 #include "WinBase.h"
 
-namespace fastbird
+namespace fb
 {
 class IUIObject;
 FB_DECLARE_SMART_PTR(StaticText);

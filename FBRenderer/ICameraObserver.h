@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	class ICameraObserver{
 	public:
 		virtual void OnViewMatrixChanged() = 0;

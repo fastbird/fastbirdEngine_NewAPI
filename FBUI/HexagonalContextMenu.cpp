@@ -31,7 +31,7 @@
 #include "ImageBox.h"
 #include "UIObject.h"
 
-namespace fastbird
+namespace fb
 {
 	HexagonalContextMenuPtr HexagonalContextMenu::Create(){
 		HexagonalContextMenuPtr p(new HexagonalContextMenu, [](HexagonalContextMenu* obj){ delete obj; });
@@ -89,7 +89,7 @@ namespace fastbird
 		__super::GatherVisit(v);
 	}
 
-	void HexagonalContextMenu::SetNPos(const fastbird::Vec2& pos) // normalized pos (0.0~1.0)
+	void HexagonalContextMenu::SetNPos(const fb::Vec2& pos) // normalized pos (0.0~1.0)
 	{
 		__super::SetNPos(pos);
 		mUpdateMaterialParams = true;

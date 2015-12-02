@@ -31,7 +31,7 @@
 #include "IPlatformTexture.h"
 #include "FBCommonHeaders/VectorMap.h"
 
-namespace fastbird{
+namespace fb{
 static std::vector<TextureWeakPtr> sAllTextures;
 TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformShader) {
 	for (auto it = sAllTextures.begin(); it != sAllTextures.end();){
@@ -61,8 +61,16 @@ void SetBindedTexture(BINDING_SHADER shader, int startSlot, TexturePtr pTextures
 
 std::vector< std::pair<BINDING_SHADER, int> > FindSlotInfo(TexturePtr texture){
 	std::vector< std::pair<BINDING_SHADER, int> > result;
-	for (int shader = 0; shader < BINDING_SHADER_COUNT; ++shader){
-		auto& shaderCategory = sBindedTextures[(BINDING_SHADER)shader];
+	static int bindingShaders[] = {
+		BINDING_SHADER_VS,
+		BINDING_SHADER_HS,
+		BINDING_SHADER_DS,
+		BINDING_SHADER_GS,
+		BINDING_SHADER_PS,
+		BINDING_SHADER_CS
+	};
+	for (int shader = 0; shader < ARRAYCOUNT(bindingShaders); ++shader){
+		auto& shaderCategory = sBindedTextures[(BINDING_SHADER)bindingShaders[shader]];
 		for (auto it = shaderCategory.begin(); it != shaderCategory.end(); ++it){
 			if (it->second.lock() == texture){
 				result.push_back(std::make_pair((BINDING_SHADER)shader, it->first));

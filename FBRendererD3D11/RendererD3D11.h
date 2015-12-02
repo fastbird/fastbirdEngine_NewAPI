@@ -36,7 +36,7 @@
 #include "EssentialEngineData/shaders/Constants.h"
 #include "RenderStatesD3D11.h"
 
-namespace fastbird
+namespace fb
 {
 	class IObject;
 	class ICamera;

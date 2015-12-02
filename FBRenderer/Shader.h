@@ -30,7 +30,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "ShaderDefines.h"
 #include "IPlatformShader.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(IPlatformShader);
 	FB_DECLARE_SMART_PTR(Shader);

@@ -33,205 +33,32 @@
 #include "FBAnimation/AnimationData.h"
 #include "FBMathLib/Math.h"
 #include "FBMathLib/BoundingVolume.h"
-using namespace fastbird;
-
-class SpatialObject::Impl{
-public:
-	Transformation mLocation;
-	TransformationPtr mAnimatedLocation;
-	BoundingVolumePtr mBoundingVolume;
-	BoundingVolumePtr mBoundingVolumeWorld;
-	Real mDistToCam;
-	AnimationPtr mAnim;
-	Vec3 mPreviousPosition;
-	bool mTransformChanged;
-
-
-	//---------------------------------------------------------------------------
-	Impl()
-		: mBoundingVolume(BoundingVolume::Create())
-		, mBoundingVolumeWorld(BoundingVolume::Create())
-		, mPreviousPosition(0, 0, 0)
-		, mTransformChanged(true)
-	{
-	}
-
-	Impl(const Impl& other)
-		: Impl()
-	{
-		mLocation = other.mLocation;
-		if (other.mAnimatedLocation){
-			mAnimatedLocation = Transformation::Create();
-			*mAnimatedLocation = *other.mAnimatedLocation;
-		}
-		*mBoundingVolume = *other.mBoundingVolume;
-		*mBoundingVolumeWorld = *other.mBoundingVolumeWorld;
-		mDistToCam = other.mDistToCam;
-		if (other.mAnim){
-			mAnim = other.mAnim->Clone();
-		}
-		mTransformChanged = other.mTransformChanged;
-	}
-
-	void SetRadius(Real r){
-		mBoundingVolume->SetRadius(r);
-		mBoundingVolumeWorld->SetRadius(r);
-	}
-
-	Real GetRadius() const{
-		return mBoundingVolumeWorld->GetRadius();
-	}
-
-	void SetDistToCam(Real dist){
-		mDistToCam = dist;
-	}
-
-	Real GetDistToCam() const{
-		return mDistToCam;
-	}
-
-	const Vec3& GetPosition() const{
-		return mLocation.GetTranslation();
-	}
-
-	const Vec3& GetPreviousPosition() const{
-		return mPreviousPosition;
-	}
-
-	const Vec3& GetScale() const{
-		return mLocation.GetScale();
-	}
-
-	Vec3 GetDirection() const{
-		return mLocation.GetForward();
-	}
-
-	const Quat& GetRotation() const{
-		return mLocation.GetRotation();
-	}
-
-	void SetPosition(const Vec3& pos){
-		mPreviousPosition = mLocation.GetTranslation();
-		mLocation.SetTranslation(pos);
-		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + pos);
-		mTransformChanged = true;
-	}
-
-	void SetRotation(const Quat& rot){
-		mLocation.SetRotation(rot);
-		mTransformChanged = true;
-	}
-
-	void SetScale(const Vec3& scale){
-		mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
-		mLocation.SetScale(scale);
-		mTransformChanged = true;
-	}
-
-	void SetDirection(const Vec3& dir){
-		mLocation.SetDirection(dir);
-		mTransformChanged = true;
-	}
-
-	void SetDirectionAndRight(const Vec3& dir, const Vec3& right){
-		mLocation.SetDirectionAndRight(dir, right);
-		mTransformChanged = true;
-	}
-
-	BoundingVolumePtr GetBoundingVolume(){
-		return mBoundingVolume;
-	}
-
-	BoundingVolumePtr GetBoundingVolumeWorld(){
-		return mBoundingVolumeWorld;
-	}
-
-	const Transformation& GetLocation() const{
-		return mLocation;
-	}
-
-	const Transformation& GetAnimatedLocation() const{
-		return mAnim ? *mAnimatedLocation : mLocation;
-	}
-
-	AnimationPtr GetAnimation() const{
-		return mAnim;
-	}
-
-	void SetLocation(const Transformation& t){
-		mLocation = t;
-	}
-
-	bool GetTransformChanged() const{
-		return mTransformChanged;
-	}
-
-	void ClearTransformChanged(){
-		mTransformChanged = false;
-	}
-
-	void SetAnimation(AnimationPtr anim){
-		mAnim = anim;
-		if (!mAnimatedLocation){
-			mAnimatedLocation = Transformation::Create();
-		}
-		mAnimatedLocation->MakeIdentity();
-	}
-
-	void UpdateAnimation(TIME_PRECISION dt){
-		if (mAnim){
-			mAnim->Update(dt);
-			if (mAnim->Changed())
-				*mAnimatedLocation = mLocation * mAnim->GetResult();
-		}
-	}
-
-	void PlayAction(const char* name, bool immediate, bool reverse){
-		if (mAnim){
-			mAnim->PlayAction(name, immediate, reverse);
-		}
-	}
-
-	bool IsPlayingAction() const{
-		return mAnim && mAnim->IsPlaying();
-	}
-
-	bool IsActionDone(const char* action) const{
-		if (!mAnim)
-			return true;
-		return mAnim->IsActionDone(action);
-	}
-
-	void NotifyTransformChanged(){
-		mTransformChanged = true;
-	}
-
-	void SetBoundingVolume(const BoundingVolume& src){
-		*mBoundingVolume = src;
-		*mBoundingVolumeWorld = *mBoundingVolume;
-		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
-		auto scale = mLocation.GetScale();
-		mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
-	}
-
-	void MergeBoundingVolume(const BoundingVolumePtr src){
-		mBoundingVolume->Merge(src.get());
-		*mBoundingVolumeWorld = *mBoundingVolume;
-		mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
-		auto scale = mLocation.GetScale();
-		mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
-	}
-};
+using namespace fb;
 
 //---------------------------------------------------------------------------
 SpatialObject::SpatialObject()
-	: mImpl(new Impl)
+	: mBoundingVolume(BoundingVolume::Create())
+	, mBoundingVolumeWorld(BoundingVolume::Create())
+	, mPreviousPosition(0, 0, 0)
+	, mTransformChanged(true)
 {
 }
 
 SpatialObject::SpatialObject(const SpatialObject& other)
-	: mImpl(new Impl(*other.mImpl)){
-
+	: SpatialObject()
+{
+	mLocation = other.mLocation;
+	if (other.mAnimatedLocation){
+		mAnimatedLocation = Transformation::Create();
+		*mAnimatedLocation = *other.mAnimatedLocation;
+	}
+	*mBoundingVolume = *other.mBoundingVolume;
+	*mBoundingVolumeWorld = *other.mBoundingVolumeWorld;
+	mDistToCam = other.mDistToCam;
+	if (other.mAnim){
+		mAnim = other.mAnim->Clone();
+	}
+	mTransformChanged = other.mTransformChanged;
 }
 
 SpatialObject::~SpatialObject(){
@@ -239,122 +66,151 @@ SpatialObject::~SpatialObject(){
 }
 
 void SpatialObject::SetRadius(Real r){
-	mImpl->SetRadius(r);
+	mBoundingVolume->SetRadius(r);
+	mBoundingVolumeWorld->SetRadius(r);
 }
 
 Real SpatialObject::GetRadius() const{
-	return mImpl->GetRadius();
+	return mBoundingVolumeWorld->GetRadius();
 }
 
 void SpatialObject::SetDistToCam(Real dist){
-	mImpl->SetDistToCam(dist);
+	mDistToCam = dist;
 }
 
 Real SpatialObject::GetDistToCam() const{
-	return mImpl->GetDistToCam();
+	return mDistToCam;
 }
 
 const Vec3& SpatialObject::GetPosition() const{
-	return mImpl->GetPosition();
+	return mLocation.GetTranslation();
 }
 
 const Vec3& SpatialObject::GetPreviousPosition() const{
-	return mImpl->GetPreviousPosition();
+	return mPreviousPosition;
 }
 
 const Vec3& SpatialObject::GetScale() const{
-	return mImpl->GetScale();
+	return mLocation.GetScale();
 }
 
 Vec3 SpatialObject::GetDirection() const{
-	return mImpl->GetDirection();
+	return mLocation.GetForward();
 }
 
 const Quat& SpatialObject::GetRotation() const{
-	return mImpl->GetRotation();
+	return mLocation.GetRotation();
 }
 
 void SpatialObject::SetPosition(const Vec3& pos){
-	mImpl->SetPosition(pos);
+	mPreviousPosition = mLocation.GetTranslation();
+	mLocation.SetTranslation(pos);
+	mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + pos);
+	mTransformChanged = true;
 }
 
 void SpatialObject::SetRotation(const Quat& rot){
-	mImpl->SetRotation(rot);
+	mLocation.SetRotation(rot);
+	mTransformChanged = true;
 }
 
 void SpatialObject::SetScale(const Vec3& scale){
-	mImpl->SetScale(scale);
+	mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
+	mLocation.SetScale(scale);
+	mTransformChanged = true;
 }
 
 void SpatialObject::SetDirection(const Vec3& dir){
-	mImpl->SetDirection(dir);
+	mLocation.SetDirection(dir);
+	mTransformChanged = true;
 }
 
 void SpatialObject::SetDirectionAndRight(const Vec3& dir, const Vec3& right){
-	mImpl->SetDirectionAndRight(dir, right);
+	mLocation.SetDirectionAndRight(dir, right);
+	mTransformChanged = true;
 }
 
 BoundingVolumePtr SpatialObject::GetBoundingVolume(){
-	return mImpl->GetBoundingVolume();
+	return mBoundingVolume;
 }
 
 BoundingVolumePtr SpatialObject::GetBoundingVolumeWorld(){
-	return mImpl->GetBoundingVolumeWorld();
+	return mBoundingVolumeWorld;
 }
 
-
 const Transformation& SpatialObject::GetLocation() const{
-	return mImpl->GetLocation();
+	return mLocation;
 }
 
 const Transformation& SpatialObject::GetAnimatedLocation() const{
-	return mImpl->GetAnimatedLocation();
+	return mAnim ? *mAnimatedLocation : mLocation;
 }
 
 AnimationPtr SpatialObject::GetAnimation() const{
-	return mImpl->GetAnimation();
+	return mAnim;
 }
 
 void SpatialObject::SetLocation(const Transformation& t){
-	mImpl->SetLocation(t);
+	mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + t.GetTranslation());
+	mLocation = t;
 }
 
 bool SpatialObject::GetTransformChanged() const{
-	return mImpl->GetTransformChanged();
+	return mTransformChanged;
 }
 
 void SpatialObject::ClearTransformChanged(){
-	mImpl->ClearTransformChanged();
+	mTransformChanged = false;
 }
 
 void SpatialObject::SetAnimation(AnimationPtr anim){
-	mImpl->SetAnimation(anim);
+	mAnim = anim;
+	if (!mAnimatedLocation){
+		mAnimatedLocation = Transformation::Create();
+	}
+	mAnimatedLocation->MakeIdentity();
 }
 
 void SpatialObject::UpdateAnimation(TIME_PRECISION dt){
-	mImpl->UpdateAnimation(dt);
+	if (mAnim){
+		mAnim->Update(dt);
+		if (mAnim->Changed())
+			*mAnimatedLocation = mLocation * mAnim->GetResult();
+	}
 }
 
 void SpatialObject::PlayAction(const char* name, bool immediate, bool reverse){
-	mImpl->PlayAction(name, immediate, reverse);
+	if (mAnim){
+		mAnim->PlayAction(name, immediate, reverse);
+	}
 }
 
 bool SpatialObject::IsPlayingAction() const{
-	return mImpl->IsPlayingAction();
+	return mAnim && mAnim->IsPlaying();
 }
 
 bool SpatialObject::IsActionDone(const char* action) const{
-	return mImpl->IsActionDone(action);
+	if (!mAnim)
+		return true;
+	return mAnim->IsActionDone(action);
 }
 
 void SpatialObject::NotifyTransformChanged(){
-	return mImpl->NotifyTransformChanged();
+	mTransformChanged = true;
 }
 
 void SpatialObject::SetBoundingVolume(const BoundingVolume& src){
-	mImpl->SetBoundingVolume(src);
+	*mBoundingVolume = src;
+	*mBoundingVolumeWorld = *mBoundingVolume;
+	mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
+	auto scale = mLocation.GetScale();
+	mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
 }
 
 void SpatialObject::MergeBoundingVolume(const BoundingVolumePtr src){
-	mImpl->MergeBoundingVolume(src);
+	mBoundingVolume->Merge(src.get());
+	*mBoundingVolumeWorld = *mBoundingVolume;
+	mBoundingVolumeWorld->SetCenter(mBoundingVolume->GetCenter() + mLocation.GetTranslation());
+	auto scale = mLocation.GetScale();
+	mBoundingVolumeWorld->SetRadius(mBoundingVolume->GetRadius() * std::max(scale.x, std::max(scale.y, scale.z)));
 }

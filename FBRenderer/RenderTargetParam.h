@@ -28,7 +28,7 @@
 #pragma once
 #include "RendererEnums.h"
 #include "FBMathLib/Vec2I.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(ICamera);
 	struct RenderTargetParam
 	{

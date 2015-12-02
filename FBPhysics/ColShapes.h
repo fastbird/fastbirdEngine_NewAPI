@@ -28,7 +28,7 @@
 #pragma once
 
 class btTriangleMesh;
-namespace fastbird
+namespace fb
 {
 	class CollisionShapes{
 	public:

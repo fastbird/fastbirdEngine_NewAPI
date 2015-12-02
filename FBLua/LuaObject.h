@@ -30,7 +30,7 @@
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBCommonHeaders/SpinLock.h"
 #include "LuaUtils.h"
-namespace fastbird
+namespace fb
 {
 	class FB_DLL_LUA LuaObject;
 	//-----------------------------------------------------------------------------

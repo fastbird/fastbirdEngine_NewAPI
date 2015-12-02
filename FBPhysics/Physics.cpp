@@ -43,7 +43,7 @@
 #include <BulletCollision/NarrowPhaseCollision/btVoronoiSimplexSolver.h>
 #include <BulletCollision/NarrowPhaseCollision/btPointCollector.h>
 #include <BulletCollision/NarrowPhaseCollision/btGjkPairDetector.h>
-using namespace fastbird;
+using namespace fb;
 ///The AABBOverlapCallback is used to collect object that overlap with a given bounding box defined by aabbMin and aabbMax. 
 struct	AABBOverlapCallback : public btBroadphaseAabbCallback
 {

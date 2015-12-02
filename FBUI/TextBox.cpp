@@ -33,7 +33,7 @@
 #include "UIObject.h"
 
 
-namespace fastbird
+namespace fb
 {
 
 	TextBoxPtr TextBox::Create(){

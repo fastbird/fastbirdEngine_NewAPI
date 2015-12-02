@@ -29,7 +29,7 @@
 #include "HorizontalGauge.h"
 #include "UIObject.h"
 
-namespace fastbird
+namespace fb
 {
 
 	HorizontalGaugePtr HorizontalGauge::Create(){

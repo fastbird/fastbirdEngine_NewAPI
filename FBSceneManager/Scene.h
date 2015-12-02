@@ -34,7 +34,7 @@
 #include "FBCommonHeaders/Observable.h"
 #undef AttachObjectFB
 #undef DetachObjectFB
-namespace fastbird{
+namespace fb{
 	class Vec3;
 	class Color;
 	class Ray3;
@@ -44,7 +44,8 @@ namespace fastbird{
 	FB_DECLARE_SMART_PTR(Scene);
 	class FB_DLL_SCENEMANAGER Scene : public IScene, public Observable<ISceneObserver>{
 		FB_DECLARE_PIMPL_NON_COPYABLE(Scene);		
-		Scene(const char* name);		
+		Scene(const char* name);
+		~Scene();
 		
 	public:		
 		typedef std::vector<SpatialSceneObject*> SPATIAL_OBJECTS_RAW;

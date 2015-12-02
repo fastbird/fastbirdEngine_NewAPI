@@ -30,7 +30,7 @@
 #include "FBRenderer/Renderer.h"
 #include "FBRenderer/Material.h"
 #include "FBRenderer/RenderStates.h"
-using namespace fastbird;
+using namespace fb;
 class BillboardQuad::Impl{
 public:
 	BillboardQuad* mSelf;

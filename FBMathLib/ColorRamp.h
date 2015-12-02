@@ -27,7 +27,7 @@
 
 #pragma once
 #include "Color.h"
-namespace fastbird{
+namespace fb{
 
 	FB_DECLARE_SMART_PTR(ColorRamp);
 	class ColorRamp
@@ -35,8 +35,10 @@ namespace fastbird{
 		FB_DECLARE_PIMPL(ColorRamp);		
 
 	public:
+
 		ColorRamp();
 		ColorRamp(const ColorRamp& other);
+		~ColorRamp();
 		ColorRamp& operator=(const ColorRamp& other);
 		bool operator==(const ColorRamp& other) const;
 		const Color& operator[] (int idx) const;

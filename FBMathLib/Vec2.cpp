@@ -29,7 +29,7 @@
 #include "Vec2.h"
 #include "Math.h"
 
-namespace fastbird
+namespace fb
 {
 	const Vec2 Vec2::UNIT_X(1.f, 0);
 	const Vec2 Vec2::UNIT_Y(0, 1.f);

@@ -29,7 +29,7 @@
 
 #include "Vec3.h"
 
-namespace fastbird
+namespace fb
 {
 #if defined(FB_DOUBLE_PRECISION)
 	class Vec4f;
@@ -94,13 +94,13 @@ namespace fastbird
 
 //// luawapper util
 //template<>
-//struct luaU_Impl<fastbird::Vec4>
+//struct luaU_Impl<fb::Vec4>
 //{
-//	static fastbird::Vec4 luaU_check(lua_State* L, int index)
+//	static fb::Vec4 luaU_check(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Vec4 luaU_check(lua_State* L, int index)");
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Vec4 luaU_check(lua_State* L, int index)");
 //		luaL_checktype(L, index, LUA_TTABLE);
-//		fastbird::Vec4 ret;
+//		fb::Vec4 ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.x = (Real)luaL_checknumber(L, -1);
 //		lua_pop(L, 1);
@@ -116,10 +116,10 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static fastbird::Vec4 luaU_to(lua_State* L, int index)
+//	static fb::Vec4 luaU_to(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Vec4 luaU_to(lua_State* L, int index)");
-//		fastbird::Vec4 ret;
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Vec4 luaU_to(lua_State* L, int index)");
+//		fb::Vec4 ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.x = (Real)lua_tonumber(L, -1);
 //		lua_pop(L, 1);
@@ -135,7 +135,7 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static void luaU_push(lua_State* L, const fastbird::Vec4& val)
+//	static void luaU_push(lua_State* L, const fb::Vec4& val)
 //	{
 //		lua_createtable(L, 3, 0);
 //		lua_pushnumber(L, val.x);
@@ -148,7 +148,7 @@ namespace fastbird
 //		lua_rawseti(L, -2, 4);
 //	}
 //
-//	static void luaU_push(lua_State* L, fastbird::Vec4& val)
+//	static void luaU_push(lua_State* L, fb::Vec4& val)
 //	{
 //		lua_createtable(L, 3, 0);
 //		lua_pushnumber(L, val.x);

@@ -25,12 +25,16 @@
  -----------------------------------------------------------------------------
 */
 
-// SpatialComponent
 #pragma once
-namespace fastbird{
-	FB_DECLARE_SMART_PTR(Spatial);
-	class FB_DLL_RENDERER Spatial{
-		FB_DECLARE_PIMPL_NON_COPYABLE(Spatial);
-
-	};
+namespace fb{
+	namespace SceneObjectType{
+		enum Enum{
+			Unknown,
+			SkySphere,
+			MeshObject,
+			MeshGroup,
+			Trail,
+			ParticleRenderer,
+		};
+	}
 }

@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "CandidatesData.h"
 #include "FBStringLib/StringLib.h"
-using namespace fastbird;
+using namespace fb;
 
 CandidatesData::CandidatesData()
 {

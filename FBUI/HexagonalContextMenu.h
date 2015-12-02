@@ -28,7 +28,7 @@
 #pragma once
 
 #include "Container.h"
-namespace fastbird
+namespace fb
 {
 FB_DECLARE_SMART_PTR(StaticText);
 FB_DECLARE_SMART_PTR(ImageBox);
@@ -46,7 +46,7 @@ public:
 	// IWinBase
 	ComponentType::Enum GetType() const { return ComponentType::Hexagonal; }
 	void GatherVisit(std::vector<UIObject*>& v);
-	void SetNPos(const fastbird::Vec2& pos); // normalized pos (0.0~1.0)
+	void SetNPos(const fb::Vec2& pos); // normalized pos (0.0~1.0)
 	bool IsIn(IInputInjectorPtr injector);
 
 	//own

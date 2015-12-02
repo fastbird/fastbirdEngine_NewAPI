@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(WinBase);
 	class FB_DLL_UI DragBox

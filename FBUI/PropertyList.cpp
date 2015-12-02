@@ -35,7 +35,7 @@
 #include "ListBoxData.h"
 #include "FBInputManager/TextManipulator.h"
 
-namespace fastbird
+namespace fb
 {
 PropertyListPtr PropertyList::Create(){
 	PropertyListPtr p(new PropertyList, [](PropertyList* obj){ delete obj; });

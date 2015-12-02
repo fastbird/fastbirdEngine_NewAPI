@@ -30,7 +30,7 @@
 #include "IUnknownDeleter.h"
 #include "RendererD3D11.h"
 
-namespace fastbird
+namespace fb
 {
 	VertexBufferD3D11Ptr VertexBufferD3D11::Create(ID3D11Buffer* vertexBuffer, unsigned stride){
 		return VertexBufferD3D11Ptr(new VertexBufferD3D11(vertexBuffer, stride), [](VertexBufferD3D11* obj){ delete obj; });

@@ -36,7 +36,7 @@ A debug library
 #include "FBCommonHeaders/String.h"
 #include <fstream>
 #include <memory>
-namespace fastbird{
+namespace fb{
 	/** Collection of debug featreus.
 	\ingroup FBDebug
 	*/
@@ -49,6 +49,11 @@ namespace fastbird{
 		*/		
 		static void Init(const char* filepath);
 		static void Init(const WCHAR* filepath);
+		/** Initialize the global error log file.
+		Any log message containing (error)(info)(log) will be printed this file also.
+		Do not need to call in the every modulues. call once.
+		*/
+		static void InitGlobalLog(const char* filepath);
 
 		/** Close the log file
 		Logs received after Debug is released, will be sent to the debug output.

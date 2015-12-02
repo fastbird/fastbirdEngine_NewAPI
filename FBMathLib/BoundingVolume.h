@@ -29,7 +29,7 @@
 #ifndef _fastbird_BoundingVolume_header_included_
 #define _fastbird_BoundingVolume_header_included_
 #include <memory>
-namespace fastbird
+namespace fb
 {
 	class Transformation;
 	class Plane3;
@@ -80,7 +80,7 @@ namespace fastbird
 		virtual bool Contain(const Vec3& pos) const = 0;
 		virtual void Merge(const BoundingVolume* pBV) = 0;
 		virtual void Merge(const Vec3& pos) = 0;
-		virtual fastbird::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal) = 0;
+		virtual fb::Vec3 GetSurfaceFrom(const Vec3& src, Vec3& normal) = 0;
 		virtual void Invalidate() = 0;		
 	};
 }

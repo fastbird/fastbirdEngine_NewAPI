@@ -64,7 +64,7 @@ typedef struct luaL_Reg {
 #else
 struct luaL_Reg;
 #endif
-namespace fastbird
+namespace fb
 { 
 	const char* GetCWD();
 }
@@ -120,29 +120,29 @@ else{\
 #define REGISTER_ENUM_TO_LUA(endIdx, enumName) \
 	inline void RegisterToLua(lua_State* L)\
 {\
-	fastbird::LuaUtils::createtable(L, 0, (endIdx)); \
+	fb::LuaUtils::createtable(L, 0, (endIdx)); \
 for (int i = 0; i <= (endIdx); ++i)\
 {\
-	fastbird::LuaUtils::pushinteger(L, i); \
-	fastbird::LuaUtils::setfield(L, -2, ConvertToString(Enum(i))); \
+	fb::LuaUtils::pushinteger(L, i); \
+	fb::LuaUtils::setfield(L, -2, ConvertToString(Enum(i))); \
 }\
-	fastbird::LuaUtils::getglobal(L, "NoNewMethod"); \
-	fastbird::LuaUtils::setfield(L, -2, "__newindex"); \
-	fastbird::LuaUtils::pushvalue(L, -1); \
-	fastbird::LuaUtils::setmetatable(L, -2); \
-	fastbird::LuaUtils::setglobal(L, #enumName); \
+	fb::LuaUtils::getglobal(L, "NoNewMethod"); \
+	fb::LuaUtils::setfield(L, -2, "__newindex"); \
+	fb::LuaUtils::pushvalue(L, -1); \
+	fb::LuaUtils::setmetatable(L, -2); \
+	fb::LuaUtils::setglobal(L, #enumName); \
 	\
-	fastbird::LuaUtils::createtable(L, 0, (endIdx)); \
+	fb::LuaUtils::createtable(L, 0, (endIdx)); \
 for (int i = 0; i <= (endIdx); ++i)\
 {\
-	fastbird::LuaUtils::pushstring(L, ConvertToString(Enum(i))); \
-	fastbird::LuaUtils::rawseti(L, -2, i); \
+	fb::LuaUtils::pushstring(L, ConvertToString(Enum(i))); \
+	fb::LuaUtils::rawseti(L, -2, i); \
 }\
-	fastbird::LuaUtils::getglobal(L, "NoNewMethod"); \
-	fastbird::LuaUtils::setfield(L, -2, "__newindex"); \
-	fastbird::LuaUtils::pushvalue(L, -1); \
-	fastbird::LuaUtils::setmetatable(L, -2); \
-	fastbird::LuaUtils::setglobal(L, #enumName "String");\
+	fb::LuaUtils::getglobal(L, "NoNewMethod"); \
+	fb::LuaUtils::setfield(L, -2, "__newindex"); \
+	fb::LuaUtils::pushvalue(L, -1); \
+	fb::LuaUtils::setmetatable(L, -2); \
+	fb::LuaUtils::setglobal(L, #enumName "String");\
 }
 
 #define REGISTER_CLASS_ENUM_TO_LUA(classname, enumName, endIdx) \
@@ -172,7 +172,7 @@ for (int i = 0; i <= (endIdx); ++i)\
 	LuaUtils::pop(L, 1);\
 }
 
-namespace fastbird
+namespace fb
 {
 	struct FB_DLL_LUA LUA_STACK_WATCHER
 	{
@@ -420,58 +420,58 @@ namespace fastbird
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::Vec2ITuple >
+	struct FB_DLL_LUA luaU_Impl < fb::Vec2ITuple >
 	{
-		static fastbird::Vec2ITuple luaU_check(lua_State* L, int index);
-		static fastbird::Vec2ITuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::Vec2ITuple& val);
+		static fb::Vec2ITuple luaU_check(lua_State* L, int index);
+		static fb::Vec2ITuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::Vec2ITuple& val);
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::Vec2Tuple >
+	struct FB_DLL_LUA luaU_Impl < fb::Vec2Tuple >
 	{
-		static fastbird::Vec2Tuple luaU_check(lua_State* L, int index);
-		static fastbird::Vec2Tuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::Vec2Tuple& val);
+		static fb::Vec2Tuple luaU_check(lua_State* L, int index);
+		static fb::Vec2Tuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::Vec2Tuple& val);
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::Vec3ITuple >
+	struct FB_DLL_LUA luaU_Impl < fb::Vec3ITuple >
 	{
-		static fastbird::Vec3ITuple luaU_check(lua_State* L, int index);
-		static fastbird::Vec3ITuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::Vec3ITuple& val);
+		static fb::Vec3ITuple luaU_check(lua_State* L, int index);
+		static fb::Vec3ITuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::Vec3ITuple& val);
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::Vec3Tuple >
+	struct FB_DLL_LUA luaU_Impl < fb::Vec3Tuple >
 	{
-		static fastbird::Vec3Tuple luaU_check(lua_State* L, int index);
-		static fastbird::Vec3Tuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::Vec3Tuple& val);
+		static fb::Vec3Tuple luaU_check(lua_State* L, int index);
+		static fb::Vec3Tuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::Vec3Tuple& val);
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::Vec4Tuple >
+	struct FB_DLL_LUA luaU_Impl < fb::Vec4Tuple >
 	{
-		static fastbird::Vec4Tuple luaU_check(lua_State* L, int index);
-		static fastbird::Vec4Tuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::Vec4Tuple& val);
+		static fb::Vec4Tuple luaU_check(lua_State* L, int index);
+		static fb::Vec4Tuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::Vec4Tuple& val);
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::QuatTuple >
+	struct FB_DLL_LUA luaU_Impl < fb::QuatTuple >
 	{
-		static fastbird::QuatTuple luaU_check(lua_State* L, int index);
-		static fastbird::QuatTuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::QuatTuple& val);
+		static fb::QuatTuple luaU_check(lua_State* L, int index);
+		static fb::QuatTuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::QuatTuple& val);
 	};
 
 	template<>
-	struct FB_DLL_LUA luaU_Impl < fastbird::TransformationTuple >
+	struct FB_DLL_LUA luaU_Impl < fb::TransformationTuple >
 	{
-		static fastbird::TransformationTuple luaU_check(lua_State* L, int index);
-		static fastbird::TransformationTuple luaU_to(lua_State* L, int index);
-		static void luaU_push(lua_State* L, const fastbird::TransformationTuple& val);
+		static fb::TransformationTuple luaU_check(lua_State* L, int index);
+		static fb::TransformationTuple luaU_to(lua_State* L, int index);
+		static void luaU_push(lua_State* L, const fb::TransformationTuple& val);
 	};
 }

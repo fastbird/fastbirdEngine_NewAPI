@@ -28,7 +28,7 @@
 #pragma once
 
 
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(Texture);
 	class FB_DLL_UI CardData{
 	public:

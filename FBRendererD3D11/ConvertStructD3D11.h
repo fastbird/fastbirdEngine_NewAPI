@@ -29,7 +29,7 @@
 #include "FBRenderer/RendererStructs.h"
 #include "ConvertEnumD3D11.h"
 
-namespace fastbird
+namespace fb
 {
 	void ConvertStructD3D11(D3D11_RASTERIZER_DESC& dest, const RASTERIZER_DESC& src)
 	{

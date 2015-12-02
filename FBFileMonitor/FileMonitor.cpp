@@ -27,8 +27,8 @@
 
 #include "stdafx.h"
 #include "FileMonitor.h"
-using namespace fastbird;
-namespace fastbird {
+using namespace fb;
+namespace fb {
 	static const unsigned FILE_CHANGE_BUFFER_SIZE = 8000;
 	class FileChangeMonitorThread : public Thread{		
 		HANDLE mExitFileChangeThread;

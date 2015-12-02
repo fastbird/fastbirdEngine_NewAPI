@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBSceneManager/SpatialSceneObject.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(Color);
 	FB_DECLARE_SMART_PTR(Material);

@@ -31,7 +31,7 @@
 #include "Vec3I.h"
 #include "Plane3.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(BoundingVolume);
 	class AABB;

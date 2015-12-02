@@ -30,7 +30,7 @@
 #include "WinBase.h"
 #include "FBInputManager/ITextManipulatorObserver.h"
 
-namespace fastbird
+namespace fb
 {
 FB_DECLARE_SMART_PTR(PropertyList);
 FB_DECLARE_SMART_PTR(ListBox);

@@ -27,6 +27,6 @@
 
 #pragma once
 
-namespace fastbird{
+namespace fb{
 
 }

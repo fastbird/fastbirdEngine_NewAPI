@@ -33,7 +33,7 @@
 #include "Shader.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBStringLib/StringLib.h"
-using namespace fastbird;
+using namespace fb;
 
 static const int NumToneMaps = 5;
 static const int NumLuminanceMaps = 3;

@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBMathLib/Math.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(DirectionalLight);
 	//------------------------------------------------------------------------
@@ -36,6 +36,7 @@ namespace fastbird
 	{
 		FB_DECLARE_PIMPL_NON_COPYABLE(DirectionalLight);
 		DirectionalLight();
+		~DirectionalLight();
 
 
 	public:

@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBMathLib/Math.h"
-namespace fastbird
+namespace fb
 {
 	inline btQuaternion FBToBullet(const Quat& rot)
 	{

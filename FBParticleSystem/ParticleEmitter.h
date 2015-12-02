@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "FBCommonHeaders/CircularBuffer.h"
 #include "FBSceneManager/SpatialObject.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(ParticleEmitter);
 	class FB_DLL_PARTICLESYSTEM ParticleEmitter : public SpatialObject
@@ -57,7 +57,7 @@ namespace fastbird
 		bool GetVisible() const;
 		bool IsAlive();
 		bool IsActive() const;
-		void SetEmitterDirection(const fastbird::Vec3& dir);
+		void SetEmitterDirection(const fb::Vec3& dir);
 		void SetEmitterColor(const Color& c);
 		void SetAlpha(float alpha);
 		float GetAlpha() const ;

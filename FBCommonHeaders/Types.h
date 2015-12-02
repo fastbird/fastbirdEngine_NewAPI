@@ -46,7 +46,7 @@ typedef unsigned long DWORD;
 typedef unsigned __int64 UINT64;
 typedef __int64 INT64;
 
-namespace fastbird{
+namespace fb{
 	//#define FB_DOUBLE_PRECISION
 	typedef float Real;
 
@@ -106,8 +106,8 @@ namespace fastbird{
 		return a.lock() == b.lock();
 	}	
 }
-using fastbird::operator==;
-using fastbird::operator!=;
+using fb::operator==;
+using fb::operator!=;
 
 
 #define FB_DECLARE_NON_COPYABLE(className) \
@@ -116,7 +116,7 @@ using fastbird::operator!=;
 
 #define FB_DECLARE_PIMPL(className) \
 	class Impl; \
-	std::shared_ptr<Impl> mImpl
+	std::unique_ptr<Impl> mImpl
 
 #define FB_DECLARE_PIMPL_NON_COPYABLE(className) \
 	FB_DECLARE_PIMPL(className); \

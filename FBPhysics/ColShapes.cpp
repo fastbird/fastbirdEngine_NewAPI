@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "ColShapes.h"
 
-using namespace fastbird;
+using namespace fb;
 const char* CollisionShapes::strings[] = {
 	"Box",
 	"Sphere",

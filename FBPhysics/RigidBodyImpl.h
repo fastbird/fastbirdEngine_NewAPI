@@ -30,7 +30,7 @@
 #include "RigidBody.h"
 #include <BulletDynamics/Dynamics/btRigidBody.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
-namespace fastbird
+namespace fb
 {
 	class Vec3;
 	class Vec3I;

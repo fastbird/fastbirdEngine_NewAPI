@@ -36,7 +36,7 @@
 #include "FBTimer/Timer.h"
 #include "FBStringLib/StringLib.h"
 #include "FBSceneObjectFactory/SkySphere.h"// this doesn't make denpendency
-using namespace fastbird;
+using namespace fb;
 #undef AttachObjectFB
 #undef DetachObjectFB
 
@@ -195,7 +195,7 @@ public:
 			}
 		}
 
-		const fastbird::Vec3& camPos = mainCam->GetPosition();
+		const fb::Vec3& camPos = mainCam->GetPosition();
 		for (const auto obj : mPreRenderList[mainCam])
 		{
 			assert(obj);
@@ -356,6 +356,10 @@ public:
 
 
 	bool AttachObject(SceneObjectPtr pObject){
+		if (pObject->GetType() == SceneObjectType::SkySphere){
+			Logger::Log(FB_ERROR_LOG_ARG, "You cannot attach sky sphere as an object. Use AttachSkySpherer function instead.");
+			return false;
+		}
 		if (!ValueExistsInVector(mObjects, pObject)){
 			mObjects.push_back(pObject);
 			pObject->OnAttachedToScene(mSelfPtr.lock());
@@ -466,7 +470,10 @@ public:
 	}
 
 	void DetachSkySphere(){
-		mSkySphere = 0;
+		if (mSkySphere){
+			mSkySphere->OnDetachedFromScene(mSelfPtr.lock());
+			mSkySphere = 0;
+		}
 	}
 
 	SkySpherePtr GetSkySphere(){
@@ -554,6 +561,10 @@ ScenePtr Scene::Create(const char* name){
 Scene::Scene(const char* name)
 	:mImpl(new Impl(this, name))
 {
+}
+
+Scene::~Scene(){
+
 }
 
 const char* Scene::GetName() const {

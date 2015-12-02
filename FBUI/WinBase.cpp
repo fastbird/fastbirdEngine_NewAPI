@@ -35,7 +35,7 @@
 #include "UIObject.h"
 #include "FBRenderer/RenderTarget.h"
 
-namespace fastbird
+namespace fb
 {
 const int WinBase::LEFT_GAP = 2;
 const int WinBase::BOTTOM_GAP = 2;
@@ -320,7 +320,7 @@ void WinBase::OnSizeChanged()
 }
 
 //---------------------------------------------------------------------------
-void WinBase::SetSize(const fastbird::Vec2I& size){
+void WinBase::SetSize(const fb::Vec2I& size){
 	mSize = size;
 	Vec2I localRT = GetParentSize();
 	if (mSize.x < 0)
@@ -354,7 +354,7 @@ void WinBase::SetSizeY(int y){
 }
 
 //---------------------------------------------------------------------------
-void WinBase::SetNSize(const fastbird::Vec2& size) // normalized size (0.0~1.0)
+void WinBase::SetNSize(const fb::Vec2& size) // normalized size (0.0~1.0)
 {
 	mNSize = size;
 	Vec2I localRT = GetParentSize();
@@ -416,7 +416,7 @@ bool WinBase::GetFillY() const{
 }
 
 //---------------------------------------------------------------------------
-void WinBase::SetWNSize(const fastbird::Vec2& size)
+void WinBase::SetWNSize(const fb::Vec2& size)
 {
 	Vec2I isize = Round(GetRenderTargetSize() * size);
 	SetSize(isize);
@@ -639,7 +639,7 @@ void WinBase::UpdateAnimatedPos(){
 }
 
 //---------------------------------------------------------------------------
-void WinBase::SetPos(const fastbird::Vec2I& pos)
+void WinBase::SetPos(const fb::Vec2I& pos)
 {
 	mPos = pos;
 	auto localRT = GetParentSize();
@@ -704,7 +704,7 @@ void WinBase::SetWPos(const Vec2I& wpos){
 }
 
 //---------------------------------------------------------------------------
-void WinBase::SetNPos(const fastbird::Vec2& pos) // normalized pos (0.0~1.0)
+void WinBase::SetNPos(const fb::Vec2& pos) // normalized pos (0.0~1.0)
 {
 	mNPos = pos;
 	mPos = Round(GetParentSize() * pos);
@@ -725,7 +725,7 @@ void WinBase::SetNPosY(float y)
 }
 
 //---------------------------------------------------------------------------
-void WinBase::SetWNPos(const fastbird::Vec2& wnPos)
+void WinBase::SetWNPos(const fb::Vec2& wnPos)
 {
 	Vec2I wpos = Round(wnPos / GetRenderTargetSize());
 	SetWPos(wpos);
@@ -745,7 +745,7 @@ void WinBase::Move(Vec2I amount){
 }
 
 //---------------------------------------------------------------------------
-fastbird::Vec2I WinBase::ConvertToScreen(const fastbird::Vec2 npos) const
+fb::Vec2I WinBase::ConvertToScreen(const fb::Vec2 npos) const
 {
 	auto rtSize = GetRenderTargetSize();
 	Vec2I screenPos = { Round(npos.x * rtSize.x), Round(npos.y * rtSize.y) };
@@ -754,7 +754,7 @@ fastbird::Vec2I WinBase::ConvertToScreen(const fastbird::Vec2 npos) const
 }
 
 //---------------------------------------------------------------------------
-fastbird::Vec2 WinBase::ConvertToNormalized(const fastbird::Vec2I pos) const
+fb::Vec2 WinBase::ConvertToNormalized(const fb::Vec2I pos) const
 {
 	auto rtSize = GetRenderTargetSize();
 	Vec2 npos = { pos.x / (float)rtSize.x, pos.y / (float)rtSize.y };
@@ -2928,7 +2928,7 @@ bool WinBase::ParseXML(tinyxml2::XMLElement* pelem)
 }
 
 //---------------------------------------------------------------------------
-bool WinBase::ParseLua(const fastbird::LuaObject& compTable)
+bool WinBase::ParseLua(const fb::LuaObject& compTable)
 {
 	assert(compTable.IsTable());
 	bool success;

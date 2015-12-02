@@ -28,12 +28,13 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "RendererStructs.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(IPlatformVertexBuffer);
 	FB_DECLARE_SMART_PTR(VertexBuffer);
 	class FB_DLL_RENDERER VertexBuffer{
 		FB_DECLARE_PIMPL_NON_COPYABLE(VertexBuffer);
 		VertexBuffer(unsigned stride, unsigned numVertices);
+		~VertexBuffer();
 
 	public:
 		static VertexBufferPtr Create(unsigned stride, unsigned numVertices);

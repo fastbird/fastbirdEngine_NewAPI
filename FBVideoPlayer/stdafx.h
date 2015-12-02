@@ -40,7 +40,7 @@
 #include "FBDebugLib/Logger.h"
 #include "FBStringLib/StringLib.h"
 
-namespace fastbird{
+namespace fb{
 	void Error(const char* szFmt, ...);
 	void Log(const char* szFmt, ...);
 }

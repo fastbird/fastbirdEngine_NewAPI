@@ -36,7 +36,7 @@
 	if (Console::HasInstance())\
 		Console::GetInstance().RegisterCommand(ConsoleCommandPtr(new ConsoleCommand(#name, func, desc)));
 
-namespace fastbird{
+namespace fb{
 	class Vec2I;
 	enum CVAR_CATEGORY
 	{

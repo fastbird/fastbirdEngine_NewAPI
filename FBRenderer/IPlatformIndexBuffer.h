@@ -27,7 +27,7 @@
 
 #pragma once
 #include "RendererStructs.h"
-namespace fastbird
+namespace fb
 {
 	enum INDEXBUFFER_FORMAT
 	{

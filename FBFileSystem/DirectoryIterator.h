@@ -29,7 +29,7 @@
 #include <memory>
 #include "FBCommonHeaders/String.h"
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	class DirectoryIterator;
 	typedef std::shared_ptr<DirectoryIterator> DirectoryIteratorPtr;
 	typedef std::weak_ptr<DirectoryIterator> DirectoryIteratorWeakPtr;

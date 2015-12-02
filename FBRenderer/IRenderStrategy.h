@@ -28,7 +28,7 @@
 #pragma once
 #include <memory>
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(Texture);
 	FB_DECLARE_SMART_PTR(Camera);
 	FB_DECLARE_SMART_PTR(IScene);

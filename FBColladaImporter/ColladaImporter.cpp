@@ -35,7 +35,7 @@
 #include <COLLADAFWIWriter.h>
 
 static const float PI = 3.1415926535897932384626433832795f;
-namespace fastbird{
+namespace fb{
 typedef std::vector< collada::CollisionInfo > COLLISION_INFOS;
 class ColladaImporter::Impl : public COLLADAFW::IWriter{
 public:	

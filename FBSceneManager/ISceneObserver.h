@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/RenderParam.h"
-namespace fastbird
+namespace fb
 {
 	class IScene;
 	FB_DECLARE_SMART_PTR(ISceneObserver);

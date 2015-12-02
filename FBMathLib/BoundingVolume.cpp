@@ -30,7 +30,7 @@
 #include "BVaabb.h"
 #include "BVSphere.h"
 
-namespace fastbird{
+namespace fb{
 	BoundingVolumePtr BoundingVolume::Create(BVType type /*= BV_SPHERE*/)
 	{
 		if (type == BV_SPHERE)

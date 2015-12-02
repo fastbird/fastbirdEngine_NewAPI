@@ -32,7 +32,7 @@
 #include "FBMathLib/BVaabb.h"
 #include "FBDebugLib/Logger.h"
 #include <assert.h>
-using namespace fastbird;
+using namespace fb;
 
 class FBCollisionShape::Impl{
 public:

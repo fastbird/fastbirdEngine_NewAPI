@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBMathLib/Transformation.h"
-namespace fastbird
+namespace fb
 {
 	namespace FBColShape
 	{

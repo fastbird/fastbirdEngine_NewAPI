@@ -36,7 +36,7 @@
 #define FB_READ_FD 0
 #define FB_WRITE_FD 1
 
-namespace fastbird
+namespace fb
 {
 	StdOutRedirect::StdOutRedirect(int bufferSize)
 	{

@@ -29,6 +29,7 @@
 #include "MeshObject.h"
 #include "SceneObjectFactory.h"
 #include "FBCommonHeaders/CowPtr.h"
+#include "FBStringMathLib/StringMathConverter.h"
 #include "FBAnimation/Animation.h"
 #include "FBAnimation/AnimationData.h"
 #include "FBDebugLib/Logger.h"
@@ -45,7 +46,7 @@
 #include "FBStringLib/StringLib.h"
 #include "FBMathLib/GeomUtils.h"
 #include "EssentialEngineData/shaders/Constants.h"
-using namespace fastbird;
+using namespace fb;
 
 class MeshObject::Impl{
 public:
@@ -165,6 +166,10 @@ public:
 		auto renderOption = renderer.GetRendererOptions();
 		if (renderOption->r_noMesh)
 			return;		
+		if (strstr(mSelf->GetName(), "CommandModule")){
+			int a = 0;
+			a++;
+		}
 		if (mSelf->HasObjFlag(SceneObjectFlag::Hide))
 			return;
 
@@ -181,8 +186,9 @@ public:
 
 		RenderEventMarker marker("MeshObject");
 
-		mObjectConstants.gWorldView = renderer.GetCamera()->GetMatrix(Camera::View) * mObjectConstants.gWorld;
-		mObjectConstants.gWorldViewProj = renderer.GetCamera()->GetMatrix(Camera::ViewProj) * mObjectConstants.gWorld;
+		auto camera = renderer.GetCamera();
+		mObjectConstants.gWorldView = camera->GetMatrix(Camera::View) * mObjectConstants.gWorld;
+		mObjectConstants.gWorldViewProj = camera->GetMatrix(Camera::ViewProj) * mObjectConstants.gWorld;		
 		renderer.UpdateObjectConstantsBuffer(&mObjectConstants, true);
 
 		if (renderParam.mRenderPass == RENDER_PASS::PASS_NORMAL)

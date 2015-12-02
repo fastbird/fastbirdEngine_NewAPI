@@ -32,7 +32,7 @@
 #include "TinyXmlLib/tinyxml2.h"
 #include "FBStringLib/StringLib.h"
 
-namespace fastbird{
+namespace fb{
 	void TextureAtlasRegion::GetQuadUV(Vec2 uv[])
 	{
 		uv[0] = Vec2(mUVStart.x, mUVEnd.y);

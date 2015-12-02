@@ -39,7 +39,7 @@
 #include "FBRenderer/Camera.h"
 #include "SceneObjectFactory.h"
 
-using namespace fastbird;
+using namespace fb;
 static RenderTargetPtr sRT;
 static ScenePtr sScene;
 static RenderStrategyMinimumPtr sRenderStrategy;

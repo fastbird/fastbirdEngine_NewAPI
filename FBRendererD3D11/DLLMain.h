@@ -27,10 +27,10 @@
 
 #pragma once
 #include "FBCommonHeaders/platform.h"
-namespace fastbird {
+namespace fb {
 	class IPlatformRenderer;
 }
 extern "C"{
-	FB_DLL_RENDERERD3D11 fastbird::IPlatformRenderer* CreateRenderEngine();
+	FB_DLL_RENDERERD3D11 fb::IPlatformRenderer* CreateRenderEngine();
 	FB_DLL_RENDERERD3D11 void DeleteRenderEngine();
 }

@@ -27,7 +27,7 @@
 
 #pragma once
 #include "Vec3.h"
-namespace fastbird
+namespace fb
 {
 	class Vec3I
 	{
@@ -71,13 +71,13 @@ namespace fastbird
 
 //// luawapper util
 //template<>
-//struct luaU_Impl<fastbird::Vec3I>
+//struct luaU_Impl<fb::Vec3I>
 //{
-//	static fastbird::Vec3I luaU_check(lua_State* L, int index)
+//	static fb::Vec3I luaU_check(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Vec3I luaU_check(lua_State* L, int index)");
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Vec3I luaU_check(lua_State* L, int index)");
 //		luaL_checktype(L, index, LUA_TTABLE);
-//		fastbird::Vec3I ret;
+//		fb::Vec3I ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.x = luaL_checkint(L, -1);
 //		lua_pop(L, 1);
@@ -90,10 +90,10 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static fastbird::Vec3I luaU_to(lua_State* L, int index)
+//	static fb::Vec3I luaU_to(lua_State* L, int index)
 //	{
-//		fastbird::LUA_STACK_WATCHER watcher(L, "static fastbird::Vec3I luaU_to(lua_State* L, int index)");
-//		fastbird::Vec3I ret;
+//		fb::LUA_STACK_WATCHER watcher(L, "static fb::Vec3I luaU_to(lua_State* L, int index)");
+//		fb::Vec3I ret;
 //		lua_rawgeti(L, index, 1);
 //		ret.x = lua_tointeger(L, -1);
 //		lua_pop(L, 1);
@@ -106,7 +106,7 @@ namespace fastbird
 //		return ret;
 //	}
 //
-//	static void luaU_push(lua_State* L, const fastbird::Vec3I& val)
+//	static void luaU_push(lua_State* L, const fb::Vec3I& val)
 //	{
 //		lua_createtable(L, 3, 0);
 //		lua_pushinteger(L, val.x);

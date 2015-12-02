@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(MeshObject);
 	FB_DECLARE_SMART_PTR(PointLight);
 	FB_DECLARE_SMART_PTR(ParticleEmitter);

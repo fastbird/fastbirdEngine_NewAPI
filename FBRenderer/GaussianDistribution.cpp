@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "GaussianDistribution.h"
 #include "Renderer.h"
-namespace fastbird
+namespace fb
 {
 	void GaussianDist::Calc(unsigned width, unsigned height, float devi, float multiplier)
 	{

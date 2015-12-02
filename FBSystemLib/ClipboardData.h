@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird
+namespace fb
 {
 	std::string GetClipboardDataAsString(HWindow hwnd);
 	void SetClipboardStringData(HWindow hwnd, const char* data);

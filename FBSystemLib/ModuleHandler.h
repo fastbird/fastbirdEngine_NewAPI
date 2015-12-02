@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/String.h"
-namespace fastbird{
+namespace fb{
 	/** Load a module in run-time.
 	*/
 	typedef intptr_t ModuleHandle;

@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBRenderer/RendererStructs.h"
-namespace fastbird{
+namespace fb{
 	struct ParticleRenderKey{
 		char mTexturePath[256];
 		BLEND_DESC mBDesc;

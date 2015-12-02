@@ -34,7 +34,7 @@
 #include "FBCommonHeaders/Helpers.h"
 #include "FBStringLib/StringLib.h"
 DEFINE_GUID(WKPDID_D3DDebugObjectName, 0x429b8c22, 0x9188, 0x4b0c, 0x87, 0x42, 0xac, 0xb0, 0xbf, 0x85, 0xc2, 0x00);
-using namespace fastbird;
+using namespace fb;
 static unsigned sNextTextureId = 1;
 class TextureD3D11::Impl{
 public:
@@ -53,8 +53,9 @@ public:
 	
 
 	//---------------------------------------------------------------------------
-	Impl() 
-		: mHr(S_FALSE)
+	Impl(TextureD3D11* self)
+		: mSelf(self)
+		, mHr(S_FALSE)
 		, mSRViewSync(0)
 		, mId(sNextTextureId++)
 	{
@@ -134,7 +135,12 @@ public:
 	//--------------------------------------------------------------------
 	// Own
 	//--------------------------------------------------------------------
-	ID3D11Texture2D* GetHardwareTexture() const{
+	ID3D11Texture2D* GetHardwareTexture() {
+		if (!mTexture && mSRView){
+			ID3D11Resource* resource = 0;
+			mSRView->GetResource(&resource);
+			mTexture = ID3D11Texture2DPtr((ID3D11Texture2D*)resource, IUnknownDeleter());
+		}
 		return mTexture.get();
 	}
 
@@ -235,16 +241,12 @@ public:
 	const char* GetPath() const{
 		return mPath.c_str();
 	}
-
-	ID3D11Texture2D* GetHardwareTexture(){
-		return mTexture.get();
-	}
 };
 
 //----------------------------------------------------------------------------
 FB_IMPLEMENT_STATIC_CREATE(TextureD3D11);
 TextureD3D11::TextureD3D11()
-	: mImpl(new Impl)
+	: mImpl(new Impl(this))
 {
 }
 

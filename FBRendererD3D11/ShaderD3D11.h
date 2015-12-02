@@ -31,7 +31,7 @@
 
 #include "FBRenderer/IPlatformShader.h"
 #include <set>
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(ShaderD3D11);
 	class ShaderD3D11 : public IPlatformShader

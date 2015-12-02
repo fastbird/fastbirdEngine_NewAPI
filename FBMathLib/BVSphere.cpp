@@ -29,7 +29,7 @@
 #include "BVSphere.h"
 #include "Math.h"
 
-using namespace fastbird;
+using namespace fb;
 
 //----------------------------------------------------------------------------
 BVSphere::BVSphere()

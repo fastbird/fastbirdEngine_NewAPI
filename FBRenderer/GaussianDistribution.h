@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "FBMathLib/Vec4.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(GaussianDist);
 	class GaussianDist

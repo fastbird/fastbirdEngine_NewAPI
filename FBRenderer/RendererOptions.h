@@ -29,7 +29,7 @@
 #include "FBMathLib/Vec2I.h"
 #include "FBCommonHeaders/Types.h"
 #include "FBConsole/ICVarObserver.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR_STRUCT(CVar);
 	FB_DECLARE_SMART_PTR(RendererOptions);
 	class RendererOptions : public ICVarObserver{

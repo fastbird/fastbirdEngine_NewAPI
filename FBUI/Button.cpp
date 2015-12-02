@@ -34,7 +34,7 @@
 #include "FBRenderer/TextureAtlas.h"
 #include "FBRenderer/Texture.h"
 
-namespace fastbird
+namespace fb
 {
 
 	const float Button::LEFT_GAP = 0.001f;

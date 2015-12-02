@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/platform.h"
 #include "IRenderStrategy.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(RenderTarget);
 	FB_DECLARE_SMART_PTR(IScene);
 	FB_DECLARE_SMART_PTR(RenderStrategyDefault);

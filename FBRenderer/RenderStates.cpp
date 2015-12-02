@@ -30,7 +30,7 @@
 #include "Renderer.h"
 #include "FBCommonHeaders/CowPtr.h"
 
-namespace fastbird{
+namespace fb{
 
 class RasterizerState::Impl{
 public:
@@ -56,6 +56,9 @@ FB_IMPLEMENT_STATIC_CREATE(RasterizerState);
 RasterizerState::RasterizerState()
 	: mImpl(new Impl)
 {
+}
+RasterizerState::~RasterizerState(){
+
 }
 
 void RasterizerState::SetPlatformState(IPlatformRasterizerStatePtr state){
@@ -97,6 +100,10 @@ FB_IMPLEMENT_STATIC_CREATE(BlendState);
 BlendState::BlendState()
 	: mImpl(new Impl)
 {
+}
+
+BlendState::~BlendState(){
+
 }
 
 void BlendState::SetLock(bool lock){
@@ -144,6 +151,10 @@ DepthStencilState::DepthStencilState()
 {
 }
 
+DepthStencilState::~DepthStencilState(){
+
+}
+
 void DepthStencilState::SetLock(bool lock){
 	Impl::Lock = lock;
 }
@@ -188,6 +199,10 @@ FB_IMPLEMENT_STATIC_CREATE(SamplerState);
 SamplerState::SamplerState()
 	: mImpl(new Impl)
 {
+}
+
+SamplerState::~SamplerState(){
+
 }
 
 void SamplerState::SetPlatformState(IPlatformSamplerStatePtr state){
@@ -306,6 +321,10 @@ const DEPTH_STENCIL_DESC RenderStates::Impl::DefaultDDesc;
 
 //---------------------------------------------------------------------------
 FB_IMPLEMENT_STATIC_CREATE(RenderStates);
+
+RenderStatesPtr RenderStates::Create(const RenderStates& other){
+	return RenderStatesPtr(new RenderStates(other), [](RenderStates* obj){ delete obj; });
+}
 RenderStates::RenderStates()
 	: mImpl(new Impl)
 {

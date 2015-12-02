@@ -28,7 +28,7 @@
 #pragma once
 #include "WinBase.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(HorizontalGauge);
 	class FB_DLL_UI HorizontalGauge : public WinBase

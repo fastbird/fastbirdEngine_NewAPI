@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird{
+namespace fb{
 	struct KeyboardEvent
 	{
 		unsigned short MakeCode;

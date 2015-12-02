@@ -35,9 +35,9 @@
 #include "FBRenderer/Texture.h"
 #include "FBTimer/Timer.h"
 
-using namespace fastbird;
+using namespace fb;
 
-namespace fastbird{
+namespace fb{
 	Timer* gpTimer = 0;
 	void stripe_decoded(VideoPlayerOgg::Impl* player, th_ycbcr_buffer _src,
 		int _fragy0, int _fragy_end);
@@ -413,7 +413,7 @@ public:
 
 };
 
-namespace fastbird{
+namespace fb{
 	void stripe_decoded(VideoPlayerOgg::Impl* player, th_ycbcr_buffer _src,
 		int _fragy0, int _fragy_end){
 		player->StripeDecoded(_src, _fragy0, _fragy_end);

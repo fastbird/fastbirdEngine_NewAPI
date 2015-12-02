@@ -28,7 +28,7 @@
 #pragma once
 #include "MathDefines.h"
 #include "Vec2.h"
-namespace fastbird
+namespace fb
 {
 	class Mat33;
 	class Vec3I;
@@ -126,5 +126,5 @@ namespace fastbird
 }
 
 // serialization
-std::istream& operator>>(std::istream& stream, fastbird::Vec3& v);
-std::ostream& operator<<(std::ostream& stream, const fastbird::Vec3& v);
+std::istream& operator>>(std::istream& stream, fb::Vec3& v);
+std::ostream& operator<<(std::ostream& stream, const fb::Vec3& v);

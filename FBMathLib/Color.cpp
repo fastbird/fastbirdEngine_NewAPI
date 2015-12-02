@@ -31,7 +31,7 @@
 #include "FBStringMathLib/StringMathConverter.h"
 #include "FBStringLib/StringConverter.h"
 
-namespace fastbird
+namespace fb
 {
 const Color Color::White(1, 1, 1);
 const Color Color::Black(0, 0, 0);

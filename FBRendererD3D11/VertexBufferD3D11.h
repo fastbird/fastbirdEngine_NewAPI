@@ -31,7 +31,7 @@
 
 #include "FBRenderer/IPlatformVertexBuffer.h"
 #include "D3D11Types.h"
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(VertexBufferD3D11);
 	class VertexBufferD3D11 : public IPlatformVertexBuffer

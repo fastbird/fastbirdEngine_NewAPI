@@ -28,7 +28,7 @@
 #include "StringConverter.h"
 #include "StringLib.h"
 #include <sstream>
-namespace fastbird{
+namespace fb{
 	TString StringConverter::ToString(Real val, unsigned short precision,
 		unsigned short width, char fill, std::ios::fmtflags flags)
 	{

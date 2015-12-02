@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{
+namespace fb{
 	class IRendererObserver{
 	public:
 		enum {

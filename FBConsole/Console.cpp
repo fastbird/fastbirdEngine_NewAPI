@@ -39,7 +39,7 @@
 #include "FBLua/LuaUtils.h"
 #include "FBLua/LuaObject.h"
 #include "FBCommonHeaders/Helpers.h"
-using namespace fastbird;
+using namespace fb;
 
 bool gConsoleInvalidParam = false;
 static void InvalidParamHandler(const wchar_t *pszExpression,

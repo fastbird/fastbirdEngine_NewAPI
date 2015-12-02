@@ -27,7 +27,7 @@
 
 #pragma once
 #include <memory>
-namespace fastbird{
+namespace fb{
 	template <class T>
 	class CowPtr{
 	public:
@@ -36,9 +36,16 @@ namespace fastbird{
 		CowPtr(){}
 		/// Do not pass a pointer managed by other auto ptr functions like the one 
 		/// you get from std::shared_ptr<T>::get().
-		explicit CowPtr(T* other) : mP(other){}
-		CowPtr(const typename CowPtr<T>::TargetPtr& other) : mP(other){}
-		
+		explicit CowPtr(T* other) 
+			: mP(other)
+		{
+		}
+
+		CowPtr(const typename CowPtr<T>::TargetPtr& other) 
+			: mP(other)
+		{
+		}		
+
 		CowPtr<T>& operator=(const typename CowPtr<T>& other){
 			if (other.mP != mP){
 				mP = other.mP;

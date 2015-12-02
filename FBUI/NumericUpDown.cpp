@@ -32,7 +32,7 @@
 #include "UIManager.h"
 #include "UIObject.h"
 
-namespace fastbird
+namespace fb
 {
 
 	NumericUpDownPtr NumericUpDown::Create(){

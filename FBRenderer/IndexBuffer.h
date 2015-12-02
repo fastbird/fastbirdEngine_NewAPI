@@ -29,11 +29,12 @@
 #include "FBCommonHeaders/Types.h"
 #include "RendererStructs.h"
 #include "IPlatformIndexBuffer.h"
-namespace fastbird{	
+namespace fb{	
 	FB_DECLARE_SMART_PTR(IndexBuffer);
 	class FB_DLL_RENDERER IndexBuffer{
 		FB_DECLARE_PIMPL_NON_COPYABLE(IndexBuffer);
 		IndexBuffer(unsigned numIndices, INDEXBUFFER_FORMAT format);
+		~IndexBuffer();
 
 	public:
 		static IndexBufferPtr Create(unsigned numIndices, INDEXBUFFER_FORMAT format);

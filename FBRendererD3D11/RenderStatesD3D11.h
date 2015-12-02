@@ -30,7 +30,7 @@
 #include "FBRenderer/RendererEnums.h"
 #include "D3D11Types.h"
 
-namespace fastbird
+namespace fb
 {
 	FB_DECLARE_SMART_PTR(RasterizerStateD3D11);
 	class RasterizerStateD3D11 : public IPlatformRasterizerState

@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/platform.h"
 #include "IInputInjector.h"
 
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(InputInjector);
 	class InputInjector : public IInputInjector{
 		FB_DECLARE_PIMPL_NON_COPYABLE(InputInjector);

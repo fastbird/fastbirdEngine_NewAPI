@@ -27,7 +27,7 @@
 
 #pragma once
 #include "FBRenderer/RendererEnums.h"
-namespace fastbird
+namespace fb
 {
 	//------------------------------------------------------------------------
 	inline D3D11_USAGE ConvertEnumD3D11(BUFFER_USAGE usage)

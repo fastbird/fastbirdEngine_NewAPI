@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(WinBase);
 	struct RegionTestParam{
 		RegionTestParam()

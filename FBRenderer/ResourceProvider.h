@@ -29,7 +29,7 @@
 #include "FBCommonHeaders/Types.h"
 #include "ResourceTypes.h"
 
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(SamplerState);
 	FB_DECLARE_SMART_PTR(DepthStencilState);
 	FB_DECLARE_SMART_PTR(BlendState);

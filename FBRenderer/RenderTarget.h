@@ -32,11 +32,11 @@
 #include "FBMathLib/Color.h"
 #include "FBCommonHeaders/Observable.h"
 #include "IRenderTargetObserver.h"
-namespace fastbird
+namespace fb
 {
 	struct RenderTargetParam;
-	class IRenderTargetListener;
 	typedef unsigned RenderTargetId;
+	FB_DECLARE_SMART_PTR(IRenderTargetObserver);
 	FB_DECLARE_SMART_PTR(IRenderStrategy);
 	FB_DECLARE_SMART_PTR(IInputInjector);
 	FB_DECLARE_SMART_PTR(GaussianDist);
@@ -64,8 +64,7 @@ namespace fastbird
 		//-------------------------------------------------------------------
 		// Observable<IRenderTargetObserver>
 		//-------------------------------------------------------------------
-		virtual void OnObserverAdded(IRenderTargetObserver* observer);
-		virtual void OnObserverRemoved(IRenderTargetObserver* observer);
+		void OnObserverAdded(IRenderTargetObserverPtr observer);
 
 		//-------------------------------------------------------------------
 		// InputConsumer From Renderer

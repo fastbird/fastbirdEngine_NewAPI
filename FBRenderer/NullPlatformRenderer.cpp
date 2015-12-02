@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "NullPlatformRenderer.h"
-using namespace fastbird;
+using namespace fb;
 
 FB_IMPLEMENT_STATIC_CREATE(NullPlatformRenderer);
 

@@ -35,11 +35,11 @@
 #include "FBCommonHeaders/Helpers.h"
 #include "FBSystemLib/System.h"
 #include <thread>
-using namespace fastbird;
+using namespace fb;
 
 static const int MAX_NUM_QUEUE = 65536;
 SyncEventPtr gScheduleSliceEvent = 0;
-namespace fastbird
+namespace fb
 {
 	TaskScheduler* gTaskScheduler = 0;
 

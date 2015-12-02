@@ -26,7 +26,7 @@
 */
 
 #pragma once
-namespace fastbird{
+namespace fb{
 	namespace InputDevice{
 		enum Enum{
 			Keyboard = 0x01,

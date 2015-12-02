@@ -29,16 +29,24 @@
 #include "ISpatialObject.h"
 #include "FBMathLib/BoundingVolume.h"// convinient include
 #include "FBCommonHeaders/Types.h"
-namespace fastbird{	
-	class Quat;
-	class Transformation;
+#include "FBMathLib/Transformation.h"
+namespace fb{	
 	FB_DECLARE_SMART_PTR(Animation);
-	FB_DECLARE_SMART_PTR(SpatialObject);
+	FB_DECLARE_SMART_PTR(BoundingVolume);
+	FB_DECLARE_SMART_PTR(SpatialObject);	
 	class FB_DLL_SCENEMANAGER SpatialObject : public ISpatialObject {
-		FB_DECLARE_PIMPL_CLONEABLE(SpatialObject);		
+		Transformation mLocation;
+		TransformationPtr mAnimatedLocation;
+		BoundingVolumePtr mBoundingVolume;
+		BoundingVolumePtr mBoundingVolumeWorld;
+		Real mDistToCam;
+		AnimationPtr mAnim;
+		Vec3 mPreviousPosition;
+		bool mTransformChanged;
 
 	protected:
 		SpatialObject();
+		SpatialObject(const SpatialObject& other);
 		~SpatialObject();
 
 	public:		

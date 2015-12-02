@@ -27,7 +27,7 @@
 
 #include "StdAfx.h"
 
-namespace fastbird{
+namespace fb{
 	Timer* gpTimer = Timer::GetMainTimer().get();
 	void Error(const char* szFmt, ...){
 		char buf[2048];

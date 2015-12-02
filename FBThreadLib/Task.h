@@ -28,7 +28,7 @@
 #pragma once
 #include <atomic>
 #include "threads.h"
-namespace fastbird
+namespace fb
 {
 FB_DECLARE_SMART_PTR(SyncEvent);
 FB_DECLARE_SMART_PTR(Task);

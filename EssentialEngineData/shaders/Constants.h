@@ -30,7 +30,7 @@
 #define __SHADER_CONSTANTS_H_
 #ifdef CPP
 #pragma once
-namespace fastbird {
+namespace fb {
 #endif
 
 cbuffer FRAME_CONSTANTS

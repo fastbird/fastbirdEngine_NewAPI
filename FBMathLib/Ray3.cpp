@@ -30,7 +30,7 @@
 #include "Math.h"
 #include "BoundingVolume.h"
 
-namespace fastbird
+namespace fb
 {
 
 Ray3::Ray3()

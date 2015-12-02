@@ -30,7 +30,7 @@
 #include "TaskScheduler.h"
 #include "threads.h"
 #include "AsyncObjects.h"
-namespace fastbird
+namespace fb
 {
 static ThreadSafeCounter counter;
 Task::Task(bool _WaitEvent, ThreadSafeCounter* _ExecCounter)

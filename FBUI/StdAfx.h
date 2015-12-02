@@ -70,7 +70,7 @@
 #include "ComponentType.h"
 #include "Align.h"
 
-namespace fastbird{
+namespace fb{
 	void Log(const char* fmt, ...);
 	void Error(const char* fmt, ...);
 }

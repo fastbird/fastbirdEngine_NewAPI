@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird{
+namespace fb{
 	int GetNumProcessors();
 	bool IsWindowForeground(HWindow window);
 	HWindow ForegroundWindow();

@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird
+namespace fb
 {
 	namespace UIPropTypes
 	{

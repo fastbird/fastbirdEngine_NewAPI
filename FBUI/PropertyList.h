@@ -28,7 +28,7 @@
 #pragma once
 #include "ListBox.h"
 
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR(PropertyList);
 	class FB_DLL_UI PropertyList : public ListBox
 	{

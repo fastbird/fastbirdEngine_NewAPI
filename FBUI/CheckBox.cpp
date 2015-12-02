@@ -30,7 +30,7 @@
 #include "ImageBox.h"
 #include "StaticText.h"
 #include "UIObject.h"
-namespace fastbird
+namespace fb
 {
 CheckBoxPtr CheckBox::Create(){
 	CheckBoxPtr p(new CheckBox, [](CheckBox* obj){ delete obj; });

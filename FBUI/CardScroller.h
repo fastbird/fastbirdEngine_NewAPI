@@ -28,7 +28,7 @@
 #pragma once
 
 #include "Container.h"
-namespace fastbird
+namespace fb
 {
 	class CardData;
 	FB_DECLARE_SMART_PTR(Wnd);	

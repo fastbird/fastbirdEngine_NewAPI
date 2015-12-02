@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace fastbird{
+namespace fb{
 	struct Rect{
 		long  left, top, right, bottom;
 	};

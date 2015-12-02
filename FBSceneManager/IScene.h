@@ -30,7 +30,7 @@
 #include "FBMathLib/Vec4.h"
 #include "DirectionalLightIndex.h"
 
-namespace fastbird{
+namespace fb{
 	struct DirectionalLightInfo{
 		Vec4 mDirection_Intensiy;
 		Vec4 mDiffuse;

@@ -32,7 +32,7 @@
 #include "FBStringMathLib/StringMathConverter.h"
 #include "FBMathLib/Vec2I.h"
 #include <sstream>
-using namespace fastbird;
+using namespace fb;
 CVar::CVar(const char* _name, const int _def, int& _storage,
 	CVAR_CATEGORY _category, const std::string& _desc)
 	: mName(_name), mCategory(_category), mDesc(_desc)

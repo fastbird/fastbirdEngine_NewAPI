@@ -35,7 +35,7 @@ Provide string manipulators
 #pragma once
 #include "FBCommonHeaders/String.h"
 #include <vector>
-namespace fastbird{
+namespace fb{
 	///@addtogroup FBStringLib
 	///@{
 

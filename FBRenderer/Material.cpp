@@ -41,7 +41,7 @@
 #include "FBStringLib/StringConverter.h"
 #include "TinyXmlLib/tinyxml2.h"
 
-using namespace fastbird;
+using namespace fb;
 extern BinaryData tempData;
 extern unsigned tempSize;
 class Material::Impl{
@@ -621,7 +621,7 @@ public:
 	{
 		TexturePtr pTextureInSlot;
 		bool same = FindTextureIn(shader, slot, pTextureInSlot);
-		if (pTextureInSlot != pTexture)
+		if (pTextureInSlot && pTextureInSlot != pTexture)
 		{
 			RemoveTexture(pTextureInSlot);
 		}
@@ -1060,21 +1060,21 @@ public:
 		return mShaderData->mShaders; 
 	}
 
-	void CopyMaterialParamFrom(const MaterialPtr src) {
+	void CopyMaterialParamFrom(MaterialConstPtr src) {
 		mMaterialData->mMaterialParameters = src->GetMaterialParameters();
 	}
 
-	void CopyMaterialConstFrom(const MaterialPtr src) {
+	void CopyMaterialConstFrom(MaterialConstPtr src) {
 		mMaterialData->mMaterialConstants = src->GetMaterialConstants();
 	}
 
-	void CopyTexturesFrom(const MaterialPtr src) {
+	void CopyTexturesFrom(MaterialConstPtr src) {
 		mMaterialData->mTextures = src->GetTextures();
 		mMaterialData->mBindingsByTexture = src->GetBindingsByTexture();
 		mMaterialData->mTexturesByBinding = src->GetTexturesByBinding();
 	}
 
-	void CopyShaderDefinesFrom(const MaterialPtr src) {
+	void CopyShaderDefinesFrom(const MaterialConstPtr src) {
 		mShaderData->mShaderDefines = src->GetShaderDefines();
 		mShaderDefinesChanged = true;
 	}
@@ -1431,19 +1431,19 @@ int Material::GetBindingShaders() const {
 	return mImpl->GetBindingShaders();
 }
 
-void Material::CopyMaterialParamFrom(const MaterialPtr src) {
+void Material::CopyMaterialParamFrom(MaterialConstPtr src) {
 	mImpl->CopyMaterialParamFrom(src);
 }
 
-void Material::CopyMaterialConstFrom(const MaterialPtr src) {
+void Material::CopyMaterialConstFrom(MaterialConstPtr src) {
 	mImpl->CopyMaterialConstFrom(src);
 }
 
-void Material::CopyTexturesFrom(const MaterialPtr src) {
+void Material::CopyTexturesFrom(MaterialConstPtr src) {
 	mImpl->CopyTexturesFrom(src);
 }
 
-void Material::CopyShaderDefinesFrom(const MaterialPtr src) {
+void Material::CopyShaderDefinesFrom(MaterialConstPtr src) {
 	mImpl->CopyShaderDefinesFrom(src);
 }
 

@@ -46,7 +46,7 @@
 #include "Mat44.h"
 #include "Color.h"
 
-namespace fastbird
+namespace fb
 {
 	bool IsEqual(Real a, Real b, Real epsilon = 0.00001f);
 	bool IsNaN(Real f);	

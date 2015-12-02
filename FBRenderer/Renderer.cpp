@@ -56,6 +56,7 @@
 #include "EssentialEngineData/shaders/Constants.h"
 #include "FBStringLib/StringConverter.h"
 #include "FBStringLib/StringLib.h"
+#include "FBStringMathLib/StringMathConverter.h"
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBCommonHeaders/Factory.h"
 #include "FBSystemLib/ModuleHandler.h"
@@ -69,22 +70,22 @@
 #include <set>
 #undef DrawText
 #undef CreateDirectory
-namespace fastbird{
+namespace fb{
 	ShaderPtr GetShaderFromExistings(IPlatformShaderPtr platformShader);
 	TexturePtr GetTextureFromExistings(IPlatformTexturePtr platformTexture);
 	FB_DECLARE_SMART_PTR(UI3DObj);
 	FB_DECLARE_SMART_PTR(UIObject);
 }
-using namespace fastbird;
+using namespace fb;
 
 static const float defaultFontSize = 20.f;
 const HWindow Renderer::INVALID_HWND = (HWindow)-1;
-Timer* fastbird::gpTimer = 0;
+Timer* fb::gpTimer = 0;
 BinaryData tempData;
 unsigned tempSize;
 class Renderer::Impl{
 public:
-	typedef fastbird::Factory<IPlatformRenderer>::CreateCallback CreateCallback;
+	typedef fb::Factory<IPlatformRenderer>::CreateCallback CreateCallback;
 	typedef std::vector<RenderTargetWeakPtr> RenderTargets;
 
 	RendererWeakPtr mSelf;
@@ -263,7 +264,7 @@ public:
 		mPlatformRendererType = type;		
 		auto module = ModuleHandler::LoadModule(mPlatformRendererType.c_str());
 		if (module){
-			typedef fastbird::IPlatformRenderer*(*Create)();
+			typedef fb::IPlatformRenderer*(*Create)();
 			Create createCallback = (Create)ModuleHandler::GetFunction(module, "CreateRenderEngine");
 			if (createCallback){
 				auto platformRenderer = createCallback();
@@ -517,7 +518,7 @@ public:
 					auto err = font->Init(fontPath.c_str());
 					if (!err){
 						font->SetTextEncoding(Font::UTF16);
-						int height = Round(font->GetHeight());
+						int height = Round(font->GetHeight());						
 						mFonts[height] = font;
 					}
 				}
@@ -1451,6 +1452,7 @@ public:
 			return;
 
 		mCameraConstants.gView = mCamera->GetMatrix(ICamera::View);
+		
 		mCameraConstants.gInvView = mCamera->GetMatrix(ICamera::InverseView);
 		mCameraConstants.gViewProj = mCamera->GetMatrix(ICamera::ViewProj);
 		mCameraConstants.gInvViewProj = mCamera->GetMatrix(ICamera::InverseViewProj);
@@ -1480,7 +1482,7 @@ public:
 		}
 		auto scene = mCurrentScene.lock();
 		if (!scene){
-			Logger::Log(FB_ERROR_LOG_ARG, "No scene is under processing.");
+			return;
 		}
 		auto pLightCam = mCurrentRenderTarget->GetLightCamera();
 		if (pLightCam)
@@ -2301,6 +2303,21 @@ public:
 		BlendState::SetLock(lock);
 	}
 
+	void SetFontTextureAtlas(const char* path){
+		if (!ValidCStringLength(path)){
+			Logger::Log(FB_ERROR_LOG_ARG, "Invalid arg.");
+			return;
+		}
+		auto textureAtlas = GetTextureAtlas(path);
+		if (!textureAtlas){
+			Logger::Log(FB_ERROR_LOG_ARG, FormatString("No texture atlas(%s)", path).c_str());
+			return;
+		}
+		for (auto font : mFonts){
+			font.second->SetTextureAtlas(textureAtlas);
+		}
+	}
+
 	void Update(TIME_PRECISION dt){
 		mPointLightMan->Update(dt);
 		// good point to reset.
@@ -3001,6 +3018,10 @@ void Renderer::SetLockDepthStencilState(bool lock){
 
 void Renderer::SetLockBlendState(bool lock){
 	mImpl->SetLockBlendState(lock);
+}
+
+void Renderer::SetFontTextureAtlas(const char* path){
+	mImpl->SetFontTextureAtlas(path);
 }
 
 void Renderer::Update(TIME_PRECISION dt){

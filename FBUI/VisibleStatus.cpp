@@ -30,7 +30,7 @@
 #include "WinBase.h"
 #include "ImageBox.h"
 #include "UIAnimation.h"
-namespace fastbird
+namespace fb
 {
 	VisibleStatus::VisibleStatus()
 		: mHideTime(0)

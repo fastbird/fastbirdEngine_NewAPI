@@ -32,7 +32,7 @@
 #include "FBMathLib/Color.h"
 #include "FBMathLib/Math.h"
 
-namespace fastbird
+namespace fb
 {
 	struct RASTERIZER_DESC
 	{

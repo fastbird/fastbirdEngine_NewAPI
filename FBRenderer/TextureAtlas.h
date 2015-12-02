@@ -28,7 +28,7 @@
 #pragma once
 #include "FBCommonHeaders/VectorMap.h"
 #include "FBMathLib/Math.h"
-namespace fastbird{
+namespace fb{
 	FB_DECLARE_SMART_PTR_STRUCT(TextureAtlasRegion);
 	struct FB_DLL_RENDERER TextureAtlasRegion
 	{

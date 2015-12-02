@@ -27,7 +27,7 @@
 
 #include "stdafx.h"
 #include "TextureBinding.h"
-using namespace fastbird;
+using namespace fb;
 
 bool TextureBinding::operator==(const TextureBinding& other) const{
 	return memcmp(this, &other, sizeof(TextureBinding)) == 0;

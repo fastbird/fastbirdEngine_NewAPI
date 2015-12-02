@@ -27,7 +27,7 @@
 
 #pragma once
 #include "WinBase.h"
-namespace fastbird
+namespace fb
 {
 	class RadioBox;	
 	FB_DECLARE_SMART_PTR(Scroller);
@@ -46,7 +46,7 @@ namespace fastbird
 		virtual WinBasePtr AddChild(float posX, float posY, const Vec2& width_aspectRatio, ComponentType::Enum type);
 		virtual WinBasePtr AddChild(const Vec2I& pos, const Vec2I& size, ComponentType::Enum type);
 		virtual WinBasePtr AddChild(ComponentType::Enum type);
-		virtual WinBasePtr AddChild(const fastbird::LuaObject& compTable);
+		virtual WinBasePtr AddChild(const fb::LuaObject& compTable);
 		virtual void RemoveChild(WinBasePtr child, bool immediately = false);
 		virtual void RemoveAllChildren(bool immediately = false);
 		virtual void RemoveAllChildExceptRuntime();
@@ -81,7 +81,7 @@ namespace fastbird
 		void ParseXMLChildren(tinyxml2::XMLElement* pelem);
 		virtual void Save(tinyxml2::XMLElement& elem);
 		void SaveChildren(tinyxml2::XMLElement& elem);
-		virtual bool ParseLua(const fastbird::LuaObject& compTable);
+		virtual bool ParseLua(const fb::LuaObject& compTable);
 
 		void SetChildrenPosSizeChanged() { mChildrenPosSizeChanged = true; }
 

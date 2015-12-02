@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "StarDef.h"
 
-namespace fastbird
+namespace fb
 {
 	Color StarDef::ms_avChromaticAberrationColor[];
 	STARDEF s_aLibStarDef[NUM_BASESTARLIBTYPES] =

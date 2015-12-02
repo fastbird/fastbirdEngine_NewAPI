@@ -29,7 +29,7 @@
 #include "ListBoxDataSet.h"
 #include "ListBoxData.h"
 
-namespace fastbird
+namespace fb
 {
 	ListBoxDataSet::ListBoxDataSet(unsigned num)
 		: mLastTime(0)

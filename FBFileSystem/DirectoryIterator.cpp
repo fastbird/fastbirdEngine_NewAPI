@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "DirectoryIterator.h"
 
-namespace fastbird{
+namespace fb{
 	class DirectoryIterator::Impl{
 	public:
 		std::string mLastFile;

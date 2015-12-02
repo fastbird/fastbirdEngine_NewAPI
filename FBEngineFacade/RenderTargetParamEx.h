@@ -29,7 +29,7 @@ THE SOFTWARE.
 #include "FBCommonHeaders/Types.h"
 #include "FBRenderer/PixelFormats.h"
 #include "FBMathLib/Vec2I.h"
-namespace fastbird{
+namespace fb{
 	struct RenderTargetParamEx
 	{
 		RenderTargetParamEx()

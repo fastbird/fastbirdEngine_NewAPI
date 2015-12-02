@@ -29,7 +29,7 @@
 #include "Vec2I.h"
 #include "Math.h"
 
-namespace fastbird
+namespace fb
 {
 	const Vec2I Vec2I::ZERO(0, 0);
 

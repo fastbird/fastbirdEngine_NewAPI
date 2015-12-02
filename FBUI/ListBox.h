@@ -31,7 +31,7 @@
 #include "ListBoxDataSet.h"
 #include "ListItemDataType.h"
 
-namespace fastbird
+namespace fb
 {
 class IUIObject;
 class CheckBox;

@@ -28,7 +28,7 @@
 #pragma once
 #include "PixelFormats.h"
 #include "PrimitiveTopology.h"
-namespace fastbird
+namespace fb
 {
 	enum BUFFER_USAGE
 	{
@@ -293,6 +293,6 @@ namespace fastbird
 
 }
 #include "RenderPass.h"
-namespace fastbird{
+namespace fb{
 	RENDER_PASS RenderPassFromString(const char* str);
 }

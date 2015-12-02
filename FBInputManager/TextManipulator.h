@@ -29,7 +29,7 @@
 #include "IInputConsumer.h"
 #include "ITextManipulatorObserver.h"
 #include "FBCommonHeaders/Observable.h"
-namespace fastbird{
+namespace fb{
 	class IKeyboard;
 	class IMouse;	
 	FB_DECLARE_SMART_PTR(TextManipulator);

@@ -30,7 +30,7 @@
 #include "Scene.h"
 #include "DirectionalLight.h"
 #include "FBTimer/Timer.h"
-using namespace fastbird;
+using namespace fb;
 
 //---------------------------------------------------------------------------
 class SceneManager::Impl{
@@ -40,7 +40,12 @@ public:
 	SceneWeakPtr mMainScene;
 
 	//---------------------------------------------------------------------------
+	Impl(){
+		
+	}
+	~Impl(){
 
+	}
 	ScenePtr CreateScene(const char* name){
 		if (!ValidCStringLength(name)){
 			Logger::Log(FB_ERROR_LOG_ARG, "invalid arg");
@@ -88,7 +93,7 @@ public:
 	}
 };
 
-Timer* fastbird::gpTimer = 0;
+Timer* fb::gpTimer = 0;
 //---------------------------------------------------------------------------
 SceneManagerWeakPtr sSceneManager;
 SceneManagerPtr SceneManager::Create(){
@@ -108,6 +113,9 @@ SceneManager& SceneManager::GetInstance(){
 
 SceneManager::SceneManager()
 	: mImpl(new Impl){
+}
+
+SceneManager::~SceneManager(){
 
 }
 

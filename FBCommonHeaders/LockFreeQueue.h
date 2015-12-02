@@ -27,7 +27,7 @@
 
 #pragma once
 #include <atomic>
-namespace fastbird
+namespace fb
 {
 	//
 	// A fixed-size, lockfree queue.

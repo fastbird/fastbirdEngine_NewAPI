@@ -31,7 +31,7 @@
 #include "CheckBox.h"
 #include "UIObject.h"
 
-namespace fastbird{
+namespace fb{
 
 //-----------------------------------------------------------------------------
 const float ListItem::LEFT_GAP = 0.001f;

@@ -35,7 +35,7 @@
 #include "FBRenderer/RenderParam.h"
 #include "FBRenderer/RendererEnums.h"
 #include "FBRenderer/RendererStructs.h"
-namespace fastbird{
+namespace fb{
 	struct ModelTriangle;
 	FB_DECLARE_SMART_PTR(IndexBuffer);
 	FB_DECLARE_SMART_PTR(Material);

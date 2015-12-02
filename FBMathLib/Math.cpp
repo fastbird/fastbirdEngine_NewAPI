@@ -28,7 +28,7 @@
 #include "stdafx.h"
 #include "Math.h"
 
-namespace fastbird
+namespace fb
 {
 	bool IsEqual(Real a, Real b, Real epsilon)
 	{

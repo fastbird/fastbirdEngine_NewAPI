@@ -27,7 +27,7 @@
 
 #pragma once
 #include <LinearMath/btIDebugDraw.h>
-namespace fastbird
+namespace fb
 {
 	class IDebugDrawer;
 

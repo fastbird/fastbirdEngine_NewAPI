@@ -30,7 +30,7 @@
 #include "ComponentType.h"
 
 #include "FBRenderer/VertexBuffer.h"
-using namespace fastbird;
+using namespace fb;
 class UIObject::Impl{
 public:	
 	WinBase* mOwnerUI;
@@ -255,10 +255,9 @@ public:
 		{
 			renderer.SetScissorRects(&mScissorRect, 1);
 		}
-		
+		mMaterial->Bind(true);
 		if (!mNoDrawBackground)
-		{
-			mMaterial->Bind(true);
+		{			
 			PrepareVBs();
 
 			//renderer.UpdateObjectConstantsBuffer(&mObjectConstants);		

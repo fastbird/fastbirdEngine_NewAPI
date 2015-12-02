@@ -29,7 +29,7 @@
 
 #include "Wnd.h"
 
-namespace fastbird
+namespace fb
 {
 
 FB_DECLARE_SMART_PTR(StaticText);

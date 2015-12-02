@@ -30,7 +30,7 @@
 #include <ctime>
 #include <iomanip>
 
-namespace fastbird
+namespace fb
 {
 	std::string TimeString::GetTimeString()
 	{

@@ -34,7 +34,7 @@
 #include "UIObject.h"
 #include "FBRenderer/TextureAtlas.h"
 
-namespace fastbird
+namespace fb
 {
 WndPtr Wnd::Create(){
 	WndPtr p(new Wnd, [](Wnd* obj){ delete obj; });

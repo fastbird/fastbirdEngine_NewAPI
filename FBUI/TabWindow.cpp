@@ -31,7 +31,7 @@
 #include "Wnd.h"
 #include "UIObject.h"
 
-namespace fastbird{
+namespace fb{
 
 	const Vec2I TabWindow::sButtonSize(150, 24);
 

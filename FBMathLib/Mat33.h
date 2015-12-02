@@ -31,7 +31,7 @@
 
 #include "Vec3.h"
 
-namespace fastbird
+namespace fb
 {
 	class Mat33
 	{
